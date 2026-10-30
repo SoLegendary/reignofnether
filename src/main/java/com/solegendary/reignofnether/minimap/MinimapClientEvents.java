@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.minimap;
 
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.*;
@@ -26,6 +28,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.ping.PingType;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -177,15 +180,19 @@ public class MinimapClientEvents {
 
     public static class MapMarker {
         public final int x;
+        public final int y;
         public final int z;
         public final String playerName;
+        public final PingType type;
         public int ticksRemaining;
         public int ageTicks;
 
-        public MapMarker(int x, int z, String playerName) {
+        public MapMarker(int x, int y, int z, String playerName, PingType type) {
             this.x = x;
+            this.y = y;
             this.z = z;
             this.playerName = playerName;
+            this.type = type;
             this.ticksRemaining = 200; // 10 seconds
             this.ageTicks = 0;
         }
@@ -197,14 +204,8 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void addMapMarker(int x, int z, String playerName) {
-        mapMarkers.add(new MapMarker(x, z, playerName));
-    }
-
-    public static void addMapMarkerForSelfAndAllies(int mouseX, int mouseY) {
-        BlockPos markerPos = getWorldPosOnMinimap(mouseX, mouseY, false);
-        if (markerPos != null)
-            PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(markerPos.getX(), markerPos.getZ()));
+    public static void addMapMarker(int x, int y, int z, String playerName, PingType type) {
+        mapMarkers.add(new MapMarker(x, y, z, playerName, type));
     }
 
     public static void removeVirtualUnit(int id) {
@@ -858,10 +859,13 @@ public class MinimapClientEvents {
     private static void drawPlayerOnMap(int xc, int zc, Player player) {
         if (MC.player == null)
             return;
-        String thisPlayerName = MC.player.getName().getString();
         String thatPlayerName = player.getName().getString();
-        if (thisPlayerName.equals(thatPlayerName))
+        if (MC.player.getName().getString().equals(thatPlayerName))
             return;
+        // compare factions, so a co-commander's lead and same-faction soldiers count as friendly
+        String myFaction = PlayerRolesClient.myCommander();
+        String thatFaction = PlayerRolesClient.commanderOf(thatPlayerName);
+        boolean friendly = myFaction.equals(thatFaction) || AlliancesClient.isAllied(myFaction, thatFaction);
         if (player.isSpectator() || player.isCreative())
             return;
 
@@ -877,7 +881,7 @@ public class MinimapClientEvents {
                             x0 < PLAYER_THICKNESS || x0 >= (PLAYER_RADIUS * 2) - PLAYER_THICKNESS ||
                                     z0 < PLAYER_THICKNESS || z0 >= (PLAYER_RADIUS * 2) - PLAYER_THICKNESS
                     )) {
-                        if (AlliancesClient.isAllied(thisPlayerName, thatPlayerName))
+                        if (friendly)
                             rgb = 0x3232FF;
                         else
                             rgb = 0xFF0000;
@@ -953,14 +957,14 @@ public class MinimapClientEvents {
     private static void drawMapMarker(MapMarker marker) {
         int xc = marker.x;
         int zc = marker.z;
-        int color = PlayerColors.getPlayerDisplayColorHex(marker.playerName) & 0xFFFFFF;
+        int color = marker.type.rgb;
         float alphaPulse = MiscUtil.getOscillatingFloat(0.45d, 1.0d, marker.ageTicks * 35L);
         int alpha = Mth.clamp((int) (alphaPulse * 255f), 90, 255);
 
         for (int x = xc - PING_RADIUS - 1; x <= xc + PING_RADIUS + 1; x++) {
             for (int z = zc - PING_RADIUS - 1; z <= zc + PING_RADIUS + 1; z++) {
                 if (isWorldXZinsideMap(x, z)) {
-                    if (isMarkerPixel(x - xc, z - zc)) {
+                    if (isMarkerPixel(marker.type, x - xc, z - zc)) {
                         int xN = x - xc_world + worldRadius + MARKER_PIXEL_OFFSET;
                         int zN = z - zc_world + worldRadius;
                         if (xN >= 0 && xN < mapColoursOverlays.length && zN >= 0 && zN < mapColoursOverlays[0].length) {
@@ -972,13 +976,25 @@ public class MinimapClientEvents {
         }
     }
 
-    private static final int PING_RADIUS = 9;    // marker shapes, in map texture pixels
+    private static final int PING_RADIUS = 9;    // ping shapes, in map texture pixels
     private static final double PING_THICKNESS = 2.5;
 
-    // a ring with a dot in the middle
-    static boolean isMarkerPixel(int dx, int dz) {
-        double d = Math.sqrt(dx * dx + dz * dz);
-        return (d > PING_RADIUS - PING_THICKNESS && d <= PING_RADIUS) || d <= PING_THICKNESS;
+    // each ping type has its own small symbol. The map is drawn rotated 45°,
+    // so shapes are tested in screen-aligned axes (u, v); every symbol is symmetric, so the rotation's sign
+    // doesn't matter. Same shapes as PingType.symbol: Help ◎ ring with a dot, Attack ⚔ X, Enemy ◇ diamond, Defend □ square
+    static boolean isMarkerPixel(PingType type, int dx, int dz) {
+        double u = (dx - dz) / Math.sqrt(2), v = (dx + dz) / Math.sqrt(2);
+        double r = PING_RADIUS, t = PING_THICKNESS;
+        double au = Math.abs(u), av = Math.abs(v);
+        return switch (type) {
+            case HELP -> {
+                double d = Math.sqrt(u * u + v * v);
+                yield (d > r - t && d <= r) || d <= t;
+            }
+            case ATTACK -> au <= r * 0.8 && av <= r * 0.8 && Math.abs(au - av) <= t * 0.6;
+            case ENEMY -> au + av <= r && au + av > r - t;
+            case DEFEND -> Math.max(au, av) <= r * 0.8 && Math.max(au, av) > r * 0.8 - t;
+        };
     }
 
 
@@ -1008,7 +1024,7 @@ public class MinimapClientEvents {
         renderPingPulses(guiGraphics);
     }
 
-    // a square outline growing and fading from each marker, once a second while it lasts
+    // a square outline growing and fading from each ping, once a second while it lasts
     private static void renderPingPulses(GuiGraphics g) {
         for (MapMarker m : mapMarkers) {
             Vec2 p = worldPosToMinimapScreen(m.x, m.z);
@@ -1016,7 +1032,7 @@ public class MinimapClientEvents {
                 continue;
             float t = (m.ageTicks % 20) / 20f;
             int s = Math.round(4 * (0.4f + 1.8f * t));
-            int colour = ((int) ((1 - t) * 255) << 24) | (PlayerColors.getPlayerDisplayColorHex(m.playerName) & 0xFFFFFF);
+            int colour = ((int) ((1 - t) * 255) << 24) | m.type.rgb;
             int x = Math.round(p.x), y = Math.round(p.y);
             g.fill(x - s, y - s, x + s, y - s + 1, colour);
             g.fill(x - s, y + s - 1, x + s, y + s, colour);
@@ -1187,7 +1203,7 @@ public class MinimapClientEvents {
 					boolean queueOrders = Keybindings.shiftMod.isDown();
 					if (!queueOrders) {
 						new UnitActionItem(
-							MC.player.getName().getString(),
+							PlayerRolesClient.myOwner(),
 							UnitAction.MOVE, -1, singleUnitId,
 							targetBp,
 							new BlockPos(0, 0, 0)
@@ -1196,7 +1212,7 @@ public class MinimapClientEvents {
 						MiscUtil.addUnitCheckpoint(unit, targetBp, true);
 					}
 					PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-						MC.player.getName().getString(),
+						PlayerRolesClient.myOwner(),
 						UnitAction.MOVE, -1, singleUnitId,
 						targetBp,
 						new BlockPos(0, 0, 0),
@@ -1208,10 +1224,6 @@ public class MinimapClientEvents {
             } else {
                 BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
                 if (moveTo == null) return;
-                if (Keybindings.altMod.isDown()) {
-                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                    return;
-                }
                 if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
                     var ids = UnitClientEvents.getSelectedUnits();
                     var idArray = ArrayUtil.livingEntityListToIdArray(ids);
@@ -1243,7 +1255,8 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
+        boolean soldier = PlayerRolesClient.myRole() == PlayerRole.SOLDIER; // their HUD has a minimap too
+        if (evt.phase != TickEvent.Phase.END || !(OrthoviewClientEvents.isEnabled() || soldier))
             return;
 
         long t0 = System.nanoTime();
@@ -1261,7 +1274,7 @@ public class MinimapClientEvents {
         mapMarkers.removeIf(MapMarker::tick);
 
         updateMapUnitsAndBuildings();
-        if (!suppressViewQuad)
+        if (!suppressViewQuad && !soldier)
             mapColoursOverlays = MinimapViewQuadRenderer.updateMapViewQuad(mapColoursOverlays);
 
         // as the map area increases, decrease refresh rate to maintain FPS

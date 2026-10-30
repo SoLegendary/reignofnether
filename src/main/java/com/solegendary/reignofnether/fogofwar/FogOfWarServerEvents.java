@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
@@ -105,10 +108,27 @@ public class FogOfWarServerEvents {
     private static final int UPDATE_TICKS = 10;
     private static int ticksUntilUpdate = UPDATE_TICKS;
 
-    private static final Map<UUID, Boolean> isRtsPlayerCache = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> hasFogCache = new ConcurrentHashMap<>();
+
+    // spectators looking through some players' eyes (top bar): their fog is the union of those players' vision
+    private static final Map<UUID, Set<String>> spectatorViews = new ConcurrentHashMap<>();
+
+    public static void setSpectatorViews(ServerPlayer sp, Set<String> names) {
+        if (PlayerRoles.roleOf(sp.getName().getString()) != PlayerRole.SPECTATOR) return;
+        UUID uuid = sp.getUUID();
+        boolean wasViewing = spectatorViews.containsKey(uuid);
+        if (names.isEmpty()) spectatorViews.remove(uuid);
+        else spectatorViews.put(uuid, Set.copyOf(names));
+        hasFogCache.remove(uuid);
+        // fog off again: the client still holds the chunks that were frozen while fogged
+        if (wasViewing && names.isEmpty()) {
+            clearPlayerVision(uuid);
+            if (serverLevel != null) resendAllTrackedChunks(sp);
+        }
+    }
 
     public static void invalidateRtsCache() {
-        isRtsPlayerCache.clear();
+        hasFogCache.clear();
     }
 
     // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
@@ -124,10 +144,11 @@ public class FogOfWarServerEvents {
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
         if (startingPlayers.contains(player.getName().getString())) return true;
-        Boolean cached = isRtsPlayerCache.get(player.getUUID());
+        Boolean cached = hasFogCache.get(player.getUUID());
         if (cached != null) return cached;
-        boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
-        isRtsPlayerCache.put(player.getUUID(), v);
+        PlayerRole role = PlayerRoles.roleOf(player.getName().getString());
+        boolean v = role.hasFog || (role == PlayerRole.SPECTATOR && spectatorViews.containsKey(player.getUUID()));
+        hasFogCache.put(player.getUUID(), v);
         return v;
     }
 
@@ -239,7 +260,8 @@ public class FogOfWarServerEvents {
 
     public static void onPlayerDisconnect(UUID playerId) {
         clearPlayerVision(playerId);
-        isRtsPlayerCache.remove(playerId);
+        hasFogCache.remove(playerId);
+        spectatorViews.remove(playerId);
     }
 
     // drop bookkeeping so re-entering orthoview later resends a full vision set
@@ -280,6 +302,8 @@ public class FogOfWarServerEvents {
         revealedPlayerNames.clear();
         revealedUnitExpiryTick.clear();
         neutralFogUnits.clear();
+        hasFogCache.clear();
+        spectatorViews.clear();
         startingPlayers.clear();
     }
 
@@ -310,14 +334,17 @@ public class FogOfWarServerEvents {
         playerEdgeChunks.clear();
         playerEdgeMasks.clear();
         pendingResends.clear();
+        if (!enabled) spectatorViews.clear(); // clients drop theirs on disable too
 
         syncClientFog();
 
-        // fog means a competitive match: enemy picks hidden (the host can turn it back)
+        // fog means a competitive match: enemy picks hidden and all chat off (the host can turn either back)
         if (!wasEnabled && enabled && serverLevel != null) {
             serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
             GameruleClientboundPacket.setHideEnemyPicks(true);
             StartPosServerEvents.syncAll(true);
+            serverLevel.getGameRules().getRule(GameRuleRegistrar.ALL_CHAT).set(false, serverLevel.getServer());
+            GameruleClientboundPacket.setAllChat(false);
         }
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
@@ -367,7 +394,9 @@ public class FogOfWarServerEvents {
         updatePlayerBrightChunks();
         for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers) {
             // TODO: on server restart (or singleplayer map relog) unit ids change so fog units always get removed as soon as they're explored
-            PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
+            // every player's vision: only for those without fog, or enemies would see it
+            if (!isFogActiveFor(p))
+                PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
             for (int id : neutralFogUnits.keySet()) {
                 Vec3 center = neutralFogUnits.get(id).getCenter();
                 if (isBlockVisibleFor(p, (int) center.x, (int) center.z) && serverLevel.getEntity(id) == null) {
@@ -421,6 +450,14 @@ public class FogOfWarServerEvents {
                     b.centrePos.getX(), b.centrePos.getZ(), b.getSightRange());
         }
 
+        // living soldiers are eyes for their whole faction
+        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
+            String name = sp.getName().getString();
+            if (sp.gameMode.isSurvival() && PlayerRoles.roleOf(name) == PlayerRole.SOLDIER)
+                addViewer(viewersByOwner.computeIfAbsent(PlayerRoles.commanderOf(name), k -> new Long2IntOpenHashMap()),
+                        sp.blockPosition().getX(), sp.blockPosition().getZ(), PLAYER_SIGHT_BLOCKS);
+        }
+
         // Rasterise each owner's viewer circles ONCE into covered-column masks (chunkLong -> 16x16 bitmask),
         // reused across that owner, all its allies, and (if revealed) every other player.
         Map<String, Long2ObjectOpenHashMap<long[]>> coveredByOwner = new HashMap<>();
@@ -450,22 +487,29 @@ public class FogOfWarServerEvents {
                 clearPlayerVision(uuid);
                 continue;
             }
-            String ownerName = sp.getName().getString();
+            String playerName = sp.getName().getString();
+            // whose vision this player gets: their own, or for a spectator each player they're viewing
+            Set<String> views = spectatorViews.get(uuid);
+            Collection<String> povs = views != null && PlayerRoles.roleOf(playerName) == PlayerRole.SPECTATOR
+                    ? views : List.of(playerName);
 
             // Union this player's own + allied + revealed owners' covered masks (+ FPS self-bubble).
             Long2ObjectOpenHashMap<long[]> covered = new Long2ObjectOpenHashMap<>();
             if (!orthoviewUuids.contains(uuid) && sp.gameMode.isSurvival())
                 rasterizeCircle(covered, sp.blockPosition().getX(), sp.blockPosition().getZ(), PLAYER_SIGHT_BLOCKS);
-            mergeMasks(covered, coveredByOwner.get(ownerName));
-            Set<String> alliedOwners = collectAlliedOwners(ownerName, viewersByOwner.keySet());
-            for (String ally : alliedOwners)
-                mergeMasks(covered, coveredByOwner.get(ally));
+            for (String pov : povs) {
+                String ownerName = PlayerRoles.commanderOf(pov); // the faction whose vision this pov gets
+                mergeMasks(covered, coveredByOwner.get(ownerName));
+                Set<String> alliedOwners = collectSharedOwners(pov, ownerName, viewersByOwner.keySet());
+                for (String ally : alliedOwners)
+                    mergeMasks(covered, coveredByOwner.get(ally));
+                // enemy units that attacked this player (or an ally) out of the fog
+                mergeMasks(covered, revealedMasksByTarget.get(ownerName));
+                for (String ally : alliedOwners)
+                    mergeMasks(covered, revealedMasksByTarget.get(ally));
+            }
             for (String revealed : revealedOwners)
                 mergeMasks(covered, coveredByOwner.get(revealed)); // no-op if already merged as self/ally
-            // enemy units that attacked this player (or an ally) out of the fog
-            mergeMasks(covered, revealedMasksByTarget.get(ownerName));
-            for (String ally : alliedOwners)
-                mergeMasks(covered, revealedMasksByTarget.get(ally));
 
             // Classify: fully-covered chunk -> live; partially-covered -> edge (keep its column mask).
             Set<ChunkPos> live = new HashSet<>();
@@ -635,10 +679,11 @@ public class FogOfWarServerEvents {
         return true;
     }
 
-    private static Set<String> collectAlliedOwners(String me, Set<String> owners) {
+    // other owners whose vision this player gets (allies, through Sharing)
+    private static Set<String> collectSharedOwners(String player, String faction, Set<String> owners) {
         Set<String> out = new HashSet<>();
         for (String o : owners)
-            if (!o.equals(me) && AlliancesServerEvents.isAllied(me, o)) out.add(o);
+            if (!o.equals(faction) && Sharing.shares(o, player, Share.VISION)) out.add(o);
         return out;
     }
 

@@ -1,5 +1,10 @@
 package com.solegendary.reignofnether.registrars;
 
+import com.solegendary.reignofnether.voice.VoiceChannels;
+import com.solegendary.reignofnether.voice.VoiceClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
+import com.solegendary.reignofnether.util.WorldToScreen;
+import com.solegendary.reignofnether.soldier.SoldierServerEvents;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningServerEvents;
@@ -48,6 +53,8 @@ import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.chat.TeamChatServerEvents;
+import com.solegendary.reignofnether.ping.PingClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
@@ -143,9 +150,16 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
+        vanillaEventBus.register(TeamChatServerEvents.class);
+        vanillaEventBus.register(PingClientEvents.class);
+        vanillaEventBus.register(WorldToScreen.class);
+        vanillaEventBus.register(SoldierHudClientEvents.class);
+        vanillaEventBus.register(VoiceClientEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
         vanillaEventBus.register(TaskSchedulerServerEvents.class);
+        vanillaEventBus.register(SoldierServerEvents.class);
+        vanillaEventBus.register(VoiceChannels.class); // integrated (singleplayer/LAN) host
     }
 }

@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.hud.panels;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -170,7 +170,7 @@ public final class SelectionPanel {
         List<LivingEntity> list = new ArrayList<>();
         for (LivingEntity e : UnitClientEvents.getSortedSelectedUnits())
             if (UnitClientEvents.getPlayerToEntityRelationship(e) == Relationship.OWNED
-                    || NonUnitClientEvents.canControlAllMobs() || AlliancesClient.canControlAlly(e))
+                    || NonUnitClientEvents.canControlAllMobs() || SharingClient.canControl(e))
                 list.add(e);
         return list;
     }

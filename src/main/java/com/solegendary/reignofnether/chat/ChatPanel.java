@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.chat;
 
+import com.solegendary.reignofnether.voice.VoiceClientEvents;
+
 import com.solegendary.reignofnether.chat.ChatLog.Channel;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -9,6 +11,11 @@ import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.ui.EditorRows;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
+import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
@@ -26,7 +33,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.List;
 
 /**
- * Chat in the RTS view, replacing vanilla's ChatScreen: the log, a channel chip, the input and SEND.
+ * Chat in the RTS view, replacing vanilla's ChatScreen: the log, a TEAM / ALL channel chip, the input and SEND.
  * Drawn in HUD units like MatchStartScreen, so the EditBox is drawn and fed input by hand.
  */
 public class ChatPanel extends Screen {
@@ -38,6 +45,9 @@ public class ChatPanel extends Screen {
     private static final int H = HEADER + LOG_H + 6 + ROW_H;
     // vanilla ends the command suggestion list this far above the bottom of the screen
     private static final int SUGGESTIONS_BOTTOM = 15;
+
+    // kept between openings, like the chat channel in other RTS games
+    private static boolean teamChannel = true;
 
     private EditBox input;
     private CommandSuggestions commandSuggestions;
@@ -63,13 +73,38 @@ public class ChatPanel extends Screen {
         Minecraft.getInstance().setScreen(parent);
     }
 
-    /** The RTS view draws its own chat (overlay and this panel), so vanilla's is hidden there. */
+    /** The RTS view and the soldier HUD draw their own chat (overlay and this panel), so vanilla's is hidden there. */
     public static boolean hidesVanillaChat() {
         Screen s = Minecraft.getInstance().screen;
-        return OrthoviewClientEvents.isEnabled() && (s instanceof TopdownGui || s instanceof ChatPanel);
+        return SoldierHudClientEvents.active() || OrthoviewClientEvents.isEnabled() && (s instanceof TopdownGui || s instanceof ChatPanel);
     }
 
-    public static final int MAX_LENGTH = 256;
+    // mirrors TeamChatServerEvents.isMatch: only then do TEAM and ALL differ
+    private static boolean inMatch() {
+        return !PlayerClientEvents.rtsPlayers.isEmpty() && !SandboxClientEvents.isSandboxPlayer() && !SurvivalClientEvents.isEnabled;
+    }
+
+    /** Where the next message goes. Spectators in a match always reach spectators only. */
+    private static Channel channel() {
+        if (!inMatch())
+            return Channel.ALL;
+        if (!PlayerRolesClient.myRole().inMatch)
+            return Channel.SPEC;
+        return teamChannel ? Channel.TEAM : Channel.ALL;
+    }
+
+    /** Whether chat (and so voice, VoiceClientEvents) is on the TEAM channel. */
+    public static boolean isTeamChannel() {
+        return teamChannel;
+    }
+
+    private static void toggleChannel() {
+        if (inMatch() && PlayerRolesClient.myRole().inMatch)
+            teamChannel = !teamChannel;
+    }
+
+    /** Room for the '!' prefix within the 256 chat limit. */
+    public static final int MAX_LENGTH = 255;
 
     @Override
     protected void init() {
@@ -99,7 +134,8 @@ public class ChatPanel extends Screen {
         HudLayout layout = HudGeometry.layout();
         frame = new HudFrame(g, scale, layout, scale.toUnits(mouseX), scale.toUnits(mouseY));
         int x = HudLayout.MARGIN;
-        int y = layout.console().y() - HudLayout.GAP * 2 - H;
+        int y = SoldierHudClientEvents.active() ? SoldierHudClientEvents.chatBottom(scale.height()) - H
+                : layout.console().y() - HudLayout.GAP * 2 - H;
 
         g.pose().pushPose();
         g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
@@ -130,6 +166,17 @@ public class ChatPanel extends Screen {
         Rect close = new Rect(x + W - 8 - 13, y + 4, 13, 13);
         int hintX = x + 8 + Text.smallWidth(title) + 6;
         int right = close.x() - 6;
+        // voice follows the chat channel, so its state sits here instead of a tag of its own
+        if (VoiceClientEvents.connected() && inMatch()) {
+            String voice = I18n.get("voice.reignofnether.tag", I18n.get("voice.reignofnether.channel."
+                    + VoiceClientEvents.current().name().toLowerCase(java.util.Locale.ROOT)));
+            int vw = Text.smallWidth(voice);
+            Text.small(g, voice, right - vw, y + 7, Theme.OK_TEXT);
+            Rect vr = new Rect(right - vw, y + 4, vw, 13);
+            frame.register(new ButtonBuilder("voice").build(), vr, null,
+                    () -> com.solegendary.reignofnether.ui.Tooltip.of(voice).body(I18n.get("voice.reignofnether.tooltip")));
+            right -= vw + 8;
+        }
         String hints = I18n.get("chat.reignofnether.panel.hints");
         if (Text.smallWidth(hints) <= right - hintX)
             Text.small(g, hints, hintX, y + 7, Theme.DIM);
@@ -144,11 +191,12 @@ public class ChatPanel extends Screen {
         g.fill(x, ry, x + W, ry + ROW_H, Theme.SUNKEN);
         g.fill(x, ry, x + W, ry + 1, Theme.INK);
 
-        Channel ch = Channel.ALL;
+        Channel ch = channel();
         Rect chip = new Rect(x + 5, ry + 5, 32, 20);
         g.fill(chip.x(), chip.y(), chip.right(), chip.bottom(), Theme.RAISED);
         Theme.ring(g, chip.x(), chip.y(), chip.w(), chip.h(), 1, ch.colour);
         Text.smallCentered(g, ch.label(), chip.centerX(), chip.y() + 6, ch.colour);
+        frame.register(new ButtonBuilder("chat channel").onLeftClick(ChatPanel::toggleChannel).build(), chip, null, null);
 
         String send = I18n.get("chat.reignofnether.panel.send");
         int sendW = Text.smallWidth(send) + 14;
@@ -176,7 +224,7 @@ public class ChatPanel extends Screen {
         scroll = 0;
     }
 
-    /** Sends typed chat or a /command. */
+    /** Sends typed chat or a /command; in a match, the ALL channel adds the '!' prefix. */
     public static void sendMessage(String typed) {
         String text = typed.trim();
         Minecraft mc = Minecraft.getInstance();
@@ -185,6 +233,8 @@ public class ChatPanel extends Screen {
         mc.gui.getChat().addRecentChat(text);
         if (text.startsWith("/"))
             mc.player.connection.sendCommand(text.substring(1));
+        else if (channel() == Channel.ALL && inMatch() && !text.startsWith("!"))
+            mc.player.connection.sendChat("!" + text);
         else
             mc.player.connection.sendChat(text);
     }
@@ -214,6 +264,10 @@ public class ChatPanel extends Screen {
                 // closes like vanilla chat so RTS hotkeys work again right away
                 send();
                 onClose();
+                return true;
+            }
+            case GLFW.GLFW_KEY_TAB -> {
+                toggleChannel();
                 return true;
             }
             case GLFW.GLFW_KEY_UP -> {
