@@ -316,7 +316,7 @@ public class PlayerClientEvents {
         }
     }
 
-    private static void resetAll() {
+    public static void resetAll() {
         resetRTS(true);
         UnitClientEvents.getAllUnits().clear();
         BuildingClientEvents.getBuildings().clear();

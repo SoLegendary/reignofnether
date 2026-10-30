@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 // only exist server-side, so this is the only way the client learns them.
 public class MatchStatsClientboundPacket {
 
+    public static final int ARMY_SAMPLE_TICKS = 600; // how often each player's army size is noted for the chart
+
     // one results-table row per player that took part in the match
     public static class MatchStatRow {
         public final String name;
@@ -27,13 +29,19 @@ public class MatchStatsClientboundPacket {
         public final boolean winner;
         public final int teamId; // startPosColorId - players sharing it are on the same team
         public final int[] scores; // ordered as RTSPlayerScoresEnum.values()
+        public final int[] army; // army size every ARMY_SAMPLE_TICKS
 
-        public MatchStatRow(String name, Faction faction, boolean winner, int teamId, int[] scores) {
+        public MatchStatRow(String name, Faction faction, boolean winner, int teamId, int[] scores, int[] army) {
             this.name = name;
             this.faction = faction;
             this.winner = winner;
             this.teamId = teamId;
             this.scores = scores;
+            this.army = army;
+        }
+
+        public int score(RTSPlayerScoresEnum scoresEnum) {
+            return scoresEnum.ordinal() < scores.length ? scores[scoresEnum.ordinal()] : 0;
         }
     }
 
@@ -60,7 +68,8 @@ public class MatchStatsClientboundPacket {
             boolean winner = buffer.readBoolean();
             int teamId = buffer.readVarInt();
             int[] scores = buffer.readVarIntArray();
-            this.rows.add(new MatchStatRow(name, faction, winner, teamId, scores));
+            int[] army = buffer.readVarIntArray();
+            this.rows.add(new MatchStatRow(name, faction, winner, teamId, scores, army));
         }
     }
 
@@ -73,6 +82,7 @@ public class MatchStatsClientboundPacket {
             buffer.writeBoolean(row.winner);
             buffer.writeVarInt(row.teamId);
             buffer.writeVarIntArray(row.scores);
+            buffer.writeVarIntArray(row.army);
         }
     }
 

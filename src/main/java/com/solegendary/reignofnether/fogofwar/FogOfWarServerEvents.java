@@ -256,6 +256,13 @@ public class FogOfWarServerEvents {
                 isBlockVisibleFor(sp, b.minCorner.getX(), b.maxCorner.getZ());
     }
 
+    // a replay starting mid-match needs everyone's current vision; it only goes out again once it changes
+    public static void resendFogState(ServerPlayer sp) {
+        Set<ChunkPos> sent = playerEdgeChunks.get(sp.getUUID());
+        if (sent != null && isFogActiveFor(sp))
+            FogChunksClientboundPacket.send(sp, sent, playerEdgeMasks.getOrDefault(sp.getUUID(), Map.of()));
+    }
+
     private static void clearPlayerVision(UUID playerId) {
         playerLiveChunks.remove(playerId);
         playerEdgeChunks.remove(playerId);
