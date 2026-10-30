@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.panels.HudFrame;
+import com.solegendary.reignofnether.ui.Rect;
+import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TutorialRendering {
 
@@ -46,39 +51,32 @@ public class TutorialRendering {
         buttonNameToHighlight = "";
     }
 
-    public static void highlightNextButton(GuiGraphics guiGraphics, ArrayList<Button> buttons) {
+    /** Rings the button the current stage wants clicked, at the rect it was drawn at this frame (HUD units). */
+    public static void highlightNextButton(GuiGraphics guiGraphics, List<HudFrame.Placed> placed) {
         if (!TutorialClientEvents.isEnabled() || buttonNameToHighlight.isEmpty()) {
             return;
         }
 
-        TutorialStage stage = TutorialClientEvents.getStage();
-
-        Button activeButton = null;
-        for (Button button : buttons) {
+        Rect r = null;
+        for (HudFrame.Placed p : placed) {
+            Button button = p.button();
             if (button.name.equals(buttonNameToHighlight) && !button.isHidden.get() && button.isEnabled.get()
                 && !button.isSelected.get() && (
                 button.hotkey != null || button.name.equals(TutorialClientEvents.helpButton.name)
                     || TutorialClientEvents.getStage() == TutorialStage.PLACE_WORKERS_B
             )) {
-                activeButton = button;
+                r = p.rect();
                 break;
             }
         }
-        if (activeButton == null) {
+        if (r == null) {
             return;
         }
 
-        if ((System.currentTimeMillis() / 500) % 2 == 0) {
-            guiGraphics.fill(
-                // x1,y1, x2,y2,
-                activeButton.x,
-                activeButton.y,
-                activeButton.x + Button.DEFAULT_ICON_FRAME_SIZE,
-                activeButton.y + Button.DEFAULT_ICON_FRAME_SIZE,
-                0x32FFFFFF
-            ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-        pointAtWithArrow(guiGraphics, activeButton.x, activeButton.y, true);
+        // pulsing gold ring hugging the cell, with a faint halo outside it
+        float pulse = MiscUtil.getOscillatingFloat(0.45, 1);
+        Theme.outline(guiGraphics, r.x(), r.y(), r.w(), r.h(), 2, Theme.withAlpha(Theme.GOLD, pulse));
+        Theme.outline(guiGraphics, r.x() - 2, r.y() - 2, r.w() + 4, r.h() + 4, 1, Theme.withAlpha(Theme.GOLD, pulse * 0.35f));
     }
 
     public static void pointAtWithArrow(GuiGraphics guiGraphics, int x, int y, boolean vertical) {
@@ -90,7 +88,7 @@ public class TutorialRendering {
         int yOffset = 0;
 
         ResourceLocation texture;
-        if (vertical && y < MC.screen.height / 2) {
+        if (vertical && y < HudGeometry.layout().height() / 2) {
             xOffset = -5;
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_UP);
             yOffset = (int) MiscUtil.getOscillatingFloat(20, 36);
@@ -100,7 +98,7 @@ public class TutorialRendering {
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_DOWN);
             yOffset = (int) MiscUtil.getOscillatingFloat(-46, -30, 500);
             texture = TEXTURE_ARROW_DOWN;
-        } else if (x < MC.screen.width / 2) {
+        } else if (x < HudGeometry.layout().width() / 2) {
             yOffset = -5;
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_LEFT);
             xOffset = (int) MiscUtil.getOscillatingFloat(20, 36);
