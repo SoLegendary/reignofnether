@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -24,6 +25,8 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 
 public class Factions {
 	
@@ -32,6 +35,8 @@ public class Factions {
 	public static final ArrayList<ResourceLocation> PLAYABLE_FACTIONS = new ArrayList<>();
 	
 	public static final HashMap<ResourceLocation, ResourceLocation> ENTITY_FACTION = new HashMap<>();
+	// what each unit production item trains; the first registration wins (VILLAGER also places militia)
+	private static final Map<ProductionItem, EntityType<? extends Unit>> UNIT_TYPES = new HashMap<>();
 	
 	public static Faction VILLAGERS;
 	public static Faction MONSTERS;
@@ -268,6 +273,13 @@ public class Factions {
 			else
 				faction.addEntityButton(productionItem.getPlaceButton());
 		ENTITY_FACTION.put(EntityType.getKey(unit), faction.key);
+		if (productionItem instanceof ProductionItem item)
+			UNIT_TYPES.putIfAbsent(item, unit);
+	}
+
+	@Nullable
+	public static EntityType<? extends Unit> unitTypeOf(ProductionItem item) {
+		return UNIT_TYPES.get(item);
 	}
 	
 	public static void registerEntity(Faction faction, EntityType<? extends Unit> unit) {

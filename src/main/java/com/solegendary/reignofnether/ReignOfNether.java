@@ -300,5 +300,6 @@ public class ReignOfNether {
     
     public static void reloadListener(AddReloadListenerEvent evt) {
         evt.addListener(new CustomButtonMappingManager());
+        evt.addListener(new com.solegendary.reignofnether.ai.BotPlans());
     }
 }

@@ -20,6 +20,6 @@ public enum RandomItemDropRule {
         return java.util.Arrays.stream(RandomItemDropRule.values())
                 .filter(status -> status.value == value)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown RandomItemDropRule value: " + value));
+                .orElse(DISABLED);
     }
 }

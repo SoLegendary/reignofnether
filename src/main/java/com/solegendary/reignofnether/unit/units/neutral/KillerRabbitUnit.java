@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.neutral;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -41,6 +44,14 @@ import java.util.List;
 // intentionally OP killer rabbit - spawn with cheat 'thebeastofcaerbannog'
 
 public class KillerRabbitUnit extends Rabbit implements Unit, AttackerUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE, UnitRole.FAST);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
 
     //region

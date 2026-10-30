@@ -149,27 +149,21 @@ public class MyRenderer {
     }
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, VertexConsumer vertexConsumer, float r, float g, float b, float a) {
-        Entity camEntity = MC.getCameraEntity();
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
+        Vec3 cam = MC.gameRenderer.getMainCamera().getPosition();
 
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        matrixStack.translate(-cam.x, -cam.y, -cam.z); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
         matrixStack.popPose();
     }
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
-        Entity camEntity = MC.getCameraEntity();
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
+        Vec3 cam = MC.gameRenderer.getMainCamera().getPosition();
 
         VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.lines());
 
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        matrixStack.translate(-cam.x, -cam.y, -cam.z); // because we start at 0,0,0 relative to camera
         LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
         matrixStack.popPose();
     }
@@ -185,13 +179,10 @@ public class MyRenderer {
             float a,
             boolean excludeMaxY
     ) {
-        Entity camEntity = MC.getCameraEntity();
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
+        Vec3 cam = MC.gameRenderer.getMainCamera().getPosition();
 
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        matrixStack.translate(-cam.x, -cam.y, -cam.z); // because we start at 0,0,0 relative to camera
 
         Matrix4f matrix4f = matrixStack.last().pose();
         Matrix3f matrix3f = matrixStack.last().normal();
@@ -360,13 +351,10 @@ public class MyRenderer {
             float a,
             ResourceLocation rl
     ) {
-        Entity camEntity = MC.getCameraEntity();
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
+        Vec3 cam = MC.gameRenderer.getMainCamera().getPosition();
 
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        matrixStack.translate(-cam.x, -cam.y, -cam.z); // because we start at 0,0,0 relative to camera
         Matrix4f matrix4f = matrixStack.last().pose();
         Matrix3f matrix3f = matrixStack.last().normal();
 
@@ -471,16 +459,10 @@ public class MyRenderer {
             float b,
             float a
     ) {
-        Entity camEntity = MC.getCameraEntity();
-        if (camEntity == null)
-            return;
-
-        double d0 = camEntity.getX();
-        double d1 = camEntity.getY() + camEntity.getEyeHeight();
-        double d2 = camEntity.getZ();
+        Vec3 cam = MC.gameRenderer.getMainCamera().getPosition();
 
         matrixStack.pushPose();
-        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        matrixStack.translate(-cam.x, -cam.y, -cam.z); // because we start at 0,0,0 relative to camera
         Matrix4f matrix4f = matrixStack.last().pose();
         Matrix3f matrix3f = matrixStack.last().normal();
 

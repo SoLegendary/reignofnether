@@ -239,7 +239,17 @@ public class MiscUtil {
     }
 
     public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves, boolean ignoreStructureVoid) {
-        int y = level.getHeight();
+        return getHighestNonAirBlock(level, blockPos, ignoreLeaves, ignoreStructureVoid, level.getHeight());
+    }
+
+    // the same answer, starting from the heightmap instead of the build limit: ~300 fewer block reads per column
+    public static BlockPos getHighestNonAirBlockFromHeightmap(Level level, BlockPos blockPos, boolean ignoreLeaves) {
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, blockPos.getX(), blockPos.getZ());
+        return getHighestNonAirBlock(level, blockPos, ignoreLeaves, true, top);
+    }
+
+    private static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves, boolean ignoreStructureVoid, int startY) {
+        int y = startY;
         BlockState bs;
         BlockPos bp;
         do {

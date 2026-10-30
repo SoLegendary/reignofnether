@@ -335,6 +335,12 @@ public class PingClientEvents {
                     r.add(new int[]{i, -i - 2, i + 2, -i});
                 }
             }
+            case ON_MY_WAY -> { // an arrowhead pointing right
+                for (int x = -6; x <= 4; x += 2) {
+                    int h = (4 - x) / 2;
+                    r.add(new int[]{x, -h - 1, x + 2, h + 1});
+                }
+            }
             case ENEMY -> { // a diamond outline
                 for (int x = -6; x <= 6; x += 2) {
                     int y = 6 - Math.abs(x);

@@ -1,0 +1,151 @@
+{
+  "status": "enabled",
+
+  "capitol": "town_centre",
+  "worker": "villager",
+  "scout": "scout_dog",
+  "supply": "villager_house",
+  "farm": "wheat_farm",
+  "drop_off": "oak_stockpile",
+  "market": "villager_market",
+  "library": "library",
+  "hero_building": "shrine_of_prosperity",
+  "heroes": [
+    { "unit": "royal_guard", "revive": "royal_guard_revive" },
+    { "unit": "enchanter", "revive": "enchanter_revive" }
+  ],
+
+  "workers": [
+    { "minute": 0, "count": 15 },
+    { "minute": 4, "count": 20 },
+    { "minute": 9, "count": 26 },
+    { "minute": 14, "count": 32 }
+  ],
+  "workers_per_army_pop": 0.75,
+  "gather_opening": { "food": 0.2, "wood": 0.65, "ore": 0.15 },
+  "gather": { "food": 0.3, "wood": 0.5, "ore": 0.2 },
+
+  "opening_max_minutes": 8,
+  "opening": [
+    { "build": "villager_house", "needs": ["town_centre"] },
+    { "build": "oak_stockpile", "needs": ["town_centre"] },
+    { "build": "shrine_of_prosperity", "needs": ["town_centre"] },
+    { "build": "villager_house", "count": 2, "needs": ["town_centre"] },
+    { "build": "barracks", "needs": ["town_centre"] },
+    { "build": "villager_house", "count": 3, "needs": ["town_centre"] },
+    { "build": "wheat_farm", "count": 3, "needs": ["town_centre"] },
+    { "build": "barracks", "count": 2, "needs": ["town_centre"] },
+    { "build": "villager_market" },
+    { "build": "villager_house", "count": 4, "needs": ["town_centre"] }
+  ],
+
+  "waves": { "first_minutes": 7, "first_pop": 15, "growth": 9 },
+  "market_items": ["broadsword", "heart_medallion"],
+
+  "matchups": {
+    "monsters": {
+      "tech": [
+        { "build": "arcane_tower", "needs": ["barracks"] },
+        { "build": "library", "needs": ["barracks"] },
+        { "research": "grand_library", "at": "library" },
+        { "research": "evoker_vexes", "at": "library", "needs": ["library"] },
+        { "build": "blacksmith", "needs": ["barracks"] },
+        { "research": "militia_bows", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "research": "golem_smithing", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "build": "witch_hut", "needs": ["barracks"] },
+        { "build": "castle", "needs": ["witch_hut", "blacksmith", "arcane_tower"] },
+        { "research": "ravager_cavalry", "at": "castle", "needs": ["castle"] },
+        { "research": "superior_blacksmith", "at": "blacksmith", "needs": ["castle"] },
+        { "build": "beacon", "needs": ["castle"] },
+        { "research": "beacon_level_1", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_2", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_3", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_4", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_5", "at": "beacon", "needs": ["beacon"] }
+      ],
+      "army": [
+        { "unit": "vindicator", "weight": 3 },
+        { "unit": "pillager", "weight": 3 },
+        { "unit": "evoker", "weight": 2, "cap": 5 },
+        { "unit": "iron_golem", "weight": 1 },
+        { "unit": "ravager", "weight": 1, "cap": 4, "needs": "castle" },
+        { "unit": "windcaller", "weight": 1, "cap": 3, "needs": "library" }
+      ],
+      "library_enchants": ["enchant_multishot"],
+      "hero_skills": {
+        "royal_guard": ["BattleRagePassive", "MaceSlam", "BattleRagePassive", "MaceSlam", "MaceSlam", "Avatar"],
+        "enchanter": ["CivilEnchantment", "MartialEnchantment", "EnchantedTether", "MarchOfProgress"]
+      }
+    },
+    "piglins": {
+      "tech": [
+        { "build": "blacksmith", "needs": ["barracks"] },
+        { "research": "militia_bows", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "research": "golem_smithing", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "build": "witch_hut", "needs": ["barracks"] },
+        { "research": "healing_potions", "at": "witch_hut", "needs": ["witch_hut"] },
+        { "research": "lingering_potions", "at": "witch_hut" },
+        { "build": "library", "needs": ["barracks"] },
+        { "research": "grand_library", "at": "library" },
+        { "build": "arcane_tower", "needs": ["barracks"] },
+        { "build": "castle", "needs": ["witch_hut", "blacksmith", "arcane_tower"] },
+        { "research": "ravager_cavalry", "at": "castle", "needs": ["castle"] },
+        { "research": "superior_blacksmith", "at": "blacksmith", "needs": ["castle"] },
+        { "build": "beacon", "needs": ["castle"] },
+        { "research": "beacon_level_1", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_2", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_3", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_4", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_5", "at": "beacon", "needs": ["beacon"] }
+      ],
+      "army": [
+        { "unit": "pillager", "weight": 3 },
+        { "unit": "iron_golem", "weight": 2 },
+        { "unit": "vindicator", "weight": 2 },
+        { "unit": "witch", "weight": 1, "cap": 4 },
+        { "unit": "ravager", "weight": 1, "cap": 4, "needs": "castle" },
+        { "unit": "windcaller", "weight": 1, "cap": 4, "needs": "library" }
+      ],
+      "library_enchants": ["enchant_multishot"],
+      "hero_skills": {
+        "royal_guard": ["BattleRagePassive", "MaceSlam", "BattleRagePassive", "MaceSlam", "BattleRagePassive", "Avatar"],
+        "enchanter": ["CivilEnchantment", "MartialEnchantment", "EnchantedTether", "MarchOfProgress"]
+      }
+    },
+    "default": {
+      "tech": [
+        { "build": "blacksmith", "needs": ["barracks"] },
+        { "research": "militia_bows", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "research": "golem_smithing", "at": "blacksmith", "needs": ["blacksmith"] },
+        { "build": "witch_hut", "needs": ["barracks"] },
+        { "research": "healing_potions", "at": "witch_hut", "needs": ["witch_hut"] },
+        { "research": "lingering_potions", "at": "witch_hut" },
+        { "build": "library", "needs": ["barracks"] },
+        { "research": "grand_library", "at": "library" },
+        { "build": "arcane_tower", "needs": ["barracks"] },
+        { "build": "castle", "needs": ["witch_hut", "blacksmith", "arcane_tower"] },
+        { "research": "ravager_cavalry", "at": "castle", "needs": ["castle"] },
+        { "research": "superior_blacksmith", "at": "blacksmith", "needs": ["castle"] },
+        { "build": "beacon", "needs": ["castle"] },
+        { "research": "beacon_level_1", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_2", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_3", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_4", "at": "beacon", "needs": ["beacon"] },
+        { "research": "beacon_level_5", "at": "beacon", "needs": ["beacon"] }
+      ],
+      "army": [
+        { "unit": "vindicator", "weight": 3 },
+        { "unit": "iron_golem", "weight": 2 },
+        { "unit": "pillager", "weight": 2 },
+        { "unit": "witch", "weight": 1, "cap": 4 },
+        { "unit": "ravager", "weight": 1, "cap": 4, "needs": "castle" },
+        { "unit": "windcaller", "weight": 1, "cap": 4, "needs": "library" }
+      ],
+      "library_enchants": ["enchant_multishot"],
+      "hero_skills": {
+        "royal_guard": ["BattleRagePassive", "MaceSlam", "BattleRagePassive", "MaceSlam", "MaceSlam", "Avatar"],
+        "enchanter": ["CivilEnchantment", "MartialEnchantment", "EnchantedTether", "MarchOfProgress"]
+      }
+    }
+  }
+}
