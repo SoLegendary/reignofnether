@@ -1,17 +1,26 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin {
+
+    // replays record block changes everywhere, not each player's fogged view of them
+    @Inject(method = "sendBlockUpdated", at = @At("HEAD"))
+    private void reignofnether$recordBlockChange(BlockPos pos, BlockState oldState, BlockState newState, int flags, CallbackInfo ci) {
+        ReplayServerEvents.onBlockChanged(pos, newState);
+    }
 
     @Inject(
             method = "sendParticles(Lnet/minecraft/server/level/ServerPlayer;ZDDDLnet/minecraft/network/protocol/Packet;)Z",

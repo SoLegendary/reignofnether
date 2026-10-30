@@ -514,7 +514,10 @@ public class ReplayClientEvents {
             return gone.isEmpty() ? null : new ClientboundRemoveEntitiesPacket(gone);
         }
         if (p instanceof ClientboundSystemChatPacket chat) { // plain text: no click events from a shared file
-            long everyone = (1L << Math.min(header.recipients.size(), ReplayRecorder.SNAPSHOT_BIT)) - 1;
+            long everyone = 0;
+            for (int bit = 0; bit < Math.min(header.recipients.size(), ReplayRecorder.SNAPSHOT_BIT); bit++)
+                if (!header.recipients.get(bit).equals(ReplayRecorder.OMNI))
+                    everyone |= 1L << bit;
             if (!chat.overlay() && (mask & everyone) == everyone) // messages to one player stay private
                 MC.gui.getChat().addMessage(Component.literal(chat.content().getString()));
             return null;
@@ -653,12 +656,6 @@ public class ReplayClientEvents {
     }
 
     public static void requestDownload() {
-        // our own server (singleplayer or hosting) already saved it into this game's replays folder
-        if (MC.hasSingleplayerServer()) {
-            download = Download.DONE;
-            openReplaysFolder();
-            return;
-        }
         if (download == Download.WAITING || download == Download.DOWNLOADING)
             return;
         download = Download.WAITING;
