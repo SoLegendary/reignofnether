@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.UnitChunkTickets;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -24,6 +25,7 @@ public class CommonModEvents {
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(PacketHandler::init);
+        event.enqueueWork(UnitChunkTickets::registerLoadingCallback);
     }
 
     @SubscribeEvent
