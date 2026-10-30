@@ -18,6 +18,8 @@ import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfo;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoLoader;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ui.Backdrop;
 import com.solegendary.reignofnether.ui.Easing;
 import com.solegendary.reignofnether.ui.HudScale;
@@ -650,7 +652,7 @@ public final class LoadingScreenClientEvents {
     private static boolean rtsViewReady(long now) {
         if (mode == Mode.SAVING || MC.level == null || MC.player == null || MC.gameMode == null
                 || MC.level.getWorldBorder().getSize() > WorldBorderServerEvents.RTS_OPTIMIZED_BORDER
-                || now > endMs + RTS_VIEW_WAIT_MS)
+                || PlayerRolesClient.myRole() == PlayerRole.SOLDIER || now > endMs + RTS_VIEW_WAIT_MS)
             return true;
         if (MC.screen instanceof TopdownGui || MC.screen instanceof MatchStartScreen)
             return true;

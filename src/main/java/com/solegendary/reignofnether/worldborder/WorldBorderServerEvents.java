@@ -14,6 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
@@ -44,10 +46,12 @@ public class WorldBorderServerEvents {
         return level != null && level.getWorldBorder().getSize() <= RTS_OPTIMIZED_BORDER;
     }
 
-    // an RTS map is played from the RTS view, which needs spectator; the loading screen then turns that view on
+    // an RTS map is played from the RTS view, which needs spectator; the loading screen then turns that view on.
+    // Soldiers fight on foot, so they keep their mode
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        if (!(evt.getEntity() instanceof ServerPlayer sp) || !isRtsOptimisedMap(sp.serverLevel()))
+        if (!(evt.getEntity() instanceof ServerPlayer sp) || !isRtsOptimisedMap(sp.serverLevel())
+                || PlayerRoles.roleOf(sp.getName().getString()) == PlayerRole.SOLDIER)
             return;
         GameType mode = sp.gameMode.getGameModeForPlayer();
         if (mode == GameType.SURVIVAL || mode == GameType.ADVENTURE)

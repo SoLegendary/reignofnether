@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.chat.ChatLines;
 import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
@@ -384,6 +387,7 @@ public class OrthoviewClientEvents {
 
         if (isEnabled() && MC.gameMode != null && (
             MC.gameMode.getPlayerMode() == GameType.ADVENTURE || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                || PlayerRolesClient.myRole() == PlayerRole.SOLDIER
         )) {
             toggleEnable();
         }
@@ -600,6 +604,7 @@ public class OrthoviewClientEvents {
             if (MC.player != null && (
                     MC.gameMode.getPlayerMode() == GameType.ADVENTURE
                             || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                            || (!enabled && PlayerRolesClient.myRole() == PlayerRole.SOLDIER)
             )) {
                 MC.player.sendSystemMessage(SystemMessage.error(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error"))));
             } else {
@@ -852,12 +857,8 @@ public class OrthoviewClientEvents {
 
     /** A spectator in first person, outside the RTS view: gets the RTS chat and a hint to press F12. */
     public static boolean spectatingOutside() {
-        return !enabled && MC.player != null && MC.player.isSpectator() && !MC.options.hideGui;
-    }
-
-    // above the spectator hotbar
-    public static int chatBottom(int h) {
-        return h - 10 - 32 - 4 - 11 - 6;
+        return !enabled && MC.player != null && MC.player.isSpectator() && !MC.options.hideGui
+                && PlayerRolesClient.myRole() != PlayerRole.SOLDIER;
     }
 
     @SubscribeEvent
@@ -881,7 +882,7 @@ public class OrthoviewClientEvents {
         Theme.popup(g, (scale.width() - w) / 2, 10, w, 20, Theme.ORANGE);
         Text.draw(g, hint, (scale.width() - w) / 2 + 10, 16, Theme.TEXT);
         if (!(MC.screen instanceof ChatPanel))
-            ChatLines.renderRecent(g, 10, chatBottom(scale.height()), 300);
+            ChatLines.renderRecent(g, 10, SoldierHudClientEvents.chatBottom(scale.height()), 300);
         g.pose().popPose();
     }
 

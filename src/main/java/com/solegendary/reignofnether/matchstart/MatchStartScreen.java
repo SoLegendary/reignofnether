@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
+import com.solegendary.reignofnether.startpos.SeatJoin;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
@@ -45,6 +46,7 @@ import org.lwjgl.glfw.GLFW;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -182,16 +184,35 @@ public class MatchStartScreen extends Screen {
         return 0xFF000000 | hex;
     }
 
-    /** Enabled and disabled seats grouped by team colour, in map order. */
+    /** Enabled and disabled seats by team number (StartPos.teamNumbers), in map order within each. */
     private static Map<Integer, List<StartPos>> teams() {
-        Map<Integer, List<StartPos>> byColour = new LinkedHashMap<>();
+        Map<StartPos, Integer> numbers = StartPos.teamNumbers(StartPosClientEvents.startPoses);
+        Map<Integer, List<StartPos>> byTeam = new TreeMap<>();
         for (StartPos sp : StartPosClientEvents.startPoses)
-            byColour.computeIfAbsent(sp.colorId, k -> new ArrayList<>()).add(sp);
-        return byColour;
+            byTeam.computeIfAbsent(numbers.get(sp), k -> new ArrayList<>()).add(sp);
+        return byTeam;
+    }
+
+    // picked teams get their own colours, apart from the players' colours
+    private static final int[] TEAM_COLOURS = { 0xFF4C8DFF, 0xFFE5534B, 0xFF57C75C, 0xFFF2C14E, 0xFFB06CFF, 0xFF3FC8C8, 0xFFFF8A3D, 0xFFE86AB4 };
+
+    /** On maps that set teams, a team is its start block colour; elsewhere each number has its own colour. */
+    private static int teamAccent(int team) {
+        if (RTSMapInfoClientEvents.teamMode)
+            return StartPosClientEvents.startPoses.stream().filter(sp -> StartPos.teamOf(sp, StartPosClientEvents.startPoses) == team)
+                    .findFirst().map(MatchStartScreen::seatColour).orElse(Theme.DIM);
+        return TEAM_COLOURS[Math.max(0, team - 1) % TEAM_COLOURS.length];
+    }
+
+    /** Players pick teams on maps that don't set them. */
+    private static boolean picksTeams() {
+        return !RTSMapInfoClientEvents.teamMode;
     }
 
     private static List<String> spectators() {
         List<String> seated = new ArrayList<>(StartPosClientEvents.hiddenPlayers.keySet());
+        for (SeatJoin join : StartPosClientEvents.joins)
+            seated.add(join.playerName);
         for (StartPos sp : StartPosClientEvents.startPoses)
             if (!sp.playerName.isBlank())
                 seated.add(sp.playerName);
@@ -491,16 +512,36 @@ public class MatchStartScreen extends Screen {
 
         String me = localName();
         StartPos mine = StartPosClientEvents.getPos();
-        int teamIndex = 1;
-        for (List<StartPos> team : teams().values()) {
+        Map<Integer, List<StartPos>> teams = teams();
+        // picked teams keep map order and only change the team picker, so a row never jumps when its team changes
+        if (picksTeams() && !StartPosClientEvents.startPoses.isEmpty()) {
+            y = seatsHeader(x, y, w, teams);
+            for (StartPos sp : StartPosClientEvents.startPoses)
+                y = renderSeatAndJoins(sp, me, x, y, w, top, bottom);
+            y += 4;
+        }
+        for (Map.Entry<Integer, List<StartPos>> entry : teams.entrySet()) {
+            int number = entry.getKey();
+            List<StartPos> team = entry.getValue();
+            List<SeatJoin> soldiers = StartPosClientEvents.joins.stream().filter(j -> j.isSoldier() && j.colorId == number).toList();
+            boolean soldierSlot = soldiers.size() < GameruleClient.soldiersPerTeam && team.stream().anyMatch(sp -> sp.enabled);
+            if (picksTeams() && soldiers.isEmpty() && !soldierSlot)
+                continue;
             boolean myTeam = mine != null && team.contains(mine);
             long filled = team.stream().filter(MatchStartScreen::taken).count();
             long open = team.stream().filter(sp -> sp.enabled).count();
-            y = teamHeader(x, y, seatColour(team.get(0)), I18n.get("matchstart.reignofnether.team", teamIndex++),
-                    I18n.get("matchstart.reignofnether.team_sub", filled, open) + (myTeam ? " · " + I18n.get("matchstart.reignofnether.your_team") : ""));
-            for (StartPos sp : team) {
-                if (y + ROW_H > top - ROW_H && y < bottom + ROW_H)
-                    renderSeatRow(sp, me, x, y, w, top, bottom);
+            y = teamHeader(x, y, teamAccent(number), I18n.get("matchstart.reignofnether.team", number),
+                    (picksTeams() ? I18n.get("matchstart.reignofnether.role.soldier") : I18n.get("matchstart.reignofnether.team_sub", filled, open))
+                            + (myTeam ? " · " + I18n.get("matchstart.reignofnether.your_team") : ""));
+            if (!picksTeams())
+                for (StartPos sp : team)
+                    y = renderSeatAndJoins(sp, me, x, y, w, top, bottom);
+            for (SeatJoin join : soldiers) {
+                renderJoinRow(join, me, x, y, w, top, bottom);
+                y += ROW_H + 3;
+            }
+            if (soldierSlot) {
+                renderSoldierSlot(team, x, y, w, top, bottom);
                 y += ROW_H + 3;
             }
             y += 4;
@@ -517,7 +558,7 @@ public class MatchStartScreen extends Screen {
         if (StartPosClientEvents.startPoses.isEmpty())
             Text.draw(g, I18n.get("matchstart.reignofnether.no_positions"), x, y, Theme.DIM);
 
-        y = renderSpectators(x, y, w, mine != null, top, bottom);
+        y = renderSpectators(x, y, w, mine != null || StartPosClientEvents.getJoin() != null, top, bottom);
         Clip.pop(g);
 
         int contentH = y + rosterScroll - top;
@@ -540,7 +581,11 @@ public class MatchStartScreen extends Screen {
         if (!StartPosClientEvents.isHost())
             return;
         int x = ruleToggle(right, y, "fog_of_war", FogOfWarClientEvents.isMatchFogOn(), GameruleServerboundPacket::setFogOfWar);
-        ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
+        x = ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
+        x = ruleToggle(x - 4, y, "co_commanders", GameruleClient.coCommanders, GameruleServerboundPacket::setCoCommanders);
+        // soldiers cycle 0..MAX seats per team
+        ruleChip(x - 4, y, "soldiers_per_team", GameruleClient.soldiersPerTeam > 0, String.valueOf(GameruleClient.soldiersPerTeam),
+                () -> GameruleServerboundPacket.setSoldiersPerTeam((GameruleClient.soldiersPerTeam + 1) % (GameruleClient.MAX_SOLDIERS_PER_TEAM + 1)));
     }
 
     /** An ON/OFF chip for a lobby game rule. Returns its left edge. */
@@ -589,7 +634,7 @@ public class MatchStartScreen extends Screen {
 
         // the whole row of an open seat takes it; its buttons are registered after, so they win
         int hx = rowFrame(x, y, w, mine, !sp.enabled ? Theme.SUNKEN : Theme.RAISED, claimable && frame.hovered(row),
-                sp.enabled ? seatColour(sp) : Theme.FAINT);
+                !sp.enabled ? Theme.FAINT : picksTeams() ? teamAccent(StartPos.teamOf(sp, StartPosClientEvents.startPoses)) : seatColour(sp));
         int hy = y + (ROW_H - HEAD) / 2;
         if (visible && claimable)
             frame.register(new ButtonBuilder("take seat row").onLeftClick(() -> claim(sp)).build(), row, null,
@@ -618,6 +663,8 @@ public class MatchStartScreen extends Screen {
             Text.mediumRight(g, status, right, y + (ROW_H - 8) / 2, ready ? Theme.OK : empty ? Theme.ORANGE : Theme.LABEL);
             right -= 52 + 8;
         }
+        if (visible && sp.enabled && picksTeams())
+            right = renderTeamPicker(sp, mine, w, right, y + (ROW_H - 20) / 2, 20) - 6;
         if (visible)
             right = renderSeatActions(sp, mine, empty, host, right, y + (ROW_H - 20) / 2, 20);
 
@@ -657,6 +704,135 @@ public class MatchStartScreen extends Screen {
         Text.small(g, seat, nx, y + 19, Theme.DIM);
         if (!sp.enabled)
             g.fill(x, y, x + w, y + ROW_H, 0x66121118);
+    }
+
+    /** A seat's row, then its co-commanders'. Returns the y after them. */
+    private int renderSeatAndJoins(StartPos sp, String me, int x, int y, int w, int top, int bottom) {
+        if (y + ROW_H > top - ROW_H && y < bottom + ROW_H)
+            renderSeatRow(sp, me, x, y, w, top, bottom);
+        y += ROW_H + 3;
+        for (SeatJoin join : StartPosClientEvents.joins) {
+            if (!join.isSoldier() && join.seat.equals(sp.pos)) {
+                renderJoinRow(join, me, x, y, w, top, bottom);
+                y += ROW_H + 3;
+            }
+        }
+        return y;
+    }
+
+    /** 2V1, 2V2V2 or FFA, from the open seats' teams. */
+    private static String teamsSummary(Map<Integer, List<StartPos>> teams) {
+        List<String> sizes = new ArrayList<>();
+        boolean allSolo = true;
+        for (List<StartPos> team : teams.values()) {
+            long n = team.stream().filter(sp -> sp.enabled).count();
+            if (n > 0)
+                sizes.add(String.valueOf(n));
+            allSolo &= n <= 1;
+        }
+        return allSolo && sizes.size() > 2 ? "FFA" : String.join("V", sizes);
+    }
+
+    private static final int TEAM_BUTTON_W = 18;
+    private static final int TEAM_BUTTONS_MAX = 4;
+    private static final int TEAM_BUTTONS_MIN_ROW_W = 470; // narrower rows get the one badge, so names keep their room
+
+    /** Seats, the matchup (2V1) and a bar of each team's share, then the seat count on the right. Returns the y below. */
+    private int seatsHeader(int x, int y, int w, Map<Integer, List<StartPos>> teams) {
+        var g = frame.g;
+        long filled = StartPosClientEvents.startPoses.stream().filter(MatchStartScreen::taken).count();
+        long open = StartPosClientEvents.startPoses.stream().filter(sp -> sp.enabled).count();
+        String name = I18n.get("matchstart.reignofnether.seats");
+        String matchup = teamsSummary(teams);
+        String count = I18n.get("matchstart.reignofnether.team_sub", filled, open).toUpperCase(Locale.ROOT);
+        float scale = Text.px(18);
+        Text.big(g, name, x, y, Theme.TEXT, scale);
+        int mx = x + Text.bigWidth(name, scale) + 8;
+        Text.big(g, matchup, mx, y, Theme.GOLD, scale);
+        int barX = mx + Text.bigWidth(matchup, scale) + 8;
+        int countX = x + w - Text.smallWidth(count);
+        Text.small(g, count, countX, y, Theme.DIM);
+        int barW = countX - 8 - barX;
+        if (barW > 20 && open > 0) {
+            g.fill(barX, y + 1, barX + barW, y + 8, Theme.INK);
+            int bx = barX + 1;
+            int inner = barW - 2;
+            int done = 0;
+            long counted = 0;
+            for (Map.Entry<Integer, List<StartPos>> e : teams.entrySet()) {
+                long n = e.getValue().stream().filter(sp -> sp.enabled).count();
+                if (n == 0)
+                    continue;
+                counted += n;
+                int end = (int) (inner * counted / open);
+                if (end - done > 1)
+                    g.fill(bx + done, y + 2, bx + end - 1, y + 7, teamAccent(e.getKey()));
+                done = end;
+            }
+        }
+        return y + 12;
+    }
+
+    /**
+     * The seat's team: a button per team, the picked one filled in its colour, so one click picks it. With more teams
+     * than fit, or a narrow roster, one numbered badge that cycles (right-click goes back). Returns its left edge.
+     */
+    private int renderTeamPicker(StartPos sp, boolean mine, int rowW, int right, int y, int h) {
+        var g = frame.g;
+        List<StartPos> seats = StartPosClientEvents.startPoses;
+        int team = StartPos.teamOf(sp, seats);
+        int max = StartPos.maxTeams(seats);
+        boolean canChange = !StartPosClientEvents.isStarting && (StartPosClientEvents.isHost() || mine);
+        if (max > TEAM_BUTTONS_MAX || rowW < TEAM_BUTTONS_MIN_ROW_W)
+            return renderTeamBadge(sp, team, max, canChange, right, y, h);
+        int w = max * (TEAM_BUTTON_W + 1) + 1;
+        int x = right - w;
+        g.fill(x, y, right, y + h, Theme.INK);
+        for (int t = 1; t <= max; t++) {
+            int option = t;
+            Rect r = new Rect(x + 1 + (t - 1) * (TEAM_BUTTON_W + 1), y + 1, TEAM_BUTTON_W, h - 2);
+            boolean on = t == team;
+            boolean hovered = canChange && !on && frame.hovered(r);
+            int colour = teamAccent(t);
+            if (on) {
+                g.fill(r.x(), r.y(), r.right(), r.bottom(), colour);
+            } else {
+                g.fill(r.x(), r.y(), r.right(), r.bottom(), hovered ? Theme.RAISED_HOVER : Theme.RAISED);
+                g.fill(r.x(), r.bottom() - 2, r.right(), r.bottom(), colour);
+            }
+            Text.drawCentered(g, String.valueOf(t), r.centerX() + 1, y + (h - 8) / 2, on ? Theme.INK : hovered ? Theme.GOLD : Theme.LABEL);
+            frame.register(new ButtonBuilder("team " + t)
+                    .isEnabled(() -> canChange && !on)
+                    .onLeftClick(() -> StartPosServerboundPacket.setTeam(sp.pos, option))
+                    .build(), r, null, () -> teamTooltip(option, canChange, false));
+        }
+        return x;
+    }
+
+    /** One numbered badge in the team's colour: click for the next team, right-click for the previous. */
+    private int renderTeamBadge(StartPos sp, int team, int max, boolean canChange, int right, int y, int h) {
+        var g = frame.g;
+        int w = h + 4;
+        Rect r = new Rect(right - w, y, w, h);
+        boolean hovered = canChange && frame.hovered(r);
+        int colour = teamAccent(team);
+        int fill = 0xFF000000 | MiscUtil.shadeHexRGB(colour & 0xFFFFFF, hovered ? 0.6f : 0.42f);
+        Theme.bevel(g, r.x(), y, w, h, fill, 0x30FFFFFF, 0x40000000, 1, hovered ? colour : Theme.INK);
+        g.fill(r.x() + 1, y + h - 3, r.right() - 1, y + h - 1, colour);
+        Text.drawCentered(g, String.valueOf(team), r.centerX() + 1, y + (h - 8) / 2, hovered ? Theme.GOLD : Theme.TEXT);
+        frame.register(new ButtonBuilder("team")
+                .isEnabled(() -> canChange)
+                .onLeftClick(() -> StartPosServerboundPacket.setTeam(sp.pos, team % max + 1))
+                .onRightClick(() -> StartPosServerboundPacket.setTeam(sp.pos, (team + max - 2) % max + 1))
+                .build(), r, null, () -> teamTooltip(team, canChange, true));
+        return r.x();
+    }
+
+    private static Tooltip teamTooltip(int team, boolean canChange, boolean cycles) {
+        return Tooltip.of(I18n.get("matchstart.reignofnether.team", team))
+                .body(I18n.get("matchstart.reignofnether.team_allied"))
+                .status(I18n.get(!canChange ? "matchstart.reignofnether.team_locked" : cycles ? "matchstart.reignofnether.team_change" : "matchstart.reignofnether.team_pick"),
+                        canChange ? Theme.GOLD : Theme.LABEL);
     }
 
     /** Background, team strip and empty head box shared by every roster row. Returns the head box's x. */
@@ -703,6 +879,12 @@ public class MatchStartScreen extends Screen {
         if (host)
             right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
                     () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
+        boolean coTaken = StartPosClientEvents.joins.stream().anyMatch(j -> !j.isSoldier() && j.seat.equals(sp.pos));
+        if (GameruleClient.coCommanders && !coTaken && !sp.hidden)
+            right = rowButton(I18n.get("matchstart.reignofnether.action.co_command"), right, y, h, false, () -> {
+                leaveOwnSeat();
+                StartPosServerboundPacket.joinAsCoCommander(sp.pos);
+            }) - 4;
         return right;
     }
 
@@ -716,6 +898,18 @@ public class MatchStartScreen extends Screen {
             Theme.button(frame.g, r.x(), y, w, h, hovered);
         Text.drawCentered(frame.g, label, r.centerX(), y + (h - 8) / 2 + 1, danger ? Theme.DANGER_TEXT : hovered ? Theme.GOLD : Theme.BODY);
         frame.register(new ButtonBuilder(label).onLeftClick(action).build(), r, null, null);
+        return r.x();
+    }
+
+    private int iconRowButton(Icon icon, int colour, boolean danger, String tooltip, int right, int y, int h, Runnable action) {
+        Rect r = new Rect(right - h, y, h, h);
+        boolean hovered = frame.hovered(r);
+        if (danger)
+            Theme.dangerButton(frame.g, r.x(), y, h, h, hovered);
+        else
+            Theme.button(frame.g, r.x(), y, h, h, hovered);
+        icon.drawIn(frame.g, r.x(), y, h, h, colour);
+        frame.register(new ButtonBuilder(tooltip).onLeftClick(action).build(), r, null, () -> Tooltip.of(I18n.get(tooltip)));
         return r.x();
     }
 
@@ -758,6 +952,60 @@ public class MatchStartScreen extends Screen {
                         () -> Tooltip.of(MiscUtil.getFactionName(f)).body(I18n.get("matchstart.reignofnether.faction_desc." + factionKey(f))));
             x += w + 4;
         }
+    }
+
+    /** A soldier or co-commander: no seat or faction of their own. */
+    private void renderJoinRow(SeatJoin join, String me, int x, int y, int w, int clipTop, int clipBottom) {
+        var g = frame.g;
+        boolean mine = join.playerName.equals(me);
+        boolean visible = y >= clipTop && y + ROW_H <= clipBottom;
+        int indent = 14;
+        int rx = x + indent;
+        int rw = w - indent;
+        int hx = rowFrame(rx, y, rw, mine, Theme.RAISED, false, teamAccent(join.colorId));
+        MyRenderer.renderPlayerHead(g, join.playerName, hx + 2, y + (ROW_H - HEAD) / 2 + 2, HEAD - 4, RANDOM_ICON);
+
+        int right = rx + rw - ROW_PAD;
+        String status = I18n.get(join.pending ? "matchstart.reignofnether.status.pending"
+                : join.ready ? "matchstart.reignofnether.status.ready" : "matchstart.reignofnether.status.not_ready");
+        Text.mediumRight(g, status, right, y + (ROW_H - 8) / 2, join.pending ? Theme.ORANGE : join.ready ? Theme.OK : Theme.LABEL);
+        right -= 52 + 8;
+        if (visible && mine && !StartPosClientEvents.isStarting)
+            right = rowButton(I18n.get("matchstart.reignofnether.action.leave"), right, y + (ROW_H - 20) / 2, 20, false,
+                    StartPosServerboundPacket::leaveJoin) - 4;
+        // the check only while they're asking; the X also removes someone already let in
+        if (visible && !StartPosClientEvents.isStarting && StartPosClientEvents.startPoses.stream().anyMatch(sp -> sp.playerName.equals(me) && join.answeredBy(sp, StartPosClientEvents.startPoses))) {
+            right = iconRowButton(Icon.CLOSE, Theme.DANGER_TEXT, true, "matchstart.reignofnether.action.refuse", right, y + (ROW_H - 20) / 2, 20,
+                    () -> StartPosServerboundPacket.answerJoin(join.playerName, false)) - 4;
+            if (join.pending)
+                right = iconRowButton(Icon.CHECK, Theme.OK, false, "matchstart.reignofnether.action.accept", right, y + (ROW_H - 20) / 2, 20,
+                        () -> StartPosServerboundPacket.answerJoin(join.playerName, true)) - 4;
+        }
+
+        int nx = hx + HEAD + 8;
+        String name = mine ? I18n.get("matchstart.reignofnether.you_name", join.playerName) : join.playerName;
+        Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : Theme.TEXT);
+        Text.small(g, I18n.get(join.isSoldier() ? "matchstart.reignofnether.role.soldier" : "matchstart.reignofnether.role.co_commander"),
+                nx, y + 19, Theme.DIM);
+    }
+
+    /** An open soldier slot on a team. */
+    private void renderSoldierSlot(List<StartPos> team, int x, int y, int w, int clipTop, int clipBottom) {
+        var g = frame.g;
+        int indent = 14;
+        int rx = x + indent;
+        int rw = w - indent;
+        int hx = rowFrame(rx, y, rw, false, Theme.RAISED, false, seatColour(team.get(0)));
+        Icon.PLUS.drawIn(g, hx, y + (ROW_H - HEAD) / 2, HEAD, HEAD, Theme.DIM);
+        int right = rx + rw - ROW_PAD;
+        if (y >= clipTop && y + ROW_H <= clipBottom && !StartPosClientEvents.isStarting)
+            right = primaryRowButton(I18n.get("matchstart.reignofnether.action.join_soldier"), right, y + (ROW_H - 20) / 2, 20, () -> {
+                leaveOwnSeat();
+                StartPosServerboundPacket.joinAsSoldier(team.get(0).pos);
+            }) - 4;
+        int nx = hx + HEAD + 8;
+        Text.draw(g, Text.fit(I18n.get("matchstart.reignofnether.seat.soldier_open"), Math.max(10, right - nx)), nx, y + 8, Theme.LABEL);
+        Text.small(g, I18n.get("matchstart.reignofnether.role.soldier"), nx, y + 19, Theme.DIM);
     }
 
     private void renderHiddenRow(String name, boolean ready, int x, int y, int w) {
@@ -865,9 +1113,11 @@ public class MatchStartScreen extends Screen {
     private void renderPick(Rect p) {
         var g = frame.g;
         StartPos mine = StartPosClientEvents.getPos();
+        SeatJoin join = StartPosClientEvents.getJoin();
         Faction faction = mine != null ? mine.faction : Factions.NONE;
-        boolean picked = mine != null && faction != Factions.NONE;
-        boolean ready = mine != null && mine.ready;
+        boolean pending = join != null && join.pending;
+        boolean picked = (mine != null && faction != Factions.NONE) || (join != null && !pending);
+        boolean ready = (mine != null && mine.ready) || (join != null && join.ready);
 
         frame.zone(p);
         Theme.outline(g, p.x(), p.y(), p.w(), p.h(), 1, Theme.INK);
@@ -887,7 +1137,12 @@ public class MatchStartScreen extends Screen {
         g.fill(p.x(), p.y(), p.right(), p.y() + Theme.BEVEL, ready ? Theme.OK : picked ? Theme.ORANGE : Theme.FAINT);
 
         String kicker, title, desc;
-        if (mine == null) {
+        if (join != null) {
+            String role = join.isSoldier() ? "soldier" : "co_commander";
+            kicker = I18n.get(pending ? "matchstart.reignofnether.pick.pending" : "matchstart.reignofnether.pick.joined");
+            title = I18n.get("matchstart.reignofnether.role." + role);
+            desc = I18n.get("matchstart.reignofnether.pick." + role + "_desc");
+        } else if (mine == null) {
             kicker = I18n.get("matchstart.reignofnether.pick.spectating");
             title = I18n.get("matchstart.reignofnether.pick.no_seat");
             desc = I18n.get("matchstart.reignofnether.pick.no_seat_desc");
@@ -914,7 +1169,8 @@ public class MatchStartScreen extends Screen {
         Text.medium(g, kicker, p.x() + pad, y - 30, Theme.ORANGE);
 
         boolean canReady = picked && !(StartPosClientEvents.isStarting && !ready);
-        String label = mine == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
+        String label = mine == null && join == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
+                : pending ? I18n.get("matchstart.reignofnether.ready.pending")
                 : !picked ? I18n.get("matchstart.reignofnether.ready.pick_faction")
                 : ready ? I18n.get("matchstart.reignofnether.ready.unready") : I18n.get("matchstart.reignofnether.ready.ready_up");
         Rect btn = new Rect(p.x() + pad, btnY, p.w() - pad * 2, btnH);
@@ -1018,6 +1274,8 @@ public class MatchStartScreen extends Screen {
             StartPosServerboundPacket.unreservePos(current.pos);
             StartPosClientEvents.selectedFaction = Factions.NONE;
         }
+        if (StartPosClientEvents.getJoin() != null)
+            StartPosServerboundPacket.leaveJoin();
     }
 
     private void pickFaction(StartPos pos, Faction faction) {
@@ -1029,8 +1287,13 @@ public class MatchStartScreen extends Screen {
     }
 
     private void toggleReady(@Nullable StartPos pos) {
-        if (pos != null)
-            toggleReady(pos.ready);
+        if (pos == null) {
+            SeatJoin join = StartPosClientEvents.getJoin();
+            if (join != null)
+                toggleReady(join.ready);
+            return;
+        }
+        toggleReady(pos.ready);
     }
 
     private void toggleReady(boolean ready) {

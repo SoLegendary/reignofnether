@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -43,7 +44,8 @@ public class HealthBarClientEvents {
 
     @SubscribeEvent
     public static void entityRender(RenderLivingEvent.Post<? extends LivingEntity, ? extends EntityModel<?>> evt) {
-        prepareRenderInWorld(evt.getEntity());
+        if (!UnitClientEvents.renderingGhosts)
+            prepareRenderInWorld(evt.getEntity());
     }
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {

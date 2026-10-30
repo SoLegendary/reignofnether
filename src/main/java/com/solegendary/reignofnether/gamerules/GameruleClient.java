@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.ui.SettingRow;
@@ -40,6 +41,11 @@ public class GameruleClient {
     public static boolean rtsPathfinding = false; // only for GUI
     public static int animalSpawnYDiff = 5;
     public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_SAME_RARITY;
+    public static final int MAX_SOLDIERS_PER_TEAM = GameRuleRegistrar.MAX_SOLDIERS_PER_TEAM;
+    public static int soldiersPerTeam = 0;
+    public static boolean coCommanders = false;
+    public static int soldierRespawnSeconds = 30;
+    public static boolean allChat = true;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -63,7 +69,7 @@ public class GameruleClient {
         }
 
         public boolean canEdit() {
-            if (MC.player == null || StartPosClientEvents.isStarting || teamLocked())
+            if (MC.player == null || StartPosClientEvents.isStarting || teamLocked() || picksLocked())
                 return false;
             return MC.player.hasPermissions(4) || (lobby && StartPosClientEvents.isHost());
         }
@@ -73,12 +79,22 @@ public class GameruleClient {
                     I18n.get(lobby ? "hud.gamerule.reignofnether.tag.match" : "hud.gamerule.reignofnether.tag.server"),
                     value, on, increase, decrease, this::canEdit,
                     I18n.get(teamLocked() ? "hud.gamerule.reignofnether.team_locked"
+                            : picksLocked() ? "hud.gamerule.reignofnether.picks_locked"
                             : lobby ? "hud.gamerule.reignofnether.host_only" : "hud.gamerule.reignofnether.op_only"));
         }
 
         private boolean teamLocked() {
             return id.equals("lock_alliances") && RTSMapInfoClientEvents.teamMode;
         }
+
+        private boolean picksLocked() {
+            return id.equals("hide_enemy_picks") && seatJoinsOn();
+        }
+    }
+
+    // soldiers and co-commanders pick a seat by name, so picks can't be hidden (StartPosServerEvents.syncTo)
+    private static boolean seatJoinsOn() {
+        return coCommanders || soldiersPerTeam > 0;
     }
 
     public static List<SettingRow> ruleRows() {
@@ -113,7 +129,7 @@ public class GameruleClient {
     public static List<Rule> rules() {
         List<Rule> rules = new ArrayList<>();
         rules.add(toggle("fog_of_war", true, FogOfWarClientEvents::isMatchFogOn, GameruleServerboundPacket::setFogOfWar));
-        rules.add(toggle("hide_enemy_picks", true, () -> hideEnemyPicks, GameruleServerboundPacket::setHideEnemyPicks));
+        rules.add(toggle("hide_enemy_picks", true, () -> hideEnemyPicks && !seatJoinsOn(), GameruleServerboundPacket::setHideEnemyPicks));
         rules.add(number("max_population", true, () -> maxPopulation, 0, 10000, 5, 25, GameruleServerboundPacket::setMaxPopulation));
         rules.add(number("allowed_heroes", true, () -> allowedHeroes, 0, 2, 1, 1, GameruleServerboundPacket::setAllowedHeroes));
         rules.add(new Rule("random_item_drops", true,
@@ -123,6 +139,10 @@ public class GameruleClient {
                 () -> GameruleServerboundPacket.setRandomItemDrops((randomItemDrops.getValue() + 3) % 4)));
         rules.add(toggle("neutral_aggro", true, () -> neutralAggro, GameruleServerboundPacket::setNeutralAggro));
         rules.add(toggle("lock_alliances", true, () -> lockAlliances, GameruleServerboundPacket::setLockAlliances));
+        rules.add(number("soldiers_per_team", true, () -> soldiersPerTeam, 0, MAX_SOLDIERS_PER_TEAM, 1, 1, GameruleServerboundPacket::setSoldiersPerTeam));
+        rules.add(toggle("co_commanders", true, () -> coCommanders, GameruleServerboundPacket::setCoCommanders));
+        rules.add(number("soldier_respawn_seconds", true, () -> soldierRespawnSeconds, 0, GameRuleRegistrar.MAX_SOLDIER_RESPAWN_SECONDS, 5, 30, GameruleServerboundPacket::setSoldierRespawnSeconds));
+        rules.add(toggle("all_chat", true, () -> allChat, GameruleServerboundPacket::setAllChat));
         rules.add(toggle("allow_beacons", true, () -> allowBeacons, GameruleServerboundPacket::setAllowBeacons));
         rules.add(number("beacon_win_minutes", true, () -> (int) beaconWinMinutes, 1, 1000, 1, 10, GameruleServerboundPacket::setBeaconWinMinutes));
         rules.add(toggle("coop_mode", false, () -> coopMode, GameruleServerboundPacket::setCoopMode));

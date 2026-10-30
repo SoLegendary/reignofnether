@@ -12,10 +12,6 @@ buildscript {
     }
 }
 
-plugins { // for essential partner mod
-    id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
-}
-
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
@@ -133,7 +129,11 @@ repositories {
         }
     }
     maven {
-        url = "https://repo.essential.gg/public"
+        // Simple Voice Chat API, for the optional voice bridge
+        url = "https://maven.maxhenkel.de/repository/public"
+        content {
+            includeGroup "de.maxhenkel.voicechat"
+        }
     }
     mavenCentral()
 }
@@ -147,6 +147,7 @@ dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+    compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.5.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
@@ -158,8 +159,7 @@ mixin {
 jar {
     manifest {
         attributes([
-            // Declared below due to Essential Partner Mod
-            // "MixinConfigs": "reignofnether.mixins.json",
+            "MixinConfigs": "reignofnether.mixins.json",
             "Specification-Title": "reignofnether",
             "Specification-Vendor": "examplemodsareus",
             "Specification-Version": "1", // We are version 1 of ourselves
@@ -194,38 +194,4 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
     options.compilerArgs += ["-Xmaxerrs", "500000"]
-}
-
-
-
-// ESSENTIAL PARTNER MOD STUFF
-
-var essentialPartnerModPackage = 'com.solegendary.reignofnether.essentialpartnermod'
-
-tasks.jar {
-    manifest.attributes(
-        // The main entry point of the Essential Partner mod are its mixins.
-        // Note that you may have to re-declare your own mixin configs here too depending on your build system.
-        'MixinConfigs': "${essentialPartnerModPackage.replace('.', '/')}/mixins.json,reignofnether.mixins.json",
-    )
-}
-
-var essentialPartnerModDep = 'gg.essential:partner-mod-integration-1.20.1-forge:1.0.2'
-
-tasks.register('relocatedEssentialPartnerModJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    destinationDirectory.set(layout.buildDirectory.dir('devlibs'))
-    archiveFileName.set('essentialpartner.jar')
-    inputs.property('essentialPartnerModPackage', essentialPartnerModPackage)
-    var configuration = project.configurations.detachedConfiguration(project.dependencies.create(essentialPartnerModDep))
-    dependsOn(configuration)
-    from({ configuration.collect { zipTree(it) } })
-    exclude('mcmod.info', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'pack.mcmeta', 'gg/essential/partnermod/EssentialPartnerMod.class')
-    relocate('gg.essential.partnermod', essentialPartnerModPackage)
-    filesMatching('gg/essential/partnermod/mixins.json') {
-        filter { it.replace('gg.essential.partnermod', essentialPartnerModPackage) }
-    }
-}
-
-tasks.jar {
-    from(relocatedEssentialPartnerModJar.archiveFile.map { zipTree(it) })
 }
