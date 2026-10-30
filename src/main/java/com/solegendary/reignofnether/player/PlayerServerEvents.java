@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -238,6 +239,22 @@ public class PlayerServerEvents {
 
     // co-commanders get their lead's entry
     @Nullable
+    // every player's army (non-worker units) right now, for the end screen's chart and peak army
+    private static void sampleArmies() {
+        Map<String, Integer> army = new HashMap<>();
+        for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            if (entity instanceof Unit unit && !(entity instanceof WorkerUnit))
+                army.merge(unit.getOwnerName(), 1, Integer::sum);
+        synchronized (rtsPlayers) {
+            for (RTSPlayer p : rtsPlayers) {
+                int size = army.getOrDefault(p.name, 0);
+                p.armyTimeline.add(size);
+                RTSPlayerScoresEnum peak = RTSPlayerScoresEnum.PEAK_ARMY;
+                p.scores.scoreList.put(peak, Math.max(p.scores.scoreList.get(peak), size));
+            }
+        }
+    }
+
     public static RTSPlayer getRTSPlayer(String playerName) {
         String owner = PlayerRoles.ownerOf(playerName);
         synchronized (rtsPlayers) {
@@ -310,6 +327,8 @@ public class PlayerServerEvents {
                     rtsGameTicks = 0;
                 } else {
                     rtsGameTicks += 1;
+                    if (rtsGameTicks % MatchStatsClientboundPacket.ARMY_SAMPLE_TICKS == 0)
+                        sampleArmies();
                     if (rtsGameTicks % 200 == 0) {
                         PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
                     }
@@ -333,7 +352,7 @@ public class PlayerServerEvents {
         }
     }
 
-    private static void syncUnits() {
+    public static void syncUnits() {
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof Unit unit) {
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
@@ -1243,8 +1262,9 @@ public class PlayerServerEvents {
         for (RTSPlayer p : byName.values())
             rows.add(new MatchStatsClientboundPacket.MatchStatRow(
                     p.name, p.faction, winnerNames.contains(p.name), p.startPosColorId,
-                    p.scores.getScoreListAsArray()));
+                    p.scores.getScoreListAsArray(), p.armyTimeline.stream().mapToInt(Integer::intValue).toArray()));
         MatchStatsClientboundPacket.broadcast(rtsGameTicks, rows);
+        ReplayServerEvents.onMatchEnd(winnerNames);
     }
 
     public static String getBeaconWinTime(String playerName) {

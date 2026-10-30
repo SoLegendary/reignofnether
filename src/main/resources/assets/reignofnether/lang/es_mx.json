@@ -854,10 +854,7 @@
     "matchend.reignofnether.title": "Resultados de la partida",
     "matchend.reignofnether.winner": "GANADOR",
     "matchend.reignofnether.loser": "PERDEDOR",
-    "matchend.reignofnether.party_total": "Total del grupo",
-    "matchend.reignofnether.resources": "Recursos recolectados: %s",
     "matchend.reignofnether.col_units": "Unidades",
-    "matchend.reignofnether.col_military": "Ejército",
     "matchend.reignofnether.col_buildings": "Construcciones",
 
     "fogofwar.reignofnether.warning": "[ADVERTENCIA]",
