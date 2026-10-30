@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.chat;
 
+import com.solegendary.reignofnether.chat.TeamChatServerEvents.Scope;
 import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
@@ -21,7 +22,7 @@ import java.util.Locale;
  * recent-chat overlay and the match setup screen.
  *
  * Lines are captured where vanilla adds them to the chat (ChatComponentMixin), so client-side messages
- * (tutorial, ready checks) are caught too. Whoever knows who said what (player chat) calls
+ * (tutorial, ready checks) are caught too. Whoever knows who said what (player chat, team chat) calls
  * {@link #expect} just before, and the next line added is tagged with it; anything else is INFO.
  */
 public final class ChatLog {
@@ -29,7 +30,7 @@ public final class ChatLog {
     private ChatLog() { }
 
     public enum Channel {
-        ALL(Theme.MUTED), INFO(Theme.ORANGE);
+        TEAM(0xFF70B919), ALL(Theme.MUTED), SPEC(Theme.LABEL), INFO(Theme.ORANGE);
 
         public final int colour;
 
@@ -39,6 +40,14 @@ public final class ChatLog {
 
         public String label() {
             return I18n.get("chat.reignofnether.channel." + name().toLowerCase(Locale.ROOT));
+        }
+
+        public static Channel of(Scope scope) {
+            return switch (scope) {
+                case TEAM, TEAM_SPECTATED -> TEAM;
+                case ALL, LOBBY -> ALL;
+                case SPECTATOR -> SPEC;
+            };
         }
     }
 

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.network.FriendlyByteBuf;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.network.NetworkEvent;
@@ -102,6 +103,23 @@ public class GameruleServerboundPacket {
                 new GameruleServerboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", randomItemDrops));
     }
 
+    public static void setSoldiersPerTeam(long soldiersPerTeam) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_SOLDIERS_PER_TEAM, "", soldiersPerTeam));
+    }
+    public static void setCoCommanders(boolean coCommanders) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_CO_COMMANDERS, "", coCommanders ? 1L : 0L));
+    }
+    public static void setSoldierRespawnSeconds(long seconds) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_SOLDIER_RESPAWN_SECONDS, "", seconds));
+    }
+    public static void setAllChat(boolean allChat) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_ALL_CHAT, "", allChat ? 1L : 0L));
+    }
+
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
         this.playerName = playerName;
@@ -131,7 +149,11 @@ public class GameruleServerboundPacket {
             GameruleAction.SET_NEUTRAL_AGGRO,
             GameruleAction.SET_LOCK_ALLIANCES,
             GameruleAction.SET_ALLOW_BEACONS,
-            GameruleAction.SET_BEACON_WIN_MINUTES
+            GameruleAction.SET_BEACON_WIN_MINUTES,
+            GameruleAction.SET_SOLDIERS_PER_TEAM,
+            GameruleAction.SET_CO_COMMANDERS,
+            GameruleAction.SET_SOLDIER_RESPAWN_SECONDS,
+            GameruleAction.SET_ALL_CHAT
     );
 
     // server-side packet-consuming functions
@@ -234,6 +256,24 @@ public class GameruleServerboundPacket {
                 case SET_RANDOM_ITEM_DROPS -> {
                     gameRules.getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setRandomItemDrops(value);
+                }
+                case SET_SOLDIERS_PER_TEAM -> {
+                    gameRules.getRule(GameRuleRegistrar.SOLDIERS_PER_TEAM).set((int) Mth.clamp(value, 0, GameRuleRegistrar.MAX_SOLDIERS_PER_TEAM), server);
+                    GameruleClientboundPacket.setSoldiersPerTeam(gameRules.getInt(GameRuleRegistrar.SOLDIERS_PER_TEAM));
+                    StartPosServerEvents.trimJoins();
+                }
+                case SET_CO_COMMANDERS -> {
+                    gameRules.getRule(GameRuleRegistrar.CO_COMMANDERS).set(booleanValue, server);
+                    GameruleClientboundPacket.setCoCommanders(booleanValue);
+                    StartPosServerEvents.trimJoins();
+                }
+                case SET_SOLDIER_RESPAWN_SECONDS -> {
+                    gameRules.getRule(GameRuleRegistrar.SOLDIER_RESPAWN_SECONDS).set((int) Mth.clamp(value, 0, GameRuleRegistrar.MAX_SOLDIER_RESPAWN_SECONDS), server);
+                    GameruleClientboundPacket.setSoldierRespawnSeconds(gameRules.getInt(GameRuleRegistrar.SOLDIER_RESPAWN_SECONDS));
+                }
+                case SET_ALL_CHAT -> {
+                    gameRules.getRule(GameRuleRegistrar.ALL_CHAT).set(booleanValue, server);
+                    GameruleClientboundPacket.setAllChat(booleanValue);
                 }
             }
             success.set(true);

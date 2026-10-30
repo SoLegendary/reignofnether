@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import javax.annotation.Nullable;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;

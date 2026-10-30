@@ -74,7 +74,7 @@ public class RTSMapInfoServerEvents {
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, rtsMapInfo.getDefaultMode());
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_VERSION, rtsMapInfo.getVersion());
             syncTeamMode();
-            for (String mode : rtsMapInfo.getModes().keySet())
+            for (String mode : rtsMapInfo.getModeNames())
                 RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.ADD_MODE, mode);
         }
     }

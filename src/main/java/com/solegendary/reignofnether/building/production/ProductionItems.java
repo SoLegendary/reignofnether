@@ -129,6 +129,12 @@ public class ProductionItems {
     public static final ResearchBeaconLevel3 RESEARCH_BEACON_LEVEL_3 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_3"), new ResearchBeaconLevel3());
     public static final ResearchBeaconLevel4 RESEARCH_BEACON_LEVEL_4 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_4"), new ResearchBeaconLevel4());
     public static final ResearchBeaconLevel5 RESEARCH_BEACON_LEVEL_5 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_5"), new ResearchBeaconLevel5());
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_ARMOR_1 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_armor_1"), new ResearchSoldierGear(true, 1, null));
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_ARMOR_2 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_armor_2"), new ResearchSoldierGear(true, 2, RESEARCH_SOLDIER_ARMOR_1));
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_ARMOR_3 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_armor_3"), new ResearchSoldierGear(true, 3, RESEARCH_SOLDIER_ARMOR_2));
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_WEAPONS_1 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_weapons_1"), new ResearchSoldierGear(false, 1, null));
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_WEAPONS_2 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_weapons_2"), new ResearchSoldierGear(false, 2, RESEARCH_SOLDIER_WEAPONS_1));
+    public static final ResearchSoldierGear RESEARCH_SOLDIER_WEAPONS_3 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soldier_weapons_3"), new ResearchSoldierGear(false, 3, RESEARCH_SOLDIER_WEAPONS_2));
 
     private static <T extends ProductionItem> T register(ResourceLocation id, T building) {
         return Registry.register(ReignOfNetherRegistries.PRODUCTION_ITEM, id, building);

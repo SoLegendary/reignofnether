@@ -36,7 +36,10 @@ import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.scenario.ScenarioRole;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
+import com.solegendary.reignofnether.soldier.SoldierServerEvents;
+import com.solegendary.reignofnether.ping.PingServerEvents;
 import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
+import com.solegendary.reignofnether.startpos.CoCommanderCommand;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
@@ -151,6 +154,7 @@ public class PlayerServerEvents {
         RTSPlayerSaveData data = RTSPlayerSaveData.getInstance(serverLevel);
         data.rtsPlayers.clear();
         data.rtsPlayers.addAll(rtsPlayers);
+        PlayerRoles.saveTo(data.soldierOf, data.coCommanderOf);
         data.save();
         serverLevel.getDataStorage().save();
     }
@@ -164,6 +168,8 @@ public class PlayerServerEvents {
 
             rtsPlayers.clear();
             rtsPlayers.addAll(data.rtsPlayers);
+            PlayerRoles.loadFrom(data.soldierOf, data.coCommanderOf);
+            FogOfWarServerEvents.invalidateRtsCache();
 
             for (RTSPlayer rtsPlayer : rtsPlayers) {
                 if (rtsPlayer.faction == Factions.NONE) {
@@ -192,7 +198,13 @@ public class PlayerServerEvents {
         return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
     }
 
+    // commanders, including co-commanders (PlayerRoles)
     public static boolean isRTSPlayer(String playerName) {
+        return PlayerRoles.roleOf(playerName) == PlayerRole.COMMANDER;
+    }
+
+    // whether this name has its own entry in rtsPlayers; most code wants isRTSPlayer or PlayerRoles.roleOf
+    public static boolean inRtsList(String playerName) {
         synchronized (rtsPlayers) {
             for (RTSPlayer p : rtsPlayers) {
                 if (p.name.equals(playerName)) return true;
@@ -201,11 +213,13 @@ public class PlayerServerEvents {
         }
     }
 
+    // co-commanders get their lead's entry
     @Nullable
     public static RTSPlayer getRTSPlayer(String playerName) {
+        String owner = PlayerRoles.ownerOf(playerName);
         synchronized (rtsPlayers) {
             for (RTSPlayer rtsPlayer : rtsPlayers)
-                if (rtsPlayer.name.equals(playerName))
+                if (rtsPlayer.name.equals(owner))
                     return rtsPlayer;
         }
         return null;
@@ -216,8 +230,11 @@ public class PlayerServerEvents {
             for (RTSPlayer p : rtsPlayers) {
                 if (p.id == id) return true;
             }
-            return false;
         }
+        for (ServerPlayer player : players)
+            if (player.getId() == id)
+                return isRTSPlayer(player.getName().getString());
+        return false;
     }
 
     public static boolean isBot(String playerName) {
@@ -327,6 +344,7 @@ public class PlayerServerEvents {
         String playerName = serverPlayer.getName().getString();
         ReignOfNether.LOGGER.info("Player logged in: " + playerName + ", id: " + serverPlayer.getId());
 
+        PlayerRoles.syncTo(serverPlayer); // first: the client filters research by the owner it acts as
         if (rtsSyncingEnabled) {
             MinecraftServer server = evt.getEntity().level().getServer();
             if (server != null && !server.isDedicatedServer()) {
@@ -335,8 +353,8 @@ public class PlayerServerEvents {
             } else {
                 syncUnits();
             }
-            ResearchServerEvents.syncResearch(playerName);
-            ResearchServerEvents.syncCheats(playerName);
+            ResearchServerEvents.syncResearch(PlayerRoles.ownerOf(playerName));
+            ResearchServerEvents.syncCheats(PlayerRoles.ownerOf(playerName));
         }
 
         boolean inOrthoviewList = false;
@@ -380,6 +398,7 @@ public class PlayerServerEvents {
         ReignOfNether.LOGGER.info("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         players.removeIf(player -> player.getId() == id);
         orthoviewPlayers.removeIf(player -> player.getId() == id);
+        PingServerEvents.forget(evt.getEntity().getName().getString());
     }
 
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {
@@ -805,6 +824,8 @@ public class PlayerServerEvents {
 
     public static void enableOrthoview(int id) {
         ServerPlayer player = getPlayerById(id);
+        if (player != null && PlayerRoles.roleOf(player.getName().getString()) == PlayerRole.SOLDIER)
+            return; // soldiers fight in first person, alive or dead
         if (player != null)
             player.removeAllEffects();
 
@@ -839,7 +860,9 @@ public class PlayerServerEvents {
             ReignOfNether.LOGGER.warn("Refused to open topdown GUI for survival/adventure player {}", serverPlayer.getName().getString());
             return;
         }
-        if (serverPlayer != null) {
+        if (serverPlayer != null && PlayerRoles.roleOf(serverPlayer.getName().getString()) == PlayerRole.SOLDIER) {
+            return;
+        } else if (serverPlayer != null) {
             // Open GUI server-side
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
@@ -963,6 +986,15 @@ public class PlayerServerEvents {
     }
 
     public static void defeat(String playerName, String reason) {
+        // a co-commander surrendering only leaves; their lead's faction plays on
+        if (!PlayerRoles.ownerOf(playerName).equals(playerName)) {
+            PlayerRoles.remove(playerName);
+            ServerPlayer sp = serverLevel.getServer().getPlayerList().getPlayerByName(playerName);
+            if (sp != null)
+                SoldierServerEvents.toSpectator(sp);
+            PlayerClientboundPacket.defeat(playerName);
+            return;
+        }
         if (SandboxServer.isSandboxPlayer(playerName))
             return;
 
@@ -1019,6 +1051,14 @@ public class PlayerServerEvents {
                 }
                 return false;
             });
+
+            // co-commanders and soldiers go down with their faction
+            for (String dropped : PlayerRoles.dropFaction(playerName)) {
+                ServerPlayer sp = serverLevel.getServer().getPlayerList().getPlayerByName(dropped);
+                if (sp != null)
+                    SoldierServerEvents.toSpectator(sp);
+                PlayerClientboundPacket.defeat(dropped);
+            }
 
             // Remove research data and resources associated with the defeated player
             saveRTSPlayers();
@@ -1105,11 +1145,20 @@ public class PlayerServerEvents {
                 if (p != null) byName.putIfAbsent(p.name, p);
         }
         List<MatchStatsClientboundPacket.MatchStatRow> rows = new ArrayList<>();
-        for (RTSPlayer p : byName.values())
+        List<RTSPlayer> all = new ArrayList<>(byName.values());
+        for (RTSPlayer p : all)
             rows.add(new MatchStatsClientboundPacket.MatchStatRow(
-                    p.name, p.faction, winnerNames.contains(p.name), p.startPosColorId,
+                    p.name, p.faction, winnerNames.contains(p.name), teamId(p, all),
                     p.scores.getScoreListAsArray()));
         MatchStatsClientboundPacket.broadcast(rtsGameTicks, rows);
+    }
+
+    // allies share a team on the end screen, however they teamed up: lobby teams, start block colours or /ally
+    private static int teamId(RTSPlayer p, List<RTSPlayer> all) {
+        for (int i = 0; i < all.size(); i++)
+            if (all.get(i) == p || AlliancesServerEvents.isAllied(p.name, all.get(i).name))
+                return i;
+        return all.size();
     }
 
     public static String getBeaconWinTime(String playerName) {
@@ -1124,6 +1173,7 @@ public class PlayerServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         AllyCommand.register(evt.getDispatcher());
+        CoCommanderCommand.register(evt.getDispatcher());
         RTSPlayerScoresCommand.register(evt.getDispatcher());
 
         evt.getDispatcher().register(Commands.literal("rts-lock").then(Commands.literal("enable").executes((command) -> {
@@ -1160,6 +1210,8 @@ public class PlayerServerEvents {
 
         synchronized (rtsPlayers) {
             rtsPlayers.clear();
+            PlayerRoles.clear();
+            SoldierServerEvents.reset();
 
             for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits()))
                 if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
@@ -1242,6 +1294,8 @@ public class PlayerServerEvents {
 
         synchronized (rtsPlayers) {
             rtsPlayers.clear();
+            PlayerRoles.clear();
+            SoldierServerEvents.reset();
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement productionBuilding)

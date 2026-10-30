@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
@@ -71,7 +70,6 @@ public final class TopRightPanel {
         List<Button> main = new ArrayList<>();
         addIfShown(main, HelperButtons.idleWorkerButton);
         addIfShown(main, HelperButtons.armyButton);
-        addIfShown(main, FogOfWarClientEvents.getSpectatorFogButton()); // spectators never have an army
         if (!SpectatorHud.isActive()) // the scoreboard already shows every player
             addIfShown(main, PlayerDisplayClientEvents.observerButton);
         addIfShown(main, PlayerDisplayClientEvents.diplomacyButton);
