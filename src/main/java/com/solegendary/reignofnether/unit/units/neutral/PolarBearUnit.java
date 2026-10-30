@@ -94,7 +94,18 @@ public class PolarBearUnit extends PolarBear implements Unit, AttackerUnit {
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(PolarBearUnit.class, EntityDataSerializers.STRING);
