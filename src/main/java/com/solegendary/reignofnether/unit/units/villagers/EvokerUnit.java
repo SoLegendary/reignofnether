@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -58,6 +61,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAttackerUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.CASTER, UnitRole.AOE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new SetFangsLine());

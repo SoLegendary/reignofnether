@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ping;
 
+import com.solegendary.reignofnether.ai.BotServerEvents;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.chat.TeamChatServerEvents;
@@ -49,6 +50,7 @@ public class PingServerEvents {
         }
         if (PlayerRoles.roleOf(sender) == PlayerRole.COMMANDER)
             SoldierServerEvents.setOrder(PlayerRoles.ownerOf(sender), type, pos);
+        BotServerEvents.onPing(sender, type, pos);
         return true;
     }
 

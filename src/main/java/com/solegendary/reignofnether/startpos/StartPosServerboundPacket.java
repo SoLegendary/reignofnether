@@ -20,10 +20,18 @@ public class StartPosServerboundPacket {
     StartPosAction action;
     BlockPos blockPos;
     Faction faction;
+    int botDifficulty = -1;
     String joinName = ""; // ACCEPT_JOIN, REFUSE_JOIN: the player being answered
 
     public static void reservePos(BlockPos pos, Faction faction) {
         PacketHandler.INSTANCE.sendToServer(new StartPosServerboundPacket(StartPosAction.RESERVE, pos, faction));
+    }
+
+    // host only: an AI bot on this seat with this faction and difficulty (BotDifficulty ordinal)
+    public static void reserveBotPos(BlockPos pos, Faction faction, int botDifficulty) {
+        StartPosServerboundPacket packet = new StartPosServerboundPacket(StartPosAction.RESERVE_BOT, pos, faction);
+        packet.botDifficulty = botDifficulty;
+        PacketHandler.INSTANCE.sendToServer(packet);
     }
 
     public static void unreservePos(BlockPos pos) {
@@ -78,6 +86,7 @@ public class StartPosServerboundPacket {
         this.action = buffer.readEnum(StartPosAction.class);
         this.blockPos = buffer.readBlockPos();
         this.faction = Factions.getFaction(buffer.readResourceLocation());
+        this.botDifficulty = buffer.readInt();
         this.joinName = buffer.readUtf();
     }
 
@@ -85,6 +94,7 @@ public class StartPosServerboundPacket {
         buffer.writeEnum(this.action);
         buffer.writeBlockPos(this.blockPos);
         buffer.writeResourceLocation(this.faction.key);
+        buffer.writeInt(this.botDifficulty);
         buffer.writeUtf(this.joinName);
     }
 
@@ -99,7 +109,8 @@ public class StartPosServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if ((action == StartPosAction.ENABLE || action == StartPosAction.DISABLE || action == StartPosAction.CLOSE_EMPTY) &&
+            else if ((action == StartPosAction.ENABLE || action == StartPosAction.DISABLE || action == StartPosAction.CLOSE_EMPTY ||
+                    action == StartPosAction.RESERVE_BOT) &&
                     !StartPosServerEvents.isHost(player)) {
                 ReignOfNether.LOGGER.warn("StartPosServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
@@ -130,7 +141,9 @@ public class StartPosServerboundPacket {
                     StartPosServerEvents.setPlayerReady(playerName, false);
                 }
                 case UNRESERVE -> {
-                    if (StartPosServerEvents.isStartingGame())
+                    // during the countdown only the host taking out a bot (it readies by itself); that stops it
+                    boolean botSeat = StartPosServerEvents.startPoses.stream().anyMatch(sp -> sp.pos.equals(blockPos) && sp.isBot());
+                    if (StartPosServerEvents.isStartingGame() && !(botSeat && StartPosServerEvents.isHost(player)))
                         return;
                     // the host can also clear someone else's seat (kick); unready whoever sat there
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
@@ -145,6 +158,7 @@ public class StartPosServerboundPacket {
                         }
                     }
                 }
+                case RESERVE_BOT -> StartPosServerEvents.reserveBotPos(blockPos, faction, botDifficulty);
                 case JOIN_SOLDIER -> StartPosServerEvents.join(playerName, PlayerRole.SOLDIER, blockPos);
                 case JOIN_CO_COMMANDER -> StartPosServerEvents.join(playerName, PlayerRole.COMMANDER, blockPos);
                 case LEAVE_JOIN -> {

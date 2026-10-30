@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.matchstart;
 
+import com.solegendary.reignofnether.ai.BotDifficulty;
+
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
@@ -605,6 +607,7 @@ public class MatchStartScreen extends Screen {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(me);
         boolean empty = !taken(sp);
         boolean host = StartPosClientEvents.isHost() && !StartPosClientEvents.isStarting;
+        boolean editBot = host && sp.isBot(); // the host sets a bot seat's faction like their own
         boolean visible = y >= clipTop && y + ROW_H <= clipBottom;
         boolean claimable = sp.enabled && empty && !StartPosClientEvents.isStarting;
         Rect row = new Rect(x, y, w, ROW_H);
@@ -646,11 +649,12 @@ public class MatchStartScreen extends Screen {
             right = renderSeatActions(sp, mine, empty, host, right, y + (ROW_H - 20) / 2, 20);
 
         int nx = hx + HEAD + 8;
-        if (mine) {
+        if (mine || editBot) {
             int size = 20;
-            boolean labels = right - pickerWidth(size, true) > nx + 70;
-            int fx = right - pickerWidth(size, labels);
-            renderFactionPicker(sp, fx, y + (ROW_H - size) / 2, size, visible, labels);
+            Faction[] choices = mine ? FACTIONS : botFactions();
+            boolean labels = right - pickerWidth(choices, size, true) > nx + 70;
+            int fx = right - pickerWidth(choices, size, labels);
+            renderFactionPicker(sp, choices, fx, y + (ROW_H - size) / 2, size, visible, labels);
             right = fx - 8;
         } else if (known != null) {
             String fLabel = I18n.get("matchstart.reignofnether.faction_hidden");
@@ -711,8 +715,13 @@ public class MatchStartScreen extends Screen {
 
     /** Take / move / leave / kick / open / close buttons for a seat row. Returns the new right edge. */
     private int renderSeatActions(StartPos sp, boolean mine, boolean empty, boolean host, int right, int y, int h) {
-        if (StartPosClientEvents.isStarting)
+        if (StartPosClientEvents.isStarting) {
+            // a bot is always ready: the host can still take it out, which stops the countdown
+            if (StartPosClientEvents.isHost() && sp.isBot())
+                right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
+                        () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
             return right;
+        }
         if (!sp.enabled) {
             if (host)
                 right = rowButton(I18n.get("matchstart.reignofnether.action.open"), right, y, h, false, () -> setSeatOpen(sp, true)) - 4;
@@ -721,6 +730,12 @@ public class MatchStartScreen extends Screen {
         if (empty) {
             if (host)
                 right = rowButton(I18n.get("matchstart.reignofnether.action.close"), right, y, h, false, () -> setSeatOpen(sp, false)) - 4;
+            if (host && !StartPosClientEvents.botFactions.isEmpty()) {
+                String why = botsUnavailable();
+                String addBot = I18n.get("matchstart.reignofnether.action.add_bot");
+                right = (why != null ? disabledRowButton(addBot, why, right, y, h) : rowButton(addBot, right, y, h, false,
+                        () -> StartPosServerboundPacket.reserveBotPos(sp.pos, Factions.RANDOM, BotDifficulty.NORMAL.ordinal()))) - 4;
+            }
             String take = I18n.get(StartPosClientEvents.getPos() != null ? "matchstart.reignofnether.action.move" : "matchstart.reignofnether.action.take");
             return primaryRowButton(take, right, y, h, () -> claim(sp)) - 4;
         }
@@ -729,6 +744,8 @@ public class MatchStartScreen extends Screen {
         if (host)
             right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
                     () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
+        if (sp.isBot())
+            return right;
         boolean coTaken = StartPosClientEvents.joins.stream().anyMatch(j -> !j.isSoldier() && j.seat.equals(sp.pos));
         if (GameruleClient.coCommanders && !coTaken && !sp.hidden)
             right = rowButton(I18n.get("matchstart.reignofnether.action.co_command"), right, y, h, false, () -> {
@@ -763,6 +780,24 @@ public class MatchStartScreen extends Screen {
         return r.x();
     }
 
+    private int disabledRowButton(String label, String why, int right, int y, int h) {
+        int w = Text.width(label) + 14;
+        Rect r = new Rect(right - w, y, w, h);
+        Theme.button(frame.g, r.x(), y, w, h, false);
+        Text.drawCentered(frame.g, label, r.centerX(), y + (h - 8) / 2 + 1, Theme.LABEL);
+        frame.register(new ButtonBuilder(label).isEnabled(() -> false).onLeftClick(() -> {}).build(), r, null,
+                () -> Tooltip.of(I18n.get("matchstart.reignofnether.bots_unavailable")).status(why, Theme.LABEL));
+        return r.x();
+    }
+
+    // why bots can't play here, null when they can (BotServerEvents.botsAvailable decides on the server)
+    @Nullable
+    private static String botsUnavailable() {
+        if (!FogOfWarClientEvents.isOnRtsOptimisedMap())
+            return I18n.get("matchstart.reignofnether.bots_need_rts_map");
+        return GameruleClient.rtsPathfinding ? null : I18n.get("matchstart.reignofnether.bots_need_pathfinding");
+    }
+
     private int primaryRowButton(String label, int right, int y, int h, Runnable action) {
         int w = Text.width(label) + 14;
         Rect r = new Rect(right - w, y, w, h);
@@ -776,16 +811,23 @@ public class MatchStartScreen extends Screen {
         return label ? size + Text.width(MiscUtil.getFactionName(f)) + 8 : size;
     }
 
-    private static int pickerWidth(int size, boolean labels) {
+    private static int pickerWidth(Faction[] choices, int size, boolean labels) {
         int w = 0;
-        for (Faction f : FACTIONS)
+        for (Faction f : choices)
             w += pickerButtonWidth(f, size, labels) + 4;
         return w - 4;
     }
 
+    private static Faction[] botFactions() {
+        java.util.List<Faction> list = new java.util.ArrayList<>(StartPosClientEvents.botFactions);
+        if (list.size() > 1)
+            list.add(Factions.RANDOM);
+        return list.toArray(Faction[]::new);
+    }
+
     /** Your faction choice: icon and name buttons like the design, or icons only when the row is narrow. */
-    private void renderFactionPicker(StartPos sp, int x, int y, int size, boolean clickable, boolean labels) {
-        for (Faction f : FACTIONS) {
+    private void renderFactionPicker(StartPos sp, Faction[] choices, int x, int y, int size, boolean clickable, boolean labels) {
+        for (Faction f : choices) {
             int w = pickerButtonWidth(f, size, labels);
             Rect r = new Rect(x, y, w, size);
             boolean on = sp.faction == f;
@@ -1143,6 +1185,11 @@ public class MatchStartScreen extends Screen {
     }
 
     private void pickFaction(StartPos pos, Faction faction) {
+        if (pos.isBot()) {
+            if (StartPosClientEvents.isHost())
+                StartPosServerboundPacket.reserveBotPos(pos.pos, faction, pos.botDifficulty);
+            return;
+        }
         if (!pos.playerName.equals(localName()))
             return;
         Faction next = pos.faction == faction ? Factions.NONE : faction;

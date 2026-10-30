@@ -171,6 +171,10 @@ public class FogOfWarServerEvents {
     public static boolean isBlockVisibleFor(String playerName, int x, int z) {
         if (serverLevel == null)
             return false;
+        // bots (and bot-controlled disconnected players) have no ServerPlayer or fog state; the bot AI limits its
+        // own knowledge to its sight ranges
+        if (PlayerServerEvents.isBot(playerName) || com.solegendary.reignofnether.ai.BotServerEvents.isControlled(playerName))
+            return true;
         for (ServerPlayer sp : serverLevel.players())
             if (sp.getName().getString().equals(playerName))
                 return isBlockVisibleFor(sp, x, z);

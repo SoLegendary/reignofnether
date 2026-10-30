@@ -1080,6 +1080,8 @@ public class UnitClientEvents {
                             entityAABB = entityAABB.inflate(0.2f, 0, 0.2f);
                             entityAABB.setMaxY(entityAABB.maxY + 0.6f);
                         }
+                        // follow the interpolated model, not the last tick position
+                        entityAABB = entityAABB.move(entity.getPosition(evt.getPartialTick()).subtract(entity.position()));
 
                         boolean isPreselected = preselectedUnits.contains(entity);
                         boolean isSelected = selectedUnits.contains(entity);
@@ -1099,7 +1101,9 @@ public class UnitClientEvents {
                         Integer id = selectedUnit.getId();
                         selectedEntityIds.add(id);
                     }
-                    var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
+                    // seen from above in orthoview, but in first person they must not show through terrain
+                    RenderType underlineType = OrthoviewClientEvents.isEnabled() ? MyRenderer.LINES_UNDER_ENTITIES : MyRenderer.LINES_DEPTH_TESTED_UNDER_ENTITIES;
+                    var vc = MyRenderer.IMMEDIATE_BUFFER.getBuffer(underlineType);
 
                     for (LivingEntity entity : allUnits) {
                         if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
@@ -1115,6 +1119,7 @@ public class UnitClientEvents {
                         if (entity instanceof Unit unit) {
                             entityAABB = unit.getInflatedSelectionBox();
                         }
+                        entityAABB = entityAABB.move(entity.getPosition(evt.getPartialTick()).subtract(entity.position()));
                         entityAABB = entityAABB.setMaxY(entityAABB.minY);
                         // depth-tested in first person, so lift off the ground to stop z-fighting with it
                         if (!OrthoviewClientEvents.isEnabled())
@@ -1144,7 +1149,7 @@ public class UnitClientEvents {
                         MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
                     MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
-                    MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
+                    MyRenderer.IMMEDIATE_BUFFER.endBatch(underlineType);
                 }
             }
 

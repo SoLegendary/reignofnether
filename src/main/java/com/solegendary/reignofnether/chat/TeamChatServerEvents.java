@@ -79,10 +79,14 @@ public class TeamChatServerEvents {
 
     // displayName carries whatever the server adds to the name (e.g. a network's badges)
     public static void send(String sender, Component displayName, Scope scope, String text) {
+        send(sender, displayName, scope, Component.literal(text));
+    }
+
+    public static void send(String sender, Component displayName, Scope scope, Component text) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null)
             return;
-        ReignOfNether.LOGGER.info("[Chat/{}] <{}> {}", scope, sender, text);
+        ReignOfNether.LOGGER.info("[Chat/{}] <{}> {}", scope, sender, text.getString());
         TeamChatClientboundPacket packet = new TeamChatClientboundPacket(sender, displayName, scope, text);
         List<ServerPlayer> sentTo = recipients(server, sender, scope);
         for (ServerPlayer p : sentTo)
