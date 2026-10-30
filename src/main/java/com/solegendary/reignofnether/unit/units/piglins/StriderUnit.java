@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -35,6 +38,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class StriderUnit extends Strider implements Unit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.SCOUT, UnitRole.FAST);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
 
     //region

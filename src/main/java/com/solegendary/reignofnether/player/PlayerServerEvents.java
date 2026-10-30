@@ -501,17 +501,7 @@ public class PlayerServerEvents {
                 return;
             }
             boolean isDogPerson = random.nextBoolean();
-
-            EntityType<?> workerEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
-	        EntityType<?> scoutEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.scoutEntityType);
-			if (faction.equals(Factions.VILLAGERS) && !isDogPerson) scoutEntityType = EntityRegistrar.SCOUT_CAT_UNIT.get();
-            // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
-                FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
-            }
-            if (rtsPlayers.isEmpty()) {
-                FogOfWarServerEvents.captureNeutralFogUnits();
-            }
+            captureFreshGameFog((ServerLevel) serverPlayer.level());
             RandomItemDropRule randomItemDropRule = RandomItemDropRule.fromValue(
                     serverPlayer.level().getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get()
             );
@@ -538,44 +528,9 @@ public class PlayerServerEvents {
             HeroServerEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
-            ArrayList<Entity> startingWorkers = new ArrayList<>();
-            Entity startingScout = null;
-
-            List<BlockPos> nonReadiedWorkerBps = List.of(
-                    new BlockPos((int) pos.x,0,(int) pos.z),
-                    new BlockPos((int) pos.x+1,0,(int) pos.z),
-                    new BlockPos((int) pos.x,0,(int) pos.z+1),
-                    new BlockPos((int) pos.x-1,0,(int) pos.z),
-                    new BlockPos((int) pos.x,0,(int) pos.z-1)
-            );
-            for (BlockPos bp0 : nonReadiedWorkerBps) {
-                Entity entity = workerEntityType != null ? workerEntityType.create(level) : null;
-                if (entity instanceof Unit unit) {
-                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, bp0)
-                            .above()
-                            .above();
-                    unit.setOwnerName(playerName);
-                    entity.moveTo(bp, 0, 0);
-                    if (!readiedStart)
-                        level.addFreshEntity(entity);
-                    startingWorkers.add(entity);
-                }
-            }
-            boolean isBat = scoutEntityType == EntityRegistrar.BAT_UNIT.get();
-            if (FogOfWarServerEvents.isEnabled()) {
-                BlockPos nonReadiedScoutBp = new BlockPos((int) pos.x - 1, 0,(int) pos.z - 1);
-                Entity scoutEntity = scoutEntityType != null ? scoutEntityType.create(level) : null;
-                if (scoutEntity instanceof Unit) {
-                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, nonReadiedScoutBp)
-                            .above()
-                            .above();
-                    ((Unit) scoutEntity).setOwnerName(playerName);
-                    scoutEntity.moveTo(isBat ? bp.offset(0,10,0) : bp, 0, 0);
-                    if (!readiedStart)
-                        level.addFreshEntity(scoutEntity);
-                    startingScout = scoutEntity;
-                }
-            }
+            List<Entity> startingUnits = createStartingUnits(level, playerName, faction, isDogPerson, pos);
+            if (!readiedStart)
+                startingUnits.forEach(level::addFreshEntity);
 
             if (faction != Factions.NONE) {
                 if (SurvivalServerEvents.isEnabled()) {
@@ -593,33 +548,9 @@ public class PlayerServerEvents {
             ResourcesServerEvents.resetResources(playerName, readiedStart);
 
             if (readiedStart) {
-                Building building = ReignOfNetherRegistries.BUILDING.get(faction.capitolBuilding);;
-                ArrayList<BuildingBlock> blocks;
-                if (building != null) {
-                    blocks = building.getRelativeBlockData(level);
-                    BlockPos bp = getBuildingOriginPos(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), blocks);
-                    for (int i = 0; i < startingWorkers.size(); i++) {
-                        startingWorkers.get(i).moveTo(bp.offset(-1, 1, i), 0, 0);
-                        level.addFreshEntity(startingWorkers.get(i));
-                    }
-                    if (startingScout != null) {
-                        startingScout.moveTo(bp.offset(0,  isBat ? 10 : 1, 2), 0, 0);
-                        level.addFreshEntity(startingScout);
-                    }
-                    var workerIds = new int[startingWorkers.size()];
-                    for (int i = 0; i < startingWorkers.size(); i++) {
-                        workerIds[i] = startingWorkers.get(i).getId();
-                    }
-                    BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false, true, true);
+                if (placeStartingCapitol(level, playerName, faction, pos, startingUnits))
                     PlayerClientboundPacket.teleport(playerName, BlockPos.containing(pos));
-                }
-                for (RTSPlayer rtsPlayer : rtsPlayers) {
-                    String playerName1 = rtsPlayer.name;
-                    String playerName2 = serverPlayer.getName().getString();
-                    if (!playerName1.equals(playerName2) && rtsPlayer.startPosColorId == startPosColorId) {
-                        AlliancesServerEvents.addAlliance(playerName1, playerName2);
-                    }
-                }
+                allyStartColour(playerName, startPosColorId);
             }
 
             boolean coopMode = serverLevel.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
@@ -645,6 +576,75 @@ public class PlayerServerEvents {
                     if (bpl instanceof ItemShopPlacement isp)
                         isp.resetStock();
         }
+    }
+
+    // first RTS join into a fresh game: snapshot the playable area for late joiners
+    private static void captureFreshGameFog(ServerLevel level) {
+        if (!rtsPlayers.isEmpty())
+            return;
+        if (!FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(level))
+            FogChunkSnapshot.captureFogChunks(level);
+        FogOfWarServerEvents.captureNeutralFogUnits();
+    }
+
+    // the starting workers (first five) and, with fog on, the scout around pos; owned but not yet in the level
+    private static List<Entity> createStartingUnits(ServerLevel level, String owner, Faction faction, boolean isDogPerson, Vec3 pos) {
+        List<Entity> units = new ArrayList<>();
+        EntityType<?> workerType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
+        int x = (int) pos.x, z = (int) pos.z;
+        for (BlockPos bp0 : List.of(new BlockPos(x, 0, z), new BlockPos(x + 1, 0, z), new BlockPos(x, 0, z + 1),
+                new BlockPos(x - 1, 0, z), new BlockPos(x, 0, z - 1))) {
+            Entity entity = workerType != null ? workerType.create(level) : null;
+            if (entity instanceof Unit unit) {
+                unit.setOwnerName(owner);
+                entity.moveTo(MiscUtil.getHighestNonAirBlock(level, bp0).above().above(), 0, 0);
+                units.add(entity);
+            }
+        }
+        if (FogOfWarServerEvents.isEnabled()) {
+            EntityType<?> scoutType = faction.equals(Factions.VILLAGERS) && !isDogPerson
+                    ? EntityRegistrar.SCOUT_CAT_UNIT.get() : ForgeRegistries.ENTITY_TYPES.getValue(faction.scoutEntityType);
+            Entity scout = scoutType != null ? scoutType.create(level) : null;
+            if (scout instanceof Unit unit) {
+                unit.setOwnerName(owner);
+                BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos(x - 1, 0, z - 1)).above().above();
+                scout.moveTo(isBat(scout) ? bp.offset(0, 10, 0) : bp, 0, 0);
+                units.add(scout);
+            }
+        }
+        return units;
+    }
+
+    private static boolean isBat(Entity entity) {
+        return entity.getType() == EntityRegistrar.BAT_UNIT.get();
+    }
+
+    // readied start: the capitol's foundations at pos, built by the starting workers with the scout beside it.
+    // False if the faction has no capitol
+    private static boolean placeStartingCapitol(ServerLevel level, String owner, Faction faction, Vec3 pos, List<Entity> units) {
+        Building building = ReignOfNetherRegistries.BUILDING.get(faction.capitolBuilding);
+        if (building == null)
+            return false;
+        BlockPos bp = getBuildingOriginPos(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), building.getRelativeBlockData(level));
+        EntityType<?> workerType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
+        List<Integer> workerIds = new ArrayList<>();
+        for (Entity unit : units) {
+            boolean worker = unit.getType() == workerType;
+            unit.moveTo(worker ? bp.offset(-1, 1, workerIds.size()) : bp.offset(0, isBat(unit) ? 10 : 1, 2), 0, 0);
+            level.addFreshEntity(unit);
+            if (worker)
+                workerIds.add(unit.getId());
+        }
+        int[] ids = workerIds.stream().mapToInt(Integer::intValue).toArray();
+        BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, owner, ids, false, false, true, true);
+        return true;
+    }
+
+    // a readied start shares the start colour's team
+    private static void allyStartColour(String name, int startPosColorId) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (!rtsPlayer.name.equals(name) && rtsPlayer.startPosColorId == startPosColorId)
+                AlliancesServerEvents.addAlliance(rtsPlayer.name, name);
     }
 
     public static BlockPos getBuildingOriginPos(BlockPos bp, ArrayList<BuildingBlock> blocks) {
@@ -689,6 +689,39 @@ public class PlayerServerEvents {
                 sendMessageToAllPlayers("server.reignofnether.bot_added", true, bot.name);
                 sendMessageToAllPlayers("server.reignofnether.total_players", false, rtsPlayers.size());
             }
+            saveRTSPlayers();
+        }
+    }
+
+    // readied start for a bot from a start position: capitol foundations, workers, scout, client sync and
+    // same-colour alliances, like startRTS does for a human. The faction must be one the bots can play (BotPlans)
+    public static void startRTSBot(String name, Vec3 pos, Faction faction, int startPosColorId) {
+        synchronized (rtsPlayers) {
+            if (serverLevel == null || isRTSPlayer(name))
+                return;
+            ServerLevel level = serverLevel;
+            captureFreshGameFog(level);
+
+            RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
+            bot.startPosColorId = startPosColorId;
+            rtsPlayers.add(bot);
+            FogOfWarServerEvents.invalidateRtsCache();
+            ResourcesServerEvents.assignResources(name);
+            PlayerClientboundPacket.addRTSPlayer(name, faction, (long) bot.id, startPosColorId, bot.isDogPerson, false);
+            HeroServerEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(name));
+            ResearchServerEvents.removeAllCheatsFor(name);
+            ResourcesServerEvents.resetResources(name, true);
+            // a bot-only match has no human start to set the clock
+            if (SurvivalServerEvents.isEnabled())
+                level.setDayTime(TimeUtils.DAWN + getWaveSurvivalTimeModifier(SurvivalServerEvents.getDifficulty()));
+            else
+                level.setDayTime(MONSTER_START_TIME_OF_DAY);
+
+            if (!placeStartingCapitol(level, name, faction, pos, createStartingUnits(level, name, faction, bot.isDogPerson, pos)))
+                return;
+            allyStartColour(name, startPosColorId);
+
+            PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
         }
     }

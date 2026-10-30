@@ -994,6 +994,7 @@ public class MinimapClientEvents {
             case ATTACK -> au <= r * 0.8 && av <= r * 0.8 && Math.abs(au - av) <= t * 0.6;
             case ENEMY -> au + av <= r && au + av > r - t;
             case DEFEND -> Math.max(au, av) <= r * 0.8 && Math.max(au, av) > r * 0.8 - t;
+            case ON_MY_WAY -> au <= r * 0.8 && Math.abs(v) <= r * 0.8 - au; // a solid arrowhead
         };
     }
 
