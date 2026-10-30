@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.faction.Factions;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.util.Random;
 
@@ -25,6 +28,13 @@ public class RTSPlayerSaveData extends SavedData {
     public final ArrayList<RTSPlayer> rtsPlayers = new ArrayList<>();
     public final Map<String, String> soldierOf = new HashMap<>();     // PlayerRoles, soldier -> owner
     public final Map<String, String> coCommanderOf = new HashMap<>(); // PlayerRoles, co-commander -> owner
+
+    // match state that used to live only in memory, so a saved game resumes as it was left
+    public final Map<String, Set<String>> alliances = new HashMap<>();
+    public final Set<String> alliedControl = new HashSet<>();
+    public boolean rtsLocked = false;
+    public long rtsGameTicks = 0;
+    public boolean fogEnabled = false;
 
     private static RTSPlayerSaveData create() {
         return new RTSPlayerSaveData();
@@ -82,17 +92,32 @@ public class RTSPlayerSaveData extends SavedData {
                 Long itemSeed = ptag.contains("itemSeed") ? ptag.getLong("itemSeed") : new Random().nextLong();
                 Long raritySeed = ptag.contains("raritySeed") ? ptag.getLong("raritySeed") : new Random().nextLong();
 
-                data.rtsPlayers.add(RTSPlayer.getFromSave(
+                RTSPlayer rtsPlayer = RTSPlayer.getFromSave(
                         name, id, ticksWithoutCapitol, faction,
                         beaconOwnerTicks, scores, scenarioRoleIndex,
                         tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
-                ));
+                );
+                rtsPlayer.startPosColorId = ptag.getInt("startPosColorId");
+                if (ptag.contains("isDogPerson"))
+                    rtsPlayer.isDogPerson = ptag.getBoolean("isDogPerson");
+                data.rtsPlayers.add(rtsPlayer);
 
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
             }
         }
         readNames(tag.getCompound("soldierOf"), data.soldierOf);
         readNames(tag.getCompound("coCommanderOf"), data.coCommanderOf);
+
+        CompoundTag match = tag.getCompound("match");
+        CompoundTag allies = match.getCompound("alliances");
+        for (String owner : allies.getAllKeys())
+            for (Tag ally : allies.getList(owner, Tag.TAG_STRING))
+                data.alliances.computeIfAbsent(owner, k -> new HashSet<>()).add(ally.getAsString());
+        for (Tag t : match.getList("alliedControl", Tag.TAG_STRING))
+            data.alliedControl.add(t.getAsString());
+        data.rtsLocked = match.getBoolean("rtsLocked");
+        data.rtsGameTicks = match.getLong("rtsGameTicks");
+        data.fogEnabled = match.getBoolean("fogEnabled");
         return data;
     }
 
@@ -131,6 +156,8 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("itemsDropped", p.itemsDropped);
             cTag.putLong("itemSeed", p.itemSeed);
             cTag.putLong("raritySeed", p.raritySeed);
+            cTag.putInt("startPosColorId", p.startPosColorId);
+            cTag.putBoolean("isDogPerson", p.isDogPerson);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);
@@ -138,6 +165,22 @@ public class RTSPlayerSaveData extends SavedData {
         tag.put("rtsplayers", list);
         tag.put("soldierOf", writeNames(soldierOf));
         tag.put("coCommanderOf", writeNames(coCommanderOf));
+
+        CompoundTag match = new CompoundTag();
+        CompoundTag allies = new CompoundTag();
+        alliances.forEach((owner, set) -> {
+            ListTag l = new ListTag();
+            set.forEach(a -> l.add(StringTag.valueOf(a)));
+            allies.put(owner, l);
+        });
+        match.put("alliances", allies);
+        ListTag control = new ListTag();
+        alliedControl.forEach(a -> control.add(StringTag.valueOf(a)));
+        match.put("alliedControl", control);
+        match.putBoolean("rtsLocked", rtsLocked);
+        match.putLong("rtsGameTicks", rtsGameTicks);
+        match.putBoolean("fogEnabled", fogEnabled);
+        tag.put("match", match);
         return tag;
     }
 

@@ -56,7 +56,9 @@ public class FogOfWarServerEvents {
 
     private static boolean enabled = false; // enforced for all clients
     static {
-        WorldState.onServerReset(() -> enabled = false);
+        WorldState.onServerReset(() -> {
+            enabled = false;
+        });
     }
     private static ServerLevel serverLevel = null;
 
@@ -430,6 +432,13 @@ public class FogOfWarServerEvents {
 
     public static boolean isEnabled() {
         return enabled;
+    }
+
+    // a saved game had fog on: turn it back on now, the resume screen freezes ticks until the host resumes
+    public static void restoreOnLoad(ServerLevel level, boolean wasEnabled) {
+        serverLevel = level;
+        if (wasEnabled && !enabled)
+            setEnabled(true);
     }
 
     @SubscribeEvent
