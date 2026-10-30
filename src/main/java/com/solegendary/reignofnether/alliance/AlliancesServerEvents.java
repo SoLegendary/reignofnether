@@ -122,6 +122,10 @@ public class AlliancesServerEvents {
                     addAlliance(player1, player2);
     }
 
+    public static Map<String, Set<String>> getAlliances() {
+        return alliances;
+    }
+
     public static void resetAllAlliances() {
         alliances.clear();
         AllianceClientboundPacket.resetAlliances();

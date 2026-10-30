@@ -19,15 +19,20 @@ public final class Backdrop {
      * @param dim 0 = full brightness, 1 = black
      */
     public static void render(GuiGraphics g, int width, int height, float dim) {
+        image(g, width, height);
+        g.fill(0, 0, width, height, Theme.withAlpha(0xFF0D0305, dim));
+        // darker top and bottom like the design
+        g.fillGradient(0, 0, width, height / 3, 0x660D0305, 0x000D0305);
+        g.fillGradient(0, height * 2 / 3, width, height, 0x000D0305, 0x990D0305);
+    }
+
+    /** Just the image, cropped to cover the screen, for screens that shade it their own way. */
+    public static void image(GuiGraphics g, int width, int height) {
         float scale = Math.max(width / (float) IMG_W, height / (float) IMG_H);
         int w = Math.round(IMG_W * scale);
         int h = Math.round(IMG_H * scale);
         int x = (width - w) / 2;
         int y = (height - h) / 2;
         g.blit(IMAGE, x, y, w, h, 0, 0, IMG_W, IMG_H, IMG_W, IMG_H);
-        g.fill(0, 0, width, height, Theme.withAlpha(0xFF0D0305, dim));
-        // darker top and bottom like the design
-        g.fillGradient(0, 0, width, height / 3, 0x660D0305, 0x000D0305);
-        g.fillGradient(0, height * 2 / 3, width, height, 0x000D0305, 0x990D0305);
     }
 }

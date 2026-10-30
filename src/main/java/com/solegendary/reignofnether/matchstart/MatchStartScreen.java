@@ -14,7 +14,10 @@ import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.hud.panels.SettingRows;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
+import com.solegendary.reignofnether.hud.playerdisplay.AbstractPlayerDisplay;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.p2p.HostPopup;
+import com.solegendary.reignofnether.p2p.P2PHost;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
 import com.solegendary.reignofnether.startpos.SeatJoin;
@@ -66,7 +69,6 @@ import java.util.function.Consumer;
  */
 public class MatchStartScreen extends Screen {
 
-    private static final ResourceLocation RANDOM_ICON = rl("textures/hud/question_mark.png");
     private static final Faction[] FACTIONS = { Factions.VILLAGERS, Factions.MONSTERS, Factions.PIGLINS, Factions.RANDOM };
 
     private static final int M = 14;   // outer margin
@@ -160,8 +162,11 @@ public class MatchStartScreen extends Screen {
         return !sp.playerName.isBlank() || sp.hidden;
     }
 
-    private static ResourceLocation factionIcon(Faction f) {
-        return f == Factions.RANDOM ? RANDOM_ICON : f.icon;
+    private static void seatHead(GuiGraphics g, StartPos sp, int x, int y, int size) {
+        if (sp.faction == Factions.RANDOM)
+            MyRenderer.renderPlayerHead(g, sp.playerName, x, y, size);
+        else
+            MyRenderer.renderPlayerHead(g, sp.playerName, x, y, size, sp.faction.icon);
     }
 
     private static String factionKey(Faction f) {
@@ -250,6 +255,8 @@ public class MatchStartScreen extends Screen {
             renderCountdown(w);
         if (GameruleClient.gamerulesMenuOpen)
             renderRulesModal(w, h);
+        else if (HostPopup.open)
+            HostPopup.render(frame, w, h);
 
         frame.showHoveredTooltip();
         Tooltip.renderPending(g, w, h);
@@ -276,6 +283,11 @@ public class MatchStartScreen extends Screen {
                 () -> GameruleClient.gamerulesMenuOpen = !GameruleClient.gamerulesMenuOpen,
                 Tooltip.of(I18n.get("matchstart.reignofnether.game_rules")).body(I18n.get(StartPosClientEvents.isHost()
                         ? "matchstart.reignofnether.rules_host" : "matchstart.reignofnether.rules_view")), true);
+        // our own world: let players elsewhere join by code
+        if (Minecraft.getInstance().hasSingleplayerServer())
+            right = headerButton(I18n.get(P2PHost.state == P2PHost.State.OFF ? "matchstart.reignofnether.host_online" : "matchstart.reignofnether.invite"),
+                    Icon.USERS, right - 6, by, bh, () -> HostPopup.open = !HostPopup.open,
+                    Tooltip.of(I18n.get("matchstart.reignofnether.host_online")).body(I18n.get("matchstart.reignofnether.host_tip")), true);
 
         int[] rc = readyCount();
         String ready = I18n.get("matchstart.reignofnether.ready_count", rc[0], rc[1]);
@@ -389,13 +401,13 @@ public class MatchStartScreen extends Screen {
         if (!sp.enabled)
             Icon.LOCK.drawIn(g, x, y, size, size, Theme.TEXT);
         else if (sp.hidden && deduced(sp) != null)
-            MyRenderer.renderPlayerHead(g, deduced(sp), x + (size - inner) / 2, y + (size - inner) / 2, inner, RANDOM_ICON);
+            MyRenderer.renderPlayerHead(g, deduced(sp), x + (size - inner) / 2, y + (size - inner) / 2, inner);
         else if (sp.hidden)
-            MyRenderer.renderIcon(g, RANDOM_ICON, x + (size - inner) / 2, y + (size - inner) / 2, inner);
+            Text.unknown(g, x + (size - inner) / 2, y + (size - inner) / 2, inner);
         else if (sp.playerName.isBlank())
             Icon.PLUS.drawIn(g, x, y, size, size, Theme.TEXT);
         else
-            MyRenderer.renderPlayerHead(g, sp.playerName, x + (size - inner) / 2, y + (size - inner) / 2, inner, factionIcon(sp.faction));
+            seatHead(g, sp, x + (size - inner) / 2, y + (size - inner) / 2, inner);
         if (sp.ready && !sp.playerName.isBlank()) {
             g.fill(x + size - 7, y + size - 7, x + size + 2, y + size + 2, Theme.OK_DARK);
             Theme.ring(g, x + size - 7, y + size - 7, 9, 9, 1, Theme.OK);
@@ -612,13 +624,13 @@ public class MatchStartScreen extends Screen {
         if (!sp.enabled)
             Icon.LOCK.drawIn(g, hx, hy, HEAD, HEAD, Theme.DIM);
         else if (sp.hidden && deduced(sp) != null)
-            MyRenderer.renderPlayerHead(g, deduced(sp), hx + 2, hy + 2, HEAD - 4, RANDOM_ICON);
+            MyRenderer.renderPlayerHead(g, deduced(sp), hx + 2, hy + 2, HEAD - 4);
         else if (sp.hidden)
-            MyRenderer.renderIcon(g, RANDOM_ICON, hx + 2, hy + 2, HEAD - 4);
+            Text.unknown(g, hx + 2, hy + 2, HEAD - 4);
         else if (empty)
             Icon.PLUS.drawIn(g, hx, hy, HEAD, HEAD, Theme.DIM);
         else
-            MyRenderer.renderPlayerHead(g, sp.playerName, hx + 2, hy + 2, HEAD - 4, factionIcon(sp.faction));
+            seatHead(g, sp, hx + 2, hy + 2, HEAD - 4);
 
         // right side first, so the name gets what's left: status column, then actions
         int right = x + w - ROW_PAD;
@@ -668,6 +680,8 @@ public class MatchStartScreen extends Screen {
         Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : empty || (sp.hidden && known == null) || !sp.enabled ? Theme.LABEL : Theme.TEXT);
         String seat = I18n.get("matchstart.reignofnether.seat_number", StartPosClientEvents.startPoses.indexOf(sp) + 1);
         Text.small(g, seat, nx, y + 19, Theme.DIM);
+        if (!empty && !sp.hidden)
+            drawPing(sp.playerName, nx + Text.smallWidth(seat) + 6, y + 19);
         if (!sp.enabled)
             g.fill(x, y, x + w, y + ROW_H, 0x66121118);
     }
@@ -800,7 +814,7 @@ public class MatchStartScreen extends Screen {
         int rx = x + indent;
         int rw = w - indent;
         int hx = rowFrame(rx, y, rw, mine, Theme.RAISED, false, teamColour(join.colorId));
-        MyRenderer.renderPlayerHead(g, join.playerName, hx + 2, y + (ROW_H - HEAD) / 2 + 2, HEAD - 4, RANDOM_ICON);
+        MyRenderer.renderPlayerHead(g, join.playerName, hx + 2, y + (ROW_H - HEAD) / 2 + 2, HEAD - 4);
 
         int right = rx + rw - ROW_PAD;
         String status = I18n.get(join.pending ? "matchstart.reignofnether.status.pending"
@@ -856,7 +870,7 @@ public class MatchStartScreen extends Screen {
         g.fill(x, y, x + w, y + ROW_H, Theme.RAISED);
         g.fill(x, y, x + 3, y + ROW_H, Theme.DIM);
         int hs = ROW_H - 8;
-        MyRenderer.renderPlayerHead(g, name, x + 9, y + 5, hs - 2, RANDOM_ICON);
+        MyRenderer.renderPlayerHead(g, name, x + 9, y + 5, hs - 2);
         Text.draw(g, Text.fit(name, w / 2), x + 8 + hs + 7, y + (ROW_H - 8) / 2, Theme.TEXT);
         String status = I18n.get(ready ? "matchstart.reignofnether.status.ready" : "matchstart.reignofnether.status.not_ready");
         Text.mediumRight(g, status, x + w - 6, y + (ROW_H - 8) / 2, ready ? Theme.OK : Theme.LABEL);
@@ -880,7 +894,8 @@ public class MatchStartScreen extends Screen {
         String me = localName();
         for (String name : specs) {
             String label = name.equals(me) ? I18n.get("matchstart.reignofnether.you_name", name) : name;
-            int cw = Text.width(label) + 13 + 4 + 12;
+            String ping = AbstractPlayerDisplay.pingText(name);
+            int cw = Text.width(label) + 13 + 4 + 12 + (ping != null ? Text.smallWidth(ping) + 6 : 0);
             if (cx + cw > x + w) {
                 cx = x;
                 y += 25;
@@ -888,8 +903,10 @@ public class MatchStartScreen extends Screen {
             Theme.bevel(g, cx, y, cw, 21, Theme.RAISED, 0, 0, 1, Theme.INK);
             if (name.equals(me))
                 Theme.ring(g, cx, y, cw, 21, 1, Theme.ORANGE);
-            MyRenderer.renderPlayerHead(g, name, cx + 4, y + 4, 13, RANDOM_ICON);
+            MyRenderer.renderPlayerHead(g, name, cx + 4, y + 4, 13);
             Text.draw(g, label, cx + 21, y + 7, name.equals(me) ? Theme.GOLD : Theme.BODY);
+            if (ping != null)
+                drawPing(name, cx + 21 + Text.width(label) + 6, y + 8);
             cx += cw + 4;
         }
         return y + 27;
@@ -1094,6 +1111,12 @@ public class MatchStartScreen extends Screen {
         g.pose().popPose();
     }
 
+    private void drawPing(String name, int x, int y) {
+        String ping = AbstractPlayerDisplay.pingText(name);
+        if (ping != null)
+            Text.small(frame.g, ping, x, y, AbstractPlayerDisplay.pingColour(name));
+    }
+
     // ------------------------------------------------------------------ actions
 
     private void claim(StartPos sp) {
@@ -1189,6 +1212,10 @@ public class MatchStartScreen extends Screen {
         }
         if (keyCode == GLFW.GLFW_KEY_ESCAPE && GameruleClient.gamerulesMenuOpen) {
             GameruleClient.gamerulesMenuOpen = false;
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && HostPopup.open) {
+            HostPopup.open = false;
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_F9) {

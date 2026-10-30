@@ -3,6 +3,9 @@ package com.solegendary.reignofnether.ui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.FormattedCharSequence;
+
+import java.util.List;
 
 /**
  * Colours and bevelled shapes shared by the RTS HUD and the match setup screen.
@@ -139,6 +142,24 @@ public final class Theme {
             g.fill(x, y, x + w, y + t, top);
         if (bottom != 0)
             g.fill(x, y + h - t, x + w, y + h, bottom);
+    }
+
+    /**
+     * A notice strip like the world list's "not RTS" warning: a faint tint of `edge`, a coloured left edge and
+     * the text wrapped to fit. ERROR for errors, ORANGE_DARK for warnings. Returns its height.
+     */
+    public static int banner(GuiGraphics g, int x, int y, int w, String text, int edge) {
+        List<FormattedCharSequence> lines = Text.wrap(text, w - 14);
+        int h = bannerHeight(text, w);
+        g.fill(x, y, x + w, y + h, (edge & 0x00FFFFFF) | 0x1A000000);
+        g.fill(x, y, x + 2, y + h, edge);
+        for (int i = 0; i < lines.size(); i++)
+            Text.draw(g, lines.get(i), x + 7, y + 4 + i * Text.lineHeight(), DESC);
+        return h;
+    }
+
+    public static int bannerHeight(String text, int w) {
+        return Text.wrap(text, w - 14).size() * Text.lineHeight() + 8;
     }
 
     /** Popup surface (tooltip, toast, chat, menu) with a coloured top edge. */
