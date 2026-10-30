@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,12 @@ public abstract class ChunkMapInitialSendMixin {
         ChunkPos pos = chunk.getPos();
 
         if (FogOfWarServerEvents.isChunkLiveFor(sp, pos)) return;
+        // fully outside the border: never snapshotted and nothing there can change, so send it live; without
+        // it the client never draws the border chunks (vanilla skips meshing a chunk with an unloaded neighbour)
+        WorldBorder border = chunk.getLevel().getWorldBorder();
+        if (pos.getMaxBlockX() + 1 <= border.getMinX() || pos.getMinBlockX() >= border.getMaxX()
+                || pos.getMaxBlockZ() + 1 <= border.getMinZ() || pos.getMinBlockZ() >= border.getMaxZ())
+            return;
         ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
         if (snap != null) {
             sp.connection.send(snap);
