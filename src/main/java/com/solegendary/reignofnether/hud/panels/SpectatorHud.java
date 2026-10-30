@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import com.solegendary.reignofnether.resources.IncomeTracker;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -450,6 +451,15 @@ public final class SpectatorHud {
             return;
         if (Math.abs(MC.player.getX() - followX) > 0.5 || Math.abs(MC.player.getZ() - followZ) > 0.5) {
             follow = null;
+            return;
+        }
+        // a replay has their real camera, zoom and rotation included
+        float[] cam = ReplayClientEvents.camera(follow);
+        if (cam != null) {
+            MC.player.setPos(cam[0], MC.player.getY(), cam[1]);
+            OrthoviewClientEvents.setCam(cam[2], cam[3]);
+            followX = MC.player.getX();
+            followZ = MC.player.getZ();
             return;
         }
         AbstractClientPlayer target = playerEntity(follow);
