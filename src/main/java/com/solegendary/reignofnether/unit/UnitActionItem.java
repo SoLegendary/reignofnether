@@ -40,7 +40,7 @@ public class UnitActionItem {
     private final int[] unitIds; // selected unit(s)
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos;
-    private final boolean groupMove; // issuing player held ctrl: MOVE / ATTACK_MOVE units match the slowest's speed
+    private final boolean groupMove; // issuing player held ctrl: MOVE / ATTACK_MOVE units move as a pack (GroupPace)
 
     public final UnitAction getAction() { return action; }
     public final int[] getUnitIds() { return unitIds; }
@@ -482,17 +482,14 @@ public class UnitActionItem {
             }
         }
 
-        // a group moves at its slowest ground unit's speed; flyers keep their own (they don't path with the group)
-        // ponytail: the cap lasts until the next order, so a group that loses its slowest unit stays slow until then
-        if (!level.isClientSide() && groupMove && groupMovers.size() >= 2) {
-            double slowest = Double.MAX_VALUE;
-            for (Unit u : groupMovers)
-                if (!u.isFlyingUnit())
-                    slowest = Math.min(slowest, u.getMoveGoal().getWalkSpeed(u));
-            if (slowest < Double.MAX_VALUE)
-                for (Unit u : groupMovers)
-                    if (!u.isFlyingUnit())
-                        u.getMoveGoal().groupSpeed = slowest;
+        // a group's ground units move as a pack (GroupPace); flyers keep their own speed (they don't path with the group)
+        if (!level.isClientSide() && groupMove) {
+            List<Unit> walkers = groupMovers.stream().filter(u -> !u.isFlyingUnit()).toList();
+            if (walkers.size() >= 2) {
+                GroupPace pace = new GroupPace(walkers, preselectedBlockPos);
+                for (Unit u : walkers)
+                    u.getMoveGoal().pace = pace;
+            }
         }
 
         // if we have multiple units performing the same MOVE action, calculate a spread of blockPoses for them to go to
