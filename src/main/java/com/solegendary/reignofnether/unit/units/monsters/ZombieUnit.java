@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
@@ -49,6 +52,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZombieUnit extends Zombie implements Unit, AttackerUnit, ConvertableUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE, UnitRole.UNDEAD);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return isSummoned() ? SUMMONED_ROLES : ROLES; // raised by a necromancer: free and decaying
+    }
+
+    private static final Set<UnitRole> SUMMONED_ROLES = Set.of(UnitRole.FRONTLINE, UnitRole.UNDEAD, UnitRole.SUMMON);
     public static final Abilities ABILITIES = new Abilities();
 
     //region

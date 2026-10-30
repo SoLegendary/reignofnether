@@ -40,7 +40,7 @@ public class MapMarkerServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player != null)
+            if (player != null && type != PingType.ON_MY_WAY) // bots' reply, never a player's
                 PingServerEvents.ping(player.getName().getString(), type, new BlockPos(x, y, z));
         });
         ctx.get().setPacketHandled(true);

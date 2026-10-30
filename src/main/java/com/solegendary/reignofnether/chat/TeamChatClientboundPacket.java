@@ -16,9 +16,9 @@ public class TeamChatClientboundPacket {
     private final String sender;
     private final Component displayName;
     private final Scope scope;
-    private final String text;
+    private final Component text; // translatable for bots' lines, literal for players'
 
-    public TeamChatClientboundPacket(String sender, Component displayName, Scope scope, String text) {
+    public TeamChatClientboundPacket(String sender, Component displayName, Scope scope, Component text) {
         this.sender = sender;
         this.displayName = displayName;
         this.scope = scope;
@@ -29,19 +29,19 @@ public class TeamChatClientboundPacket {
         this.sender = buf.readUtf();
         this.displayName = buf.readComponent();
         this.scope = buf.readEnum(Scope.class);
-        this.text = buf.readUtf();
+        this.text = buf.readComponent();
     }
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(sender);
         buf.writeComponent(displayName);
         buf.writeEnum(scope);
-        buf.writeUtf(text);
+        buf.writeComponent(text);
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                TeamChatClient.show(sender, displayName, scope, Component.literal(text))));
+                TeamChatClient.show(sender, displayName, scope, text)));
         ctx.get().setPacketHandled(true);
     }
 }

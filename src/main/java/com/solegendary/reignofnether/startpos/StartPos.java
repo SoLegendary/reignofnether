@@ -26,6 +26,7 @@ public class StartPos {
     public boolean enabled = true;
     public boolean ready = false; // player on this spot is ready to start the game
     public boolean hidden = false; // client only: taken by an enemy whose pick is hidden (hideEnemyPicks)
+    public int botDifficulty = -1; // BotDifficulty ordinal when an AI bot holds this seat, else -1
 
     public static final String BUTTON_NAME = "Start Pos";
 
@@ -46,6 +47,11 @@ public class StartPos {
         this.playerName = "";
         this.ready = false;
         this.hidden = false;
+        this.botDifficulty = -1;
+    }
+
+    public boolean isBot() {
+        return botDifficulty >= 0;
     }
 
     public ResourceLocation getIcon() {

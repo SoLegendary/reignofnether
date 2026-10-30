@@ -33,6 +33,7 @@ public class StartPosClientEvents {
     // players on other teams whose seats the server hides (hideEnemyPicks): name -> ready
     public static final Map<String, Boolean> hiddenPlayers = new LinkedHashMap<>();
     public static final List<SeatJoin> joins = new ArrayList<>(); // soldiers and co-commanders this player may see
+    public static final List<Faction> botFactions = new ArrayList<>(); // what the host can give an AI seat (BotPlans)
 
     public static boolean isEnabled() {
         return ClientGameModeHelper.gameMode == GameMode.CLASSIC && !startPoses.isEmpty();
