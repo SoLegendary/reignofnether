@@ -312,6 +312,38 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
+    // experience in a profession; half of the requirement teaches it, all of it makes a veteran
+    public int getExp(VillagerUnitProfession p) {
+        return switch (p) {
+            case FARMER -> farmerExp;
+            case LUMBERJACK -> lumberjackExp;
+            case MINER -> minerExp;
+            case MASON -> masonExp;
+            case HUNTER -> hunterExp;
+            default -> 0;
+        };
+    }
+
+    public static int getExpReq(VillagerUnitProfession p) {
+        return switch (p) {
+            case FARMER -> FARMER_EXP_REQ;
+            case LUMBERJACK -> LUMBERJACK_EXP_REQ;
+            case MINER -> MINER_EXP_REQ;
+            case MASON -> MASON_EXP_REQ;
+            case HUNTER -> HUNTER_EXP_REQ;
+            default -> 1;
+        };
+    }
+
+    // clientside, from the worker sync packet
+    public void syncExp(int[] exp) {
+        farmerExp = exp[0];
+        lumberjackExp = exp[1];
+        minerExp = exp[2];
+        masonExp = exp[3];
+        hunterExp = exp[4];
+    }
+
     public Item chestplate = Items.AIR;
     public boolean chestplateEnchanted = false;
     public boolean swordEnchanted = false;

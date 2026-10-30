@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
+import com.solegendary.reignofnether.minimap.MapColourServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -68,8 +69,10 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
+        vanillaEventBus.register(MapColourServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
         vanillaEventBus.register(TaskSchedulerServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.util.WorldState.class);
     }
 }

@@ -42,6 +42,7 @@ import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -83,7 +84,6 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
@@ -108,10 +108,13 @@ public class UnitServerEvents {
     // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
     // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
     public static boolean rtsPathfinding = false;
+    static {
+        WorldState.onServerReset(() -> rtsPathfinding = false);
+    }
 
     // actioned only when the associated unit is idle, one at a time
     private static final int MAX_QUEUED_ACTIONS_PER_OWNER = 4096;
-    private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
+    private static final List<UnitActionItem> unitActionSlowQueue = WorldState.server(Collections.synchronizedList(new ArrayList<>()));
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
 
@@ -130,7 +133,7 @@ public class UnitServerEvents {
     // unit -> formation slot. Queued so a large vanilla selection's moves dispatch time-sliced across ticks
     // instead of running N concurrent synchronous A* searches in one tick.
     private record FormationOrder(LivingEntity unit, BlockPos target) {}
-    private static final LinkedHashMap<Integer, FormationOrder> formationDispatchQueue = new LinkedHashMap<>();
+    private static final LinkedHashMap<Integer, FormationOrder> formationDispatchQueue = WorldState.server(new LinkedHashMap<>());
 
     public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
         synchronized (formationDispatchQueue) {
@@ -144,7 +147,7 @@ public class UnitServerEvents {
         return allUnits;
     }
 
-    public static final ArrayList<TargetResourcesSave> savedTargetResources = new ArrayList<>();
+    public static final ArrayList<TargetResourcesSave> savedTargetResources = WorldState.server(new ArrayList<>());
 
     private static boolean isServerStopping = false;
 
@@ -178,16 +181,6 @@ public class UnitServerEvents {
     }
 
     // statics outlive the world: clear them so the next world opened in this game starts clean
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        UnitChunkTickets.clear();
-        HeroServerEvents.fallenHeroes.clear();
-        savedTargetResources.clear();
-        unitActionSlowQueue.clear();
-        formationDispatchQueue.clear();
-        knockbackIgnoreIds.clear();
-        rtsPathfinding = false;
-    }
 
     @SubscribeEvent
     public static void onLevelUnload(LevelEvent.Unload evt) {
@@ -1261,7 +1254,7 @@ public class UnitServerEvents {
         }
     }
 
-    public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
+    public static ArrayList<Integer> knockbackIgnoreIds = WorldState.server(new ArrayList<>());
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {
