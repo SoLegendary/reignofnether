@@ -8,7 +8,9 @@ import java.util.Locale;
 // the ping wheel's options. Each has one symbol and colour used everywhere: the wheel, team chat, and the
 // minimap, which draws the same shape (MinimapClientEvents.isMarkerPixel)
 public enum PingType {
-    HELP("◎", 0xFF3030), DEFEND("□", 0x3A8CFF), ATTACK("⚔", 0xFF8A00), ENEMY("◇", 0xFFE020);
+    HELP("◎", 0xFF3030), DEFEND("□", 0x3A8CFF), ATTACK("⚔", 0xFF8A00), ENEMY("◇", 0xFFE020),
+    // only bots send this one, to answer an ally's ping (MapMarkerServerboundPacket drops it from players)
+    ON_MY_WAY("➤", 0x40E040);
 
     public final String symbol;
     public final int rgb;
