@@ -30,8 +30,10 @@ import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.IncomeTracker;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierClient;
 import com.solegendary.reignofnether.ui.Toast;
 import com.solegendary.reignofnether.util.WorldState;
+import com.solegendary.reignofnether.voice.VoiceClientEvents;
 import com.solegendary.reignofnether.hud.panels.CommandCard;
 import com.solegendary.reignofnether.hud.panels.SpectatorHud;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
@@ -72,20 +74,23 @@ public class PlayerClientEvents {
     public static final List<RTSPlayer> rtsPlayers = WorldState.client(Collections.synchronizedList(new ArrayList<>()));
     public static BlockState lastUsedBlockState = null;
 
+    // commanders, including co-commanders (PlayerRolesClient)
     public static boolean isRTSPlayer() {
-        for (RTSPlayer rtsPlayer : rtsPlayers)
-            if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
-                return true;
-        return false;
+        return PlayerRolesClient.myRole() == PlayerRole.COMMANDER;
     }
 
     public static boolean isRTSPlayer(String playerName) {
+        return PlayerRolesClient.roleOf(playerName) == PlayerRole.COMMANDER;
+    }
+
+    static boolean inRtsList(String playerName) {
         for (RTSPlayer rtsPlayer : rtsPlayers)
             if (rtsPlayer.name.equals(playerName))
                 return true;
         return false;
     }
 
+    // co-commanders get their lead's entry
     @Nullable
     public static RTSPlayer getRTSPlayer() {
         return MC.player == null ? null : getRTSPlayer(MC.player.getName().getString());
@@ -93,8 +98,9 @@ public class PlayerClientEvents {
 
     @Nullable
     public static RTSPlayer getRTSPlayer(String playerName) {
+        String owner = PlayerRolesClient.ownerOf(playerName);
         for (RTSPlayer rtsPlayer : rtsPlayers)
-            if (rtsPlayer.name.equals(playerName))
+            if (rtsPlayer.name.equals(owner))
                 return rtsPlayer;
         return null;
     }
@@ -315,6 +321,8 @@ public class PlayerClientEvents {
         resetRTS(true);
         // everything declared through WorldState (each class registers its own world state)
         WorldState.resetClient();
+        // after rtsPlayers is cleared above: the local role is worked out from it
+        PlayerRolesClient.clear();
         // PlayerLoggedOutEvent fires on the integrated server thread in singleplayer
         MC.execute(() -> {
             ScenarioClientEvents.resetRoles();

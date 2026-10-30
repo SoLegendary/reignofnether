@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import javax.annotation.Nullable;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -98,7 +98,7 @@ public class ControlGroup {
         }
         List<Integer> saveableUnits = new ArrayList<>();
         for (LivingEntity e : getSelectedUnits()) {
-            if (((getPlayerToEntityRelationship(e) == Relationship.OWNED || AlliancesClient.canControlAlly(e)) &&
+            if (((getPlayerToEntityRelationship(e) == Relationship.OWNED || SharingClient.canControl(e)) &&
                  (!entityIds.contains(e.getId())))) {
                 Integer id = e.getId();
                 saveableUnits.add(id);

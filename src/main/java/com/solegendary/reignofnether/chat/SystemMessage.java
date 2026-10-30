@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 // RoN's system lines in chat, one line each with a marker in front: ◆ info, ▲ important, ✖ error.
-// Dim marker, light body, no blank lines around it.
+// Same look as team chat (TeamChatClient.format): dim marker, light body, no blank lines around it.
 public final class SystemMessage {
 
     private SystemMessage() {}
