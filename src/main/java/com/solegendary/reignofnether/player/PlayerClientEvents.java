@@ -328,6 +328,7 @@ public class PlayerClientEvents {
             ScenarioClientEvents.resetRoles();
             PlayerChunksClientEvents.reset();
             BarStates.clear();
+            StartPosClientEvents.botFactions.clear();
             CustomBuildingClientEvents.customBuildings.clear();
         });
     }

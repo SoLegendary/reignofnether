@@ -31,6 +31,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
     public static GameRules.Key<GameRules.IntegerValue> RANDOM_ITEM_DROPS;
     public static GameRules.Key<GameRules.BooleanValue> HIDE_ENEMY_PICKS;
+    public static GameRules.Key<GameRules.BooleanValue> BOT_TAKEOVER;
     public static GameRules.Key<GameRules.IntegerValue> SOLDIERS_PER_TEAM;
     public static final int MAX_SOLDIERS_PER_TEAM = 4;
     public static final int MAX_SOLDIER_RESPAWN_SECONDS = 300;
@@ -98,6 +99,10 @@ public class GameRuleRegistrar {
         // in the match lobby, other teams' factions and chosen start positions are hidden
         HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(true)
+        );
+        // a bot plays a disconnected player's base until they reconnect
+        BOT_TAKEOVER = GameRules.register("botTakeover", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
         );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
         COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,

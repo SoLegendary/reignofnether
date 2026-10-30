@@ -25,6 +25,7 @@ public class StartPosClientboundPacket {
     int colorId;
     boolean ready = false;
     boolean hidden = false;
+    int botDifficulty = -1;
     boolean pending = false;
     int team = 0;
 
@@ -33,6 +34,7 @@ public class StartPosClientboundPacket {
         StartPosClientboundPacket packet = new StartPosClientboundPacket(action, sp.pos, sp.faction, sp.playerName, sp.colorId);
         packet.ready = sp.ready;
         packet.hidden = sp.hidden;
+        packet.botDifficulty = sp.botDifficulty;
         packet.team = sp.team;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
@@ -52,6 +54,11 @@ public class StartPosClientboundPacket {
         packet.ready = join.ready;
         packet.pending = join.pending;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static void sendBotFaction(ServerPlayer player, Faction faction) {
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+                new StartPosClientboundPacket(StartPosAction.BOT_FACTION, BlockPos.ZERO, faction, "", 0));
     }
 
     public static void clear(ServerPlayer player) {
@@ -105,6 +112,7 @@ public class StartPosClientboundPacket {
         this.colorId = buffer.readInt();
         this.ready = buffer.readBoolean();
         this.hidden = buffer.readBoolean();
+        this.botDifficulty = buffer.readInt();
         this.pending = buffer.readBoolean();
         this.team = buffer.readInt();
     }
@@ -117,6 +125,7 @@ public class StartPosClientboundPacket {
         buffer.writeInt(this.colorId);
         buffer.writeBoolean(this.ready);
         buffer.writeBoolean(this.hidden);
+        buffer.writeInt(this.botDifficulty);
         buffer.writeBoolean(this.pending);
         buffer.writeInt(this.team);
     }
@@ -135,6 +144,7 @@ public class StartPosClientboundPacket {
                                 pos.enabled = action == StartPosAction.ADD;
                                 pos.ready = ready;
                                 pos.hidden = hidden;
+                                pos.botDifficulty = botDifficulty;
                                 pos.team = team;
                                 StartPosClientEvents.startPoses.add(pos);
                             }
@@ -142,7 +152,9 @@ public class StartPosClientboundPacket {
                                 StartPosClientEvents.startPoses.clear();
                                 StartPosClientEvents.hiddenPlayers.clear();
                                 StartPosClientEvents.joins.clear();
+                                StartPosClientEvents.botFactions.clear();
                             }
+                            case BOT_FACTION -> StartPosClientEvents.botFactions.add(faction);
                             case JOIN_SOLDIER, JOIN_CO_COMMANDER -> {
                                 SeatJoin join = new SeatJoin(playerName, action == StartPosAction.JOIN_SOLDIER ?
                                         PlayerRole.SOLDIER : PlayerRole.COMMANDER, colorId, blockPos);

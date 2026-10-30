@@ -1,5 +1,11 @@
 package com.solegendary.reignofnether.startpos;
 
+import com.solegendary.reignofnether.ai.BotDifficulty;
+import com.solegendary.reignofnether.ai.BotPlans;
+import com.solegendary.reignofnether.ai.BotServerEvents;
+import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.util.RandomSource;
+
 import java.util.Comparator;
 import javax.annotation.Nullable;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -99,6 +105,9 @@ public class StartPosServerEvents {
             if (!join.ready && !join.pending)
                 shouldStartGame = false;
         }
+        // seats can all be bots, but someone has to be here to watch
+        if (PlayerServerEvents.players.isEmpty())
+            shouldStartGame = false;
         if (shouldStartGame) {
             startGameCountdown();
         } else if (startingGame) {
@@ -134,11 +143,14 @@ public class StartPosServerEvents {
         StartPos viewerSeat = startPoses.stream().filter(sp -> sp.playerName.equals(name)).findFirst().orElse(null);
         Integer viewerColor = viewerColor(name);
         StartPosClientboundPacket.clear(player);
+        for (Faction f : BotPlans.available())
+            StartPosClientboundPacket.sendBotFaction(player, f);
+        boolean host = isHost(player);
         List<String> hidden = new ArrayList<>();
         Map<String, Boolean> hiddenReady = new HashMap<>();
         for (StartPos sp : startPoses) {
             StartPosAction action = sp.enabled ? StartPosAction.ADD : StartPosAction.ADD_DISABLED;
-            boolean isHidden = isHiddenFrom(sp, viewerSeat, viewerColor, hidePicks);
+            boolean isHidden = !(host && sp.isBot()) && isHiddenFrom(sp, viewerSeat, viewerColor, hidePicks); // the host runs the bots
             if (isHidden) {
                 hidden.add(sp.playerName);
                 hiddenReady.put(sp.playerName, sp.ready);
@@ -182,7 +194,7 @@ public class StartPosServerEvents {
         for (StartPos sp : startPoses)
             sp.team = numbers.get(sp);
         seat.team = team;
-        if (!seat.playerName.isBlank())
+        if (!seat.playerName.isBlank() && !seat.isBot())
             setPlayerReady(seat.playerName, false); // nobody starts on a team they didn't see
         trimJoins(); // soldiers of a team left empty go, and everyone gets the new teams
     }
@@ -238,7 +250,7 @@ public class StartPosServerEvents {
 
     private static boolean canCoCommand(String playerName, StartPos seat, MinecraftServer server) {
         return server.getGameRules().getBoolean(GameRuleRegistrar.CO_COMMANDERS) &&
-                !seat.playerName.isBlank() && !seat.playerName.equals(playerName) &&
+                !seat.playerName.isBlank() && !seat.playerName.equals(playerName) && !seat.isBot() &&
                 joins.stream().noneMatch(j -> !j.isSoldier() && j.seat.equals(seat.pos) && !j.playerName.equals(playerName));
     }
 
@@ -355,6 +367,69 @@ public class StartPosServerEvents {
         return server != null && server.getGameRules().getBoolean(GameRuleRegistrar.HIDE_ENEMY_PICKS);
     }
 
+    // ---------------------------------------------------------------- AI seats
+
+    private static final int BOT_READY_TICKS = 5 * 20;
+    private static final Map<String, Long> botReadyAt = WorldState.server(new HashMap<>()); // a bot readies up a moment after a change
+
+    // the host puts a bot on an empty seat, or changes a bot seat's faction or difficulty. A faction whose AI is
+    // in maintenance (BotPlans) can't be picked; RANDOM picks among the available ones at match start
+    public static void reserveBotPos(BlockPos pos, Faction faction, int botDifficulty) {
+        if (startingGame || BotPlans.available().isEmpty() || !BotServerEvents.botsAvailable())
+            return;
+        if (faction != Factions.RANDOM && !BotPlans.isAvailable(faction))
+            faction = Factions.RANDOM;
+        for (StartPos startPos : startPoses) {
+            if (!startPos.pos.equals(pos) || !startPos.enabled)
+                continue;
+            if (!startPos.playerName.isBlank() && !startPos.isBot())
+                return; // never kick a human
+            if (!startPos.isBot())
+                startPos.playerName = BotServerEvents.getUnusedBotName();
+            startPos.faction = faction;
+            startPos.botDifficulty = BotDifficulty.fromOrdinal(botDifficulty).ordinal();
+            syncAll();
+            setPlayerReady(startPos.playerName, false);
+            botReadyAt.put(startPos.playerName, serverTicks + BOT_READY_TICKS);
+            return;
+        }
+    }
+
+    // the gamerule was switched off in the lobby: bots can't play this match, their seats open up again
+    private static void dropUnavailableBots() {
+        if (!PlayerServerEvents.rtsPlayers.isEmpty() || startPoses.stream().noneMatch(StartPos::isBot) || BotServerEvents.botsAvailable())
+            return;
+        for (StartPos startPos : startPoses)
+            if (startPos.isBot()) {
+                String seated = startPos.playerName;
+                startPos.reset();
+                setPlayerReady(seated, false);
+            }
+        trimJoins();
+        syncAll();
+    }
+
+    private static void readyBots() {
+        if (botReadyAt.isEmpty())
+            return;
+        for (var e : List.copyOf(botReadyAt.entrySet())) {
+            if (serverTicks < e.getValue())
+                continue;
+            botReadyAt.remove(e.getKey());
+            // only if the bot still holds its seat (the host may have removed it meanwhile)
+            if (!startingGame && startPoses.stream().anyMatch(sp -> sp.isBot() && sp.playerName.equals(e.getKey())))
+                setPlayerReady(e.getKey(), true);
+        }
+    }
+
+    private static void startBot(StartPos seat, RandomSource random) {
+        Faction faction = BotPlans.resolve(seat.faction, random);
+        if (faction == Factions.NONE)
+            return; // every faction's AI went into maintenance meanwhile
+        PlayerServerEvents.startRTSBot(seat.playerName, new Vec3(seat.pos.getX(), seat.pos.getY(), seat.pos.getZ()), faction, seat.colorId);
+        BotServerEvents.addBot(seat.playerName, BotDifficulty.fromOrdinal(seat.botDifficulty));
+    }
+
     // the singleplayer/P2P host or an op
     public static boolean isHost(ServerPlayer player) {
         return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
@@ -455,6 +530,8 @@ public class StartPosServerEvents {
         if (evt.phase != TickEvent.Phase.END)
             return;
         serverTicks++;
+        dropUnavailableBots();
+        readyBots();
 
         if (startingGame) {
             if (ticksToStart % 20 == 0) {
@@ -486,6 +563,10 @@ public class StartPosServerEvents {
                         FogOfWarServerEvents.setStartingPlayers(List.of());
                     }
                     RTSMapInfoServerEvents.syncTeamMode(); // catches a /gamerule during the lobby
+                    // bots start after humans, so the first human start still runs its one-off match setup
+                    for (StartPos startPos : startPoses)
+                        if (startPos.enabled && startPos.isBot())
+                            startBot(startPos, evt.getServer().overworld().getRandom());
                     // ally all players on the same team: picked in the lobby, else the same colour of start block
                     Map<StartPos, Integer> teams = StartPos.teamNumbers(startPoses);
                     Map<String, Integer> teamOf = new HashMap<>();
@@ -503,6 +584,7 @@ public class StartPosServerEvents {
                         }
                     }
                     startJoins(evt.getServer());
+                    botReadyAt.clear();
                     PlayerServerEvents.setRTSLock(true, true);
                     StartPosServerEvents.reset(evt.getServer().getLevel(Level.OVERWORLD));
                     StartPosClientboundPacket.reset();
