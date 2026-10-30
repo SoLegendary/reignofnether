@@ -43,6 +43,9 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
 import com.solegendary.reignofnether.matchstart.MatchResumeClientboundPacket;
 import com.solegendary.reignofnether.matchstart.MatchResumeServerboundPacket;
+import com.solegendary.reignofnether.replay.ReplayCameraServerboundPacket;
+import com.solegendary.reignofnether.replay.ReplayChunkClientboundPacket;
+import com.solegendary.reignofnether.replay.ReplayDownloadServerboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
@@ -480,6 +483,24 @@ public final class PacketHandler {
                 .encoder(MatchResumeServerboundPacket::encode)
                 .decoder(MatchResumeServerboundPacket::new)
                 .consumerMainThread(MatchResumeServerboundPacket::handle)
+                .add();
+    
+        INSTANCE.messageBuilder(ReplayCameraServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ReplayCameraServerboundPacket::encode)
+                .decoder(ReplayCameraServerboundPacket::new)
+                .consumerMainThread(ReplayCameraServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ReplayDownloadServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ReplayDownloadServerboundPacket::encode)
+                .decoder(ReplayDownloadServerboundPacket::new)
+                .consumerMainThread(ReplayDownloadServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ReplayChunkClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ReplayChunkClientboundPacket::encode)
+                .decoder(ReplayChunkClientboundPacket::new)
+                .consumerMainThread(ReplayChunkClientboundPacket::handle)
                 .add();
     }
 }

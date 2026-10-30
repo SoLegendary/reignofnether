@@ -21,6 +21,8 @@ import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.hud.panels.MinimapTools;
 import com.solegendary.reignofnether.hud.panels.SelectionPanel;
 import com.solegendary.reignofnether.hud.panels.SpectatorHud;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
+import com.solegendary.reignofnether.replay.ReplayHud;
 import com.solegendary.reignofnether.chat.SpectatorFeed;
 import com.solegendary.reignofnether.hud.panels.TopLeftPanel;
 import com.solegendary.reignofnether.hud.panels.TopRightPanel;
@@ -317,6 +319,8 @@ public class HudClientEvents {
             SpectatorHud.render(f);
         else
             TopLeftPanel.render(f);
+        if (ReplayClientEvents.isActive())
+            ReplayHud.render(f);
         TopRightPanel.render(f);
         SandboxPanel.render(f);
         PlayerDisplayClientEvents.render(f);
