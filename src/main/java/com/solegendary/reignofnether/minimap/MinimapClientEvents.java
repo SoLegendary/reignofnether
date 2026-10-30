@@ -1258,8 +1258,16 @@ public class MinimapClientEvents {
         boolean soldier = PlayerRolesClient.myRole() == PlayerRole.SOLDIER; // their HUD has a minimap too
         if (evt.phase != TickEvent.Phase.END || !(OrthoviewClientEvents.isEnabled() || soldier))
             return;
+        update(soldier);
+    }
 
-        long t0 = System.nanoTime();
+    /** Keeps the map updating for a menu that shows it (the saved game resume screen) when orthoview is off. */
+    public static void tickForScreen() {
+        if (!OrthoviewClientEvents.isEnabled())
+            update(false);
+    }
+
+    private static void update(boolean soldier) {
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
         if (mapColoursOverlays.length != worldRadius * 2)

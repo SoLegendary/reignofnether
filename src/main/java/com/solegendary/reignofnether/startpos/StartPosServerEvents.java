@@ -326,7 +326,7 @@ public class StartPosServerEvents {
         return server != null && server.getGameRules().getBoolean(GameRuleRegistrar.HIDE_ENEMY_PICKS);
     }
 
-    // the singleplayer/Essential host or an op
+    // the singleplayer/P2P host or an op
     public static boolean isHost(ServerPlayer player) {
         return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
     }
