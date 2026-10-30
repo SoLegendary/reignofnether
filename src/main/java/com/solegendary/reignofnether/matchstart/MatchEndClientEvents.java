@@ -1,8 +1,13 @@
 package com.solegendary.reignofnether.matchstart;
 
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket.MatchStatRow;
 import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,6 +34,19 @@ public class MatchEndClientEvents {
 
     public static boolean hasResults() {
         return !rows.isEmpty();
+    }
+
+    private static Button resultsButton = null;
+
+    // reopens the results after they were closed, until the next match end or logout
+    public static Button getResultsButton() {
+        if (resultsButton == null)
+            resultsButton = new ButtonBuilder(I18n.get("matchend.reignofnether.reopen"))
+                    .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/book.png"))
+                    .isHidden(() -> !hasResults() || Minecraft.getInstance().screen instanceof MatchEndScreen)
+                    .onLeftClick(() -> Minecraft.getInstance().setScreen(new MatchEndScreen()))
+                    .build();
+        return resultsButton;
     }
 
     // called on the client main thread from the packet handler
