@@ -45,9 +45,9 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
-    public static final int POISON_DAMAGE = 6;
+    public static final int POISON_DAMAGE = 7;
 
-    final static public float attackDamage = 2.0f;
+    final static public float attackDamage = 1f;
 
     @Override
     protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor) {

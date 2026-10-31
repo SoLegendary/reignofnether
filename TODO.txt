@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1
+1.20.1-1.5.1a
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -8,75 +8,49 @@
 
 Balance
 -------
-[❌] Add roof to dark watchtower
-[❌] Free attacking vexes?
+[✅] The Enchanter's Civil Enchantment has been replaced with Protective Enchantment
+[✅] Enchanter abilities no longer give experience
+[✅] Enchanter March of Progress mana cost per second raised from 3 to 3.5
+[✅] Pillager damage reduced from 8 to 6 (except when mounted)
+[✅] Militia Archer damage reduced from 3 to 2.5
+[✅] Militia Archer Training has been moved to the Town Centre and requires a Barracks
+[✅] Vindicator Sharpness damage raised from +2 to +3
 
-[✅] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
-    - Tether to up to 1/2/3 nearby allies for 30s
-    - Tethered units take half damage and gain the enchanter's damage and passive item stats
-    - March of Progress raises the damage and item bonus by 50%
+[✅] Headhunter damage reduced from 6 to 4.5
+[✅] Brute Shields damage reduction reduced from 75% to 66%
+[✅] Strider HP increased from 30 to 40
 
-[✅] Mounted Ravagers can now toggle 'Siege Mode', while active:
-    - The ravager is immobile, immune to knockback, cannot rotate and can only attack enemies its facing
-    - The mounted pillager gains double range and larger explosions on non-multishot arrows
-    - If the pillager dies or is ejected, siege mode is disabled
-
-[✅] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
-[✅] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
-[✅] Libraries can now autocast any number of enchantments instead of just one
-[✅] Windcaller levitation duration increased from 4s to 5s
-[✅] Library enchantments can now be stacked
-[✅] Pillager base damage raised from 7 to 8
-[✅] The Enchanter's Ultimate now affects multishot (increasing the arrow count to 5)
-[✅] Multishot additional arrows now deal 50% less damage per level of multishot (arrows 2-3 deal 50%, arrows 4-5 deal 25%)
-[✅] Arrows which have pierced a unit now deal 50% less damage (unless they are multishot arrows)
-[✅] Multishot cost reduced from (70 wood, 35 ore) to (60 wood, 30 ore)
-[✅] Quick charge cost reduced from (40 wood, 20 ore) to (30 wood, 20 ore)
-[✅] Sharpness cost reduced from (40 wood, 60 ore) to (30 wood, 60 ore)
-
-[✅] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
-[✅] Phantoms now deal 30% less damage to buildings
-[✅] Wildfire Molten Bombs now deal 20 damage to buildings
-
-[✅] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
-[✅] Bat HP reduced from 15hp to 10hp
-[✅] Ghast explosive damage now benefits from increased attack damage
-[✅] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
-[✅] Throwable TNT items are now equivalent to a level 3 merchant TNT
-[✅] Neutral buildings now drop regular resources as bounty again instead of emeralds
-
-[✅] All units can now take unlimited instances of damage in a single tick
-
-[✅] Windcallers and Necromancers now have homing projectiles
-[✅] Lifesteal and mana-on-hit effects no longer apply to spells
-
-[✅] All heroes now have 20% ranged armour
-[✅] Light Feather evasion chance raised from 17% to 22%
+[✅] Skeleton and Stray damage reduced from 4 to 3
+[✅] Bogged attack damage reduced from 2 to 1
+[✅] Bogged poison damage increased from 6 to 7
+[✅] Strays now have a 30% chance to create wraith snow on hit instead of slowness
 
 Quality of Life
 ---------------
-[✅] Items are no longer destroyed by explosions
-[✅] Villager profession bonuses as passive icons
-[✅] Flowing water and lava now retain the same liquid level state when converted between each other
-    - This means flowing water now becomes cobble & magma instead of lava source blocks
-[✅] Improved the accuracy of crediting killed neutrals for item drops and bounties
-[✅] Population cost of units and custom production spawn eggs can now be set using the NBT tag "popCost"
-[✅] Neutral unit bounty can be modified using the NBT "emeraldBounty"
-[✅] Improved visibility of items on the ground and highlighted animals
-[✅] Added a command /rtsapi-start-scenario-role <playerName> <scenarioRoleId>
-    - This immediately starts the scenario for the player in the given role
-    - Will error if the role is unavailable (nonexistent, taken or is for NPCs only)
-    - Can't be used to change the role for players who already started the scenario
+[✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
+[✅] Added `/gamerule hideEnemyPicks` which hides enemy faction picks
+[✅] Various fog of war stability improvements
+[✅] Miscellaneous performance improvements, especially for large scale battles
+[✅] Reduced the size of the mod jar significantly
+[✅] Improved permissions security of various serverside actions
+[✅] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
+[✅] Added bees to the sandbox unit menu
+[✅] Holding ctrl when issuing a move command makes your army move together in formation:
+    - Faster units slow down to allow slower units to catch up
+    - Ranged units try to stay behind melee units
 
 Bugfixes
 --------
-[✅] Fixed custom spawn eggs tooltips showing default costs if you didn't add a tooltipTitle
-[✅] Fixed resistance effects being more effective than 20% per level
-[✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
-[✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
-[✅] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
-
-
+[✅] You can no longer see your opponent's building outlines in fog at the start of a match
+[✅] Joining a world with a low Y level no longer makes your camera slide down
+[✅] Workers no longer get stuck trying to reach resources out of reach and instead search elsewhere
+[✅] Fixed heroes sometimes spinning on spawn
+[✅] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
+[✅] Fixed a crash when publishing a scenario map on a server world
+[✅] Fixed accuracy problems when using `/rtsapi player camera move` with different pan durations
+[✅] Buildable custom buildings no longer carry across singleplayer maps when switching maps
 
 Languages
 ---------
+
+

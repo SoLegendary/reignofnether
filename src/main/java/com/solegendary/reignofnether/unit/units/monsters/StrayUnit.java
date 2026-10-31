@@ -172,7 +172,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 4.0f;
+    final static public float attackDamage = 3.0f;
     final static public float attacksPerSecond = 0.35f;
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
@@ -299,13 +299,11 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    public static final int SLOW_SECONDS = 5;
-
     @Override
     protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor) {
         AbstractArrow arrow = super.getArrow(pArrowStack, pDistanceFactor);
         if (arrow instanceof Arrow)
-            ((Arrow)arrow).addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SLOW_SECONDS * 20));
+            ((Arrow)arrow).effects.clear(); // clear vanilla slowness
         return arrow;
     }
 
@@ -314,6 +312,8 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 
+    public final static float SNOW_ON_HIT_CHANCE = 0.30f;
+
     // override to make inaccuracy 0
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
@@ -321,6 +321,8 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
                 (item) -> item instanceof BowItem
         )));
         AbstractArrow abstractarrow = this.getArrow(itemstack, velocity);
+        abstractarrow.addTag(RangedAttackerUnit.SNOW_ARROW_TAG);
+
         if (this.getMainHandItem().getItem() instanceof BowItem) {
             abstractarrow = ((BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
         }

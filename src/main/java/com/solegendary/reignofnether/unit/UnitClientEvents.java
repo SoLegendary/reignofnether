@@ -316,7 +316,8 @@ public class UnitClientEvents {
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos,
-                Keybindings.shiftMod.isDown()
+                Keybindings.shiftMod.isDown(),
+                Keybindings.ctrlMod.isDown()
             ));
         }
     }
@@ -340,7 +341,8 @@ public class UnitClientEvents {
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos,
-                        Keybindings.shiftMod.isDown()
+                        Keybindings.shiftMod.isDown(),
+                        Keybindings.ctrlMod.isDown()
                 ));
             }
         }
@@ -408,7 +410,8 @@ public class UnitClientEvents {
                 ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0),
-                Keybindings.shiftMod.isDown()
+                Keybindings.shiftMod.isDown(),
+                Keybindings.ctrlMod.isDown()
             ));
         }
     }

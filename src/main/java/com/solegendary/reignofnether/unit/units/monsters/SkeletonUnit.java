@@ -176,7 +176,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     // endregion
 
-    final static public float attackDamage = 4.0f;
+    final static public float attackDamage = 3.0f;
     final static public float attacksPerSecond = 0.35f;
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;

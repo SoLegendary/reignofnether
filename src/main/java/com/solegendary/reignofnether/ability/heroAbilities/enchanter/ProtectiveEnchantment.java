@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -142,7 +143,15 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;
         }
-        ((EnchanterUnit) unitUsing).getCastEnchantedTetherGoal().setAbility(this);
-        ((EnchanterUnit) unitUsing).getCastEnchantedTetherGoal().setTarget(targetEntity);
+        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setAbility(this);
+        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setTarget(targetEntity);
+    }
+
+    @Override
+    public boolean canEnchant(LivingEntity le) {
+        return le instanceof Unit &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments()
+                        .containsKey(EnchantmentRegistrar.FORTYIFYING.get());
     }
 }

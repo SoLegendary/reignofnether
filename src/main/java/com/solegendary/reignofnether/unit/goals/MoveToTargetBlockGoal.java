@@ -51,9 +51,11 @@ public class MoveToTargetBlockGoal extends Goal {
     protected boolean pendingRepath = false;
     @Nullable protected BlockPos repathFromFinalNode = null;
 
-    // speed matching: units ordered to move as a group walk at the slowest member's speed (blocks per tick),
-    // so the group arrives together instead of stringing out. 0 = no cap; cleared by the next order.
-    public double groupSpeed = 0;
+    // units ordered to move as a group keep pace with it (GroupPace) so it arrives together instead of stringing
+    // out. null = no group; cleared by the next order. The speed is refreshed every PACE_REFRESH ticks on the way
+    @Nullable public GroupPace pace = null;
+    private static final int PACE_REFRESH = 10;
+    private int paceTicks = 0;
 
     private static float uncappedSpeedMod(Unit u) {
         float speedMod = u.getSpeedModifier();
@@ -62,10 +64,11 @@ public class MoveToTargetBlockGoal extends Goal {
 
     public float getSpeedMod(Unit u) {
         float speedMod = uncappedSpeedMod(u);
-        if (groupSpeed > 0) {
+        if (pace != null) {
             double own = mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * speedMod;
-            if (own > groupSpeed)
-                speedMod *= (float) (groupSpeed / own);
+            double cap = pace.speedCap(u);
+            if (own > cap)
+                speedMod *= (float) (cap / own);
         }
         return speedMod;
     }
@@ -108,6 +111,10 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
+        if (pace != null && ++paceTicks >= PACE_REFRESH && this.mob instanceof Unit u && !this.mob.getNavigation().isDone()) {
+            paceTicks = 0;
+            this.mob.getNavigation().setSpeedModifier(getSpeedMod(u));
+        }
         // Keep the goal active (without recalculating) while an async RTS path is being computed.
         if (pathPending)
             return moveTarget != null;
@@ -326,7 +333,7 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public void stopMoving() {
-        groupSpeed = 0;
+        pace = null;
         recalcCooldown = 0;
         pathPending = false;
         pendingRepath = false;

@@ -47,7 +47,7 @@ public class PandaProd extends ProductionItem implements IUnitProductionItem {
                 List.of(
 	                Component.translatable("entity.reignofnether.panda_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs(""),
-	                Component.translatable("entity.reignofnether.panda_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
+	                Component.translatable("entity.reignofnether.panda_unit.tooltip1").getVisualOrderText()
                 )
         );
     }

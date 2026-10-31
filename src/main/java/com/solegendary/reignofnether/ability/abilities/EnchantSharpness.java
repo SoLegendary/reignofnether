@@ -27,7 +27,7 @@ public class EnchantSharpness extends EnchantAbility {
     private static final UnitAction ENCHANT_ACTION = UnitAction.ENCHANT_SHARPNESS;
 
     public EnchantSharpness() {
-        super(ENCHANT_ACTION, ResourceCosts.ENCHANT_SHARPNESS, 2, EquipmentSlot.MAINHAND);
+        super(ENCHANT_ACTION, ResourceCosts.ENCHANT_SHARPNESS, 3, EquipmentSlot.MAINHAND);
     }
 
     @Override

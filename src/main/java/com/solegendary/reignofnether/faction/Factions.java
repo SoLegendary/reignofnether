@@ -146,6 +146,7 @@ public class Factions {
 		registerEntity(NEUTRAL, EntityRegistrar.PANDA_UNIT.get(), ProductionItems.PANDA);
 		registerEntity(NEUTRAL, EntityRegistrar.WOLF_UNIT.get(), ProductionItems.WOLF);
 		registerEntity(NEUTRAL, EntityRegistrar.LLAMA_UNIT.get(), ProductionItems.LLAMA);
+		registerEntity(NEUTRAL, EntityRegistrar.BEE_UNIT.get(), ProductionItems.BEE);
 	}
 	
 	

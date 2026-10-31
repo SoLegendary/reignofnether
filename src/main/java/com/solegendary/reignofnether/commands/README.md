@@ -43,6 +43,7 @@ Custom command support has been added for normal buildings using `/rtsapi buildi
 - /rtsapi player research get &lt;player&gt;
 - /rtsapi player teammode &lt;mode&gt;
 - /rtsapi player starting-teams-mode &lt;mode&gt;
+- /rtsapi player start-scenario-role &lt;player&gt; &lt;scenarioId&gt;
 - /rtsapi player camera &lt;value&gt; &lt;player&gt;
 - /rtsapi player camera move &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [lockTicks] [forcePanTicks] [zoom]
 - /rtsapi player camera fade &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [fadeTicks] [blackoutTicks]

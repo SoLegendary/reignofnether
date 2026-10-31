@@ -2,17 +2,21 @@ package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.google.common.collect.Lists;
+import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -285,6 +289,15 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
 
         reignofnether$explodeOnce(damagesource, pResult.getEntity().getEyePosition(), Level.ExplosionInteraction.BLOCK);
+
+        if (level() instanceof ServerLevel serverLevel &&
+            this.getTags().contains(RangedAttackerUnit.SNOW_ARROW_TAG) &&
+            random.nextFloat() < StrayUnit.SNOW_ON_HIT_CHANCE) {
+            BlockServerEvents.getSnowPositions(level(), entity.getOnPos().above(), 0)
+                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                        BlockServerEvents.placeWraithSnow(serverLevel, pos, this.getOwner() != null ? this.getOwner().getId() : -1);
+                    }));
+        }
     }
 
     @Inject(
@@ -301,6 +314,18 @@ public abstract class AbstractArrowMixin extends Projectile {
             if (isInsideBuildingAndNotForeignEntity(pResult, building)) {
                 ci.cancel();
             }
+        }
+        if (level() instanceof ServerLevel serverLevel &&
+                this.getTags().contains(RangedAttackerUnit.SNOW_ARROW_TAG) &&
+                random.nextFloat() < StrayUnit.SNOW_ON_HIT_CHANCE) {
+
+            Vec3 loc = pResult.getLocation();
+            BlockPos bpLoc = new BlockPos((int) loc.x, (int) loc.y, (int) loc.z);
+
+            BlockServerEvents.getSnowPositions(level(), bpLoc, 0)
+                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                        BlockServerEvents.placeWraithSnow(serverLevel, pos, this.getOwner() != null ? this.getOwner().getId() : -1);
+                    }));
         }
     }
 

@@ -24,6 +24,7 @@ public class UnitActionServerboundPacket {
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos; // for building abilities
     private final boolean shiftQueue; // shift queue actions
+    private final boolean groupMove; // ctrl was held: match speeds of the moving group
 
     // packet-handler functions
     public UnitActionServerboundPacket(
@@ -35,6 +36,19 @@ public class UnitActionServerboundPacket {
         BlockPos selectedBuildingPos,
         boolean shiftQueue
     ) {
+        this(ownerName, action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos, shiftQueue, false);
+    }
+
+    public UnitActionServerboundPacket(
+        String ownerName,
+        UnitAction action,
+        int unitId,
+        int[] unitIds,
+        BlockPos preselectedBlockPos,
+        BlockPos selectedBuildingPos,
+        boolean shiftQueue,
+        boolean groupMove
+    ) {
         this.ownerName = ownerName;
         this.action = action;
         this.unitId = unitId;
@@ -42,6 +56,7 @@ public class UnitActionServerboundPacket {
         this.preselectedBlockPos = preselectedBlockPos;
         this.selectedBuildingPos = selectedBuildingPos;
         this.shiftQueue = shiftQueue;
+        this.groupMove = groupMove;
     }
 
     public UnitActionServerboundPacket(FriendlyByteBuf buffer) {
@@ -52,6 +67,7 @@ public class UnitActionServerboundPacket {
         this.preselectedBlockPos = buffer.readBlockPos();
         this.selectedBuildingPos = buffer.readBlockPos();
         this.shiftQueue = buffer.readBoolean();
+        this.groupMove = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -62,6 +78,7 @@ public class UnitActionServerboundPacket {
         buffer.writeBlockPos(this.preselectedBlockPos);
         buffer.writeBlockPos(this.selectedBuildingPos);
         buffer.writeBoolean(this.shiftQueue);
+        buffer.writeBoolean(this.groupMove);
     }
 
     // server-side packet-consuming functions
@@ -95,7 +112,8 @@ public class UnitActionServerboundPacket {
                         this.unitIds,
                         this.preselectedBlockPos,
                         this.selectedBuildingPos,
-                        this.shiftQueue
+                        this.shiftQueue,
+                        this.groupMove
                 );
                 success.set(true);
             }

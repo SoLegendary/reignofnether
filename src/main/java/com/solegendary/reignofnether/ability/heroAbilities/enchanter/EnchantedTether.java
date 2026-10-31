@@ -129,9 +129,9 @@ public class EnchantedTether extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.enchanted_tether.tooltip2", DURATION_SECONDS)),
                 fcs(I18n.get("abilities.reignofnether.enchanted_tether.tooltip3")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank1", CHARGES_RANK_1), getRank(hero) == 0),
-                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank2", CHARGES_RANK_2), getRank(hero) == 1),
-                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank3", CHARGES_RANK_3), getRank(hero) == 2)
+                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank1", CHARGES_RANK_1, CD_RANK_1), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank2", CHARGES_RANK_2, CD_RANK_2), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.enchanted_tether.rank3", CHARGES_RANK_3, CD_RANK_3), getRank(hero) == 2)
         );
     }
 

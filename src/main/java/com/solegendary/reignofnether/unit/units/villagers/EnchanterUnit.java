@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -29,7 +30,6 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimations;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -77,9 +77,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
             List.of(
-                    new Pair<>(new CivilEnchantment(), Keybindings.abilitySlot1),
+                    new Pair<>(new EnchantedTether(), Keybindings.abilitySlot1),
                     new Pair<>(new MartialEnchantment(), Keybindings.abilitySlot2),
-                    new Pair<>(new EnchantedTether(), Keybindings.abilitySlot3),
+                    new Pair<>(new ProtectiveEnchantment(), Keybindings.abilitySlot3),
                     new Pair<>(new MarchOfProgress(), Keybindings.abilitySlot4)
             )
     );
@@ -143,12 +143,12 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
-    private GenericTargetedSpellGoal castEnchantCivilGoal;
-    public GenericTargetedSpellGoal getCastEnchantCivilGoal() { return castEnchantCivilGoal; }
-    private GenericTargetedSpellGoal castEnchantMilitaryGoal;
-    public GenericTargetedSpellGoal getCastEnchantMartialGoal() { return castEnchantMilitaryGoal; }
     private GenericTargetedSpellGoal castEnchantedTetherGoal;
     public GenericTargetedSpellGoal getCastEnchantedTetherGoal() { return castEnchantedTetherGoal; }
+    private GenericTargetedSpellGoal castEnchantMilitaryGoal;
+    public GenericTargetedSpellGoal getCastEnchantMartialGoal() { return castEnchantMilitaryGoal; }
+    private GenericTargetedSpellGoal castEnchantProtectiveGoal;
+    public GenericTargetedSpellGoal getCastEnchantProtectiveGoal() { return castEnchantProtectiveGoal; }
     private GenericUntargetedSpellGoal castAuraGoal;
     public GenericUntargetedSpellGoal getCastAuraGoal() { return castAuraGoal; }
 
@@ -405,7 +405,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             animateTicks -= 1;
         }
         this.castEnchantMilitaryGoal.tick();
-        this.castEnchantCivilGoal.tick();
+        this.castEnchantProtectiveGoal.tick();
         this.castEnchantedTetherGoal.tick();
         this.castAuraGoal.tick();
 
@@ -713,12 +713,12 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.castEnchantCivilGoal = new GenericTargetedSpellGoal(
+        this.castEnchantProtectiveGoal = new GenericTargetedSpellGoal(
                 this,
                 0,
                 10,
                 UnitAnimationAction.CAST_SPELL,
-                this::enchantCivilian,
+                this::enchantArmour,
                 null,
                 null
         );
@@ -774,7 +774,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void resetBehaviours() {
         animateScaleReducing = true;
         this.castEnchantMilitaryGoal.stop();
-        this.castEnchantCivilGoal.stop();
+        this.castEnchantProtectiveGoal.stop();
         this.castAuraGoal.stop();
     }
 
@@ -834,8 +834,18 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         if (!level().isClientSide)
             playEnchantSound();
 
-        if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
-            addExperience(ENCHANT_EXP);
+        //if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
+        //    addExperience(ENCHANT_EXP);
+    }
+
+    public void enchantArmour(LivingEntity entity) {
+        if (level().isClientSide) return;
+
+        entity.getItemBySlot(EquipmentSlot.CHEST).enchant(EnchantmentRegistrar.FORTYIFYING.get(), 1);
+        playEnchantSound();
+
+        //if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
+        //    addExperience(ENCHANT_EXP);
     }
 
     // clientside

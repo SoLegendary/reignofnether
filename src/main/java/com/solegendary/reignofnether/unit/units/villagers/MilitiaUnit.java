@@ -208,6 +208,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean bowEnchanted = false;
 
     final static public float attackDamage = 3.0f;
+    final static public float attackDamageRanged = 2.5f;
     final static public float attacksPerSecond = 0.5f;
     final static public float rangedAttacksPerSecond = 0.3f;
     final static public float attackRange = 10; // only used by ranged units or melee building attackers
@@ -257,6 +258,12 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         AttributeInstance ai4 = getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
         if (ai4 != null)
             ai4.setBaseValue(useBow ? rangedAttacksPerSecond : attacksPerSecond);
+        AttributeInstance ai5 = getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        if (ai5 != null)
+            ai5.setBaseValue(useBow ? attackDamageRanged : attackDamage);
+        AttributeInstance ai6 = getAttribute(Attributes.ATTACK_DAMAGE);
+        if (ai6 != null)
+            ai6.setBaseValue(useBow ? attackDamageRanged : attackDamage);
 
         if (rangedAttackGoal != null && attackGoal != null) {
             if (useBow) {

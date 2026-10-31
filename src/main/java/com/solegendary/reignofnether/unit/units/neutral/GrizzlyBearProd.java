@@ -46,7 +46,7 @@ public class GrizzlyBearProd extends ProductionItem implements IUnitProductionIt
                 List.of(
 	                Component.translatable("entity.reignofnether.grizzly_bear_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs(""),
-	                Component.translatable("entity.reignofnether.grizzly_bear_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
+	                Component.translatable("entity.reignofnether.grizzly_bear_unit.tooltip1").getVisualOrderText()
                 )
         );
     }

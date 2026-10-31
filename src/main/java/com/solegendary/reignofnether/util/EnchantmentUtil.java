@@ -14,17 +14,11 @@ import java.util.Map;
 
 public class EnchantmentUtil {
 
-    private static final HashMap<Enchantment, Item> level2Enchants = new HashMap<>();
-
-    static {
-        level2Enchants.put(Enchantments.SHARPNESS, Items.IRON_AXE);
-        level2Enchants.put(Enchantments.QUICK_CHARGE, Items.CROSSBOW);
-    }
-
     public static int getRegularEnchantLevel(Enchantment enchantment, ItemStack itemStack) {
-        if (level2Enchants.get(enchantment) == itemStack.getItem()) {
+        if (itemStack.getItem() == Items.IRON_AXE && enchantment == Enchantments.SHARPNESS)
+            return 3;
+        if (itemStack.getItem() == Items.CROSSBOW && enchantment == Enchantments.QUICK_CHARGE)
             return 2;
-        }
         return 1;
     }
 

@@ -257,21 +257,6 @@ public class GameruleClient {
                 fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
             )
         ));
-        buttons.add(new GameruleIntegerButton("animalSpawnYDiff: " + Math.round(animalSpawnYDiff),
-                () -> {
-                    int value = Math.min(100, animalSpawnYDiff + (Keybindings.shiftMod.isDown() ? 5 : 1));
-                    GameruleServerboundPacket.setAnimalSpawnYDiff(value);
-                },
-                () -> {
-                    int value = Math.max(1, animalSpawnYDiff - (Keybindings.shiftMod.isDown() ? 5 : 1));
-                    GameruleServerboundPacket.setAnimalSpawnYDiff(value);
-                },
-                List.of(
-                        fcs(I18n.get("commands.reignofnether.gamerule.animal_spawn_y_diff")),
-                        fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                        fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-                )
-        ));
         buttons.add(new GameruleIntegerButton("randomItemDrops: " + Math.round(randomItemDrops.getValue()),
                 () -> {
                     int value = randomItemDrops.getValue() + 1;

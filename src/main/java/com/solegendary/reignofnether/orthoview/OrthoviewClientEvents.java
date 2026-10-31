@@ -81,8 +81,8 @@ public class OrthoviewClientEvents {
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final float ZOOM_STEP_KEY = 10;
-    private static final float ZOOM_STEP_SCROLL = 2;
+    private static final float ZOOM_STEP_KEY = 5;
+    private static final float ZOOM_STEP_SCROLL = 1;
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
     private static final float CAMROTY_MAX = -20;
@@ -95,6 +95,7 @@ public class OrthoviewClientEvents {
 
     private static final int FORCE_PAN_TICKS_DEFAULT = 20;
     private static int forcePanTicksLeft = 0;
+    private static int forcePanTicksMax = FORCE_PAN_TICKS_DEFAULT;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
     private static float forcePanOriginalX = 0;
@@ -144,7 +145,7 @@ public class OrthoviewClientEvents {
     }
 
     private static float getEdgeCamPanSensitivity() {
-        return 2 * (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
+        return (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
     }
     public static float getPanSensitivityMult() {
         return (float) ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() / 10f;
@@ -288,6 +289,7 @@ public class OrthoviewClientEvents {
     public static void forceMoveCam(int x, int z, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
             forcePanTicksLeft = forcePanTicks;
+            forcePanTicksMax = forcePanTicksLeft;
             forcePanTargetX = x;
             forcePanTargetZ = z;
             cameraLockTicksLeft = forcePanTicks + cameraLockTicks;
@@ -366,9 +368,9 @@ public class OrthoviewClientEvents {
         }
 
         if (forcePanTicksLeft > 0) {
-            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_DEFAULT;
-            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_DEFAULT;
-            float zoomDiff = (forceZoom - forcePanOriginalZoom) / FORCE_PAN_TICKS_DEFAULT;
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / forcePanTicksMax;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / forcePanTicksMax;
+            float zoomDiff = (forceZoom - forcePanOriginalZoom) / forcePanTicksMax;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
             clampPlayerToWorldBorder();
@@ -750,8 +752,8 @@ public class OrthoviewClientEvents {
             float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
             float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;
 
-            float moveX = normalizedX * 0.40f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
-            float moveZ = normalizedZ * 0.40f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveX = normalizedX * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveZ = normalizedZ * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

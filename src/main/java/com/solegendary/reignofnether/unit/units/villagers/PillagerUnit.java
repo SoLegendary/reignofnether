@@ -199,7 +199,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
     public float getUnitAttackDamage() {
         float baseDamage = AttackerUnit.super.getUnitAttackDamage();
-        return isPassenger() ? baseDamage + 1 : baseDamage;
+        return isPassenger() ? baseDamage + 2 : baseDamage;
     }
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.PILLAGER;}
@@ -210,7 +210,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // endregion
 
-    final static public float attackDamage = 8.0f;
+    final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.632f; // excludes crossbow charge time
     final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
