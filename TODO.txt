@@ -23,7 +23,7 @@ Balance
 [✅] Skeleton and Stray damage reduced from 4 to 3
 [✅] Bogged attack damage reduced from 2 to 1
 [✅] Bogged poison damage increased from 6 to 7
-[✅] Strays now have a 25% chance to create wraith snow on hit instead of slowness
+[✅] Strays now have a 30% chance to create wraith snow on hit instead of slowness
 
 
 Quality of Life
@@ -37,7 +37,7 @@ Quality of Life
 [✅] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
 [✅] Added bees to the sandbox unit menu
 [✅] Holding ctrl when issuing a move command makes your army move together in formation:
-    - Faster units slow down by up to 40% to allow slower units to catch up
+    - Faster units slow down to allow slower units to catch up
     - Ranged units try to stay behind melee units
 
 

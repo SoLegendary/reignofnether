@@ -312,7 +312,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
     }
 
-    public final static float SNOW_ON_HIT_CHANCE = 0.25f;
+    public final static float SNOW_ON_HIT_CHANCE = 0.30f;
 
     // override to make inaccuracy 0
     @Override
