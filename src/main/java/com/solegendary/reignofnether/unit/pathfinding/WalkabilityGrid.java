@@ -117,14 +117,14 @@ public final class WalkabilityGrid {
         if (c == null) return; // not cached -> nothing to patch; a later getOrBuild reads fresh state
         // a block at y only changes cells whose feet/head/floor touch it: y-1, y, y+1. if that span is outside
         // this chunk's band, a rebuild reproduces identical cells - skip.
-        if (bp.getY() + 1 < c.minY() || bp.getY() - 1 >= c.maxY()) return;
+        if (bp.getY() + 1 < c.minY() || bp.getY() - 2 >= c.maxY()) return;
         long now = tickClock;
         synchronized (DIRTY_LOCK) {
             DirtyChunk entry = dirtyChunks.get(key);
             if (entry == null) { entry = new DirtyChunk(now); dirtyChunks.put(key, entry); }
             entry.lastTick = now; // bump the settle window; firstTick stays the ceiling anchor
             // grow the changed-cell bbox by that same [y-1, y+1] span
-            entry.include(bp.getX() & 15, bp.getZ() & 15, bp.getY() - 1, bp.getY() + 1);
+            entry.include(bp.getX() & 15, bp.getZ() & 15, bp.getY() - 2, bp.getY() + 1); // a cell in water reads 2 above itself
             DIRTY_GRIDS.put(this, level);
         }
     }

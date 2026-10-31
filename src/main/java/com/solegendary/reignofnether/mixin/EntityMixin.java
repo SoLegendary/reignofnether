@@ -165,6 +165,17 @@ public abstract class EntityMixin {
         }
     }
 
+    // currents shove units off their path and can hold them in place entirely
+    @Inject(
+            method = "isPushedByFluid()Z",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void isPushedByFluid(CallbackInfoReturnable<Boolean> cir) {
+        if ((Object) this instanceof Unit)
+            cir.setReturnValue(false);
+    }
+
     private boolean ron$isHighlightedAnimal() {
         return level.isClientSide() && MinimapClientEvents.shouldHighlightAnimals() &&
                 (Object) this instanceof LivingEntity le && ResourceSources.isHuntableAnimal(le);
