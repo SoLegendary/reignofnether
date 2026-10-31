@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
-import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
@@ -89,7 +88,6 @@ public class CustomBuildingClientEvents {
 
         customBuildings.add(building);
 
-        Factions.updateCustomBuildings();
     }
 
     @SubscribeEvent

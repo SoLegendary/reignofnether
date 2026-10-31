@@ -310,7 +310,6 @@ public class PlayerClientEvents {
         HeroClientEvents.fallenHeroes.clear();
         PlayerDisplayClientEvents.resetDisplay();
         PlayerColors.reset();
-        CustomBuildingClientEvents.customBuildings.clear();
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
         RTSMapInfoClientEvents.reset();
@@ -337,6 +336,7 @@ public class PlayerClientEvents {
             ScenarioClientEvents.resetRoles();
             PlayerChunksClientEvents.reset();
             BarStates.clear();
+            CustomBuildingClientEvents.customBuildings.clear();
         });
     }
 

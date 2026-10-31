@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -209,17 +208,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public boolean isSwingingArmRepeatedly() {
         return ((this.getGatherResourceGoal() != null && this.getGatherResourceGoal().isGathering()) ||
                 (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
-    }
-
-    public static List<BuildingPlaceButton> getBuildingButtons() {
-	    List<BuildingPlaceButton> buttons = new ArrayList<>(Factions.PIGLINS.getBuildingButtons());
-
-        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
-            if (cb.buildableByPiglins)
-                buttons.add(cb.getWorkerBuildButton(null));
-        });
-
-        return buttons;
     }
 
     public GruntUnit(EntityType<? extends Piglin> entityType, Level level) {
