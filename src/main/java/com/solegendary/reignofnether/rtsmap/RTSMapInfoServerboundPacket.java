@@ -47,7 +47,7 @@ public class RTSMapInfoServerboundPacket {
                 ReignOfNether.LOGGER.warn("RTSMapInfoServerboundPacket: Sender was null");
                 success.set(false);
                 return;
-            } else if (!player.hasPermissions(2)) {
+            } else if (!StartPosServerEvents.isHost(player)) {
                 ReignOfNether.LOGGER.warn("RTSMapInfoServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
                 return;

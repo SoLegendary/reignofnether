@@ -16,12 +16,10 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class TitleClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final Random random = new Random();
     private static Faction titleBackgroundFaction = getRandomFaction();
     private static PanoramaRenderer panorama = new PanoramaRenderer(getCubeMap());
     public static String splash = getRandomSplash();

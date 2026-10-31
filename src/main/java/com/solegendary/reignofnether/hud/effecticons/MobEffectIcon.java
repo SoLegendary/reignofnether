@@ -22,7 +22,8 @@ public class MobEffectIcon extends Button {
     private final String descId;
     private final Long startTime = TimeClientEvents.getClientTime();
     public int duration = 0;
-    private static final int MIN_DURATION_SHOWN = 40; // don't show really short effects as most of them are just auras
+    public final long createdMs = System.currentTimeMillis(); // for the HUD's timer border, needs no clock sync
+    public static final int MIN_DURATION_SHOWN = 40; // don't show really short effects as most of them are just auras
 
     public MobEffectIcon(MobEffect effect, ResourceLocation iconRl, String descId) {
         super("Passive Icon", ICON_SIZE, iconRl, null, () -> false, () -> true, () -> true, null, null, List.of());
@@ -73,6 +74,14 @@ public class MobEffectIcon extends Button {
         long elapsed = TimeClientEvents.getClientTime() - startTime;
         long remainingTicks = Math.max(0, duration - elapsed);
         return (int) Math.ceil(remainingTicks / 20d);
+    }
+
+    @Override
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        String name = I18n.get("effect.reignofnether." + descId);
+        if (duration >= MIN_DURATION_SHOWN)
+            name += " " + I18n.get("effect.reignofnether.duration", getSecondsRemaining());
+        return com.solegendary.reignofnether.ui.Tooltip.of(name).body(I18n.get("effect.reignofnether." + descId + ".desc"));
     }
 
     @Override
