@@ -1,14 +1,15 @@
 package com.solegendary.reignofnether.util;
 
+import com.solegendary.reignofnether.ui.Text;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.CrashReport;
@@ -21,7 +22,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -49,7 +52,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.regex.Matcher;
@@ -60,6 +62,9 @@ import static net.minecraft.client.renderer.RenderStateShard.*;
 public class MyRenderer {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    // draws on endBatch even with Oculus/Iris, whose level bufferSource() defers everything until after the entities
+    public static final MultiBufferSource.BufferSource IMMEDIATE_BUFFER = MultiBufferSource.immediate(new BufferBuilder(256));
 
     public static final RenderType LINES_NO_DEPTH_TEST = RenderType.create(
             "lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
@@ -88,8 +93,31 @@ public class MyRenderer {
                     .createCompositeState(false)
     );
 
+    // hidden by terrain, and occluded by entities too since it writes no depth for them to fail against
+    public static final RenderType LINES_DEPTH_TESTED_UNDER_ENTITIES = RenderType.create(
+            ReignOfNether.MOD_ID + ":lines_depth_tested_under_entities",
+            DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
+            RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)
+                    .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setCullState(NO_CULL)
+                    .createCompositeState(false)
+    );
 
     public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("forge:textures/white.png");
+    // translucent coloured quads drawn over terrain (first-person ping waypoints)
+    public static final RenderType QUADS_NO_DEPTH_TEST = RenderType.create(
+            ReignOfNether.MOD_ID + ":quads_no_depth_test",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, true,
+            RenderType.CompositeState.builder().setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setCullState(NO_CULL)
+                    .setDepthTestState(NO_DEPTH_TEST)
+                    .createCompositeState(false)
+    );
 
     public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
 
@@ -484,8 +512,8 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    // render a HUD frame and return the RectZone that it represents
-    public static RectZone renderFrameWithBg(GuiGraphics guiGraphics, int x, int y, int width, int height, int bgCol) {
+    // render a HUD frame
+    public static void renderFrameWithBg(GuiGraphics guiGraphics, int x, int y, int width, int height, int bgCol) {
         // draw icon frame with dark transparent bg
         guiGraphics.fill(// x1,y1, x2,y2,
                 x + 2, y + 2,
@@ -529,26 +557,6 @@ public class MyRenderer {
                 width - thickness * 2, thickness, // dimensions of blit texture
                 width, thickness // size of texture itself (if < dimensions, texture is repeated)
         );
-        return RectZone.getZoneByLW(x, y, width, height);
-    }
-
-    public static RectZone renderIconFrameWithBg(GuiGraphics guiGraphics, ResourceLocation frameRl, int x, int y, int size, int bg) {
-        //transparent background
-        guiGraphics.fill(// x1,y1, x2,y2,
-                x, y,
-                x + size,
-                y + size,
-                bg); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-
-        // icon frame
-        RenderSystem.setShaderTexture(0, frameRl);
-        guiGraphics.blit(frameRl,
-                x, y, 0,
-                0, 0, // where on texture to start drawing from
-                size, size, // dimensions of blit texture
-                size, size // size of texture itself (if < dimensions, texture is repeated)
-        );
-        return RectZone.getZoneByLW(x, y, size, size);
     }
 
     public static void renderIcon(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int x, int y, int size) {
@@ -561,49 +569,40 @@ public class MyRenderer {
         );
     }
 
+    /** Legacy tooltip lines, drawn now in the HUD's tooltip style next to the cursor (GUI coordinates). */
     public static void renderTooltip(GuiGraphics guiGraphics, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
-        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0) {
-            if (mouseY < MC.screen.height / 2)
-                mouseY += (tooltipLines.size() * 10);
+        if (tooltipLines != null && tooltipLines.size() > 0)
+            renderTooltip(guiGraphics, com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines), mouseX, mouseY);
+    }
+
+    public static void renderTooltip(GuiGraphics guiGraphics, com.solegendary.reignofnether.ui.Tooltip tooltip, int mouseX, int mouseY) {
+        if (MC.screen != null) {
+            var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+            float k = scale.poseScale();
+            guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0, 0, 3000);
-            guiGraphics.renderTooltip(MC.font, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)));
-            guiGraphics.pose().translate(0, 0, -3000);
+            guiGraphics.pose().scale(k, k, 1);
+            tooltip.render(guiGraphics, scale.toUnits(mouseX), scale.toUnits(mouseY), 12, 12, scale.width(), scale.height());
+            guiGraphics.pose().popPose();
         }
     }
 
     public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, ItemStack itemStack, int mouseX, int mouseY) {
         if (unitItem == null || MC.screen == null || !unitItem.enableTooltip)
             return;
-
-        final int iconSize = 16;
-        int spaceWidth = MC.font.width(" ");
-        int paddingChars = iconSize / Math.max(spaceWidth, 1);
-        String pad = " ".repeat(paddingChars);
-        String qty = itemStack.getCount() > 1 ? " (" + itemStack.getCount() + ")" : "";
-        MutableComponent name = unitItem.iconRl != null ?
-                Component.literal(pad + unitItem.getName().getString() + qty) :
-                Component.literal(unitItem.getName().getString() + qty);
-
-        List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
-
-        List<FormattedCharSequence> lines = new ArrayList<>();
-        lines.add(name.getVisualOrderText());
-        if (lore != null)
-            lines.addAll(lore);
-
-        if (mouseY < MC.screen.height / 2)
-            mouseY += (lines.size() * 10);
-
-        int textY = mouseY - (9 * (lines.size() - 1));
-
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 3000);
-        if (unitItem.iconRl != null)
-            guiGraphics.blit(unitItem.iconRl, mouseX + 19, textY - 15, 0, 0, iconSize-2, iconSize-2, iconSize-2, iconSize-2);
-        guiGraphics.pose().translate(0, 0, -1500);
-        guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
-        guiGraphics.pose().translate(0, 0, -1500);
-        guiGraphics.pose().popPose();
+        String name = unitItem.getName().getString();
+        if (itemStack.getCount() > 1)
+            name += " (" + itemStack.getCount() + ")";
+        var rarity = unitItem.rarity.getStyleModifier().apply(Style.EMPTY).getColor();
+        var t = com.solegendary.reignofnether.ui.Tooltip.of(name)
+                .titleColour(rarity != null ? 0xFF000000 | rarity.getValue() : com.solegendary.reignofnether.ui.Theme.TEXT)
+                .tag("Item", com.solegendary.reignofnether.ui.Theme.ORANGE);
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank())
+            t.body(desc);
+        for (FormattedCharSequence line : unitItem.getEntityTooltip(itemStack))
+            t.body(line);
+        renderTooltip(guiGraphics, t, mouseX, mouseY);
     }
 
     public static void renderItemInFrontOfEntityFace(PoseStack poseStack, LivingEntity entity, float partialTicks, ItemStack itemStack) {
@@ -707,13 +706,13 @@ public class MyRenderer {
         poseStack.popPose();
     }
 
-    public static void drawScaledCenteredString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int color, float scale) {
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
-        poseStack.translate(x, y, 0);
-        poseStack.scale(scale, scale, 1.0f);
-        guiGraphics.drawCenteredString(font, text, 0, 0, color);
-        poseStack.popPose();
+    // a plain "?" until the skin has loaded
+    public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize) {
+        var level = Minecraft.getInstance().level;
+        if (level != null && level.players().stream().anyMatch(p -> p.getName().getString().equals(playerName) && p.isSkinLoaded()))
+            renderPlayerHead(g, playerName, x, y, iconSize, null);
+        else
+            Text.unknown(g, x, y, iconSize);
     }
 
     public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize, ResourceLocation fallbackRl) {

@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.minimap;
 
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -12,18 +14,21 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.panels.MapZoom;
+import com.solegendary.reignofnether.ui.Icon;
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.ping.PingType;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -38,7 +43,6 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -57,7 +61,6 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -81,13 +84,14 @@ public class MinimapClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
     private static int worldRadius = 100; // how many world blocks should be mapped
     private static int mapGuiRadius = 50; // actual size on the screen
-    public static final int CORNER_OFFSET = 10;
-    public static final int BG_OFFSET = 6;
+    // bottom-right corner of the map in GUI coordinates, set from the HUD layout every frame
+    private static float mapRight = 0;
+    private static float mapBottom = 0;
 
+    // ponytail: terrain cost grows with the area, so the last step is 1.5x rather than double; raise it if 360 stays smooth
+    private static final int[] MAP_RADII = { 120, 240, 360 };
     private static boolean largeMap = false;
     public static boolean isLargeMap() { return largeMap; }
-    private static boolean shouldToggleSize = false;
-    private static boolean markerMode = false;
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
@@ -95,8 +99,6 @@ public class MinimapClientEvents {
     private static final int PLAYER_THICKNESS = 1;
     private static final int START_POS_RADIUS = 7;
     private static final int START_POS_THICKNESS = 2;
-    private static final int MARKER_RADIUS = 16;
-    private static final int MARKER_THICKNESS = 3;
     private static final int MARKER_PIXEL_OFFSET = 4; // shift rendered marker to better align with cursor
 
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
@@ -122,7 +124,7 @@ public class MinimapClientEvents {
 
     private static int xc_world = 0; // world pos x centre, maps to xc
     private static int zc_world = 0; // world pos zcentre, maps to yc
-    private static float xl, xc, xr, yt, yc, yb;
+    private static float xc, yc;
 
     public static final ArrayList<VirtualUnit> virtualUnits = new ArrayList<>();
     public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
@@ -134,15 +136,14 @@ public class MinimapClientEvents {
     private static final float EXTRA_DARK = 0.10f;
 
     private static boolean lockedMap = false; // does map follow when moving offscreen?
-    private static boolean highlightAnimals = false; // apply glow effect (clientside only) to animals
-    private static boolean underlineUnitsAndBuildings = true; // underline units and buildings
-
+    // apply glow effect (clientside only) to animals
     public static boolean shouldHighlightAnimals() {
-        return highlightAnimals;
+        return ReignOfNetherClientConfigs.HIGHLIGHT_ANIMALS.get();
     }
 
+    // underline units and buildings
     public static boolean shouldUnderline() {
-        return underlineUnitsAndBuildings;
+        return ReignOfNetherClientConfigs.UNDERLINES.get();
     }
 
     public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
@@ -179,17 +180,21 @@ public class MinimapClientEvents {
         neutralFogUnits.clear();
     }
 
-    private static class MapMarker {
+    public static class MapMarker {
         public final int x;
+        public final int y;
         public final int z;
         public final String playerName;
+        public final PingType type;
         public int ticksRemaining;
         public int ageTicks;
 
-        public MapMarker(int x, int z, String playerName) {
+        public MapMarker(int x, int y, int z, String playerName, PingType type) {
             this.x = x;
+            this.y = y;
             this.z = z;
             this.playerName = playerName;
+            this.type = type;
             this.ticksRemaining = 200; // 10 seconds
             this.ageTicks = 0;
         }
@@ -201,22 +206,8 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void addMapMarker(int x, int z, String playerName) {
-        mapMarkers.add(new MapMarker(x, z, playerName));
-    }
-
-    public static void addMapMarkerForSelfAndAllies(int mouseX, int mouseY) {
-        if (Keybindings.altMod.isDown()){
-            mouseX += 2;
-            mouseY += 1;
-        } else {
-            mouseX -= 1;
-            mouseY += 1;
-        }
-        BlockPos markerPos = getWorldPosOnMinimap(mouseX, mouseY, false);
-        if (markerPos != null) {
-            PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(markerPos.getX(), markerPos.getZ()));
-        }
+    public static void addMapMarker(int x, int y, int z, String playerName, PingType type) {
+        mapMarkers.add(new MapMarker(x, y, z, playerName, type));
     }
 
     public static void removeVirtualUnit(int id) {
@@ -240,10 +231,6 @@ public class MinimapClientEvents {
         }
     }
 
-    public static int getMapGuiRadius() {
-        return mapGuiRadius;
-    }
-
     public static int getWorldRadius() {
         return worldRadius;
     }
@@ -260,39 +247,46 @@ public class MinimapClientEvents {
         return mapTexture != null && mapTexLoc != null;
     }
 
+    /**
+     * The square of the world shown by the match setup map, in blocks: {minX, minZ, size}. The playable
+     * area (world border) when the mapped texture covers it, so the map is centred on it with no unmapped
+     * edges; otherwise the whole mapped area.
+     */
+    private static int[] playArea() {
+        int texMinX = xc_world - worldRadius;
+        int texMinZ = zc_world - worldRadius;
+        int tex = worldRadius * 2;
+        if (MC.level != null) {
+            var border = MC.level.getWorldBorder();
+            int size = (int) Math.ceil(Math.max(border.getMaxX() - border.getMinX(), border.getMaxZ() - border.getMinZ()));
+            int minX = (int) Math.floor((border.getMinX() + border.getMaxX()) / 2 - size / 2.0);
+            int minZ = (int) Math.floor((border.getMinZ() + border.getMaxZ()) / 2 - size / 2.0);
+            if (minX >= texMinX && minZ >= texMinZ && minX + size <= texMinX + tex && minZ + size <= texMinZ + tex)
+                return new int[] { minX, minZ, size };
+        }
+        return new int[] { texMinX, texMinZ, tex };
+    }
+
+    /** Draws the playable area of the map, north up, into the rectangle. */
     public static void renderMapInto(GuiGraphics g, int x, int y, int w, int h) {
         if (mapTexture == null || mapTexLoc == null) return;
         int tex = worldRadius * 2;
-        g.blit(mapTexLoc, x, y, w, h, 0, 0, tex, tex, tex, tex);
+        int[] area = playArea();
+        int u = area[0] - (xc_world - worldRadius);
+        int v = area[1] - (zc_world - worldRadius);
+        g.blit(mapTexLoc, x, y, w, h, u, v, area[2], area[2], tex, tex);
     }
 
-    public static Vector2f worldToRect(int worldX, int worldZ,
-                                                int rectX, int rectY, int rectW, int rectH) {
-        int centreX = xc_world;
-        int centreZ = zc_world;
-        int span = worldRadius * 2;
-        float u = (worldX - (centreX - worldRadius)) / (float) span;
-        float v = (worldZ - (centreZ - worldRadius)) / (float) span;
+    public static Vector2f worldToRect(int worldX, int worldZ, float rectX, float rectY, float rectW, float rectH) {
+        int[] area = playArea();
+        float u = (worldX - area[0]) / (float) area[2];
+        float v = (worldZ - area[1]) / (float) area[2];
         return new Vector2f(rectX + u * rectW, rectY + v * rectH);
-    }
-
-    public static BlockPos rectToWorld(int sx, int sy,
-                                                          int rectX, int rectY, int rectW, int rectH) {
-        float u = (sx - rectX) / (float) Math.max(1, rectW);
-        float v = (sy - rectY) / (float) Math.max(1, rectH);
-        int span = worldRadius * 2;
-        int wx = (int) (xc_world - worldRadius + u * span);
-        int wz = (int) (zc_world - worldRadius + v * span);
-        int y = 64;
-        if (MC.level != null) {
-            y = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, wx, wz);
-        }
-        return new BlockPos(wx, y, wz);
     }
 
     public static void setLargeMap(boolean large) {
         if (largeMap != large) {
-            toggleMapSize();
+            setWideStep(large ? 1 : 0);
         }
     }
 
@@ -312,15 +306,10 @@ public class MinimapClientEvents {
 
     public static boolean suppressViewQuad = false;
 
-    private static void toggleMapSize() {
-        largeMap = !largeMap;
-        if (largeMap) {
-            worldRadius = 240;
-            mapGuiRadius = 120;
-        } else {
-            worldRadius = 120;
-            mapGuiRadius = 60;
-        }
+    private static void setWideStep(int step) {
+        largeMap = step > 0;
+        // the on-screen size comes from the HUD layout, see updateScreenGeometry()
+        worldRadius = MAP_RADII[step];
         if (mapTexLoc != null)
             Minecraft.getInstance().textureManager.release(mapTexLoc); // also closes the old DynamicTexture
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
@@ -334,46 +323,10 @@ public class MinimapClientEvents {
         forceUpdateAllPartitions = true;
     }
 
-    public static Button getToggleSizeButton() {
-        return new Button(largeMap ? "Close" : "Open large map",
-                14,
-                largeMap
-                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/barrier.png")
-                        : ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                Keybindings.minimapToggle,
-                () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK),
-                () -> true,
-                () -> shouldToggleSize = true,
-                null,
-                List.of(fcs(largeMap
-                        ? I18n.get("hud.map.reignofnether.close")
-                        : I18n.get("hud.map.reignofnether.open")))
-        );
-    }
-
-    public static Button getMarkerModeButton() {
-        return new Button("Marker",
-                14,
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/target_top.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> markerMode,
-                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
-                () -> Keybindings.altMod.isDown() || isLargeMap(),
-                () -> markerMode = !markerMode,
-                null,
-                List.of(markerMode
-                        ? fcs(I18n.get("hud.map.reignofnether.marker_mode_enabled"))
-                        : fcs(I18n.get("hud.map.reignofnether.marker_mode_disabled")))
-        );
-    }
-
     public static Button getCamSensitivityButton() {
         return new Button("Camera Sensitivity",
                 14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png"),
+                Icon.SLIDERS.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
@@ -406,6 +359,7 @@ public class MinimapClientEvents {
                     } else if (nightCircleMode == NightCircleMode.OFF) {
                         nightCircleMode = NightCircleMode.ALL;
                     }
+                    ReignOfNetherClientConfigs.NIGHT_CIRCLES.set(nightCircleMode);
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
                         RangeIndicatorAddon ria;
                         if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
@@ -424,9 +378,7 @@ public class MinimapClientEvents {
     public static Button getMapLockButton() {
         return new Button("Lock Map",
                 14,
-                lockedMap ?
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_front.png") :
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_front_dark.png"),
+                lockedMap ? Icon.LOCK.texture : Icon.UNLOCK.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
@@ -448,19 +400,15 @@ public class MinimapClientEvents {
     public static Button getHighlightAnimalsButton() {
         return new Button("Highlight Animals",
                 14,
-                highlightAnimals ?
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png") :
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep_dark.png"),
+                Icon.PAW.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
-                () -> false,
+                MinimapClientEvents::shouldHighlightAnimals,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
                 () -> true,
-                () -> {
-                    highlightAnimals = !highlightAnimals;
-                },
+                () -> ReignOfNetherClientConfigs.HIGHLIGHT_ANIMALS.set(!shouldHighlightAnimals()),
                 null,
-                List.of(fcs(highlightAnimals
+                List.of(fcs(shouldHighlightAnimals()
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
                         : I18n.get("hud.map.reignofnether.highlight_animals.disabled"))
                 )
@@ -470,7 +418,7 @@ public class MinimapClientEvents {
     public static Button getToggleUnderlinesButton() {
         return new Button("Toggle Underlines",
                 14,
-                underlineUnitsAndBuildings ?
+                shouldUnderline() ?
                         ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_green_diamond.png") :
                         ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_dark.png"),
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
@@ -478,9 +426,9 @@ public class MinimapClientEvents {
                 () -> false,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
                 () -> true,
-                () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
+                () -> ReignOfNetherClientConfigs.UNDERLINES.set(!shouldUnderline()),
                 null,
-                List.of(fcs(underlineUnitsAndBuildings
+                List.of(fcs(shouldUnderline()
                         ? I18n.get("hud.map.reignofnether.underlines.enabled")
                         : I18n.get("hud.map.reignofnether.underlines.disabled"))
                 )
@@ -490,12 +438,12 @@ public class MinimapClientEvents {
     public static Button getCameraRotateCWButton() {
         return new Button("Rotate camera clockwise",
                 14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/rotate_cw.png"),
+                Icon.REDO.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.rotCW,
                 () -> false,
-                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
-                () -> Keybindings.altMod.isDown() || isLargeMap(),
+                () -> false, // has its own tile in the HUD's minimap tools
+                () -> true,
                 () -> OrthoviewClientEvents.fixedRotateCam(true),
                 null,
                 List.of(
@@ -508,12 +456,12 @@ public class MinimapClientEvents {
     public static Button getCameraRotateCCWButton() {
         return new Button("Rotate camera counter-clockwise",
                 14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/rotate_ccw.png"),
+                Icon.UNDO.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 Keybindings.rotCCW,
                 () -> false,
-                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
-                () -> Keybindings.altMod.isDown() || isLargeMap(),
+                () -> false, // has its own tile in the HUD's minimap tools
+                () -> true,
                 () -> OrthoviewClientEvents.fixedRotateCam(false),
                 null,
                 List.of(
@@ -730,8 +678,8 @@ public class MinimapClientEvents {
 
             int xc = ns.getFirst().getX() + (7 / 2);
             int zc = ns.getFirst().getZ() + (7 / 2);
-            int xN = xc - xc_world + (mapGuiRadius * 2);
-            int zN = zc - zc_world + (mapGuiRadius * 2);
+            int xN = xc - xc_world + worldRadius;
+            int zN = zc - zc_world + worldRadius;
 
             nightSources.add(new Pair<>(new BlockPos(xN, 0, zN), ns.getSecond()));
         }
@@ -877,8 +825,8 @@ public class MinimapClientEvents {
                             ? 0x000000
                             : color;
 
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -899,8 +847,8 @@ public class MinimapClientEvents {
                             ? 0x000000
                             : color;
 
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -911,10 +859,13 @@ public class MinimapClientEvents {
     private static void drawPlayerOnMap(int xc, int zc, Player player) {
         if (MC.player == null)
             return;
-        String thisPlayerName = MC.player.getName().getString();
         String thatPlayerName = player.getName().getString();
-        if (thisPlayerName.equals(thatPlayerName))
+        if (MC.player.getName().getString().equals(thatPlayerName))
             return;
+        // compare factions, so a co-commander's lead and same-faction soldiers count as friendly
+        String myFaction = PlayerRolesClient.myCommander();
+        String thatFaction = PlayerRolesClient.commanderOf(thatPlayerName);
+        boolean friendly = myFaction.equals(thatFaction) || AlliancesClient.isAllied(myFaction, thatFaction);
         if (player.isSpectator() || player.isCreative())
             return;
 
@@ -930,13 +881,13 @@ public class MinimapClientEvents {
                             x0 < PLAYER_THICKNESS || x0 >= (PLAYER_RADIUS * 2) - PLAYER_THICKNESS ||
                                     z0 < PLAYER_THICKNESS || z0 >= (PLAYER_RADIUS * 2) - PLAYER_THICKNESS
                     )) {
-                        if (AlliancesClient.isAllied(thisPlayerName, thatPlayerName))
+                        if (friendly)
                             rgb = 0x3232FF;
                         else
                             rgb = 0xFF0000;
                     }
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -968,8 +919,8 @@ public class MinimapClientEvents {
                             //    rgb = 0xFFFF00;
                             rgb = startPos.getHexColor();
                         }
-                        int xN = x - xc_world + (mapGuiRadius * 2);
-                        int zN = z - zc_world + (mapGuiRadius * 2);
+                        int xN = x - xc_world + worldRadius;
+                        int zN = z - zc_world + worldRadius;
 
                         mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
@@ -980,51 +931,42 @@ public class MinimapClientEvents {
 
     /** Converts a world XZ coordinate to a minimap screen XY position (centre of that pixel). */
     public static Vec2 worldPosToMinimapScreen(int worldX, int worldZ) {
-        float pixelsToBlocks = (float) worldRadius / (float) mapGuiRadius;
-
-        // normalised offset from map centre in pixels (pre-rotation)
-        float dx = (worldX - xc_world) / pixelsToBlocks;
-        float dz = (worldZ - zc_world) / pixelsToBlocks;
-
-        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
-            // square mode: same -45° rotation as the diamond, but with the rotated quad
-            // circumscribing the visible square (content zoom = SQUARE_CONTENT_SCALE)
-            Vec2 rotated = MyMath.rotateCoords(
-                (float) (dx / Math.sqrt(2) * SQUARE_CONTENT_SCALE),
-                (float) (dz / Math.sqrt(2) * SQUARE_CONTENT_SCALE),
-                -45
-            );
-            return new Vec2(xc + rotated.x, yc + rotated.y);
-        }
-
-        // rotate -45° to go from axis-aligned → diamond orientation
-        Vec2 rotated = MyMath.rotateCoords((float) (dx / Math.sqrt(2)), (float) (dz / Math.sqrt(2)), -45);
-
-        return new Vec2(xc + rotated.x, yc + rotated.y);
+        float d = contentRadius();
+        float u = (worldX + 0.5f - xc_world) / worldRadius;
+        float v = (worldZ + 0.5f - zc_world) / worldRadius;
+        return new Vec2(xc + d * (u + v) / 2, yc + d * (v - u) / 2);
     }
+
+    /**
+     * Half-diagonal the whole map texture would have on screen. The texture is turned 45 degrees to match
+     * the camera; at zoom 1 it fills the diamond frame, zoomed in only its middle is drawn.
+     */
+    private static float contentRadius() {
+        // the square frame is filled by a texture twice the diamond's size
+        return (isSquare() ? 2 : 1) * ZOOM.value() * mapGuiRadius;
+    }
+
+    /** Square frame (the corners of the turned map are cut off) instead of the diamond; a client setting. */
+    public static boolean isSquare() {
+        return ReignOfNetherClientConfigs.SQUARE_MINIMAP.get();
+    }
+
+    /** The HUD minimap's zoom: 1 shows the whole map. */
+    public static final MapZoom ZOOM = new MapZoom(1f).withWideSteps(MAP_RADII.length - 1, MinimapClientEvents::setWideStep);
 
     private static void drawMapMarker(MapMarker marker) {
         int xc = marker.x;
         int zc = marker.z;
-        int color = getPulsingMarkerColor(marker);
+        int color = marker.type.rgb;
         float alphaPulse = MiscUtil.getOscillatingFloat(0.45d, 1.0d, marker.ageTicks * 35L);
         int alpha = Mth.clamp((int) (alphaPulse * 255f), 90, 255);
 
-        for (int x = xc - MARKER_RADIUS; x < xc + MARKER_RADIUS; x++) {
-            for (int z = zc - MARKER_RADIUS; z < zc + MARKER_RADIUS; z++) {
+        for (int x = xc - PING_RADIUS - 1; x <= xc + PING_RADIUS + 1; x++) {
+            for (int z = zc - PING_RADIUS - 1; z <= zc + PING_RADIUS + 1; z++) {
                 if (isWorldXZinsideMap(x, z)) {
-                    double dist = Math.sqrt(Math.pow(x - xc, 2) + Math.pow(z - zc, 2));
-
-                    boolean draw = false;
-
-                    // Draw concentric rings
-                    if (dist > MARKER_RADIUS - MARKER_THICKNESS && dist < MARKER_RADIUS) draw = true;
-                    if (dist > MARKER_RADIUS * 0.6 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.6) draw = true;
-                    if (dist > MARKER_RADIUS * 0.2 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.2) draw = true;
-
-                    if (draw) {
-                        int xN = x - xc_world + (mapGuiRadius * 2) + MARKER_PIXEL_OFFSET;
-                        int zN = z - zc_world + (mapGuiRadius * 2);
+                    if (isMarkerPixel(marker.type, x - xc, z - zc)) {
+                        int xN = x - xc_world + worldRadius + MARKER_PIXEL_OFFSET;
+                        int zN = z - zc_world + worldRadius;
                         if (xN >= 0 && xN < mapColoursOverlays.length && zN >= 0 && zN < mapColoursOverlays[0].length) {
                             mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(color) | (alpha << 24);
                         }
@@ -1034,15 +976,25 @@ public class MinimapClientEvents {
         }
     }
 
-    private static int getPulsingMarkerColor(MapMarker marker) {
-        int baseColor = PlayerColors.getPlayerDisplayColorHex(marker.playerName);
-        float pulse = MiscUtil.getOscillatingFloat(0.35d, 1.0d, marker.ageTicks * 25L);
+    private static final int PING_RADIUS = 9;    // ping shapes, in map texture pixels
+    private static final double PING_THICKNESS = 2.5;
 
-        int r = Mth.clamp((int) (((baseColor >> 16) & 0xFF) * pulse), 0, 255);
-        int g = Mth.clamp((int) (((baseColor >> 8) & 0xFF) * pulse), 0, 255);
-        int b = Mth.clamp((int) ((baseColor & 0xFF) * pulse), 0, 255);
-
-        return (r << 16) | (g << 8) | b;
+    // each ping type has its own small symbol. The map is drawn rotated 45°,
+    // so shapes are tested in screen-aligned axes (u, v); every symbol is symmetric, so the rotation's sign
+    // doesn't matter. Same shapes as PingType.symbol: Help ◎ ring with a dot, Attack ⚔ X, Enemy ◇ diamond, Defend □ square
+    static boolean isMarkerPixel(PingType type, int dx, int dz) {
+        double u = (dx - dz) / Math.sqrt(2), v = (dx + dz) / Math.sqrt(2);
+        double r = PING_RADIUS, t = PING_THICKNESS;
+        double au = Math.abs(u), av = Math.abs(v);
+        return switch (type) {
+            case HELP -> {
+                double d = Math.sqrt(u * u + v * v);
+                yield (d > r - t && d <= r) || d <= t;
+            }
+            case ATTACK -> au <= r * 0.8 && av <= r * 0.8 && Math.abs(au - av) <= t * 0.6;
+            case ENEMY -> au + av <= r && au + av > r - t;
+            case DEFEND -> Math.max(au, av) <= r * 0.8 && Math.max(au, av) > r * 0.8 - t;
+        };
     }
 
 
@@ -1056,153 +1008,93 @@ public class MinimapClientEvents {
         PoseStack stack = guiGraphics.pose();
         Matrix4f matrix4f = stack.last().pose();
 
-        // place vertices in a diamond shape - left, centre, right, top, centre, bottom
-        // map vertex coordinates (left, centre, right, top, centre, bottom)
-        xl = MC.getWindow().getGuiScaledWidth() - (mapGuiRadius * 2) - CORNER_OFFSET;
-        xc = MC.getWindow().getGuiScaledWidth() - mapGuiRadius - CORNER_OFFSET;
-        xr = MC.getWindow().getGuiScaledWidth() - CORNER_OFFSET;
-        yt = MC.getWindow().getGuiScaledHeight() - (mapGuiRadius * 2) - CORNER_OFFSET;
-        yc = MC.getWindow().getGuiScaledHeight() - mapGuiRadius - CORNER_OFFSET;
-        yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
+        // diamond frame, the map turned 45 degrees like the camera view
+        updateScreenGeometry();
+        xc = mapRight - mapGuiRadius;
+        yc = mapBottom - mapGuiRadius;
 
-        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
-            renderSquareMap(guiGraphics, matrix4f);
-            return;
+        if (isSquare()) {
+            guiGraphics.enableScissor(Math.round(xc - mapGuiRadius), Math.round(yc - mapGuiRadius),
+                    Math.round(xc + mapGuiRadius), Math.round(yc + mapGuiRadius));
+            drawMapTexture(matrix4f, xc, yc, contentRadius(), 1);
+            guiGraphics.disableScissor();
+        } else {
+            drawMapTexture(matrix4f, xc, yc, mapGuiRadius, ZOOM.value());
         }
+        renderPingPulses(guiGraphics);
+    }
 
-        // background vertex coords need to be slightly larger
-        float xl_bg = xl - BG_OFFSET;
-        float xc_bg = xc;
-        float xr_bg = xr + BG_OFFSET;
-        float yt_bg = yt - BG_OFFSET;
-        float yc_bg = yc;
-        float yb_bg = yb + BG_OFFSET;
+    // a square outline growing and fading from each ping, once a second while it lasts
+    private static void renderPingPulses(GuiGraphics g) {
+        for (MapMarker m : mapMarkers) {
+            Vec2 p = worldPosToMinimapScreen(m.x, m.z);
+            if (!isPointInsideMinimap(p.x, p.y))
+                continue;
+            float t = (m.ageTicks % 20) / 20f;
+            int s = Math.round(4 * (0.4f + 1.8f * t));
+            int colour = ((int) ((1 - t) * 255) << 24) | m.type.rgb;
+            int x = Math.round(p.x), y = Math.round(p.y);
+            g.fill(x - s, y - s, x + s, y - s + 1, colour);
+            g.fill(x - s, y + s - 1, x + s, y + s, colour);
+            g.fill(x - s, y - s + 1, x - s + 1, y + s - 1, colour);
+            g.fill(x + s - 1, y - s + 1, x + s, y + s - 1, colour);
+        }
+    }
 
-        // render map background first
-        ResourceLocation iconFrameResource = ResourceLocation.fromNamespaceAndPath(
-            ReignOfNether.MOD_ID,
-            "textures/hud/map_background.png"
-        );
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        // code taken from GuiComponent.blit()
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix4f, xc_bg, yb_bg, 0.0F).uv(0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xr_bg, yc_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xc_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xl_bg, yc_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
+    /**
+     * Draws the map turned like the HUD minimap, centred in the square (x, y, size) in the current pose.
+     * Zoom 1 shows the whole map, 2 fills the square like the HUD minimap; the caller clips to the square.
+     */
+    public static void renderSquare(GuiGraphics g, float x, float y, float size, float zoom) {
+        drawMapTexture(g.pose().last().pose(), x + size / 2, y + size / 2, size / 2 * zoom, 1);
+    }
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
-
-        // render map itself
+    /** A diamond of half-diagonal d showing the middle 1/zoom of the map texture. */
+    private static void drawMapTexture(Matrix4f matrix4f, float cx, float cy, float d, float zoom) {
+        float lo = 0.5f - 0.5f / zoom, hi = 0.5f + 0.5f / zoom;
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer consumer = buffer.getBuffer(mapRenderType);
-        consumer.vertex(matrix4f, xc, yb, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xr, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc, yt, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xl, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
-
+        consumer.vertex(matrix4f, cx, cy + d, 0.0F).color(255, 255, 255, 255).uv(lo, hi).uv2(255).endVertex();
+        consumer.vertex(matrix4f, cx + d, cy, 0.0F).color(255, 255, 255, 255).uv(hi, hi).uv2(255).endVertex();
+        consumer.vertex(matrix4f, cx, cy - d, 0.0F).color(255, 255, 255, 255).uv(hi, lo).uv2(255).endVertex();
+        consumer.vertex(matrix4f, cx - d, cy, 0.0F).color(255, 255, 255, 255).uv(lo, lo).uv2(255).endVertex();
         buffer.endBatch();
     }
 
-    public static final float SQUARE_SCALE = 1.2f; // 20% bigger than the inscribed square
-    public static float squareHalf = 0; // half-side of the visible square, set per frame
-    // content-zoom factor for square mode: 2 * SQUARE_SCALE / sqrt(2) — chosen so the rotated
-    // (-45°) texture quad circumscribes the visible square (no empty corners after scissor)
-    public static final float SQUARE_CONTENT_SCALE = (float) (SQUARE_SCALE * Math.sqrt(2));
-
-    private static void renderSquareMap(GuiGraphics guiGraphics, Matrix4f matrix4f) {
-        float baseHalf = (float) (mapGuiRadius / Math.sqrt(2));
-        float half = baseHalf * SQUARE_SCALE;
-        squareHalf = half;
-
-        // anchor bottom-right corner at the very bottom-right of the screen
-        int sw = MC.getWindow().getGuiScaledWidth();
-        int sh = MC.getWindow().getGuiScaledHeight();
-        float brX = sw - CORNER_OFFSET;
-        float brY = sh - CORNER_OFFSET;
-        // centre of the bigger square (grows up-left from the fixed bottom-right)
-        xc = brX - half;
-        yc = brY - half;
-
-        float x1 = brX - 2 * half;
-        float x2 = brX;
-        float y1 = brY - 2 * half;
-        float y2 = brY;
-
-        // parchment frame: same texture as the diamond — the artwork is a square frame drawn
-        // axis-aligned in the image, so standard (0,0)→(1,1) UVs render it as-is here.
-        float xl_bg = x1 - BG_OFFSET, xr_bg = x2 + BG_OFFSET;
-        float yt_bg = y1 - BG_OFFSET, yb_bg = y2 + BG_OFFSET;
-        ResourceLocation bg = ResourceLocation.fromNamespaceAndPath(
-                ReignOfNether.MOD_ID, "textures/hud/map_background.png");
-        RenderSystem.setShaderTexture(0, bg);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bb.vertex(matrix4f, xl_bg, yb_bg, 0.0F).uv(0.0F, 1.0F).endVertex();
-        bb.vertex(matrix4f, xr_bg, yb_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
-        bb.vertex(matrix4f, xr_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
-        bb.vertex(matrix4f, xl_bg, yt_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
-        BufferUploader.drawWithShader(bb.end());
-
-        // clip the rotated content to the visible square (after the frame, so frame isn't clipped)
-        guiGraphics.enableScissor((int) x1, (int) y1, (int) x2, (int) y2);
-
-        // render the texture as a rotated quad that fully circumscribes the visible square
-        // (d = 2*half makes the diamond's edges meet the square's corners — no black borders)
-        float d = 2 * half;
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        VertexConsumer consumer = buffer.getBuffer(mapRenderType);
-        consumer.vertex(matrix4f, xc, yc + d, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc + d, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc, yc - d, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc - d, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
-        buffer.endBatch();
-
-        guiGraphics.disableScissor();
-    }
-
-    // https://stackoverflow.com/questions/27022064/detect-click-in-a-diamond
     public static boolean isPointInsideMinimap(double x, double y) {
-        double dx = Math.abs(x - xc);
-        double dy = Math.abs(y - yc);
-        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
-            return dx <= squareHalf && dy <= squareHalf;
-        }
-        double d = dx / (mapGuiRadius * 2) + dy / (mapGuiRadius * 2);
-        return d <= 0.5;
+        if (isSquare())
+            return Math.abs(x - xc) <= mapGuiRadius && Math.abs(y - yc) <= mapGuiRadius;
+        return Math.abs(x - xc) + Math.abs(y - yc) <= mapGuiRadius;
     }
 
     // given an x and y on the screen that the player clicked, return the world position of that spot
-    private static BlockPos getWorldPosOnMinimap(float x, float y, boolean offsetForCamera) {
+    public static BlockPos getWorldPosOnMinimap(float x, float y, boolean offsetForCamera) {
         if (!isPointInsideMinimap(x, y) || CursorClientEvents.isBoxSelecting() || MC.level == null) {
             return null;
         }
 
-        float pixelsToBlocks = (float) worldRadius / (float) mapGuiRadius;
+        return toWorldPos(x - xc, y - yc, contentRadius(), offsetForCamera);
+    }
 
-        // offset x,y so that user clicks the centre of the view quad instead of bottom border
+    /** The world position under (x, y) on a map drawn by renderSquare into the square at (left, top). */
+    public static BlockPos getWorldPosOnSquare(float x, float y, float left, float top, float size, float zoom) {
+        if (MC.level == null || x < left || y < top || x > left + size || y > top + size)
+            return null;
+        return toWorldPos(x - (left + size / 2), y - (top + size / 2), size / 2 * zoom, true);
+    }
+
+    // dx, dy from the centre of a diamond of half-diagonal d
+    private static BlockPos toWorldPos(float dx, float dy, float d, boolean offsetForCamera) {
+        double xWorld = xc_world + (dx - dy) / d * worldRadius;
+        double zWorld = zc_world + (dx + dy) / d * worldRadius;
+
+        // offset so the click lands on the centre of the view quad instead of its bottom edge
         if (offsetForCamera) {
-            float camRotX = OrthoviewClientEvents.getCamRotX();
-            double radius = OrthoviewClientEvents.getZoom() * 0.5F / pixelsToBlocks;
-            double angleRad = Math.toRadians(camRotX - 315.0);
-            x -= radius * Math.cos(angleRad);
-            y -= radius * Math.sin(angleRad);
-        }
-
-        double xWorld;
-        double zWorld;
-        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
-            // square mode: undo -45° rotation and SQUARE_CONTENT_SCALE
-            Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc, 45);
-            xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2) / SQUARE_CONTENT_SCALE;
-            zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2) / SQUARE_CONTENT_SCALE;
-        } else {
-            Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc, 45);
-            xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
-            zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+            double angleRad = Math.toRadians(OrthoviewClientEvents.getCamRotX() - 315.0);
+            Vec2 dir = MyMath.rotateCoords((float) Math.cos(angleRad), (float) Math.sin(angleRad), 45);
+            double blocks = OrthoviewClientEvents.getZoom() * 0.5 * Math.sqrt(2);
+            xWorld -= dir.x * blocks;
+            zWorld -= dir.y * blocks;
         }
         int roundedX = Mth.floor(xWorld + 0.5d);
         int roundedZ = Mth.floor(zWorld + 0.5d);
@@ -1217,10 +1109,6 @@ public class MinimapClientEvents {
                 OrthoviewClientEvents.isCameraLocked() ||
                 HudClientEvents.isMouseOverAnyButton() ||
                 !(MC.screen instanceof TopdownGui)) {
-            return;
-        }
-
-        if (markerMode) {
             return;
         }
 
@@ -1267,13 +1155,12 @@ public class MinimapClientEvents {
         Button startPosButton = getMousedOverStartPosButton();
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && (!isMouseOverAnyButton() || startPosButton != null)) {
             BlockPos moveTo = startPosButton != null ?
-                    getWorldPosOnMinimap((float) startPosButton.x + 11, startPosButton.y + 11, true) :
+                    getWorldPosOnMinimap((float) HudGeometry.scale().toGui(startPosButton.x + startPosButton.drawnSize / 2.0),
+                            (float) HudGeometry.scale().toGui(startPosButton.y + startPosButton.drawnSize / 2.0), true) :
                     getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
 
             if (MC.player != null && moveTo != null) {
-                if (markerMode) {
-                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                } else if (!altDown && Keybindings.shiftMod.isDown()) {
+                if (!altDown && Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
                     forceUpdateAllPartitions = true;
                     TutorialClientEvents.clickedMinimap = true;
@@ -1316,7 +1203,7 @@ public class MinimapClientEvents {
 					boolean queueOrders = Keybindings.shiftMod.isDown();
 					if (!queueOrders) {
 						new UnitActionItem(
-							MC.player.getName().getString(),
+							PlayerRolesClient.myOwner(),
 							UnitAction.MOVE, -1, singleUnitId,
 							targetBp,
 							new BlockPos(0, 0, 0)
@@ -1325,7 +1212,7 @@ public class MinimapClientEvents {
 						MiscUtil.addUnitCheckpoint(unit, targetBp, true);
 					}
 					PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-						MC.player.getName().getString(),
+						PlayerRolesClient.myOwner(),
 						UnitAction.MOVE, -1, singleUnitId,
 						targetBp,
 						new BlockPos(0, 0, 0),
@@ -1337,10 +1224,6 @@ public class MinimapClientEvents {
             } else {
                 BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
                 if (moveTo == null) return;
-                if (Keybindings.altMod.isDown()) {
-                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                    return;
-                }
                 if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
                     var ids = UnitClientEvents.getSelectedUnits();
                     var idArray = ArrayUtil.livingEntityListToIdArray(ids);
@@ -1351,32 +1234,40 @@ public class MinimapClientEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
+    /** Size and corner of the map on screen, taken from the HUD layout so it always sits in the console. */
+    private static void updateScreenGeometry() {
+        float[] r = HudGeometry.toGui(HudGeometry.layout().minimap());
+        float size = r[2];
+        mapGuiRadius = Math.max(1, Math.round(size / 2));
+        mapRight = r[0] + r[2];
+        mapBottom = r[1] + r[3];
+    }
+
+    /** Drawn by the HUD, after the console background and before the panels. */
+    public static void render(GuiGraphics guiGraphics) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
-        // toggle here to ensure it doesn't happen in the middle of the updates
-        if (shouldToggleSize) {
-            shouldToggleSize = false;
-            toggleMapSize();
-        }
-
-        renderMap(evt.getGuiGraphics());
-
-        //MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-        //        "camrotX: " + OrthoviewClientEvents.getCamRotX()
-        //});
+        renderMap(guiGraphics);
     }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
+        boolean soldier = PlayerRolesClient.myRole() == PlayerRole.SOLDIER; // their HUD has a minimap too
+        if (evt.phase != TickEvent.Phase.END || !(OrthoviewClientEvents.isEnabled() || soldier))
             return;
+        update(soldier);
+    }
 
-        long t0 = System.nanoTime();
+    /** Keeps the map updating for a menu that shows it (the saved game resume screen) when orthoview is off. */
+    public static void tickForScreen() {
+        if (!OrthoviewClientEvents.isEnabled())
+            update(false);
+    }
+
+    private static void update(boolean soldier) {
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
         if (mapColoursOverlays.length != worldRadius * 2)
@@ -1391,7 +1282,7 @@ public class MinimapClientEvents {
         mapMarkers.removeIf(MapMarker::tick);
 
         updateMapUnitsAndBuildings();
-        if (!suppressViewQuad)
+        if (!suppressViewQuad && !soldier)
             mapColoursOverlays = MinimapViewQuadRenderer.updateMapViewQuad(mapColoursOverlays);
 
         // as the map area increases, decrease refresh rate to maintain FPS

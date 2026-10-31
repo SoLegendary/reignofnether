@@ -10,6 +10,8 @@ public class MinimapViewQuadRenderer {
     // Perpendicular half-width of the view-quad outline, in world blocks.
     // Must stay >= 0.5 or a near-horizontal edge can fall between integer rows and leave gaps.
     private static final double VIEW_QUAD_HALF_WIDTH = 1.5;
+    // gold camera box (overlay pixels are stored as ABGR)
+    private static final int VIEW_QUAD_COLOUR = MiscUtil.reverseHexRGB(0xFEF481) | 0xFF000000;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -116,7 +118,7 @@ public class MinimapViewQuadRenderer {
             int x0End = Math.min(size - 1, (int) Math.floor(xExit) + xOff);
 
             for (int x0 = x0Start; x0 <= x0End; x0++) {
-                mapColoursOverlays[x0][z0] = -1;
+                mapColoursOverlays[x0][z0] = VIEW_QUAD_COLOUR;
             }
         }
         return mapColoursOverlays;

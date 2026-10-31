@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -98,9 +99,8 @@ public class BuildingProductionServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if (!player.getName().getString().equals(building.ownerName) &&
-                    !SandboxServer.isSandboxOp(player) &&
-                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), "")) {
+            else if (!Sharing.shares(building.ownerName, player.getName().getString(), Share.CONTROL) &&
+                    !SandboxServer.isSandboxOp(player)) {
 
                 ReignOfNether.LOGGER.warn("BuildingProductionServerboundPacket: Tried to process packet from " + player.getName() + " for " + building.ownerName);
                 success.set(false);
