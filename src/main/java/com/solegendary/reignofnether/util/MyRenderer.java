@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.util;
 import com.solegendary.reignofnether.ui.Text;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -61,6 +63,9 @@ public class MyRenderer {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    // draws on endBatch even with Oculus/Iris, whose level bufferSource() defers everything until after the entities
+    public static final MultiBufferSource.BufferSource IMMEDIATE_BUFFER = MultiBufferSource.immediate(new BufferBuilder(256));
+
     public static final RenderType LINES_NO_DEPTH_TEST = RenderType.create(
             "lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
             RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)
@@ -88,6 +93,18 @@ public class MyRenderer {
                     .createCompositeState(false)
     );
 
+    // hidden by terrain, and occluded by entities too since it writes no depth for them to fail against
+    public static final RenderType LINES_DEPTH_TESTED_UNDER_ENTITIES = RenderType.create(
+            ReignOfNether.MOD_ID + ":lines_depth_tested_under_entities",
+            DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
+            RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)
+                    .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setCullState(NO_CULL)
+                    .createCompositeState(false)
+    );
 
     public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("forge:textures/white.png");
     // translucent coloured quads drawn over terrain (first-person ping waypoints)

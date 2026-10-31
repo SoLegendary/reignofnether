@@ -1062,7 +1062,7 @@ public class UnitClientEvents {
 
                 if (OrthoviewClientEvents.isEnabled()) {
                     // drawn before the entities: still visible through terrain, but models cover it
-                    var vcOutline = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
+                    var vcOutline = MyRenderer.IMMEDIATE_BUFFER.getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
                     // evaluate conditions that will remain constant during the rendering stage
                     boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
                     boolean isLeftClickAttack = isLeftClickAttack();
@@ -1093,7 +1093,7 @@ public class UnitClientEvents {
                         else if (isPreselected && !isMouseOverAnyButtonOrHud)
                             MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcOutline, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                     }
-                    MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
+                    MyRenderer.IMMEDIATE_BUFFER.endBatch(MyRenderer.LINES_UNDER_ENTITIES);
                 }
                 if (MinimapClientEvents.shouldUnderline()) {
                     var selectedEntityIds = new HashSet<>();
@@ -1102,8 +1102,8 @@ public class UnitClientEvents {
                         selectedEntityIds.add(id);
                     }
                     // seen from above in orthoview, but in first person they must not show through terrain
-                    RenderType underlineType = OrthoviewClientEvents.isEnabled() ? MyRenderer.LINES_UNDER_ENTITIES : RenderType.lines();
-                    var vc = MC.renderBuffers().bufferSource().getBuffer(underlineType);
+                    RenderType underlineType = OrthoviewClientEvents.isEnabled() ? MyRenderer.LINES_UNDER_ENTITIES : MyRenderer.LINES_DEPTH_TESTED_UNDER_ENTITIES;
+                    var vc = MyRenderer.IMMEDIATE_BUFFER.getBuffer(underlineType);
 
                     for (LivingEntity entity : allUnits) {
                         if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
@@ -1149,7 +1149,7 @@ public class UnitClientEvents {
                         MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
                     MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
-                    MC.renderBuffers().bufferSource().endBatch(underlineType);
+                    MyRenderer.IMMEDIATE_BUFFER.endBatch(underlineType);
                 }
             }
 
