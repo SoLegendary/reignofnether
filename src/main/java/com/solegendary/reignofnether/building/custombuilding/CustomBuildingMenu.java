@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingCommand;
-import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.*;
 import com.solegendary.reignofnether.hud.buttons.BooleanButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -183,7 +182,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_BUILDABLE_BY_VILLAGERS, customBuilding.name, !customBuilding.buildableByVillagers);
                 customBuilding.buildableByVillagers = !customBuilding.buildableByVillagers;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_buildable_by_villagers.tooltip1")
         ));
@@ -192,7 +190,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_BUILDABLE_BY_MONSTERS, customBuilding.name, !customBuilding.buildableByMonsters);
                 customBuilding.buildableByMonsters = !customBuilding.buildableByMonsters;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_buildable_by_monsters.tooltip1")
         ));
@@ -201,7 +198,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_BUILDABLE_BY_PIGLINS, customBuilding.name, !customBuilding.buildableByPiglins);
                 customBuilding.buildableByPiglins = !customBuilding.buildableByPiglins;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_buildable_by_piglins.tooltip1")
         ));
@@ -210,7 +206,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_NETHER_TERRAIN_ONLY, customBuilding.name, !customBuilding.netherTerrainOnly);
                 customBuilding.netherTerrainOnly = !customBuilding.netherTerrainOnly;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_nether_terrain_only.tooltip1")
         ));
@@ -221,13 +216,11 @@ public class CustomBuildingMenu {
                 int value = Math.min(10000, customBuilding.cost.food + (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_FOOD_COST, customBuilding.name, value);
                 customBuilding.cost.food = value;
-                Factions.updateCustomBuildings();
             },
             () -> {
                 int value = Math.max(0, customBuilding.cost.food - (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_FOOD_COST, customBuilding.name, value);
                 customBuilding.cost.food = value;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_food_cost.tooltip1", customBuilding.cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
@@ -240,13 +233,11 @@ public class CustomBuildingMenu {
                 int value = Math.min(10000, customBuilding.cost.wood + (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_WOOD_COST, customBuilding.name, value);
                 customBuilding.cost.wood = value;
-                Factions.updateCustomBuildings();
             },
             () -> {
                 int value = Math.max(0, customBuilding.cost.wood - (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_WOOD_COST, customBuilding.name, value);
                 customBuilding.cost.wood = value;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1", customBuilding.cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
@@ -259,13 +250,11 @@ public class CustomBuildingMenu {
                 int value = Math.min(10000, customBuilding.cost.ore + (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_ORE_COST, customBuilding.name, value);
                 customBuilding.cost.ore = value;
-                Factions.updateCustomBuildings();
             },
             () -> {
                 int value = Math.max(0, customBuilding.cost.ore - (Keybindings.shiftMod.isDown() ? 100 : 5));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_ORE_COST, customBuilding.name, value);
                 customBuilding.cost.ore = value;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1", customBuilding.cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
@@ -340,7 +329,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_CAPTURABLE, customBuilding.name, !customBuilding.capturable);
                 customBuilding.capturable = !customBuilding.capturable;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.tooltip1")
         ));
@@ -349,7 +337,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_INVULNERABLE, customBuilding.name, !customBuilding.invulnerable);
                 customBuilding.invulnerable = !customBuilding.invulnerable;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_invulnerable.tooltip1")
         ));
@@ -358,7 +345,6 @@ public class CustomBuildingMenu {
             () -> {
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_REPAIRABLE, customBuilding.name, !customBuilding.repairable);
                 customBuilding.repairable = !customBuilding.repairable;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_repairable.tooltip1")
         ));
@@ -402,13 +388,11 @@ public class CustomBuildingMenu {
                 int value = Math.min(200, customBuilding.nightRadius + (Keybindings.shiftMod.isDown() ? 10 : 1));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_NIGHT_RADIUS, customBuilding.name, value);
                 customBuilding.nightRadius = value;
-                Factions.updateCustomBuildings();
             },
             () -> {
                 int value = Math.max(0, customBuilding.nightRadius - (Keybindings.shiftMod.isDown() ? 10 : 1));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_NIGHT_RADIUS, customBuilding.name, value);
                 customBuilding.nightRadius = value;
-                Factions.updateCustomBuildings();
             },
             I18n.get("sandbox.reignofnether.custom_buildings.set_night_radius.tooltip1")
         );
@@ -438,13 +422,11 @@ public class CustomBuildingMenu {
                 int value = Math.min(100, customBuilding.garrisonCapacity + (Keybindings.shiftMod.isDown() ? 10 : 1));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_GARRISON_CAPACITY, customBuilding.name, value);
                 customBuilding.garrisonCapacity = value;
-                Factions.updateCustomBuildings();
             },
             () -> {
                 int value = Math.max(0, customBuilding.garrisonCapacity - (Keybindings.shiftMod.isDown() ? 10 : 1));
                 CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_GARRISON_CAPACITY, customBuilding.name, value);
                 customBuilding.garrisonCapacity = value;
-                Factions.updateCustomBuildings();
             },
             getGarrisonTooltips(customBuilding, I18n.get("sandbox.reignofnether.custom_buildings.set_garrison_capacity.tooltip1"))
         );
