@@ -1,76 +1,49 @@
 package com.solegendary.reignofnether.minimap;
 
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
-import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.sounds.SoundAction;
-import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.ping.PingServerEvents;
+import com.solegendary.reignofnether.ping.PingType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+// a minimap marker or a ping from the ping wheel; PingServerEvents shows it to allies
 public class MapMarkerServerboundPacket {
     private final int x;
+    private final int y;
     private final int z;
+    private final PingType type;
 
-
-
-    public MapMarkerServerboundPacket(int x, int z) {
+    public MapMarkerServerboundPacket(int x, int y, int z, PingType type) {
         this.x = x;
+        this.y = y;
         this.z = z;
+        this.type = type;
     }
 
     public MapMarkerServerboundPacket(FriendlyByteBuf buffer) {
         this.x = buffer.readInt();
+        this.y = buffer.readInt();
         this.z = buffer.readInt();
+        this.type = buffer.readEnum(PingType.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(this.x);
+        buffer.writeInt(this.y);
         buffer.writeInt(this.z);
+        buffer.writeEnum(this.type);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return;
-            }
-
-            MinecraftServer server = player.getServer();
-            if (server == null) {
-                return;
-            }
-
-            PlayerList playerList = server.getPlayerList();
-            Set<ServerPlayer> recipients = new HashSet<>();
-            recipients.add(player);
-            String playerName = player.getName().getString();
-            for (String allyName : AlliancesServerEvents.getAllAllies(playerName)) {
-                ServerPlayer allyPlayer = playerList.getPlayerByName(allyName);
-                if (allyPlayer != null) {
-                    recipients.add(allyPlayer);
-                }
-            }
-
-            MapMarkerClientboundPacket markerPacket = new MapMarkerClientboundPacket(x, z, playerName);
-            for (ServerPlayer target : recipients) {
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> target), markerPacket);
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> target),
-                        new SoundClientboundPacket(SoundAction.ALLY, BlockPos.ZERO, "", 1.0f, -1));
-            }
-            success.set(true);
+            if (player != null && type != PingType.ON_MY_WAY) // bots' reply, never a player's
+                PingServerEvents.ping(player.getName().getString(), type, new BlockPos(x, y, z));
         });
         ctx.get().setPacketHandled(true);
-        return success.get();
+        return true;
     }
 }

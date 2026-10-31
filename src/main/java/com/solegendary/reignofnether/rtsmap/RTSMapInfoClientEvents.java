@@ -16,6 +16,7 @@ public class RTSMapInfoClientEvents {
 
     public static ArrayList<String> modeNames = new ArrayList<>();
     public static String selectedMode = "";
+    public static boolean teamMode = false;
     public static String mapName = "";
     public static String description = "";
     public static Set<String> authors = new HashSet<>();
@@ -54,6 +55,7 @@ public class RTSMapInfoClientEvents {
     public static void reset() {
         modeNames = new ArrayList<>();
         selectedMode = "";
+        teamMode = false;
         mapName = "";
         description = "";
         authors = new HashSet<>();

@@ -7,14 +7,15 @@ public class RTSPlayerScores {
     public LinkedHashMap<RTSPlayerScoresEnum, Integer> scoreList = new LinkedHashMap<>();
 
     public RTSPlayerScores() {
-        scoreList.put(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED, 0);
-        scoreList.put(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED, 0);
-        scoreList.put(RTSPlayerScoresEnum.TOTAL_RESOURCES_HARVESTED, 0);
-        scoreList.put(RTSPlayerScoresEnum.FOOD_HARVESTED, 0);
-        scoreList.put(RTSPlayerScoresEnum.WOOD_HARVESTED, 0);
-        scoreList.put(RTSPlayerScoresEnum.ORES_HARVESTED, 0);
+        for (RTSPlayerScoresEnum scoresEnum : RTSPlayerScoresEnum.values())
+            scoreList.put(scoresEnum, 0);
+    }
+
+    // for an RTS player of a running match (or the owner of a player's units); nobody else keeps scores
+    public static void addToScore(String playerName, RTSPlayerScoresEnum scoresEnum) {
+        RTSPlayer rtsPlayer = PlayerServerEvents.isGameActive() ? PlayerServerEvents.getRTSPlayer(playerName) : null;
+        if (rtsPlayer != null)
+            rtsPlayer.scores.addToScore(scoresEnum);
     }
 
     public LinkedHashMap<RTSPlayerScoresEnum, Integer> getScoreList() {
@@ -54,7 +55,7 @@ public class RTSPlayerScores {
     public void setScoreListFromArray(int[] arrayList) {
         int i = 0;
         for (RTSPlayerScoresEnum scoresEnum : RTSPlayerScoresEnum.values()) {
-            scoreList.put(scoresEnum, arrayList[i]);
+            scoreList.put(scoresEnum, i < arrayList.length ? arrayList[i] : 0); // saves from before a score existed
             i++;
         }
     }

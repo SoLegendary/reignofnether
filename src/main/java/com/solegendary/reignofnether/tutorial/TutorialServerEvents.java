@@ -26,9 +26,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -93,6 +93,16 @@ public class TutorialServerEvents {
         return null;
     }
 
+    // Fires once, when the world is first created; vanilla then loads the chunks and places players on the surface
+    @SubscribeEvent
+    public static void onCreateSpawnPosition(LevelEvent.CreateSpawnPosition evt) {
+        if (evt.getLevel() instanceof ServerLevel serverLevel && serverLevel.getSeed() == TUTORIAL_MAP_SEED
+            && evt.getSettings().getLevelName().equals(TUTORIAL_MAP_NAME)) {
+            evt.getSettings().setSpawn(PLAYER_SPAWN_POS, 0);
+            evt.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         MinecraftServer server = evt.getEntity().getServer();
@@ -103,13 +113,6 @@ public class TutorialServerEvents {
         String levelName = server.getWorldData().getLevelSettings().levelName();
         if (evt.getEntity().level() instanceof ServerLevel serverLevel && serverLevel.getSeed() == TUTORIAL_MAP_SEED
             && levelName.equals(TUTORIAL_MAP_NAME)) {
-
-            if (!serverLevel.getSharedSpawnPos().equals(PLAYER_SPAWN_POS)) {
-                serverLevel.setDefaultSpawnPos(PLAYER_SPAWN_POS, 0);
-                evt.getEntity().teleportTo(PLAYER_SPAWN_POS.getX() + 0.5,
-                        serverLevel.getHeight(Heightmap.Types.MOTION_BLOCKING, PLAYER_SPAWN_POS.getX(), PLAYER_SPAWN_POS.getZ()),
-                        PLAYER_SPAWN_POS.getZ() + 0.5);
-            }
 
             TutorialStage stage = loadStage(server.getLevel(Level.OVERWORLD));
 
