@@ -25,7 +25,6 @@ Balance
 [✅] Bogged poison damage increased from 6 to 7
 [✅] Strays now have a 30% chance to create wraith snow on hit instead of slowness
 
-
 Quality of Life
 ---------------
 [✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
@@ -40,7 +39,6 @@ Quality of Life
     - Faster units slow down to allow slower units to catch up
     - Ranged units try to stay behind melee units
 
-
 Bugfixes
 --------
 [✅] You can no longer see your opponent's building outlines in fog at the start of a match
@@ -50,7 +48,7 @@ Bugfixes
 [✅] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
 [✅] Fixed a crash when publishing a scenario map on a server world
 [✅] Fixed accuracy problems when using `/rtsapi player camera move` with different pan durations
-
+[✅] Buildable custom buildings no longer carry across singleplayer maps when switching maps
 
 Languages
 ---------
