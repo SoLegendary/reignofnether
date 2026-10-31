@@ -30,12 +30,10 @@ import com.solegendary.reignofnether.hud.layout.CommandGrid;
 import com.solegendary.reignofnether.hud.layout.CommandGrid.Command;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.items.ItemClientEvents;
-import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.sandbox.SandboxActionButtons;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
@@ -242,8 +240,6 @@ public final class CommandCard {
             return unitContents(entity, unit, selUnits.get(0));
         if (!(entity instanceof Unit) && !UnitClientEvents.getSelectedUnits().isEmpty() && NonUnitClientEvents.canControlAllMobs())
             return mobContents();
-        if (SandboxClientEvents.isSandboxPlayer() && selUnits.isEmpty() && BuildingClientEvents.getSelectedBuildings().isEmpty())
-            return sandboxContents();
         return Contents.empty(I18n.get("hud.reignofnether.card.no_selection"));
     }
 
@@ -302,18 +298,11 @@ public final class CommandCard {
                     else
                         abilities.add(b);
                 }
-        List<Button> sandbox = sandboxUnitActions(true);
 
         String name = SelectionPanel.displayName(entity);
         String mode = I18n.get(worker ? "hud.reignofnether.card.build" : entity instanceof HeroUnit ? "hud.reignofnether.card.hero" : "hud.reignofnether.card.army");
-        if (basic.isEmpty() && advanced.isEmpty()) {
-            if (entity instanceof UnitInventory) // Z-N are the hero item keys: keep sandbox actions on A-G
-                sandbox.forEach(b -> commands.add(new Command<>(b, NO_PREFERENCE)));
-            else
-                addToBottomRow(commands, sandbox);
+        if (basic.isEmpty() && advanced.isEmpty())
             return new Contents(mode + " · " + name, commands, abilities);
-        }
-        abilities.addAll(sandbox); // Z/X are the building tabs
 
         List<Command<Button>> tabs = new ArrayList<>();
         tabs.add(new Command<>(tabButton(1, "hud.reignofnether.card.basic", basic), SLOT_Z));
@@ -425,7 +414,6 @@ public final class CommandCard {
                         commands.add(new Command<>(b, slot != null ? slot : lab ? LAB_LIGHTNING_SLOT : NO_PREFERENCE));
                     }
         }
-        addToBottomRow(commands, sandboxUnitActions(false));
         String mode = placement instanceof ProductionPlacement ? I18n.get("hud.reignofnether.card.train") : I18n.get("hud.reignofnether.card.building");
         return new Contents(name + " · " + mode, commands, abilities);
     }
@@ -465,57 +453,4 @@ public final class CommandCard {
             Map.entry(ProductionItems.RESEARCH_SILVERFISH, 10),
             Map.entry(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, 11),
             Map.entry(ProductionItems.RESEARCH_MASS_BURIAL, 12));
-
-    // sandbox tools and menus own the bottom row Z-B, so they never take a skill's or a unit's key
-    private static void addToBottomRow(List<Command<Button>> commands, List<Button> buttons) {
-        for (int i = 0; i < buttons.size(); i++)
-            commands.add(new Command<>(buttons.get(i), i < 5 ? SLOT_Z + i : NO_PREFERENCE));
-    }
-
-    private static List<Button> sandboxUnitActions(boolean unit) {
-        List<Button> list = new ArrayList<>();
-        if (!SandboxClientEvents.isSandboxPlayer())
-            return list;
-        list.add(SandboxActionButtons.getSetRelationshipButton());
-        list.add(SandboxActionButtons.getCycleScenarioRoleButton());
-        if (!unit)
-            list.add(SandboxActionButtons.removeBuildingPlacement);
-        if (unit && HudClientEvents.hudSelectedEntity instanceof Unit) {
-            list.add(SandboxActionButtons.setAnchor);
-            list.add(SandboxActionButtons.resetToAnchor);
-            list.add(SandboxActionButtons.removeAnchor);
-        }
-        list.removeIf(b -> b == null || b.isHidden.get());
-        return list;
-    }
-
-    private static Contents sandboxContents() {
-        List<Button> menus = new ArrayList<>();
-        for (Button b : List.of(
-                SandboxClientEvents.getCycleBuildingOrUnitsButton(),
-                SandboxClientEvents.getToggleFactionButton(),
-                SandboxClientEvents.getToggleRelationshipButton(),
-                SandboxClientEvents.sandboxMenuType == com.solegendary.reignofnether.sandbox.SandboxMenuType.UNITS
-                        ? SandboxClientEvents.getToggleUnitCheatsButton()
-                        : SandboxClientEvents.getToggleBuildingCheatsButton(),
-                SandboxClientEvents.getToggleNonUnitControlButton()))
-            if (!b.isHidden.get())
-                menus.add(b);
-        List<Command<Button>> commands = new ArrayList<>();
-        addToBottomRow(commands, menus);
-
-        // spawn buttons fill Q-G in reading order, with the page button on G; Sort leads the custom buildings
-        List<Button> spawns = new ArrayList<>();
-        Button sort = SandboxClientEvents.getSortCustomBuildingsButton();
-        if (!sort.isHidden.get())
-            spawns.add(sort);
-        spawns.addAll(switch (SandboxClientEvents.sandboxMenuType) {
-            case UNITS -> SandboxClientEvents.getUnitButtons();
-            case BUILDINGS -> SandboxClientEvents.getBuildingButtons();
-            case CUSTOM_BUILDINGS -> SandboxClientEvents.getCustomBuildingButtons();
-        });
-        spawns.removeIf(b -> b.isHidden.get());
-        String menu = I18n.get("sandbox.reignofnether.menu_type_button_" + SandboxClientEvents.sandboxMenuType.name().toLowerCase(Locale.ROOT));
-        return new Contents(I18n.get("hud.reignofnether.card.sandbox") + " · " + menu, commands, spawns);
-    }
 }

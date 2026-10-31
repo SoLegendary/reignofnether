@@ -68,8 +68,9 @@ public final class TopLeftPanel {
         int y = HudLayout.MARGIN;
 
         String viewed = viewedPlayer();
-        // sandbox players have no economy; checked per player, as others in the same game can have one
-        Resources resources = viewed != null && PlayerClientEvents.getPlayerFaction(viewed) != Factions.NONE
+        // sandbox players have the NONE faction too, but keep their bar for testing costs
+        Resources resources = viewed != null && (PlayerClientEvents.getPlayerFaction(viewed) != Factions.NONE
+                || SandboxClientEvents.isSandboxPlayer(viewed))
                 ? ResourcesClientEvents.getResources(viewed) : null;
         String self = selfName();
 
@@ -112,7 +113,8 @@ public final class TopLeftPanel {
             sel = BuildingClientEvents.getSelectedBuildings().get(0).ownerName;
 
         boolean canSee = sel != null && (sel.equals(self) || AlliancesClient.isAllied(self, sel)
-                || !PlayerClientEvents.isRTSPlayer() || SandboxClientEvents.isSandboxPlayer());
+                || !PlayerClientEvents.isRTSPlayer()
+                || (SandboxClientEvents.isSandboxPlayer() && PlayerClientEvents.isRTSPlayer(sel)));
         if (canSee)
             return sel;
         return PlayerClientEvents.isRTSPlayer() ? self : sel;

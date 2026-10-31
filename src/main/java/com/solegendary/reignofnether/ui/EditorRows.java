@@ -12,12 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
- * Rows of the sandbox editor popups (custom building, scenario role), drawn like the settings menu rows:
+ * Rows of the sandbox editors (custom building, scenario role), drawn like the settings menu rows:
  * name on the left, and on the right a checkbox, a ◀ value ▶ stepper or a value with a small button.
  * Every method draws one row at (x, y), registers its clickable parts on the frame and returns the next y.
  */
@@ -71,8 +72,10 @@ public final class EditorRows {
         Theme.outline(f.g, r.x(), r.y(), r.w(), r.h(), 1, Theme.INK);
         f.g.fill(r.x(), r.y(), r.right(), r.bottom(), Theme.SUNKEN);
         f.zone(r);
-        if (box instanceof MyEditBox my)
+        if (box instanceof MyEditBox my) {
             my.hudUnits = true;
+            my.placed = true;
+        }
         box.setX(r.x() + 3);
         box.setY(r.centerY() - 4);
         box.setWidth(r.w() - 6);
@@ -151,6 +154,43 @@ public final class EditorRows {
             cy += group.height() + GROUP_GAP;
         }
         return new Rect(x, y, (col + 1) * colW + col * COL_GAP, h);
+    }
+
+    private record Line(int h, Row row) { }
+
+    /**
+     * The groups in one column, from line `first` on. It scrolls by whole lines, so no row is ever cut in half or
+     * left clickable outside the area. Returns the first line actually shown.
+     */
+    public static int renderScrolled(HudFrame f, List<Group> groups, Rect area, int first) {
+        List<Line> lines = new ArrayList<>();
+        for (Group group : groups) {
+            if (!lines.isEmpty())
+                lines.add(new Line(GROUP_GAP, (frame, x, y, w) -> { }));
+            if (group.label() != null)
+                lines.add(new Line(GROUP_H, (frame, x, y, w) -> Text.small(frame.g, group.label().toUpperCase(Locale.ROOT), x, y + 3, Theme.LABEL)));
+            for (Row row : group.rows())
+                lines.add(new Line(ROW_H, row));
+        }
+        int last = lines.size(); // the lowest first line that still fills the area
+        int room = area.h();
+        while (last > 0 && lines.get(last - 1).h() <= room)
+            room -= lines.get(--last).h();
+        int top = Math.max(0, Math.min(first, last));
+        int w = last > 0 ? area.w() - 4 : area.w();
+        int y = area.y();
+        for (int i = top; i < lines.size() && y + lines.get(i).h() <= area.bottom(); i++) {
+            lines.get(i).row().draw(f, area.x(), y, w);
+            y += lines.get(i).h();
+        }
+        if (last > 0) {
+            int total = lines.stream().mapToInt(Line::h).sum();
+            int thumb = Math.max(8, area.h() * area.h() / total);
+            int thumbY = area.y() + (area.h() - thumb) * top / last;
+            f.g.fill(area.right() - 2, area.y(), area.right(), area.bottom(), Theme.INK);
+            f.g.fill(area.right() - 2, thumbY, area.right(), thumbY + thumb, Theme.FAINT);
+        }
+        return top;
     }
 
     /** Name on the left with its tooltip; returns the rectangle left for the row's control. */

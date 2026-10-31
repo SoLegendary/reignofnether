@@ -52,7 +52,6 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.chat.TeamChatServerEvents;
 import com.solegendary.reignofnether.ai.BotServerEvents;
@@ -120,7 +119,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CustomBuildingClientEvents.class);
         vanillaEventBus.register(SoundClientEvents.class);
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
-        vanillaEventBus.register(ScenarioClientEvents.class);
         vanillaEventBus.register(TextInputClientEvents.class);
         vanillaEventBus.register(RtsDebugClientEvents.class);
         vanillaEventBus.register(RtsDebugNavmesh.class);

@@ -43,6 +43,14 @@ public class TextInputClientEvents {
         if (Minecraft.getInstance().isPaused())
             return;
         for (MyEditBox input : registeredInputs) {
+            if (input.hudUnits) {
+                input.setVisible(input.placed);
+                if (!input.placed && input.isFocused()) {
+                    input.setFocused(false);
+                    handleDefocus(input);
+                }
+                input.placed = false;
+            }
             float k = scale(input);
             var g = evt.getGuiGraphics();
             g.pose().pushPose();

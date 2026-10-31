@@ -37,6 +37,7 @@ import com.solegendary.reignofnether.hud.panels.CommandCard;
 import com.solegendary.reignofnether.hud.panels.SpectatorHud;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -327,7 +328,6 @@ public class PlayerClientEvents {
         HeroClientEvents.fallenHeroes.clear();
         PlayerDisplayClientEvents.resetDisplay();
         PlayerColors.reset();
-        CustomBuildingClientEvents.customBuildings.clear();
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
         RTSMapInfoClientEvents.reset();
@@ -359,6 +359,7 @@ public class PlayerClientEvents {
             PlayerChunksClientEvents.reset();
             BarStates.clear();
             StartPosClientEvents.botFactions.clear();
+            CustomBuildingClientEvents.customBuildings.clear();
         });
     }
 
@@ -444,6 +445,7 @@ public class PlayerClientEvents {
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         IncomeTracker.reset();
         CommandCard.reset();
+        SandboxPanel.reset();
         SpectatorHud.reset();
         Toast.clear();
     }

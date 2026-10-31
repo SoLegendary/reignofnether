@@ -3,17 +3,14 @@ package com.solegendary.reignofnether.scenario;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.*;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
-import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.ui.EditorRows;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -23,8 +20,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -65,7 +60,6 @@ public class ScenarioClientEvents {
     ));
     private static int roleIndexToEdit = 0; // list index, not role.index
     private static int roleIndexToPlay = 0; // list index, not role.index
-    private static HudFrame frame = null; // the editor drawn last frame, for clicks
 
     // statics outlive the world: back to the defaults, or the next world inherits these
     public static void resetRoles() {
@@ -329,39 +323,28 @@ public class ScenarioClientEvents {
         return count;
     }
 
+    /** Why the scenario can't be published yet, or null when it can. */
+    @Nullable
+    public static String getPublishError() {
+        if (getNumScenarioBuildings() == 0 && getNumScenarioUnits() == 0)
+            return I18n.get("sandbox.reignofnether.publish_scenario_tooltip_error1");
+        if (getNumPlayerRoles() <= 0)
+            return I18n.get("sandbox.reignofnether.publish_scenario_tooltip_error2");
+        return null;
+    }
+
     public static void pressedPublishScenarioButton() {
         if (!confirmPublishScenario) {
             confirmPublishScenario = true;
         } else {
-            if (getNumScenarioBuildings() == 0 && getNumScenarioUnits() == 0) {
-                HudClientEvents.showTemporaryMessage(I18n.get("sandbox.reignofnether.publish_scenario_tooltip_error1"));
-            } else if (getNumPlayerRoles() <= 0) {
-                HudClientEvents.showTemporaryMessage(I18n.get("sandbox.reignofnether.publish_scenario_tooltip_error2"));
+            String error = getPublishError();
+            if (error != null) {
+                HudClientEvents.showTemporaryMessage(error);
             } else {
                 PlayerServerboundPacket.publishScenario();
                 setMenuOpen(false);
             }
             confirmPublishScenario = false;
         }
-    }
-
-    @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        frame = null;
-        ScenarioRole role = getScenarioRoleToEdit();
-        if (MC.screen instanceof TopdownGui && isMenuOpen() && role != null) {
-            frame = EditorRows.begin(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
-            ScenarioMenu.render(frame, role);
-            EditorRows.end(frame);
-        }
-    }
-
-    public static boolean isMouseOverHud(int mouseX, int mouseY) {
-        return EditorRows.isOver(frame, mouseX, mouseY);
-    }
-
-    @SubscribeEvent
-    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        EditorRows.click(frame, evt.getMouseX(), evt.getMouseY(), evt.getButton());
     }
 }

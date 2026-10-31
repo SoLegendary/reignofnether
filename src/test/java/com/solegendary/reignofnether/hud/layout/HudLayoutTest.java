@@ -37,6 +37,18 @@ class HudLayoutTest {
     }
 
     @Test
+    void sandboxDockFitsBetweenTheTopBarAndTheMinimap() {
+        for (int[] win : WINDOWS)
+            for (int chosen = 1; chosen <= 8; chosen++) {
+                HudScale s = HudScale.of(win[0], win[1], 2.0, chosen);
+                HudLayout l = HudLayout.compute(s.width(), s.height());
+                Rect dock = l.sandboxDock(HudLayout.MARGIN + HudLayout.TOP_CARD_H + HudLayout.GAP);
+                assertTrue(dock.x() >= 0 && dock.right() <= l.width() && dock.h() > 0, Arrays.toString(win));
+                assertTrue(dock.bottom() <= l.minimap().y() && dock.bottom() <= l.tools().y(), Arrays.toString(win));
+            }
+    }
+
+    @Test
     void bigGuiScaleCannotShrinkTheHudBelowTheMinimum() {
         HudScale big = HudScale.of(1920, 1080, 3.0, 6);
         assertEquals(3, big.pixelsPerUnit());

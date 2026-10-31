@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -657,8 +658,9 @@ public class OrthoviewClientEvents {
         if (!enabled || isCameraLocked()) {
             return;
         }
-        // placing a bridge or scrolling the building editor uses the wheel too: Alt zooms during those
-        boolean wheelTaken = BuildingClientEvents.getBuildingToPlace() != null || CustomBuildingClientEvents.getCustomBuildingToEdit() != null;
+        // placing a bridge or scrolling the building editor or sandbox sheet uses the wheel too: Alt zooms during those
+        boolean wheelTaken = BuildingClientEvents.getBuildingToPlace() != null || CustomBuildingClientEvents.getCustomBuildingToEdit() != null
+                || SandboxPanel.takesWheel();
         if (evt.getScreen() instanceof TopdownGui && (Keybindings.altMod.isDown() || !wheelTaken)) {
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
         }

@@ -41,7 +41,7 @@ public final class SettingRows {
         }
     }
 
-    private static void renderRow(HudFrame f, SettingRow rule, int x, int y, int w) {
+    public static void renderRow(HudFrame f, SettingRow rule, int x, int y, int w) {
         boolean editable = rule.editable().get();
         f.g.fill(x, y + ROW_H - 1, x + w, y + ROW_H, Theme.RAISED);
         Rect label = new Rect(x, y, w - VALUE_W - 2 * STEP - 6, ROW_H);

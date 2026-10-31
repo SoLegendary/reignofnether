@@ -35,8 +35,9 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -322,6 +323,7 @@ public class HudClientEvents {
         if (ReplayClientEvents.isActive())
             ReplayHud.render(f);
         TopRightPanel.render(f);
+        SandboxPanel.render(f);
         PlayerDisplayClientEvents.render(f);
         renderItemShop(f);
         renderOverlays(f);
@@ -439,6 +441,11 @@ public class HudClientEvents {
     private static String[] targetingHint() {
         if (BuildingClientEvents.getBuildingToPlace() != null)
             return new String[] { I18n.get("hud.reignofnether.hint.place"), I18n.get("hud.reignofnether.hint.place_sub") };
+        SandboxAction sandboxAction = CursorClientEvents.getLeftClickSandboxAction();
+        if (sandboxAction == SandboxAction.SPAWN_UNIT)
+            return new String[] { I18n.get("hud.reignofnether.hint.spawn_unit", SandboxClientEvents.spawnUnitName.toUpperCase(Locale.ROOT)), I18n.get("hud.reignofnether.hint.place_sub") };
+        if (sandboxAction == SandboxAction.SET_ANCHOR)
+            return new String[] { I18n.get("hud.reignofnether.hint.set_anchor"), I18n.get("hud.reignofnether.hint.cancel") };
         var action = CursorClientEvents.getLeftClickAction();
         if (action == null)
             return null;
@@ -520,9 +527,7 @@ public class HudClientEvents {
             return true;
         if (MinimapClientEvents.isPointInsideMinimap(mouseX, mouseY))
             return true;
-        if (CustomBuildingClientEvents.isMouseOverHud(mouseX, mouseY))
-            return true;
-        return ScenarioClientEvents.isMouseOverHud(mouseX, mouseY);
+        return CustomBuildingClientEvents.isMouseOverHud(mouseX, mouseY);
     }
 
     /** Left button released: lets the button under the mouse finish its action (item slots use this). */
@@ -537,8 +542,8 @@ public class HudClientEvents {
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!(MC.screen instanceof TopdownGui) || lastFrame == null)
             return;
-        // the editor popups are drawn over the HUD and handle their own clicks
-        if (CustomBuildingClientEvents.isMouseOverHud(mouseX, mouseY) || ScenarioClientEvents.isMouseOverHud(mouseX, mouseY))
+        // the building editor popup is drawn over the HUD and handles its own clicks
+        if (CustomBuildingClientEvents.isMouseOverHud(mouseX, mouseY))
             return;
         HudScale s = HudGeometry.scale();
         int ux = s.toUnits(evt.getMouseX());

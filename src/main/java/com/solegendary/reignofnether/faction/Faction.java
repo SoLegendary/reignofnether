@@ -55,16 +55,6 @@ public class Faction {
 		return this;
 	}
 	
-	public void updateCustomBuildings() {
-		if (!this.playable) return;
-		CustomBuildingClientEvents.customBuildings.forEach(cb -> {
-			BuildingPlaceButton button = cb.getWorkerBuildButton(null);
-			this.buildingButtons.removeIf(b -> button.name.equals(b.name));
-			if (this.isBuildableCustomBuilding.test(cb))
-				this.buildingButtons.add(button);
-		});
-	}
-	
 	public Faction setSpawnWave(BiConsumer<ServerLevel, Wave> spawnWave) {
 		this.spawnWave = spawnWave;
 		return this;
@@ -118,8 +108,14 @@ public class Faction {
 		buildingButtons.add(buildButton);
 	}
 	
+	// custom buildings are per-world so their buttons are built from the live list, never stored here
 	public List<BuildingPlaceButton> getBuildingButtons() {
-		return buildingButtons;
+		List<BuildingPlaceButton> buttons = new ArrayList<>(buildingButtons);
+		if (isBuildableCustomBuilding != null)
+			for (CustomBuilding cb : CustomBuildingClientEvents.customBuildings)
+				if (isBuildableCustomBuilding.test(cb))
+					buttons.add(cb.getWorkerBuildButton(null));
+		return buttons;
 	}
 	
 	public ArrayList<UnitSpawnButton> getEntityButtons() {

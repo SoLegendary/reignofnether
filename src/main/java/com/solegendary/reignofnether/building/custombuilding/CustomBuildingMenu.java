@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingCommand;
-import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.*;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
@@ -156,33 +155,33 @@ public class CustomBuildingMenu {
     private static List<Group> groups(CustomBuilding b) {
         return List.of(
             new Group(I18n.get(KEY + "group.buildable_by"), List.of(
-                toggle(b, "set_buildable_by_villagers", CustomBuildingAction.SET_BUILDABLE_BY_VILLAGERS, () -> b.buildableByVillagers, v -> b.buildableByVillagers = v, true),
-                toggle(b, "set_buildable_by_monsters", CustomBuildingAction.SET_BUILDABLE_BY_MONSTERS, () -> b.buildableByMonsters, v -> b.buildableByMonsters = v, true),
-                toggle(b, "set_buildable_by_piglins", CustomBuildingAction.SET_BUILDABLE_BY_PIGLINS, () -> b.buildableByPiglins, v -> b.buildableByPiglins = v, true),
-                toggle(b, "set_nether_terrain_only", CustomBuildingAction.SET_NETHER_TERRAIN_ONLY, () -> b.netherTerrainOnly, v -> b.netherTerrainOnly = v, true)
+                toggle(b, "set_buildable_by_villagers", CustomBuildingAction.SET_BUILDABLE_BY_VILLAGERS, () -> b.buildableByVillagers, v -> b.buildableByVillagers = v),
+                toggle(b, "set_buildable_by_monsters", CustomBuildingAction.SET_BUILDABLE_BY_MONSTERS, () -> b.buildableByMonsters, v -> b.buildableByMonsters = v),
+                toggle(b, "set_buildable_by_piglins", CustomBuildingAction.SET_BUILDABLE_BY_PIGLINS, () -> b.buildableByPiglins, v -> b.buildableByPiglins = v),
+                toggle(b, "set_nether_terrain_only", CustomBuildingAction.SET_NETHER_TERRAIN_ONLY, () -> b.netherTerrainOnly, v -> b.netherTerrainOnly = v)
             )),
             new Group(I18n.get(KEY + "group.cost"), List.of(
-                number(b, "set_food_cost", ButtonCell.ICON_FOOD, CustomBuildingAction.SET_FOOD_COST, () -> b.cost.food, v -> b.cost.food = v, 0, 10000, 5, 100, true,
+                number(b, "set_food_cost", ButtonCell.ICON_FOOD, CustomBuildingAction.SET_FOOD_COST, () -> b.cost.food, v -> b.cost.food = v, 0, 10000, 5, 100,
                     EditorRows.tip(I18n.get(KEY + "set_food_cost.label"), I18n.get(KEY + "set_food_cost.tooltip1", b.cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT))),
-                number(b, "set_wood_cost", ButtonCell.ICON_WOOD, CustomBuildingAction.SET_WOOD_COST, () -> b.cost.wood, v -> b.cost.wood = v, 0, 10000, 5, 100, true,
+                number(b, "set_wood_cost", ButtonCell.ICON_WOOD, CustomBuildingAction.SET_WOOD_COST, () -> b.cost.wood, v -> b.cost.wood = v, 0, 10000, 5, 100,
                     EditorRows.tip(I18n.get(KEY + "set_wood_cost.label"), I18n.get(KEY + "set_wood_cost.tooltip1", b.cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT))),
-                number(b, "set_ore_cost", ButtonCell.ICON_ORE, CustomBuildingAction.SET_ORE_COST, () -> b.cost.ore, v -> b.cost.ore = v, 0, 10000, 5, 100, true,
+                number(b, "set_ore_cost", ButtonCell.ICON_ORE, CustomBuildingAction.SET_ORE_COST, () -> b.cost.ore, v -> b.cost.ore = v, 0, 10000, 5, 100,
                     EditorRows.tip(I18n.get(KEY + "set_ore_cost.label"), I18n.get(KEY + "set_ore_cost.tooltip1", b.cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT))),
-                number(b, "set_pop_supply", modIcon("textures/icons/items/bed.png"), CustomBuildingAction.SET_POPULATION_SUPPLY, () -> b.cost.population, v -> b.cost.population = v, 0, 300, 1, 10, false, null)
+                number(b, "set_pop_supply", modIcon("textures/icons/items/bed.png"), CustomBuildingAction.SET_POPULATION_SUPPLY, () -> b.cost.population, v -> b.cost.population = v, 0, 300, 1, 10, null)
             )),
             new Group(I18n.get(KEY + "group.building"), List.of(
                 maxHealth(b),
-                number(b, "set_night_radius", modIcon("textures/hud/moon.png"), CustomBuildingAction.SET_NIGHT_RADIUS, () -> b.nightRadius, v -> b.nightRadius = v, 0, 200, 1, 10, true, null),
-                number(b, "set_nether_radius", modIcon("textures/icons/blocks/portal.png"), CustomBuildingAction.SET_NETHER_RADIUS, () -> b.netherRadius, v -> b.netherRadius = v, 0, 200, 1, 10, false, null),
-                number(b, "set_garrison_capacity", vanillaIcon("textures/block/ladder.png"), CustomBuildingAction.SET_GARRISON_CAPACITY, () -> b.garrisonCapacity, v -> b.garrisonCapacity = v, 0, 100, 1, 10, true,
+                number(b, "set_night_radius", modIcon("textures/hud/moon.png"), CustomBuildingAction.SET_NIGHT_RADIUS, () -> b.nightRadius, v -> b.nightRadius = v, 0, 200, 1, 10, null),
+                number(b, "set_nether_radius", modIcon("textures/icons/blocks/portal.png"), CustomBuildingAction.SET_NETHER_RADIUS, () -> b.netherRadius, v -> b.netherRadius = v, 0, 200, 1, 10, null),
+                number(b, "set_garrison_capacity", vanillaIcon("textures/block/ladder.png"), CustomBuildingAction.SET_GARRISON_CAPACITY, () -> b.garrisonCapacity, v -> b.garrisonCapacity = v, 0, 100, 1, 10,
                     garrisonTooltip(b, "set_garrison_capacity")),
-                number(b, "set_garrison_range", vanillaIcon("textures/item/bow.png"), CustomBuildingAction.SET_GARRISON_RANGE, () -> b.garrisonRange, v -> b.garrisonRange = v, 0, 100, 1, 10, false,
+                number(b, "set_garrison_range", vanillaIcon("textures/item/bow.png"), CustomBuildingAction.SET_GARRISON_RANGE, () -> b.garrisonRange, v -> b.garrisonRange = v, 0, 100, 1, 10,
                     garrisonTooltip(b, "set_garrison_range")),
-                toggle(b, "set_capturable", CustomBuildingAction.SET_CAPTURABLE, () -> b.capturable, v -> b.capturable = v, true),
-                toggle(b, "set_invulnerable", CustomBuildingAction.SET_INVULNERABLE, () -> b.invulnerable, v -> b.invulnerable = v, true),
-                toggle(b, "set_repairable", CustomBuildingAction.SET_REPAIRABLE, () -> b.repairable, v -> b.repairable = v, true),
-                toggle(b, "set_draw_aggro", CustomBuildingAction.SET_DRAW_AGGRO, () -> b.drawAggro, v -> b.drawAggro = v, false),
-                toggle(b, "set_destroy_on_reset", CustomBuildingAction.SET_DESTROY_ON_RESET, () -> b.shouldDestroyOnReset, v -> b.shouldDestroyOnReset = v, false)
+                toggle(b, "set_capturable", CustomBuildingAction.SET_CAPTURABLE, () -> b.capturable, v -> b.capturable = v),
+                toggle(b, "set_invulnerable", CustomBuildingAction.SET_INVULNERABLE, () -> b.invulnerable, v -> b.invulnerable = v),
+                toggle(b, "set_repairable", CustomBuildingAction.SET_REPAIRABLE, () -> b.repairable, v -> b.repairable = v),
+                toggle(b, "set_draw_aggro", CustomBuildingAction.SET_DRAW_AGGRO, () -> b.drawAggro, v -> b.drawAggro = v),
+                toggle(b, "set_destroy_on_reset", CustomBuildingAction.SET_DESTROY_ON_RESET, () -> b.shouldDestroyOnReset, v -> b.shouldDestroyOnReset = v)
             )),
             new Group(I18n.get(KEY + "group.contents"), List.of(
                 (f, x, y, w) -> EditorRows.action(f, vanillaIcon("textures/block/fletching_table_front.png"), I18n.get(KEY + "trainable_units.label"), trainableUnitsTooltip(b),
@@ -210,34 +209,30 @@ public class CustomBuildingMenu {
         }
     }
 
-    private static Row toggle(CustomBuilding b, String key, CustomBuildingAction action, BooleanSupplier get, Consumer<Boolean> set, boolean updateFactions) {
+    private static Row toggle(CustomBuilding b, String key, CustomBuildingAction action, BooleanSupplier get, Consumer<Boolean> set) {
         String label = I18n.get(KEY + key + ".label");
         return (f, x, y, w) -> EditorRows.toggle(f, label, EditorRows.tip(label, I18n.get(KEY + key + ".tooltip1")), get.getAsBoolean(), () -> {
             CustomBuildingServerboundPacket.customiseBuilding(action, b.name, !get.getAsBoolean());
             set.accept(!get.getAsBoolean());
-            if (updateFactions)
-                Factions.updateCustomBuildings();
         }, x, y, w);
     }
 
     /** Left click (or ▶) adds small, or big with shift; right click (or ◀) takes it away, within [min, max]. */
     private static Row number(CustomBuilding b, String key, ResourceLocation icon, CustomBuildingAction action, IntSupplier get, IntConsumer set,
-                              int min, int max, int small, int big, boolean updateFactions, Supplier<Tooltip> tooltip) {
+                              int min, int max, int small, int big, Supplier<Tooltip> tooltip) {
         String label = I18n.get(KEY + key + ".label");
         Supplier<Tooltip> tip = tooltip != null ? tooltip : EditorRows.tip(label, I18n.get(KEY + key + ".tooltip1"));
         return (f, x, y, w) -> EditorRows.stepper(f, icon, label, tip, String.valueOf(get.getAsInt()), null,
-            () -> step(b, action, get, set, max, small, big, 1, updateFactions),
-            () -> step(b, action, get, set, min, small, big, -1, updateFactions), x, y, w);
+            () -> step(b, action, get, set, max, small, big, 1),
+            () -> step(b, action, get, set, min, small, big, -1), x, y, w);
     }
 
     private static void step(CustomBuilding b, CustomBuildingAction action, IntSupplier get, IntConsumer set,
-                             int limit, int small, int big, int sign, boolean updateFactions) {
+                             int limit, int small, int big, int sign) {
         int delta = Keybindings.shiftMod.isDown() ? big : small;
         int value = sign > 0 ? Math.min(limit, get.getAsInt() + delta) : Math.max(limit, get.getAsInt() - delta);
         CustomBuildingServerboundPacket.customiseBuilding(action, b.name, value);
         set.accept(value);
-        if (updateFactions)
-            Factions.updateCustomBuildings();
     }
 
     /** Max health steps in fives; ctrl+click resets it to the default for the building's size. */

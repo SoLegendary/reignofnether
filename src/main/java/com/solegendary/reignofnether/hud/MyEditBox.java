@@ -16,6 +16,7 @@ public class MyEditBox extends EditBox {
     public boolean isPositiveNumber;
     public CommandSuggestions commandSuggestions;
     public boolean hudUnits = false; // x/y/size in HUD units: drawn and clicked under the HUD scale, so its text matches the HUD
+    public boolean placed = false; // laid out by the HUD this frame; a HUD box that wasn't belongs to a panel that isn't showing
 
     private MyEditBox(Builder builder) {
         super(Minecraft.getInstance().font, builder.x, builder.y, builder.width, builder.height, Component.literal(""));

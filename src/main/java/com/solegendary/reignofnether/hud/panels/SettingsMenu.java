@@ -49,7 +49,7 @@ public final class SettingsMenu {
     private SettingsMenu() { }
 
 
-    /** Same rule as the old HUD button: sandbox players and spectators, outside the tutorial and scenarios. */
+    /** Same rule as the old HUD button: sandbox players and spectators, outside the tutorial and scenarios. Sandbox players get game rules in the dock; mapmaker rules stay here. */
     public static boolean canOpenGamerules() {
         return (SandboxClientEvents.isSandboxPlayer() || !PlayerClientEvents.isRTSPlayer())
                 && !TutorialClientEvents.isEnabled() && !GameruleClient.scenarioMode && !StartPosClientEvents.isStarting;
@@ -72,11 +72,12 @@ public final class SettingsMenu {
         int y = back.getY() + 24;
         evt.addListener(new IconButton(x, y, Icon.SETTINGS, Component.translatable("hud.reignofnether.settings"),
                 () -> Minecraft.getInstance().setScreen(settingsScreen(pause))));
-        if (canOpenGamerules())
+        boolean rulesInDock = SandboxClientEvents.isSandboxPlayer();
+        if (canOpenGamerules() && !rulesInDock)
             evt.addListener(new IconButton(x, y + 24, Icon.LIST, Component.translatable("hud.gamerule.reignofnether.title"),
                     () -> Minecraft.getInstance().setScreen(new Panel(pause, "hud.gamerule.reignofnether.title", GameruleClient::ruleRows, 213))));
         if (canOpenGamerules())
-            evt.addListener(new IconButton(x, y + 48, Icon.LIST, Component.translatable("hud.gamerule.reignofnether.mapmaker_title"),
+            evt.addListener(new IconButton(x, y + (rulesInDock ? 24 : 48), Icon.LIST, Component.translatable("hud.gamerule.reignofnether.mapmaker_title"),
                     () -> Minecraft.getInstance().setScreen(new Panel(pause, "hud.gamerule.reignofnether.mapmaker_title", GameruleClient::mapmakerRuleRows, 213))));
         // surrender, red, under the last pause button; a second click within 3 s confirms
         if (PlayerClientEvents.isRTSPlayer() && !SandboxClientEvents.isSandboxPlayer()) {

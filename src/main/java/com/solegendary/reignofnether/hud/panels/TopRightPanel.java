@@ -19,7 +19,6 @@ import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
@@ -43,7 +42,7 @@ import java.util.List;
 
 /**
  * Top-right of the HUD: the utility bar (idle workers, army, players, chat), a second row with the
- * buttons that only exist in some situations (match start, sandbox, scenario, beacon, game rules,
+ * buttons that only exist in some situations (match start, scenario, beacon, game rules,
  * datapack buttons), the clock to the left of the bar and the attack alert under it.
  */
 public final class TopRightPanel {
@@ -149,10 +148,6 @@ public final class TopRightPanel {
             }
         } else if (SurvivalClientEvents.isEnabled) {
             addIfShown(list, SurvivalClientEvents.getNextWaveButton());
-        } else if (SandboxClientEvents.isSandboxPlayer()) {
-            addIfShown(list, SandboxClientEvents.getConfigureScenarioButton());
-            addIfShown(list, SandboxClientEvents.getPublishScenarioButton());
-            addIfShown(list, SandboxClientEvents.getExitSandboxButton());
         }
 
         BeaconPlacement beacon = BuildingUtils.getBeacon(true);

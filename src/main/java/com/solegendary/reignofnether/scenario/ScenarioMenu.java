@@ -6,10 +6,10 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.MyEditBox;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
-import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.ui.EditorRows;
 import com.solegendary.reignofnether.ui.EditorRows.Group;
 import com.solegendary.reignofnether.ui.EditorRows.Row;
@@ -29,12 +29,10 @@ import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.scenario.ScenarioClientEvents.getScenarioRoleToEdit;
 
-/** The scenario role editor: a popup in HUD units to name and set up each role in turn. */
+/** The scenario role editor, the sandbox dock's scenario tab: names and sets up each role in turn. */
 public class ScenarioMenu {
 
     private static final String KEY = "sandbox.reignofnether.scenario.";
-    private static final int PAD = 7;
-    private static final int COL_W = 200;
     private static final int FOOTER_H = 14;
 
     private static MyEditBox roleNameInput = registerRoleNameInput();
@@ -68,36 +66,36 @@ public class ScenarioMenu {
         roleNameInput = null;
     }
 
-    /** Draws the editor for this role at the right of the screen. */
-    public static void render(HudFrame f, ScenarioRole role) {
-        int top = HudLayout.MARGIN + HudLayout.TOP_CARD_H + HudLayout.GAP;
-        int nameH = Math.max(EditorRows.ROW_H, EditorRows.fieldHeight(f) + 4);
-        int maxBody = f.layout.height() - HudLayout.MARGIN - top - PAD * 2 - EditorRows.HEADER_H - nameH - FOOTER_H - 6;
-        List<Group> groups = groups(role);
-        Rect body = EditorRows.measure(groups, COL_W, maxBody);
-        int w = body.w() + PAD * 2;
-        int h = EditorRows.HEADER_H + nameH + body.h() + 6 + FOOTER_H + PAD * 2;
-        int x = f.layout.width() - HudLayout.MARGIN - w;
-        Theme.popup(f.g, x, top, w, h, Theme.ORANGE);
-        f.zone(x, top, w, h);
-
-        int cx = x + PAD;
-        int y = top + PAD;
-        renderHeader(f, role, cx, y, body.w());
+    /** Draws the editor for this role in the dock's scenario tab. Returns the scroll actually used. */
+    public static int render(HudFrame f, ScenarioRole role, Rect r, int scroll) {
+        int x = r.x();
+        int y = r.y();
+        renderHeader(f, role, x, y, r.w());
         y += EditorRows.HEADER_H;
 
-        Rect field = EditorRows.label(f, I18n.get(KEY + "name"), null, cx, y + (nameH - EditorRows.ROW_H) / 2, COL_W, 120);
+        // above the scrolled rows: an edit box can't be cut off
+        int nameH = Math.max(EditorRows.ROW_H, EditorRows.fieldHeight(f) + 4);
+        Rect field = EditorRows.label(f, I18n.get(KEY + "name"), null, x, y + (nameH - EditorRows.ROW_H) / 2, r.w(), 120);
         if (roleNameInput != null)
             EditorRows.field(f, roleNameInput, new Rect(field.x(), y + 2, field.w(), nameH - 4));
-        y += nameH;
+        y += nameH + 4;
 
-        EditorRows.render(f, groups, cx, y, COL_W, maxBody);
-        renderFooter(f, cx, top + h - PAD - FOOTER_H, body.w());
+        String error = ScenarioClientEvents.getPublishError();
+        int footerY = r.bottom() - FOOTER_H;
+        int bottom = footerY - 6;
+        if (error != null) {
+            bottom -= Theme.bannerHeight(error, r.w());
+            Theme.banner(f.g, x, bottom, r.w(), error, Theme.ORANGE_DARK);
+            bottom -= 4;
+        }
+        int shown = EditorRows.renderScrolled(f, groups(role), new Rect(x, y, r.w(), bottom - y), scroll);
+        renderFooter(f, x, footerY, r.w(), error == null);
+        return shown;
     }
 
     /** ◀ Role N ▶ chips, help and close. */
     private static void renderHeader(HudFrame f, ScenarioRole role, int x, int y, int w) {
-        EditorRows.header(f, "", x, y, w, ScenarioMenu::helpTooltip, ScenarioMenu::saveAndClose);
+        EditorRows.header(f, "", x, y, w, ScenarioMenu::helpTooltip, SandboxPanel::fold);
         String title = I18n.get(KEY + "role_label") + " " + (role.index + 1);
         Rect back = new Rect(x, y, 12, 12);
         int titleW = Text.headingWidth(title, Text.px(18));
@@ -120,19 +118,24 @@ public class ScenarioMenu {
         return Tooltip.of(I18n.get(KEY + "help_title")).body(body);
     }
 
-    private static void saveAndClose() {
-        ScenarioClientEvents.setMenuOpen(false);
+    public static void save() {
         ScenarioServerboundPacket.saveScenario();
         HudClientEvents.showTemporaryMessage(I18n.get(KEY + "saved_all_roles"));
     }
 
-    /** Reset (shift+ctrl+right click, so it can't happen by accident) and Save & close. */
-    private static void renderFooter(HudFrame f, int x, int y, int w) {
+    /** Reset (shift+ctrl+right click, so it can't happen by accident) and Publish, which asks to confirm. */
+    private static void renderFooter(HudFrame f, int x, int y, int w, boolean canPublish) {
         EditorRows.textButton(f, "Reset Scenario Role", I18n.get(KEY + "reset_role.label"), new Rect(x, y, 70, FOOTER_H), Style.DANGER,
                 null, ScenarioMenu::resetRole,
                 () -> Tooltip.of(I18n.get(KEY + "reset_role.tooltip1")).danger().body(I18n.get(KEY + "reset_role.tooltip2")));
-        EditorRows.textButton(f, "Close & Save Scenario", I18n.get(KEY + "close_and_save"), new Rect(x + w - 80, y, 80, FOOTER_H), Style.PRIMARY,
-                ScenarioMenu::saveAndClose, null, null);
+        boolean confirm = ScenarioClientEvents.confirmPublishScenario;
+        String publish = "sandbox.reignofnether.publish_scenario_tooltip";
+        EditorRows.textButton(f, "Publish Scenario Map", I18n.get(confirm ? publish + "_confirm" : "sandbox.reignofnether.publish"),
+                new Rect(x + w - 80, y, 80, FOOTER_H), canPublish ? Style.PRIMARY : Style.SECONDARY,
+                canPublish ? ScenarioClientEvents::pressedPublishScenarioButton : null,
+                () -> ScenarioClientEvents.confirmPublishScenario = false,
+                () -> confirm ? Tooltip.of(I18n.get(publish + "1")).body(I18n.get(publish + "_cancel"))
+                        : Tooltip.of(I18n.get(publish + "1")).body(I18n.get(publish + "2")).body(I18n.get(publish + "3")));
     }
 
     private static void resetRole() {

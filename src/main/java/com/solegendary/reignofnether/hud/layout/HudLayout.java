@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.ui.Rect;
  * <pre>
  *  [resources........]                              [clock][utility bar]
  *  [groups]                                                  [alert]
- *  [queue]
+ *  [queue]                                                 [sandbox dock]
  *
  *                          [targeting hint]
  *                              [toast]
@@ -55,6 +55,10 @@ public record HudLayout(
 
     public static final int MAP = 116;
     public static final int MAP_PAD = 1;
+
+    public static final int DOCK_SHEET_W = 227;
+    public static final int DOCK_RAIL_W = TILE_SMALL + 6;
+    public static final int DOCK_GAP = 3;
 
     /** Below this width, the selection panel drops the stats column. */
     public static final int COMPACT_WIDTH = 750;
@@ -103,6 +107,12 @@ public record HudLayout(
 
         return new HudLayout(width, height, console, card, selection, tools, map,
                 console.y() - GAP * 2, width < COMPACT_WIDTH, width > MAX_BAR, bigMap);
+    }
+
+    /** Sandbox sheet and tab rail: right-aligned, from the given top down to the console. */
+    public Rect sandboxDock(int top) {
+        int w = DOCK_SHEET_W + DOCK_GAP + DOCK_RAIL_W;
+        return new Rect(width - MARGIN - w, top, w, (bigMap ? minimap.y() : console.y()) - GAP - top);
     }
 
     /** Top-left corner of the given command card slot. */
