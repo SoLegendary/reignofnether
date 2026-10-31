@@ -104,6 +104,23 @@ public class GameruleClientboundPacket {
                 new GameruleClientboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", value));
     }
 
+    public static void setSoldiersPerTeam(long soldiersPerTeam) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_SOLDIERS_PER_TEAM, "", soldiersPerTeam));
+    }
+    public static void setCoCommanders(boolean coCommanders) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_CO_COMMANDERS, "", coCommanders ? 1L : 0L));
+    }
+    public static void setSoldierRespawnSeconds(long seconds) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_SOLDIER_RESPAWN_SECONDS, "", seconds));
+    }
+    public static void setAllChat(boolean allChat) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_ALL_CHAT, "", allChat ? 1L : 0L));
+    }
+
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
         this.playerName = playerName;
@@ -165,6 +182,10 @@ public class GameruleClientboundPacket {
                             case SET_RTS_PATHFINDING -> GameruleClient.rtsPathfinding = value == 1L;
                             case SET_ANIMAL_SPAWN_Y_DIFF -> GameruleClient.animalSpawnYDiff = Math.toIntExact(value);
                             case SET_RANDOM_ITEM_DROPS -> GameruleClient.randomItemDrops = RandomItemDropRule.fromValue(Math.toIntExact(value));
+                            case SET_SOLDIERS_PER_TEAM -> GameruleClient.soldiersPerTeam = Math.toIntExact(value);
+                            case SET_CO_COMMANDERS -> GameruleClient.coCommanders = value == 1L;
+                            case SET_SOLDIER_RESPAWN_SECONDS -> GameruleClient.soldierRespawnSeconds = Math.toIntExact(value);
+                            case SET_ALL_CHAT -> GameruleClient.allChat = value == 1L;
                         }
                         success.set(true);
                     });

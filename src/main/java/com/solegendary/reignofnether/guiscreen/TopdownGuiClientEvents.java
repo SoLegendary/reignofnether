@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.guiscreen;
 
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
@@ -55,7 +56,8 @@ public class TopdownGuiClientEvents {
 
     @SubscribeEvent
     public static void onScreenOpen(ScreenEvent.Opening evt) {
-        if (evt.getScreen() instanceof TopdownGui) {
+        // the chat panel sits on top of the RTS view, so it keeps the same GUI scale
+        if (evt.getScreen() instanceof TopdownGui || evt.getScreen() instanceof ChatPanel) {
             int i = MC.getWindow().calculateScale(Math.min(MAX_GUI_SCALE_MOD, MC.options.guiScale().get()), MC.isEnforceUnicode());
             if (MC.options.guiScale().get() == 0)
                 i = MAX_GUI_SCALE_MOD;
