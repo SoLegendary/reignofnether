@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.items;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
+import javax.annotation.Nullable;
+
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
@@ -10,7 +11,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
-import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
@@ -108,9 +108,8 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() <= 0 &&
-                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null && MC.player != null &&
-                        AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), MC.player.getName().getString())));
+                // heroes always show their slots, enemies' too; the slot buttons gate who can use them
+                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -161,39 +160,31 @@ public class ItemClientEvents {
             Keybindings.item6
     );
 
-    public static RectZone renderUnitInventory(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, UnitInventory inv) {
-        ItemClientEvents.renderedButtons.clear();
-        ItemClientEvents.hoveredInvItem = null;
+    /** The inventory slots of a unit, in slot order. The HUD draws them and routes their clicks and keys. */
+    public static List<Button> inventoryButtons(UnitInventory inv) {
+        renderedButtons.clear();
         for (int i = 0; i < inv.getAllItems().size(); i++) {
             Keybinding hotkey = i < hotkeys.size() ? hotkeys.get(i) : null;
             ItemStack itemStack = inv.getAllItems().get(i);
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem instanceof EmptyUnitItem emptyItem) {
-                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasDragActionItem(), (Unit) inv));
-            } else if (unitItem != null) {
-                ItemClientEvents.renderedButtons.add(unitItem.getInventoryButton(i, itemStack, (Unit) inv, hotkey));
-            }
+            if (unitItem instanceof EmptyUnitItem emptyItem)
+                renderedButtons.add(emptyItem.getEmptySlotButton(i, hasDragActionItem(), (Unit) inv));
+            else if (unitItem != null)
+                renderedButtons.add(unitItem.getInventoryButton(i, itemStack, (Unit) inv, hotkey));
         }
-        int i = 0;
-        for (Button button : ItemClientEvents.renderedButtons) {
-            int xi = i % 2 == 0 ? x : x + BUTTON_WIDTH;
-            int yi = y + ((i / 2) * BUTTON_WIDTH);
-            button.render(guiGraphics, xi, yi, mouseX, mouseY);
-            i += 1;
-        }
+        return renderedButtons;
+    }
 
-        for (Button button : ItemClientEvents.renderedButtons) {
-            if (button.isMouseOver(mouseX, mouseY)) {
-                button.renderTooltip(guiGraphics, mouseX, mouseY);
-                if (button instanceof UnitItemInventoryButton uiInvButton) {
-                    if (hoveredInvItem == null) {
-                        hoveredInvItem = uiInvButton.unitItem;
-                        hoveredInvItem.updateHighlightBps(MC.level);
-                    }
-                }
+    /** Called by the HUD with the slot under the mouse, so the world highlights what that item would hit. */
+    public static void setHoveredButton(@Nullable Button button) {
+        if (button instanceof UnitItemInventoryButton slot) {
+            if (hoveredInvItem != slot.unitItem) {
+                hoveredInvItem = slot.unitItem;
+                hoveredInvItem.updateHighlightBps(MC.level);
             }
+        } else {
+            hoveredInvItem = null;
         }
-        return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
     }
 
     @SubscribeEvent
@@ -220,27 +211,25 @@ public class ItemClientEvents {
         if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
-        for (Button button : renderedButtons)
-            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+        HudClientEvents.releaseMouse();
 
         if (hasDragActionItem() &&
             HudClientEvents.hudSelectedEntity instanceof UnitInventory inv &&
             HudClientEvents.hudSelectedEntity instanceof Unit unit
         ) {
-            Button mousedOverButton = getMousedOverButton();
-            Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
+            Button mousedOverButton = HudClientEvents.getMousedOverButton();
             if (mousedOverButton instanceof UnitItemInventoryButton uiButton && actionableInvIndex != uiButton.invIndex) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
                 ItemServerboundPacket.swap(((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
-            } else if (hudMousedOverButton != null &&
-                    hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory inv1) {
-                Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
+            } else if (mousedOverButton != null &&
+                    mousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
+                    mousedOverButton.entity instanceof UnitInventory inv1) {
+                Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(mousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) {
                     // Give via group button
                     unit.getCheckpoints().clear();
-                    unit.getCheckpoints().add(new Checkpoint(hudMousedOverButton.entity, true));
-                    ItemServerboundPacket.give(((Entity) inv).getId(), actionableInvUUID, hudMousedOverButton.entity.getId());
+                    unit.getCheckpoints().add(new Checkpoint(mousedOverButton.entity, true));
+                    ItemServerboundPacket.give(((Entity) inv).getId(), actionableInvUUID, mousedOverButton.entity.getId());
                 }
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 BuildingPlacement bpl = BuildingClientEvents.getPreselectedBuilding();
@@ -282,27 +271,11 @@ public class ItemClientEvents {
         return leftClickUseItem && actionableUnitItem != null && actionableInvUUID != null;
     }
 
-    // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
-    @SubscribeEvent
-    public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
-        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity))
-            return;
-        for (Button button : renderedButtons)
-            button.checkPressed(evt.getKeyCode());
-    }
-
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || !(MC.screen instanceof TopdownGui) || MC.player == null)
             return;
 
-        for (Button button : renderedButtons) {
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-            }
-        }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDownX = (int) evt.getMouseX();
             mouseLeftDownY = (int) evt.getMouseY();
@@ -343,13 +316,6 @@ public class ItemClientEvents {
         actionableInvUUID = null;
         actionableInvIndex = 0;
         leftClickUseItem = false;
-    }
-
-    private static Button getMousedOverButton() {
-        for (Button button : renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY))
-                return button;
-        return null;
     }
 
     @SubscribeEvent

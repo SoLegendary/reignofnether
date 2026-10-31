@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -16,6 +18,7 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -76,7 +79,7 @@ public class BuildingClientEvents {
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
-        if (ResearchClient.hasCheat("foodforthought")) {
+        if (ResearchClient.hasCheat("foodforthought") || PlayerClientEvents.getPlayerFaction(playerName) == Factions.NONE) {
             return GameruleClient.maxPopulation;
         }
 
@@ -741,7 +744,9 @@ public class BuildingClientEvents {
             if (building != null && building.getBuilding().capturable && !isSandboxPlayer) {
                 HudClientEvents.showTemporaryMessage(I18n.get("server.reignofnether.cannot_delete_capturable"));
             } else if (building != null &&
-                ((building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
+                // unbuilt: cancel construction, under the same rule as the card's Cancel button (B)
+                (((building.isBuilt || !HelperButtons.buildingCancelButton.isHidden.get())
+                        && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
                 HudClientEvents.hudSelectedPlacement = null;
                 BuildingServerboundPacket.cancelBuilding(building.minCorner, MC.player.getName().getString());
             }
@@ -787,7 +792,12 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(BuildingPlacement::shouldBeDestroyed);
-            buildings.removeIf(BuildingPlacement::shouldBeDestroyed);
+            buildings.removeIf(b -> {
+                if (!b.shouldBeDestroyed())
+                    return false;
+                onLost(b);
+                return true;
+            });
         }
     }
 
@@ -963,8 +973,24 @@ public class BuildingClientEvents {
     }
 
     public static void removeBuilding(BlockPos bp) {
-        buildings.removeIf(b -> b.originPos.equals(bp));
+        buildings.removeIf(b -> {
+            if (!b.originPos.equals(bp))
+                return false;
+            onLost(b);
+            return true;
+        });
         BuildingClientEvents.clearSelectedBuildings();
+    }
+
+    /** Losing your last capital: a tip in chat that surrender is in the pause menu. */
+    private static void onLost(BuildingPlacement b) {
+        if (!b.isCapitol || !b.isBuilt || MC.player == null || !PlayerClientEvents.isRTSPlayer()
+                || !b.ownerName.equals(MC.player.getName().getString()))
+            return;
+        boolean another = buildings.stream().anyMatch(o -> o != b && o.isCapitol && o.ownerName.equals(b.ownerName) && !o.shouldBeDestroyed());
+        if (!another)
+            MC.gui.getChat().addMessage(com.solegendary.reignofnether.chat.SystemMessage.important(
+                    net.minecraft.network.chat.Component.translatable("hud.reignofnether.capital_lost_tip")));
     }
 
     public static void removeFogQueuedBuilding(BlockPos bp) {

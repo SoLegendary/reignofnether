@@ -1,25 +1,19 @@
 package com.solegendary.reignofnether.hud.buttons;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.mixin.UnitInventoryMobMixin;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.hud.panels.ButtonCell;
+import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -87,7 +81,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+    public void refresh() {
         if (MC.level != null && unitItem.cooldownTicksMax > 0) {
             Long cooldownTicksLeft = ItemUtil.getCooldownTicksLeft(itemStack, ((Entity) unit).level());
             this.greyPercent = 1 - Math.min(1f, (float) cooldownTicksLeft / unitItem.cooldownTicksMax);
@@ -99,75 +93,30 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 return String.valueOf(this.itemStack.getCount());
             return "";
         };
-        super.render(guiGraphics, x, y, mouseX, mouseY);
     }
 
-    // render a translucent version of this button
+    // render a translucent version of this button, the size of an inventory slot, under the cursor
     public void renderGhost(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        int x = mouseX - (DEFAULT_ICON_SIZE / 2);
-        int y = mouseY - (DEFAULT_ICON_SIZE / 2);
-        int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
-        float alpha = Mth.clamp(GHOST_ALPHA, 0.0f, 1.0f);
+        var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+        float k = scale.poseScale();
+        int size = 26;
+        int x = scale.toUnits(mouseX) - size / 2;
+        int y = scale.toUnits(mouseY) - size / 2;
 
-        guiGraphics.pose().pushPose(); // contain the z-translates below
-
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 400);
+        guiGraphics.pose().scale(k, k, 1);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-
-        // frame + bg: shader colour fades the texture, but the bg is a solid
-        // fill inside renderIconFrameWithBg, so fade its alpha channel manually
-        if (this.frameResource != null) {
-            int a = Math.round(((bgColour >>> 24) & 0xFF) * alpha);
-            int bgCol = (a << 24) | (bgColour & 0x00FFFFFF);
-            guiGraphics.pose().translate(0, 0, 1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource,
-                    x + xyDiff, y + xyDiff, iconFrameSize, bgCol);
-        }
-        if (bgIconResource != null) {
-            guiGraphics.pose().translate(0, 0, 1);
-            MyRenderer.renderIcon(guiGraphics, bgIconResource,
-                    ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    imageSize + (innerIconSizeModifier * 2));
-        }
-        if (iconResource != null) {
-            guiGraphics.pose().translate(0, 0, 1);
-            MyRenderer.renderIcon(guiGraphics, iconResource,
-                    ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    imageSize + (innerIconSizeModifier * 2));
-        }
-
+        // fills are batched, so flush while the faded shader colour is still set
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, GHOST_ALPHA);
+        Theme.cell(guiGraphics, x, y, size, size, Theme.CellState.READY, false);
+        int icon = Math.round(size * 0.56f);
+        ButtonCell.drawIcon(guiGraphics, this, x + (size - icon) / 2, y + (size - icon) / 2, icon);
+        guiGraphics.flush();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        // item models ignore shader colour, so draw normally then wash out on top
-        if (iconItem != null) {
-            int offset = 2 + Math.round((1.0f - iconItemScale) * 8f);
-            int itemX = x + offset + (7 - xyDiff - iconSize / 2);
-            int itemY = y + offset + (7 - xyDiff - iconSize / 2);
-            int itemPx = Math.round(16 * iconItemScale);
-
-            guiGraphics.pose().translate(0, 0, 1);
-            MyRenderer.renderItem(guiGraphics, iconItem, itemX, itemY, iconItemScale);
-
-            guiGraphics.pose().translate(0, 0, 1);
-            int washAlpha = Math.round((1.0f - alpha) * 0xC0);
-            guiGraphics.fill(RenderType.guiGhostRecipeOverlay(),
-                    itemX, itemY, itemX + itemPx, itemY + itemPx,
-                    (washAlpha << 24) | 0xFFFFFF);
-        }
+        Theme.ring(guiGraphics, x, y, size, size, 1, Theme.ORANGE);
         RenderSystem.disableBlend();
         guiGraphics.pose().popPose();
-    }
-
-    private int ghostIconX(int x, int xyDiff) {
-        int iconX = x + 4 + (7 - xyDiff - iconSize / 2);
-        iconX -= innerIconSizeModifier;
-        return iconX + (DEFAULT_ICON_SIZE - imageSize) / 2;
-    }
-
-    private int ghostIconY(int y, int xyDiff) {
-        int iconY = y + 4 + (7 - xyDiff - iconSize / 2);
-        iconY -= innerIconSizeModifier;
-        return iconY + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 }
