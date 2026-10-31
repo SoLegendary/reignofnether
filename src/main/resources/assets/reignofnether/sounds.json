@@ -95,26 +95,26 @@
     "wraith_death": {
         "subtitle": "sounds.reignofnether.wraith_death",
         "sounds": [
-            { "name": "reignofnether:wraith_death_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_death_02", "attenuation_distance": 256 }
+            { "name": "reignofnether:wraith_death_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_death_02", "attenuation_distance": 40 }
         ]
     },
     "wraith_hurt": {
         "subtitle": "sounds.reignofnether.wraith_hurt",
         "sounds": [
-            { "name": "reignofnether:wraith_hurt_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_hurt_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_hurt_03", "attenuation_distance": 256 }
+            { "name": "reignofnether:wraith_hurt_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_hurt_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_hurt_03", "attenuation_distance": 40 }
         ]
     },
     "wraith_ambient": {
         "subtitle": "sounds.reignofnether.wraith_ambient",
         "sounds": [
-            { "name": "reignofnether:wraith_ambient_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_ambient_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_ambient_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_ambient_04", "attenuation_distance": 256 },
-            { "name": "reignofnether:wraith_ambient_05", "attenuation_distance": 256 }
+            { "name": "reignofnether:wraith_ambient_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_ambient_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_ambient_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_ambient_04", "attenuation_distance": 40 },
+            { "name": "reignofnether:wraith_ambient_05", "attenuation_distance": 40 }
         ]
     },
     "wraith_fear": {
@@ -140,32 +140,32 @@
     "wretchedwraith_death": {
         "subtitle": "sounds.reignofnether.wretchedwraith_death",
         "sounds": [
-            { "name": "reignofnether:wretchedwraith_death_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_death_02", "attenuation_distance": 256 }
+            { "name": "reignofnether:wretchedwraith_death_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_death_02", "attenuation_distance": 40 }
         ]
     },
     "wretchedwraith_hurt": {
         "subtitle": "sounds.reignofnether.wretchedwraith_hurt",
         "sounds": [
-            { "name": "reignofnether:wretchedwraith_hurt_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_hurt_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_hurt_03", "attenuation_distance": 256 }
+            { "name": "reignofnether:wretchedwraith_hurt_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_hurt_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_hurt_03", "attenuation_distance": 40 }
         ]
     },
     "wretchedwraith_ambient": {
         "subtitle": "sounds.reignofnether.wretchedwraith_ambient",
         "sounds": [
-            { "name": "reignofnether:wretchedwraith_ambient_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_ambient_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_ambient_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_ambient_04", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_ambient_05", "attenuation_distance": 256 },
-            { "name": "reignofnether:wretchedwraith_ambient_06", "attenuation_distance": 256 }
+            { "name": "reignofnether:wretchedwraith_ambient_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_ambient_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_ambient_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_ambient_04", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_ambient_05", "attenuation_distance": 40 },
+            { "name": "reignofnether:wretchedwraith_ambient_06", "attenuation_distance": 40 }
         ]
     },
     "wildfire_death": {
         "subtitle": "sounds.reignofnether.wildfire_death",
-        "sounds": [ { "name": "reignofnether:wildfire_death", "attenuation_distance": 256 } ]
+        "sounds": [ { "name": "reignofnether:wildfire_death", "attenuation_distance": 40 } ]
     },
     "wildfire_molten_bomb": {
         "subtitle": "sounds.reignofnether.wildfire_molten_bomb",
@@ -186,18 +186,18 @@
     "wildfire_hurt": {
         "subtitle": "sounds.reignofnether.wildfire_hurt",
         "sounds": [
-            { "name": "reignofnether:wildfire_hurt_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wildfire_hurt_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wildfire_hurt_03", "attenuation_distance": 256 }
+            { "name": "reignofnether:wildfire_hurt_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wildfire_hurt_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wildfire_hurt_03", "attenuation_distance": 40 }
         ]
     },
     "wildfire_ambient": {
         "subtitle": "sounds.reignofnether.wildfire_ambient",
         "sounds": [
-            { "name": "reignofnether:wildfire_ambient_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:wildfire_ambient_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:wildfire_ambient_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:wildfire_ambient_04", "attenuation_distance": 256 }
+            { "name": "reignofnether:wildfire_ambient_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:wildfire_ambient_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:wildfire_ambient_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:wildfire_ambient_04", "attenuation_distance": 40 }
         ]
     },
     "piglin_merchant_loot_explosion": {
@@ -207,28 +207,28 @@
     "windcaller_death": {
         "subtitle": "sounds.reignofnether.windcaller_death",
         "sounds": [
-            { "name": "reignofnether:windcaller_death_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_death_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_death_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_death_04", "attenuation_distance": 256 }
+            { "name": "reignofnether:windcaller_death_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_death_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_death_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_death_04", "attenuation_distance": 40 }
         ]
     },
     "windcaller_hurt": {
         "subtitle": "sounds.reignofnether.windcaller_hurt",
         "sounds": [
-            { "name": "reignofnether:windcaller_hurt_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_hurt_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_hurt_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_hurt_04", "attenuation_distance": 256 }
+            { "name": "reignofnether:windcaller_hurt_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_hurt_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_hurt_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_hurt_04", "attenuation_distance": 40 }
         ]
     },
     "windcaller_ambient": {
         "subtitle": "sounds.reignofnether.windcaller_ambient",
         "sounds": [
-            { "name": "reignofnether:windcaller_ambient_01", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_ambient_02", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_ambient_03", "attenuation_distance": 256 },
-            { "name": "reignofnether:windcaller_ambient_04", "attenuation_distance": 256 }
+            { "name": "reignofnether:windcaller_ambient_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_ambient_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_ambient_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:windcaller_ambient_04", "attenuation_distance": 40 }
         ]
     },
     "windcaller_wind_attack": {
