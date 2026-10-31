@@ -329,10 +329,9 @@ public class MatchStartScreen extends Screen {
     private void renderMap(Rect p) {
         var g = frame.g;
         Theme.panel(g, p.x(), p.y(), p.w(), p.h(), PANEL_FILL);
-        Text.small(g, I18n.get("matchstart.reignofnether.map_hint"), p.x() + 11, p.y() + 9, Theme.LABEL);
         renderModeChips(p.right() - 11, p.y() + 6);
 
-        int top = p.y() + 24;
+        int top = p.y() + (RTSMapInfoClientEvents.modeNames.size() > 1 ? 24 : 8);
         int side = Math.max(40, Math.min(p.w() - 16, p.bottom() - top - 8));
         int mx = p.x() + (p.w() - side) / 2;
         int my = top + (p.bottom() - top - 8 - side) / 2;

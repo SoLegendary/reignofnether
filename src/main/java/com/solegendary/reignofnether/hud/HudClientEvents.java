@@ -297,9 +297,11 @@ public class HudClientEvents {
         updateSelectedPlacement();
 
         HudFrame f = new HudFrame(g, scale, layout, scale.toUnits(mouseX), scale.toUnits(mouseY));
+        SelectionPanel.prepare();
 
         g.pose().pushPose();
         g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+        renderConsole(f, layout);
         renderMapFrame(f, layout);
         g.pose().popPose();
 
@@ -362,15 +364,27 @@ public class HudClientEvents {
             hudSelectedPlacement = selBuildings.get(0);
     }
 
+    /** The bar: one piece, or on wide screens a left piece sized to the selection and a right piece for the map. */
+    private static void renderConsole(HudFrame f, HudLayout l) {
+        Rect c = l.console();
+        int pad = HudLayout.CONSOLE_PAD;
+        int mapX = l.tools().x() - pad;
+        Rect left = l.split() ? new Rect(0, c.y(), l.selection().x() + SelectionPanel.width(f) + pad, c.h()) : c;
+        Theme.panel(f.g, left.x(), left.y(), left.w(), left.h(), Theme.floating());
+        f.zone(left);
+        if (l.split()) {
+            Rect right = new Rect(mapX, c.y(), l.width() - mapX, c.h());
+            Theme.panel(f.g, right.x(), right.y(), right.w(), right.h(), Theme.floating());
+            f.zone(right);
+        } else {
+            Theme.divider(f.g, mapX, c.y() + pad, 1, c.h() - pad * 2);
+        }
+        Theme.divider(f.g, l.commandCard().right() + pad, c.y() + pad, 1, c.h() - pad * 2);
+    }
+
     /** Diamond frame: the whole map turned 45 degrees like the camera, so no corner is cut off. */
     private static void renderMapFrame(HudFrame f, HudLayout l) {
-        // one floating card holds the tools, their label and the diamond, like the other bottom cards
         Rect map = l.minimap();
-        int pad = HudLayout.CONSOLE_PAD;
-        int top = Math.min(map.y(), l.tools().y()) - pad;
-        Rect card = new Rect(l.tools().x() - pad, top, map.right() + pad - (l.tools().x() - pad), l.height() - top);
-        Theme.panel(f.g, card.x(), card.y(), card.w(), card.h(), Theme.floating());
-        f.zone(card);
         if (MinimapClientEvents.isSquare()) {
             Theme.outline(f.g, map.x() - 2, map.y() - 2, map.w() + 4, map.h() + 4, 1, Theme.INK);
             Theme.outline(f.g, map.x(), map.y(), map.w(), map.h(), 2, Theme.CONSOLE_RIM);

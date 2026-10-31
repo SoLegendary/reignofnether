@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
@@ -148,25 +149,23 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     }
 
     /**
-     * Draws the selected entity's animated 3D model inside a box (HUD units): the whole body, plus its mount and
-     * riders, scaled from their bounding boxes to fit the box with the feet near the bottom.
+     * Draws the selected entity's animated 3D model inside a box (HUD units), framed on its face like a portrait:
+     * the head and shoulders, with the eyes a little above the middle. Anything else is cut off by the box.
      */
     public void drawEntity(GuiGraphics g, LivingEntity entity, int x, int y, int w, int h) {
         Entity root = entity.getRootVehicle();
         List<Entity> stack = root.getSelfAndPassengers().toList();
 
-        float width = 0, height = 0;
-        for (Entity e : stack) {
-            float rs = rendererScale(e);
-            width = Math.max(width, e.getBbWidth() * rs);
-            height = Math.max(height, (float) (e.getY() - root.getY()) + e.getBbHeight() * rs);
+        float rs = rendererScale(entity);
+        float body = entity.getBbHeight() * rs;
+        float eyes = (float) (entity.getY() - root.getY()) + entity.getEyeHeight() * rs;
+        float visible = Math.max(Math.min(1f, body * 1.25f), body * 0.55f); // small mobs are shown whole
+        if (entity instanceof WildfireUnit) { // its model is about twice its blaze-sized hitbox
+            eyes = 3.3f;
+            visible = 1.9f;
         }
-        float pad = 4;
-        // ponytail: the hitbox, plus headroom for models that overshoot it (shields,
-        // helmets); long mobs turning sideways (ravager) can still touch the edge, Clip keeps it in
-        float scale = Math.min((w - 2 * pad) / (width * 1.3f), (h - 2 * pad) / (height * 1.2f));
-        float drawY = y + h - pad; // feet on the bottom: the headroom goes on top, clear of the level badge
-        drawEntityOnScreen(g.pose(), root, stack, x + w / 2f, drawY, scale);
+        float scale = h / visible;
+        drawEntityOnScreen(g.pose(), root, stack, x + w / 2f, y + h * 0.4f + eyes * scale, scale);
     }
 
     // how far the renderer scales the model past the hitbox. Hitboxes already include the scale for nearly every mob

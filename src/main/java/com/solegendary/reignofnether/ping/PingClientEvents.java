@@ -139,9 +139,10 @@ public class PingClientEvents {
     }
 
     /**
-     * The FPV HUD prototype's waypoint: a beam fading downwards, a square ring pulsing out from the spot, a
-     * bobbing bevelled diamond with the symbol and a chip with the name and distance above. Shapes are drawn
-     * in the 1920x1080 design's pixels (half a HUD unit), text in HUD units. Call with the GUI's own pose.
+     * The RTS view's waypoint: a beam fading downwards, a square ring pulsing out from the spot, a bobbing
+     * bevelled diamond with the symbol and a chip with the name above (no distance: it means nothing from the
+     * RTS camera). Shapes are drawn in the 1920x1080 design's pixels (half a HUD unit), text in HUD units.
+     * Call with the GUI's own pose.
      */
     public static void drawWaypoint(GuiGraphics g, Vec3 world, PingType type, float ageTicks) {
         Vec2 p = WorldToScreen.project(world);
@@ -185,18 +186,15 @@ public class PingClientEvents {
 
         // the chip, its top 58 design pixels above the spot (29 units)
         String label = Component.translatable(type.key()).getString();
-        String dist = Math.round(WorldToScreen.distance(world)) + " m";
-        float big = Text.px(15);
         int h = 13;
-        int w = 4 + Text.smallWidth(label) + 4 + Text.bigWidth(dist, big) + 4;
+        int w = 4 + Text.smallWidth(label) + 4;
         int cx = Math.round(x / 2), top = Math.round(y / 2) - 29;
         int lx = cx - w / 2;
         g.pose().pushPose();
         g.pose().scale(k, k, 1);
         g.fill(lx, top, lx + w, top + h, 0xD90B0A0F);
-        // both centred on the chip: small caps centre at y + 4.5, big caps are 7/8 of its line
+        // centred on the chip: small caps centre at y + 4.5
         Text.small(g, label, lx + 4, top + Math.round(h / 2f - 4.5f), colour);
-        Text.bigRight(g, dist, lx + w - 4, top + Math.round((h - Text.bigHeight(big) * 7 / 8f) / 2), Theme.TEXT, big);
         g.pose().popPose();
     }
 

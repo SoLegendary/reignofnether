@@ -251,10 +251,9 @@ public class MatchResumeScreen extends Screen {
     /** The map as it is now, with each player's base (their capitol) as a seat-style marker. */
     private void renderMap(GuiGraphics g, int px, int py, int pw, int ph) {
         Theme.panel(g, px, py, pw, ph, PANEL_FILL);
-        Text.small(g, "THE MAP NOW", px + 11, py + 9, Theme.LABEL);
         if (fog)
             Text.smallRight(g, "ALLIED BASES ONLY \u00b7 FOG OF WAR", px + pw - 11, py + 9, Theme.DIM);
-        int top = py + 24;
+        int top = py + (fog ? 24 : 8);
         int side = Math.max(40, Math.min(pw - 16, py + ph - top - 8));
         int mx = px + (pw - side) / 2, my = top;
         Theme.outline(g, mx - 2, my - 2, side + 4, side + 4, 1, Theme.INK);

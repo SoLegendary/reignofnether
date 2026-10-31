@@ -126,17 +126,12 @@ public final class CommandCard {
     }
 
     public static void render(HudFrame f) {
-        if (SpectatorHud.isActive())
-            return; // spectators can't command anything
         Rect card = f.layout.commandCard();
-        Contents c = cachedContents();
-        // a floating card, only there when there is something to command
-        if (c.isEmpty())
+        if (SpectatorHud.isActive()) {
+            renderSpectatorCard(f); // spectators can't command anything
             return;
-        int pad = HudLayout.CONSOLE_PAD;
-        Rect panel = new Rect(card.x() - pad, card.y() - pad, card.w() + pad * 2, card.h() + pad * 2);
-        Theme.panel(f.g, panel.x(), panel.y(), panel.w(), panel.h(), Theme.floating());
-        f.zone(panel);
+        }
+        Contents c = cachedContents();
 
         Object owner = HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement : HudClientEvents.hudSelectedEntity;
         if (owner != pageOwner) {
@@ -146,7 +141,8 @@ public final class CommandCard {
         }
         CommandGrid.Layout<Button> layout = CommandGrid.assign(c.commands(), c.abilities(), page);
 
-        Text.small(f.g, Text.fitSmall(c.title().toUpperCase(Locale.ROOT), card.w()), card.x(), card.y(), Theme.LABEL);
+        int badge = SelectionPanel.renderSkillPoints(f, card.right(), card.y() - 4);
+        Text.small(f.g, Text.fitSmall(c.title().toUpperCase(Locale.ROOT), card.w() - (badge > 0 ? badge + 4 : 0)), card.x(), card.y(), Theme.LABEL);
 
         for (int slot = 0; slot < CommandGrid.SLOTS; slot++) {
             int x = f.layout.slotX(slot);
@@ -158,6 +154,27 @@ public final class CommandCard {
                 ButtonCell.renderEmpty(f.g, x, y, HudLayout.CELL, Keybindings.grid[slot].getCurrentLabel());
             else
                 renderCell(f, b, x, y, slot);
+        }
+    }
+
+    /** The hero's abilities with their cooldowns; registered for the tooltip only, so not clickable. */
+    private static void renderSpectatorCard(HudFrame f) {
+        List<Button> abilities = new ArrayList<>();
+        if (HudClientEvents.hudSelectedEntity instanceof HeroUnit hero)
+            for (Button b : hero.getAbilityButtons())
+                if (b instanceof AbilityButton ab && ab.ability instanceof HeroAbility)
+                    abilities.add(b);
+        for (int slot = 0; slot < CommandGrid.SLOTS; slot++) {
+            int x = f.layout.slotX(slot);
+            int y = f.layout.slotY(slot);
+            if (slot >= abilities.size()) {
+                ButtonCell.renderEmpty(f.g, x, y, HudLayout.CELL, null);
+                continue;
+            }
+            Button b = abilities.get(slot);
+            Rect cell = new Rect(x, y, HudLayout.CELL, HudLayout.CELL);
+            ButtonCell.render(f.g, b, x, y, HudLayout.CELL, null, f.hovered(cell));
+            f.register(new ButtonBuilder("ability").build(), cell, null, () -> ButtonCell.tooltipFor(b, null));
         }
     }
 

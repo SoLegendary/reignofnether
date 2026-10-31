@@ -39,8 +39,4 @@ public class WorldToScreen {
         float y = (1 - (v.y / v.w * 0.5f + 0.5f)) * MC.getWindow().getGuiScaledHeight();
         return new Vec2(x, y);
     }
-
-    public static double distance(Vec3 world) {
-        return camera.distanceTo(world);
-    }
 }

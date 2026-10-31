@@ -87,6 +87,12 @@ class HudLayoutTest {
     }
 
     @Test
+    void barSplitsOnlyAboveItsMaximumWidth() {
+        assertFalse(HudLayout.compute(HudLayout.MAX_BAR, 540).split());
+        assertTrue(HudLayout.compute(HudLayout.MAX_BAR + 1, 540).split());
+    }
+
+    @Test
     void commandCardFitsTheConsole() {
         HudLayout l = HudLayout.compute(960, 540);
         assertEquals(HudLayout.CONSOLE_HEIGHT - HudLayout.CONSOLE_PAD * 2, HudLayout.cardHeight());
