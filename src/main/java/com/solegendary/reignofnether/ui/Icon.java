@@ -7,11 +7,13 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * Pixelarticons (MIT, the launcher's icon set), stored white and tinted when drawn. The art is 12x12 pixels
- * on a 24x24 texture, so sizes that are a multiple of 6 units stay pixel-exact.
+ * on a 24x24 texture, so sizes that are a multiple of 6 units stay pixel-exact. PAW to SATELLITE were drawn for
+ * the map tools in the same grid.
  */
 public enum Icon {
     CHECK, CLOSE, PLUS, MINUS, LOCK, UNLOCK, SETTINGS("settings-cog"), MESSAGE, USERS, EYE, SHUFFLE,
-    ZOOM_IN("zoom-in"), ZOOM_OUT("zoom-out"), UNDO, REDO, LIST("bulletlist"), MAP, BOOK_OPEN("book-open"), GLOBE;
+    ZOOM_IN("zoom-in"), ZOOM_OUT("zoom-out"), UNDO, REDO, LIST("bulletlist"), MAP, BOOK_OPEN("book-open"), GLOBE,
+    PAW, LEAF, SLIDERS, EXPAND, SHRINK, SATELLITE;
 
     public final ResourceLocation texture;
 

@@ -112,7 +112,9 @@ public class Keybindings {
     };
 
     // RTS view only, like the command card; off the grid so Z stays a command
-    public static final Keybinding diplomacy = new Keybinding("key.reignofnether.diplomacy", GLFW.GLFW_KEY_M, CATEGORY_RTS, RtsConflictContext.COMMAND, "M");
+    public static final Keybinding bigMap = new Keybinding("key.reignofnether.big_map", GLFW.GLFW_KEY_M, CATEGORY_RTS, RtsConflictContext.COMMAND, "M");
+    public static final Keybinding satellite = new Keybinding("key.reignofnether.satellite", GLFW.GLFW_KEY_COMMA, CATEGORY_RTS, RtsConflictContext.COMMAND, ",");
+    public static final Keybinding diplomacy = new Keybinding("key.reignofnether.diplomacy_panel", GLFW.GLFW_KEY_PERIOD, CATEGORY_RTS, RtsConflictContext.COMMAND, ".");
 
     // soldiers: full map while waiting to respawn. Not M: Simple Voice Chat mutes on M outside screens.
     public static final Keybinding soldierMap = new Keybinding("key.reignofnether.soldier_map", GLFW.GLFW_KEY_J, CATEGORY_RTS, RtsConflictContext.SOLDIER, "J");
@@ -127,7 +129,7 @@ public class Keybindings {
             zoomIn, zoomOut,
             panPlusX, panMinusX, panPlusZ, panMinusZ,
             rotCW, rotCCW, reset,
-            hotkey6, hotkey7, jumpToAlert, diplomacy,
+            hotkey6, hotkey7, jumpToAlert, bigMap, satellite, diplomacy,
             chat, deselect, tab, ping, soldierMap,
             item1, item2, item3, item4, item5, item6
         ));

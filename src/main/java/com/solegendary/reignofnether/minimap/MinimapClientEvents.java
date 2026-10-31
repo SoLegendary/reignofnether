@@ -324,7 +324,7 @@ public class MinimapClientEvents {
     public static Button getCamSensitivityButton() {
         return new Button("Camera Sensitivity",
                 14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png"),
+                Icon.SLIDERS.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
@@ -398,12 +398,10 @@ public class MinimapClientEvents {
     public static Button getHighlightAnimalsButton() {
         return new Button("Highlight Animals",
                 14,
-                shouldHighlightAnimals() ?
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png") :
-                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep_dark.png"),
+                Icon.PAW.texture,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
-                () -> false,
+                MinimapClientEvents::shouldHighlightAnimals,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
                 () -> true,
                 () -> ReignOfNetherClientConfigs.HIGHLIGHT_ANIMALS.set(!shouldHighlightAnimals()),
@@ -952,7 +950,7 @@ public class MinimapClientEvents {
     }
 
     /** The HUD minimap's zoom: 1 shows the whole map. */
-    public static final MapZoom ZOOM = new MapZoom(1f);
+    public static final MapZoom ZOOM = new MapZoom(1f).withWideStep(MinimapClientEvents::setLargeMap);
 
     private static void drawMapMarker(MapMarker marker) {
         int xc = marker.x;

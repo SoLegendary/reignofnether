@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ui.Icon;
@@ -12,14 +14,11 @@ import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
-import com.solegendary.reignofnether.hud.panels.MapZoom;
 import com.solegendary.reignofnether.hud.panels.SpectatorHud;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.ui.Clip;
 import com.solegendary.reignofnether.ui.Rect;
@@ -28,7 +27,6 @@ import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -63,10 +61,6 @@ public class PlayerDisplayClientEvents {
     private static final int PAD = 10;
     private static final int HEADER_H = 40; // title row and column labels
     private static final int ROW_GAP = 4;
-    private static final int MAP = 200;
-    // the map is a diamond, so zoom 2 is as far out as it goes and still fills the card: the large map keeps it all in
-    private static final MapZoom ZOOM = MapZoom.minimum(2f);
-    private static boolean largeMapShown = false;
 
     public static void resetDisplay() {
         displayType = DisplayType.NONE;
@@ -81,10 +75,6 @@ public class PlayerDisplayClientEvents {
     }
 
     /** Diplomacy key: diplomacy for RTS players, the economy overview for everyone else. */
-    private static void toggleFromKey() {
-        toggle(PlayerClientEvents.isRTSPlayer() ? DisplayType.DIPLOMACY : DisplayType.OBSERVER);
-    }
-
     private static void toggle(DisplayType type) {
         if (displayType != DisplayType.NONE)
             resetDisplay();
@@ -124,10 +114,6 @@ public class PlayerDisplayClientEvents {
         // opened before the match started: it would show every enemy's economy
         if (displayType == DisplayType.OBSERVER && PlayerClientEvents.isRTSPlayer())
             resetDisplay();
-        if (largeMapShown != (displayType != DisplayType.NONE)) { // here because the map texture needs the render thread
-            largeMapShown = !largeMapShown;
-            MinimapClientEvents.setLargeMap(largeMapShown);
-        }
         if (displayType == DisplayType.DIPLOMACY && MC.level != null && MC.player != null) {
             renderDiplomacy(f);
         } else {
@@ -205,28 +191,18 @@ public class PlayerDisplayClientEvents {
 
     /** Panel background, title, close hint and close button. Returns the panel rectangle. */
     private static Rect renderPanel(HudFrame f, String title, int rows) {
-        // two solid cards side by side: the player rows, only as tall as they need, and the map
+        // only as tall as the rows need
         int rowsH = Math.max(AbstractPlayerDisplay.ROW_H, rows * (AbstractPlayerDisplay.ROW_H + ROW_GAP) - ROW_GAP);
         // below the spectator scoreboard, which grows a row per two players
         int minTop = SpectatorHud.isActive() ? Math.max(TOP, SpectatorHud.bottom() + HudLayout.GAP) : TOP;
-        int map = Math.min(MAP, f.layout.console().y() - minTop - PAD * 2 - HudLayout.GAP);
-        // and only if it fits beside the rows on a small screen
-        map = Math.min(map, f.layout.width() - WIDTH - PAD * 2 - HudLayout.GAP * 3);
-        int mapW = map > 0 ? map + PAD * 2 + HudLayout.GAP : 0;
         int h = HEADER_H + rowsH + PAD;
-        int x = (f.layout.width() - WIDTH - mapW) / 2;
+        int x = (f.layout.width() - WIDTH) / 2;
         // centred between the top of the screen and the console, never over the top bar
-        int top = Math.max(minTop, (f.layout.console().y() - Math.max(h, map > 0 ? map + PAD * 2 : 0)) / 2);
+        int top = Math.max(minTop, (f.layout.console().y() - h) / 2);
         Rect panel = new Rect(x, top, WIDTH, h);
         Theme.panel(f.g, x, top, WIDTH, h, Theme.floating());
         f.g.fill(x, top, x + WIDTH, top + 2, Theme.ORANGE);
         f.zone(panel);
-        if (map > 0) {
-            Rect card = new Rect(panel.right() + HudLayout.GAP, top, map + PAD * 2, map + PAD * 2);
-            Theme.panel(f.g, card.x(), card.y(), card.w(), card.h(), Theme.floating());
-            f.zone(card);
-            renderMap(f, card.x() + PAD, card.y() + PAD, map);
-        }
 
         Text.heading(f.g, title, x + PAD, top + 10, Theme.GOLD, Text.px(24));
 
@@ -237,36 +213,6 @@ public class PlayerDisplayClientEvents {
         f.register(new ButtonBuilder("Close player panel").onLeftClick(PlayerDisplayClientEvents::resetDisplay).build(),
                 close, null, () -> null);
         return panel;
-    }
-
-    /** The minimap, bigger, in the same frame as the HUD's. */
-    private static void renderMap(HudFrame f, int x, int y, int size) {
-        if (size <= 0)
-            return;
-        Theme.outline(f.g, x - 2, y - 2, size + 4, size + 4, 1, Theme.INK);
-        Theme.outline(f.g, x, y, size, size, 2, Theme.CONSOLE_RIM);
-        f.g.fill(x, y, x + size, y + size, Theme.INK);
-        Clip.push(f.g, x, y, size, size);
-        MinimapClientEvents.renderSquare(f.g, x, y, size, ZOOM.value());
-        Clip.pop(f.g);
-        // clicking the map moves the view there, like the minimap; registered first so the buttons on it win
-        float zoom = ZOOM.value();
-        int mx = f.mouseX, my = f.mouseY;
-        f.register(new ButtonBuilder("Move view on map").onLeftClick(() -> {
-            BlockPos pos = MinimapClientEvents.getWorldPosOnSquare(mx, my, x, y, size, zoom);
-            if (pos != null && MC.player != null)
-                PlayerServerboundPacket.teleportPlayer((double) pos.getX(), MC.player.getY(), (double) pos.getZ());
-        }).build(), new Rect(x, y, size, size), null, () -> null);
-        ZOOM.renderButtons(f, x + 4, y + size - 4);
-
-        // the map toggles that matter mid-match; the rest are in the settings menu
-        int tile = HudLayout.TOOL;
-        int tx = x + size - tile - 4, ty = y + 4;
-        if (size < (tile + 2) * 3 + HudLayout.ZOOM + 8)
-            return;
-        f.cell(MinimapClientEvents.getHighlightAnimalsButton(), tx, ty, tile, null);
-        f.cell(OrthoviewClientEvents.getLeavesHidingButton(), tx, ty + tile + 2, tile, null);
-        f.cell(MinimapClientEvents.getCamSensitivityButton(), tx, ty + (tile + 2) * 2, tile, null);
     }
 
     /** "Allies can control my units" chip with an on/off dot, like the match setup's rule toggles. */
@@ -295,9 +241,16 @@ public class PlayerDisplayClientEvents {
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (DiplomacyPlayerDisplay.keyPressed(evt.getKeyCode())) {
             evt.setCanceled(true);
-        } else if (evt.getKeyCode() == Keybindings.diplomacy.getKey() && evt.getScreen() instanceof TopdownGui
-                && OrthoviewClientEvents.isEnabled() && !TextInputClientEvents.isAnyInputFocused()) {
-            toggleFromKey();
+        } else if (evt.getScreen() instanceof TopdownGui && OrthoviewClientEvents.isEnabled() && !TextInputClientEvents.isAnyInputFocused()) {
+            int key = evt.getKeyCode();
+            if (key == Keybindings.bigMap.getKey())
+                HudGeometry.setBigMap(!HudGeometry.isBigMap());
+            else if (key == Keybindings.satellite.getKey())
+                StrategicMapClientEvents.toggle();
+            else if (key == Keybindings.diplomacy.getKey())
+                toggle(PlayerClientEvents.isRTSPlayer() ? DisplayType.DIPLOMACY : DisplayType.OBSERVER);
+            else
+                return;
             evt.setCanceled(true);
         }
     }

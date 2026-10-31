@@ -2353,7 +2353,9 @@
     "key.categories.reignofnether.rts":    "Reign of Nether: RTS Controls",
 
     "key.reignofnether.soldier_map": "Soldier full map",
-    "key.reignofnether.diplomacy": "Diplomacy",
+    "key.reignofnether.big_map": "Big map",
+    "key.reignofnether.satellite": "Satellite view",
+    "key.reignofnether.diplomacy_panel": "Diplomacy",
     "key.reignofnether.zoom_in":      "Zoom In",
     "key.reignofnether.zoom_out":     "Zoom Out",
     "key.reignofnether.pan_plus_x":   "Pan Camera East",

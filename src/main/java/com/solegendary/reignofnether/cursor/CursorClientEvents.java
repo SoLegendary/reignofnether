@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.cursor;
 
+import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -294,6 +295,8 @@ public class CursorClientEvents {
                 entityaabb = entityaabb.inflate(0.2f, 0, 0.2f);
                 entityaabb.setMaxY(entityaabb.maxY + 0.6f);
             }
+            if (StrategicMapClientEvents.isOpen())
+                entityaabb = entityaabb.inflate(StrategicMapClientEvents.iconReach(), 0, StrategicMapClientEvents.iconReach());
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);

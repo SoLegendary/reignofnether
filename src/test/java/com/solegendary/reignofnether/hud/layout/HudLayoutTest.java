@@ -100,4 +100,15 @@ class HudLayoutTest {
         assertTrue(l.slotX(last) + HudLayout.CELL <= l.commandCard().right());
         assertTrue(l.slotY(last) + HudLayout.CELL <= l.commandCard().bottom());
     }
+
+    @Test
+    void bigMapGrowsUpwardsWithItsToolsInARowBelow() {
+        HudLayout small = HudLayout.compute(960, 540);
+        HudLayout big = HudLayout.compute(960, 540, true);
+        assertTrue(big.minimap().w() > small.minimap().w());
+        assertTrue(big.minimap().bottom() <= big.tools().y());
+        assertTrue(big.tools().bottom() <= 540);
+        assertTrue(big.toolX(9) + HudLayout.TOOL <= big.tools().right());
+        assertTrue(big.toolY(9) == big.tools().y());
+    }
 }

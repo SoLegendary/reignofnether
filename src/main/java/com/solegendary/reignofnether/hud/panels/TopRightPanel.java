@@ -108,9 +108,8 @@ public final class TopRightPanel {
         f.zone(x, top, w, h);
         int bx = x + PAD;
         for (Button b : buttons) {
-            // the key is only in the tooltip; the diplomacy key is handled by its panel
-            String key = b == PlayerDisplayClientEvents.observerButton || b == PlayerDisplayClientEvents.diplomacyButton
-                    ? Keybindings.diplomacy.getCurrentLabel() : b.hotkey != null ? b.hotkey.getCurrentLabel() : null;
+            // the key is only in the tooltip
+            String key = b.hotkey != null ? b.hotkey.getCurrentLabel() : null;
             Rect cell = new Rect(bx, top + PAD, BTN, BTN);
             ButtonCell.render(f.g, b, bx, top + PAD, BTN, null, f.hovered(cell));
             f.register(b, cell, b.hotkey, () -> ButtonCell.tooltipFor(b, key));

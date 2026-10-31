@@ -32,6 +32,7 @@ import com.solegendary.reignofnether.items.ItemShopMenu;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
@@ -301,6 +302,7 @@ public class HudClientEvents {
 
         g.pose().pushPose();
         g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+        StrategicMapClientEvents.render(f);
         renderConsole(f, layout);
         renderMapFrame(f, layout);
         g.pose().popPose();
@@ -372,8 +374,9 @@ public class HudClientEvents {
         Rect left = l.split() ? new Rect(0, c.y(), l.selection().x() + SelectionPanel.width(f) + pad, c.h()) : c;
         Theme.panel(f.g, left.x(), left.y(), left.w(), left.h(), Theme.floating());
         f.zone(left);
-        if (l.split()) {
-            Rect right = new Rect(mapX, c.y(), l.width() - mapX, c.h());
+        if (l.split() || l.bigMap()) {
+            int top = l.bigMap() ? l.minimap().y() - pad : c.y();
+            Rect right = new Rect(mapX, top, l.width() - mapX, l.height() - top);
             Theme.panel(f.g, right.x(), right.y(), right.w(), right.h(), Theme.floating());
             f.zone(right);
         } else {

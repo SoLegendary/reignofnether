@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
@@ -18,6 +19,7 @@ import com.solegendary.reignofnether.healthbars.BarStates;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
@@ -320,6 +322,8 @@ public class PlayerClientEvents {
         FogOfWarClientEvents.movedToCapitol = false;
         FogOfWarClientEvents.brightChunks.clear();
         OrthoviewClientEvents.unlockCam();
+        StrategicMapClientEvents.reset();
+        HudGeometry.setBigMap(false);
         HeroClientEvents.fallenHeroes.clear();
         PlayerDisplayClientEvents.resetDisplay();
         PlayerColors.reset();

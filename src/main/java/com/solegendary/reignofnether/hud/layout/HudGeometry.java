@@ -13,7 +13,8 @@ public final class HudGeometry {
     private static int width, height, chosenScale;
     private static double guiScale;
     private static HudScale scale;
-    private static HudLayout layout;
+    private static HudLayout layout, bigLayout;
+    private static boolean bigMap = false;
 
     // called many times a frame (every text draw), so compares fields instead of allocating a key
     public static HudScale scale() {
@@ -29,13 +30,22 @@ public final class HudGeometry {
             chosenScale = chosen;
             scale = HudScale.of(width, height, guiScale, chosenScale);
             layout = HudLayout.compute(scale.width(), scale.height());
+            bigLayout = HudLayout.compute(scale.width(), scale.height(), true);
         }
         return scale;
     }
 
     public static HudLayout layout() {
         scale();
-        return layout;
+        return bigMap ? bigLayout : layout;
+    }
+
+    public static boolean isBigMap() {
+        return bigMap;
+    }
+
+    public static void setBigMap(boolean big) {
+        bigMap = big;
     }
 
     /** A rectangle in HUD units converted to GUI coordinates: {x, y, w, h}. */
