@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
@@ -44,10 +45,11 @@ public final class RtsPathfinder {
         // Snap the start too: a unit standing on a slab/dais edge or still falling (eg. a hero just spawned on
         // its altar) is a block off its node 0, and narrow units can't advance to a node 1 block above/below,
         // so they spun in place until moved by hand.
-        start = snapToWalkable(level, start, mobility, footprintRadius, clearanceCells, fireCost, 1);
+        start = snapToWalkable(level, surfaceOf(level, start), mobility, footprintRadius, clearanceCells, fireCost, 1);
         // Snap the goal onto a standable cell. If none exists nearby (eg. an airborne canopy leaf) the goal is
         // unreachable as an exact cell: path best-effort with a capped budget so A* can't flood MAX_RADIUS
         // proving the obvious (the 250ms freeze on leaf orders).
+        target = surfaceOf(level, target);
         BlockPos snapped = findStandable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
         boolean reachableGoal = snapped != null;
         if (reachableGoal) target = snapped;
@@ -65,6 +67,13 @@ public final class RtsPathfinder {
                 onReady.onPath(null, false);
             }
         }
+    }
+
+    // Cell on top of the water column bp is in, or bp if it isn't in water. A sinking unit or a click on a lake
+    // bed can be further below the surface than either snap radius reaches, and only the surface is walkable.
+    private static BlockPos surfaceOf(Level level, BlockPos bp) {
+        while (WalkabilityBuilder.coversFluid(level.getFluidState(bp.above()))) bp = bp.above();
+        return level.getFluidState(bp).is(FluidTags.WATER) ? bp.above() : bp;
     }
 
     // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear. Shared
