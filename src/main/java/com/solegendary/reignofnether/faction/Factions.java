@@ -296,10 +296,6 @@ public class Factions {
 		return faction;
 	}
 
-	public static void updateCustomBuildings() {
-		for (ResourceLocation faction : Factions.CLASSIC_FACTIONS)
-			Factions.getFaction(faction).updateCustomBuildings();
-	}
 	
 	public static ResourceLocation getKey(Faction faction) {
 		return ReignOfNetherRegistries.FACTIONS.getKey(faction);
