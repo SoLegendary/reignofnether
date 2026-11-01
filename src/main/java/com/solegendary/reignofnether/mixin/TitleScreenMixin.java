@@ -61,8 +61,8 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void init(CallbackInfo ci) {
-        int discordX = this.width - 1022;
-        int discordY = this.height - 95;
+        int discordX = this.width - 102;
+        int discordY = this.height - 57;
 
         this.discordButton = new AbstractWidget(discordX, discordY, 114, 38, Component.empty()) {
             @Override
