@@ -619,11 +619,12 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         animateScaleReducing = true;
         this.castMaceSlamGoal.stop();
         this.castTauntingCryGoal.stop();
-        this.castAvatarGoal.stop();
+        /*
+        this.castAvatarGoal.stop(); // don't allow cancelling avatar
         if (getAvatarTicksLeft() <= 0 && getAvatarScalingStarted()) {
             disableAvatar();
             updateKnockbackResistance();
-        }
+        } */
     }
 
     public void maceSlam(BlockPos blockPos) {
@@ -808,5 +809,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         AABB aabb = this.getBoundingBox().inflate(0.15f, 0, 0.15f);
         aabb.setMaxY(aabb.maxY + 0.4875f);
         return aabb;
+    }
+
+    @Override
+    public boolean uninterruptable() {
+        return castAvatarGoal != null && castAvatarGoal.isCasting();
     }
 }

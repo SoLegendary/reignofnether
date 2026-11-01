@@ -8,6 +8,7 @@ public class StockedShopItem {
     public int stock;
     public final int maxRestockTicks;
     private int restockTicks;
+    public final int startingStock;
 
     public StockedShopItem(UnitItem unitItem, int maxStock, int maxRestockTicks) {
         this.item = unitItem;
@@ -16,22 +17,25 @@ public class StockedShopItem {
         this.stock = maxStock;
         this.maxRestockTicks = maxRestockTicks;
         this.restockTicks = maxRestockTicks;
+        this.startingStock = maxStock;
     }
 
-    public StockedShopItem(UnitItem unitItem, int buyCost, int maxStock, int stock, int maxRestockTicks) {
+    public StockedShopItem(UnitItem unitItem, int buyCost, int maxStock, int startingStock, int maxRestockTicks) {
         this.item = unitItem;
         this.buyCost = buyCost;
         this.maxStock = maxStock;
-        this.stock = stock;
+        this.stock = startingStock;
+        this.startingStock = startingStock;
         this.maxRestockTicks = maxRestockTicks;
         this.restockTicks = maxRestockTicks;
     }
 
-    public StockedShopItem(UnitItem unitItem, int buyCost, int maxStock, int stock, int maxRestockTicks, int restockTicks) {
+    public StockedShopItem(UnitItem unitItem, int buyCost, int maxStock, int stock, int startingStock, int maxRestockTicks, int restockTicks) {
         this.item = unitItem;
         this.buyCost = buyCost;
         this.maxStock = maxStock;
         this.stock = stock;
+        this.startingStock = startingStock;
         this.maxRestockTicks = maxRestockTicks;
         this.restockTicks = restockTicks;
     }
@@ -52,5 +56,10 @@ public class StockedShopItem {
                 stock += 1;
             }
         }
+    }
+
+    public void reset() {
+        this.stock = startingStock;
+        this.restockTicks = maxRestockTicks;
     }
 }

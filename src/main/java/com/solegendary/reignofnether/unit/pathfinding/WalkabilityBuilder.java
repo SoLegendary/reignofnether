@@ -6,10 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.SculkCatalystBlock;
-import net.minecraft.world.level.block.SculkShriekerBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
@@ -68,7 +65,12 @@ public final class WalkabilityBuilder {
         // the very leaf it's told to mine). don't count these as support: the cell falls through to "no floor" so
         // the unit routes around and stands on the real ground below. BlockTags.LEAVES is allocation-free, unlike
         // BlockUtils.isLeafBlock whose List.of fallback would allocate on this hot path for every solid floor.
-        if (MiscUtil.isSolidBlocking(level, floor) && !isFenceLike(floorBs) && !floorBs.is(BlockTags.LEAVES)) return KIND_LAND;
+        if (MiscUtil.isSolidBlocking(level, floor) &&
+                !isFenceLike(floorBs) &&
+                !floorBs.is(BlockTags.LEAVES) &&
+                !(floorBs.getBlock() instanceof LanternBlock))
+            return KIND_LAND;
+
         if (floorBs.getFluidState().is(FluidTags.LAVA)) return KIND_LAVA;
         if (!floorBs.getFluidState().isEmpty()) return KIND_WATER;
         return KIND_BLOCKED; // no floor support

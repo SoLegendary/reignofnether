@@ -20,6 +20,7 @@ public class ItemShopClientboundPacket {
     private final ArrayList<Integer> buyCosts;
     private final ArrayList<Integer> maxStocks;
     private final ArrayList<Integer> stocks;
+    private final ArrayList<Integer> startingStock;
     private final ArrayList<Integer> maxRestockTicks;
     private final ArrayList<Integer> restockTicks;
 
@@ -37,6 +38,7 @@ public class ItemShopClientboundPacket {
         this.stocks = new ArrayList<>();
         this.maxRestockTicks = new ArrayList<>();
         this.restockTicks = new ArrayList<>();
+        this.startingStock = new ArrayList<>();
 
         for (StockedShopItem stock : stockedItems) {
             descIds.add(stock.item.descId);
@@ -45,6 +47,7 @@ public class ItemShopClientboundPacket {
             stocks.add(stock.stock);
             maxRestockTicks.add(stock.maxRestockTicks);
             restockTicks.add(stock.getTicksToNextRestock());
+            startingStock.add(stock.startingStock);
         }
     }
 
@@ -57,6 +60,7 @@ public class ItemShopClientboundPacket {
         this.stocks = new ArrayList<>();
         this.maxRestockTicks = new ArrayList<>();
         this.restockTicks = new ArrayList<>();
+        this.startingStock = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
             descIds.add(buffer.readUtf());
@@ -65,6 +69,7 @@ public class ItemShopClientboundPacket {
             stocks.add(buffer.readInt());
             maxRestockTicks.add(buffer.readInt());
             restockTicks.add(buffer.readInt());
+            startingStock.add(buffer.readInt());
         }
     }
 
@@ -78,6 +83,7 @@ public class ItemShopClientboundPacket {
             buffer.writeInt(stocks.get(i));
             buffer.writeInt(maxRestockTicks.get(i));
             buffer.writeInt(restockTicks.get(i));
+            buffer.writeInt(startingStock.get(i));
         }
     }
 
@@ -98,6 +104,7 @@ public class ItemShopClientboundPacket {
                                     buyCosts.get(i),
                                     maxStocks.get(i),
                                     stocks.get(i),
+                                    startingStock.get(i),
                                     maxRestockTicks.get(i),
                                     restockTicks.get(i)
                             ));

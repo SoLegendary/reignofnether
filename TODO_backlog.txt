@@ -15,6 +15,11 @@ Bugfixes
 
 Quality of Life Features
 ------------------------
+
+[❌] Updated the main menu panoramas with modern units and buildings
+
+[❌] Adjustable slime/magma cube size on production buttons
+
 [❌] Add roof to dark watchtower
 [❌] Free attacking vexes?
 

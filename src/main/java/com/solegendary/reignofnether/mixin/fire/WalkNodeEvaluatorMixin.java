@@ -46,7 +46,11 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
             cir.setReturnValue(BlockPathTypes.DAMAGE_FIRE);
         else {
             BlockPathTypes bpt = getBlockPathTypeStatic(pLevel, new BlockPos.MutableBlockPos(pX, pY, pZ));
-            cir.setReturnValue(bpt);
+            if (bpt == BlockPathTypes.RAIL || bpt == BlockPathTypes.UNPASSABLE_RAIL) {
+                cir.setReturnValue(BlockPathTypes.WALKABLE);
+            } else {
+                cir.setReturnValue(bpt);
+            }
         }
     }
 }

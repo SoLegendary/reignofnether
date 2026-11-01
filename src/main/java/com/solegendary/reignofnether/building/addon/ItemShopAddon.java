@@ -43,7 +43,8 @@ public interface ItemShopAddon extends BuildingAddon {
                                 tag.getInt("maxStock"),
                                 tag.getInt("stock"),
                                 tag.getInt("maxRestockTicks"),
-                                tag.getInt("restockTicks")
+                                tag.getInt("restockTicks"),
+                                tag.getInt("startingStock")
                         );
                         stockedItems.add(stock);
                     }
@@ -61,6 +62,7 @@ public interface ItemShopAddon extends BuildingAddon {
                     tag2.putInt("stock", stockedShopItem.stock);
                     tag2.putInt("maxRestockTicks", stockedShopItem.maxRestockTicks);
                     tag2.putInt("restockTicks", stockedShopItem.getTicksToNextRestock());
+                    tag2.putInt("startingStock", stockedShopItem.startingStock);
                     ltag.add(tag2);
                 }
                 tag.put("list", ltag);

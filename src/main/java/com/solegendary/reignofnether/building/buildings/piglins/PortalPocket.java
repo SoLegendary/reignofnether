@@ -40,6 +40,8 @@ public class PortalPocket extends AbstractPortal {
         this.canSetRallyPoint = false;
         this.maxHealth = 50f;
         this.buildTimeModifier = 2.0f;
+        this.startingBlockTypes.add(Blocks.OBSIDIAN);
+        this.startingBlockTypes.add(Blocks.GRAY_GLAZED_TERRACOTTA);
     }
 
     @Override
