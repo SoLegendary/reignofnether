@@ -23,7 +23,7 @@ Bugfixes
 [✅] Fixed custom production items not working on server worlds
 [✅] The gamerules menu no longer overlaps with the beacon button in sandbox
 [✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
-[❌] Fixed units getting stuck on lantern barracks
+[✅] Fixed units getting stuck on lanterns and rails
 
 Languages
 ---------
