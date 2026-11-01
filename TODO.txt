@@ -23,6 +23,7 @@ Bugfixes
 [✅] The gamerules menu no longer overlaps with the beacon button in sandbox
 [✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
 [✅] Fixed units getting stuck on lanterns and rails
+[❌] Fixed pocket portals not working
 
 Languages
 ---------
