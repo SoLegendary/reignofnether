@@ -31,8 +31,12 @@ public final class RtsPathfinder {
     // mob's liveness with the requesting goal's current request-seq, so a superseded order is dropped
     // before it burns chunk-build budget (see PathfinderWorkerPool.processBuildQueue).
     public static void requestPath(Mob mob, BlockPos target, int reach, MobilityClass mobility, BooleanSupplier valid, PathCallback onReady) {
+        requestPath(mob, mob.blockPosition(), target, reach, mobility, valid, onReady);
+    }
+
+    // as if the mob stood at start (the bots measure walks between two spots with a worker's size and mobility)
+    public static void requestPath(Mob mob, BlockPos start, BlockPos target, int reach, MobilityClass mobility, BooleanSupplier valid, PathCallback onReady) {
         Level level = mob.level();
-        BlockPos start = mob.blockPosition();
         if (isUnloaded(level, start) || isUnloaded(level, target)) {
             onReady.onPath(null, false);
             return;

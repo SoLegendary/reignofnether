@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
@@ -54,6 +57,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.WORKER, UnitRole.UNDEAD);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
 
     //region

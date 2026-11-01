@@ -4,17 +4,16 @@ package com.solegendary.reignofnether.healthbars;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,9 +32,6 @@ import java.util.List;
 
 public class HealthBarClientEvents {
 
-    private static final ResourceLocation GUI_BARS_TEXTURES = ResourceLocation.fromNamespaceAndPath(
-                ReignOfNether.MOD_ID, "textures/hud/healthbars.png");
-
     private static final List<LivingEntity> renderedEntities = new ArrayList<>();
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -48,7 +44,8 @@ public class HealthBarClientEvents {
 
     @SubscribeEvent
     public static void entityRender(RenderLivingEvent.Post<? extends LivingEntity, ? extends EntityModel<?>> evt) {
-        prepareRenderInWorld(evt.getEntity());
+        if (!UnitClientEvents.renderingGhosts)
+            prepareRenderInWorld(evt.getEntity());
     }
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
@@ -181,24 +178,8 @@ public class HealthBarClientEvents {
             float percent = Math.min(1, Math.min(state.amount, MiscUtil.getMaxAbsorptionAmount(entity)) / MiscUtil.getMaxAbsorptionAmount(entity));
             float percent2 = Math.min(state.previousAmountDisplay, MiscUtil.getMaxAbsorptionAmount(entity)) / MiscUtil.getMaxAbsorptionAmount(entity);
 
-            render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.ABSORB,
-                    0, 1f, 1f,
-                    0, 0.5f, 0.5f
-            );
+            render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.ABSORB, Theme.BUFF);
         }
-    }
-
-    public static void renderManaForEntity(PoseStack matrix, HeroUnit heroUnit, double x, double y,
-                                           float width, RenderMode renderMode) {
-        BarState state = BarStates.getState((LivingEntity) heroUnit, BarState.BarStateType.MANA);
-
-        float percent = Math.min(1, Math.min(state.amount, heroUnit.getMaxMana()) / heroUnit.getMaxMana());
-        float percent2 = Math.min(state.previousAmountDisplay, heroUnit.getMaxMana()) / heroUnit.getMaxMana();
-
-        render(matrix, percent, percent2, x, y, width, renderMode, BarState.BarStateType.MANA,
-                0.3f, 0.3f, 1f,
-                0.15f, 0.15f, 0.5f
-        );
     }
 
     public static void renderForBuilding(PoseStack matrix, BuildingPlacement building, double x, double y,
@@ -212,70 +193,59 @@ public class HealthBarClientEvents {
 
     private static void render(PoseStack matrix, float percent, float percent2, double x, double y,
                                float width, RenderMode renderMode, BarState.BarStateType barStateType) {
-        // base colour on percentage health remaining (green @ 100%, yellow @ 50%, red @ 0%)
-        float r = Math.max(0, Math.min(1, 2-percent*2));
-        float g = Math.max(0, Math.min(1, percent*2));
-        float b = 0;
-        float r2 = r * 0.5f;
-        float g2 = g * 0.5f;
-        float b2 = b * 0.5f;
-        render(matrix, percent, percent2, x, y, width, renderMode, barStateType, r, g, b, r2, g2, b2);
+        render(matrix, percent, percent2, x, y, width, renderMode, barStateType, Theme.hpColor(percent));
     }
 
+    /**
+     * Flat bar like {@link Theme#bar}: ink track, the recently lost amount in a darker shade of the fill,
+     * the fill, and a light top / dark bottom line. Quads are drawn back to front, each a step closer.
+     */
     private static void render(PoseStack matrix, float percent, float percent2, double x, double y,
-                               float width, RenderMode renderMode, BarState.BarStateType barStateType, float r, float g, float b, float r2, float g2, float b2) {
-        int zOffset = 0;
+                               float width, RenderMode renderMode, BarState.BarStateType barStateType, int colour) {
         Matrix4f m4f = matrix.last().pose();
-        if (!(barStateType == BarState.BarStateType.ABSORB && (renderMode == RenderMode.IN_WORLD_ORTHOVIEW || renderMode == RenderMode.IN_WORLD_FIRST_PERSON)))
-            drawBar(m4f, x, y, width, 1, 0.35f,0.35f,0.35f, zOffset++, renderMode);
-        drawBar(m4f, x, y, width, percent2, r2,g2,b2, zOffset++, renderMode);
-        drawBar(m4f, x, y, width, percent, r,g,b, zOffset, renderMode);
+        boolean inWorld = renderMode == RenderMode.IN_WORLD_FIRST_PERSON || renderMode == RenderMode.IN_WORLD_ORTHOVIEW;
+        double h = switch (renderMode) {
+            case GUI_ICON -> 4;
+            case GUI_PORTRAIT -> 12;
+            case IN_WORLD_FIRST_PERSON -> 6;
+            case IN_WORLD_ORTHOVIEW -> 10;
+        };
+        int z = 0;
+        // absorption sits on top of the health bar in the world, so it has no track of its own
+        if (!(barStateType == BarState.BarStateType.ABSORB && inWorld))
+            quad(m4f, x, y, width, 1, h, Theme.INK, z++, inWorld);
+        quad(m4f, x, y, width, percent2, h, (colour & 0xFEFEFE) >> 1 | 0xFF000000, z++, inWorld);
+        quad(m4f, x, y, width, percent, h, colour, z++, inWorld);
+        if (h >= 3) {
+            quad(m4f, x, y, width, percent, 1, 0x59FFFFFF, z, inWorld);
+            quad(m4f, x, y + h - 1, width, percent, 1, 0x40000000, z, inWorld);
+        }
     }
 
-    private static void drawBar(Matrix4f matrix4f, double x, double y, float width, float percent,
-                                float r, float g, float b, int zOffset, RenderMode renderMode) {
-        float c = 0.00390625F;
-        int u = 0;
-        int v = 6 * 5 * 2 + 5;
-        int uw = Mth.ceil(92 * percent);
-        int vh = 5;
-
-        double size = percent * width;
-        double h = 10;
-
-        if (renderMode == RenderMode.GUI_ICON)
-            h = 4;
-        else if (renderMode == RenderMode.GUI_PORTRAIT)
-            h = 12;
-        else if (renderMode == RenderMode.IN_WORLD_FIRST_PERSON)
-            h = 6;
-        else if (renderMode == RenderMode.IN_WORLD_ORTHOVIEW)
-            h = 10;
-
-        RenderSystem.setShaderColor(r, g, b, 1);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, GUI_BARS_TEXTURES);
-        RenderSystem.enableBlend();
-
+    /** One flat quad from the bar's left edge, percent of width wide. */
+    private static void quad(Matrix4f matrix4f, double x, double y, float width, float percent, double h,
+                             int argb, int zOffset, boolean inWorld) {
+        if (percent <= 0)
+            return;
         float half = width / 2;
+        float x0 = (float) (-half + x);
+        float x1 = (float) (-half + percent * width + x);
+        float y0 = (float) y;
+        float y1 = (float) (y + h);
+        float z = zOffset * (inWorld ? -0.1F : 0.1F);
+        int a = argb >>> 24, r = argb >> 16 & 0xFF, g = argb >> 8 & 0xFF, b = argb & 0xFF;
 
-        float zOffsetAmount = renderMode == RenderMode.IN_WORLD_FIRST_PERSON || renderMode == RenderMode.IN_WORLD_ORTHOVIEW ? -0.1F : 0.1F;
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
 
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-
-        buffer.vertex(matrix4f, (float) (-half + x), (float) y, zOffset * zOffsetAmount)
-                .uv(u * c, v * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + x), (float) (h + y), zOffset * zOffsetAmount)
-                .uv(u * c, (v + vh) * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + size + x), (float) (h + y), zOffset * zOffsetAmount)
-                .uv((u + uw) * c, (v + vh) * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + size + x), (float) y, zOffset * zOffsetAmount)
-                .uv(((u + uw) * c), v * c).endVertex();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        buffer.vertex(matrix4f, x0, y0, z).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix4f, x0, y1, z).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix4f, x1, y1, z).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix4f, x1, y0, z).color(r, g, b, a).endVertex();
         tessellator.end();
-
-        // reset color
-        RenderSystem.setShaderColor(1,1,1,1);
     }
 }

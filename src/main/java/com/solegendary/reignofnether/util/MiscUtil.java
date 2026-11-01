@@ -241,7 +241,17 @@ public class MiscUtil {
     }
 
     public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves, boolean ignoreStructureVoid) {
-        int y = level.getHeight();
+        return getHighestNonAirBlock(level, blockPos, ignoreLeaves, ignoreStructureVoid, level.getHeight());
+    }
+
+    // the same answer, starting from the heightmap instead of the build limit: ~300 fewer block reads per column
+    public static BlockPos getHighestNonAirBlockFromHeightmap(Level level, BlockPos blockPos, boolean ignoreLeaves) {
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, blockPos.getX(), blockPos.getZ());
+        return getHighestNonAirBlock(level, blockPos, ignoreLeaves, true, top);
+    }
+
+    private static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves, boolean ignoreStructureVoid, int startY) {
+        int y = startY;
         BlockState bs;
         BlockPos bp;
         do {
@@ -791,6 +801,17 @@ public class MiscUtil {
                 .replace("entity.reignofnether.", "")
                 .replace("_unit", "")
                 .toLowerCase();
+    }
+
+    private static final Map<String, ResourceLocation> MOB_HEAD_ICONS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    // eg. zombie -> reignofnether:textures/mobheads/zombie.png, cached since the HUD asks every frame
+    public static ResourceLocation mobHeadIcon(String iconName) {
+        return MOB_HEAD_ICONS.computeIfAbsent(iconName, n -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + n + ".png"));
+    }
+
+    public static ResourceLocation mobHeadIcon(Entity entity) {
+        return mobHeadIcon(getEntityIconName(entity));
     }
 
     // eg. Zombie

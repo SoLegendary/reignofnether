@@ -6,5 +6,6 @@ public enum RTSMapInfoAction {
     SET_MAP_NAME,
     SET_DESCRIPTION,
     ADD_AUTHOR,
-    SET_VERSION
+    SET_VERSION,
+    SET_TEAM_MODE
 }

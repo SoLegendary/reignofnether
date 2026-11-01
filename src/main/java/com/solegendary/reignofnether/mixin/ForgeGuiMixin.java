@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.mojang.blaze3d.platform.Window;
+import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -30,10 +31,12 @@ public class ForgeGuiMixin extends Gui {
             remap=false
     )
     protected void renderChat(int width, int height, GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (!OrthoviewClientEvents.isEnabled())
+        if (!OrthoviewClientEvents.isEnabled() && !ChatPanel.hidesVanillaChat())
             return;
 
         ci.cancel();
+        if (ChatPanel.hidesVanillaChat())
+            return; // the RTS view shows its own chat
 
         this.minecraft.getProfiler().push("chat");
         Window window = this.minecraft.getWindow();

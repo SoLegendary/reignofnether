@@ -1,0 +1,35 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        " ": 4,
+        "\u00a0": 4
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "reignofnether:font/pixelify.png",
+      "height": 12,
+      "ascent": 9,
+      "chars": [
+        "!\"#$%&'()*+,-./0",
+        "123456789:;<=>?@",
+        "ABCDEFGHIJKLMNOP",
+        "QRSTUVWXYZ[\\]^_`",
+        "abcdefghijklmnop",
+        "qrstuvwxyz{|}~¡¢",
+        "£¤¥§¨©ª«¬®¯°±²³´",
+        "µ¶·¸¹º»¼½¾¿ÀÁÂÃÄ",
+        "ÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔ",
+        "ÕÖ×ØÙÚÛÜÝÞßàáâãä",
+        "åæçèéêëìíîïðñòóô",
+        "õö÷øùúûüýþÿ…\u0000\u0000\u0000\u0000"
+      ]
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:default"
+    }
+  ]
+}
