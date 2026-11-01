@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.rtsmap;
 
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -16,9 +19,32 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class RTSMapInfoServerEvents {
 
     public static RTSMapInfo rtsMapInfo = null;
+    private static boolean lockedByTeamMode = false;
 
     public static boolean usingMapInfoStartPositions() {
         return rtsMapInfo != null && rtsMapInfo.supportsMode(rtsMapInfo.getDefaultMode());
+    }
+
+    public static boolean isTeamMode() {
+        return usingMapInfoStartPositions() && rtsMapInfo.isTeamMode();
+    }
+
+    // a team mode keeps its teams, so alliances stay locked, then unlock when it ends (the host can relock them);
+    // tells clients so they can show it
+    public static void syncTeamMode() {
+        boolean teamMode = isTeamMode();
+        RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_TEAM_MODE, String.valueOf(teamMode));
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null && (teamMode || lockedByTeamMode)) {
+            server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(teamMode, server);
+            GameruleClientboundPacket.setLockAlliances(teamMode);
+        }
+        lockedByTeamMode = teamMode;
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        lockedByTeamMode = false;
     }
 
     @SubscribeEvent
@@ -41,15 +67,14 @@ public class RTSMapInfoServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         if (rtsMapInfo != null) {
-            evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getName() + " " + rtsMapInfo.getVersion()).withStyle(Style.EMPTY.withBold(true)));
+            evt.getEntity().sendSystemMessage(SystemMessage.important(Component.literal(rtsMapInfo.getName() + " " + rtsMapInfo.getVersion())));
             MutableComponent authors = rtsMapInfo.getAuthor().size() > 1
                     ? Component.translatable("message.reignofnether.rts_map_info_author.multiple")
                     : Component.translatable("message.reignofnether.rts_map_info_author.singular");
             for (String author : rtsMapInfo.getAuthor())
                 authors.append(" ").append(author);
-            evt.getEntity().sendSystemMessage(authors);
-            evt.getEntity().sendSystemMessage(Component.literal(""));
-            evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getDescription()));
+            evt.getEntity().sendSystemMessage(SystemMessage.info(authors));
+            evt.getEntity().sendSystemMessage(SystemMessage.info(Component.literal(rtsMapInfo.getDescription())));
 
             StringBuilder modesStr = new StringBuilder();
             for (String modeName : rtsMapInfo.getModes().keySet()) {
@@ -60,8 +85,7 @@ public class RTSMapInfoServerEvents {
             }
             if (modesStr.length() > 0) {
                 modesStr.setLength(modesStr.length() - 2);
-                evt.getEntity().sendSystemMessage(Component.literal(""));
-                evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr));
+                evt.getEntity().sendSystemMessage(SystemMessage.info(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr)));
             }
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MAP_NAME, rtsMapInfo.getName());
             for (String author : rtsMapInfo.getAuthor())
@@ -69,13 +93,13 @@ public class RTSMapInfoServerEvents {
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_DESCRIPTION, rtsMapInfo.getDescription());
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, rtsMapInfo.getDefaultMode());
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_VERSION, rtsMapInfo.getVersion());
+            syncTeamMode();
             for (String mode : rtsMapInfo.getModes().keySet())
                 RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.ADD_MODE, mode);
 
             MinecraftServer server = evt.getEntity().level().getServer();
             if (server != null && server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get() && WorldBorderServerEvents.prewarmedNavmesh) {
-                evt.getEntity().sendSystemMessage(Component.literal(""));
-                evt.getEntity().sendSystemMessage(Component.translatable("server.reignofnether.prewarmed_navmesh"));
+                evt.getEntity().sendSystemMessage(SystemMessage.info(Component.translatable("server.reignofnether.prewarmed_navmesh")));
             }
         }
     }

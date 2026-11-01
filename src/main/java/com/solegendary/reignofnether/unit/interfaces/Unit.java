@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
@@ -215,6 +217,10 @@ public interface Unit {
     }
 
     public ResourceCost getCost();
+
+    // hand-written per unit class so the AI knows a new unit as soon as it exists (see UnitRole). An instance
+    // method so a unit can change roles at runtime (a mounted pillager, a flying windcaller)
+    Set<UnitRole> getUnitRoles();
 
     LivingEntity getFollowTarget();
     boolean getHoldPosition();
@@ -529,7 +535,8 @@ public interface Unit {
 
     private static void checkAndPickupResources(Unit unit, List<ItemEntity> nearbyItems) {
         Mob unitMob = (Mob) unit;
-        if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
+        // resources and unit items are carried side by side; the HUD shows both
+        if (unitMob.canPickUpLoot()) {
             for (ItemEntity itementity : nearbyItems) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {
