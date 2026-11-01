@@ -15,7 +15,6 @@ Quality of Life
 [✅] Units holding resources are prioritised towards the front of a group selection
 [✅] The Royal Guard's ultimate is no longer cancellable or interruptable
 [✅] The Lilypad sponsorship has ended so its banners have been removed
-[❌] Updated the main menu panoramas with modern units and buildings
 
 Bugfixes
 --------

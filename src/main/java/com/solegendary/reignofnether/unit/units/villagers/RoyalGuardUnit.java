@@ -616,12 +616,15 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public void resetBehaviours() {
+        animateScaleReducing = true;
         this.castMaceSlamGoal.stop();
         this.castTauntingCryGoal.stop();
+        /*
+        this.castAvatarGoal.stop(); // don't allow cancelling avatar
         if (getAvatarTicksLeft() <= 0 && getAvatarScalingStarted()) {
             disableAvatar();
             updateKnockbackResistance();
-        }
+        } */
     }
 
     public void maceSlam(BlockPos blockPos) {
