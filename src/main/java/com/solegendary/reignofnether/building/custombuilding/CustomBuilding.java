@@ -37,6 +37,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
@@ -301,7 +302,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             }
 
                             // custom costs need our own tooltip, else CustomProductionItem keeps the original item's tooltip (with original costs)
-                            if (hasCustomProductionTag(stackNbt) || newTooltipTitle != null || !newTooltipLines.isEmpty()) {
+                            if (FMLEnvironment.dist.isClient() &&
+                                (hasCustomProductionTag(stackNbt) || newTooltipTitle != null || !newTooltipLines.isEmpty())) {
                                 // : fcs("") is placeholder only and is replaced with the original title later
                                 newToolTip = new ArrayList<>(List.of(
                                         newTooltipTitle != null ? newTooltipTitle : fcs(""),

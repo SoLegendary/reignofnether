@@ -514,7 +514,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             double d2 = Math.sqrt(d0 * d0 + d1 * d1);
             double d3 = pTarget.getY(0.3333333333333333) - pProjectile.getY() + d2 * 0.20000000298023224;
             if (pTarget.getEyeHeight() <= 1.0f)
-                d1 -= (1.0f - pTarget.getEyeHeight());
+                d3 -= (1.0f - pTarget.getEyeHeight());
             Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
             pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         }

@@ -151,6 +151,10 @@ public class UnitClientEvents {
 
 
 
+    private static int getHeldResourcesValue(LivingEntity entity) {
+        return entity instanceof Unit unit ? Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() : 0;
+    }
+
     public static ArrayList<LivingEntity> getSortedSelectedUnits() {
         if (!sortedSelectedUnitsChanged) {
             return sortedSelectedUnits;
@@ -161,7 +165,10 @@ public class UnitClientEvents {
             var isHeroB = b instanceof HeroUnit;
             if (isHeroA && !isHeroB) return -1;
             if (!isHeroA && isHeroB) return 1;
-            return HudClientEvents.getModifiedEntityName(a).compareTo(HudClientEvents.getModifiedEntityName(b));
+            int nameCompare = HudClientEvents.getModifiedEntityName(a).compareTo(HudClientEvents.getModifiedEntityName(b));
+            if (nameCompare != 0) return nameCompare;
+            // favour units holding more resources (eg. so a worker with resources is shown first)
+            return Integer.compare(getHeldResourcesValue(b), getHeldResourcesValue(a));
         });
         sortedSelectedUnits = units;
         sortedSelectedUnitsChanged = false;

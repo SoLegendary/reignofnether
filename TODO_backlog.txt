@@ -15,6 +15,9 @@ Bugfixes
 
 Quality of Life Features
 ------------------------
+
+[❌] Adjustable slime/magma cube size on production buttons
+
 [❌] Add roof to dark watchtower
 [❌] Free attacking vexes?
 

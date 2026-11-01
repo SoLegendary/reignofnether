@@ -616,10 +616,8 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castMaceSlamGoal.stop();
         this.castTauntingCryGoal.stop();
-        this.castAvatarGoal.stop();
         if (getAvatarTicksLeft() <= 0 && getAvatarScalingStarted()) {
             disableAvatar();
             updateKnockbackResistance();
@@ -808,5 +806,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         AABB aabb = this.getBoundingBox().inflate(0.15f, 0, 0.15f);
         aabb.setMaxY(aabb.maxY + 0.4875f);
         return aabb;
+    }
+
+    @Override
+    public boolean uninterruptable() {
+        return castAvatarGoal != null && castAvatarGoal.isCasting();
     }
 }

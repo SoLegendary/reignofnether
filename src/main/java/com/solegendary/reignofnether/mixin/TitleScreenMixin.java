@@ -47,14 +47,11 @@ public class TitleScreenMixin extends Screen {
             ResourceLocation.parse("textures/gui/title/edition.png");
     private static final ResourceLocation DISCORD_TEXTURE =
             ResourceLocation.parse( "textures/gui/title/discord.png");
-    private static final ResourceLocation LILYPAD_TEXTURE =
-            ResourceLocation.parse( "textures/gui/title/lilypad.png");
 
     @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
     @Shadow private long fadeInStart;
     @Nullable @Shadow(remap = false) private TitleScreenModUpdateIndicator modUpdateNotification;
-    private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
     private AbstractWidget mapsButton;
 
@@ -64,50 +61,8 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void init(CallbackInfo ci) {
-        int lilypadX = this.width - 100;
-        int lilypadY = this.height - 57;
-
-        this.lilypadButton = new AbstractWidget(lilypadX, lilypadY, 110, 40, Component.empty()) {
-            @Override
-            public void onClick(double pMouseX, double pMouseY) {
-                openLink("https://lilypad.gg/reignofnether");
-            }
-
-            @Override
-            protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-                narrationElementOutput.add(NarratedElementType.TITLE, Component.literal("Choose Lilypad Hosting"));
-            }
-
-            @Override
-            public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-                PoseStack pPoseStack = guiGraphics.pose();
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderTexture(0, LILYPAD_TEXTURE);
-
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-
-                pPoseStack.pushPose();
-                float scale = 0.8f;
-                pPoseStack.translate(this.getX(), this.getY(), 0);
-                pPoseStack.scale(scale, scale, 1.0f);
-
-                guiGraphics.blit(LILYPAD_TEXTURE, 0, 0, 0, 0, this.width, this.height, this.width, this.height);
-
-                if (isHoveredOrFocused())
-                    guiGraphics.fill( // x1,y1, x2,y2,
-                            0,0,
-                            this.width,
-                            this.height,
-                            0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-
-                pPoseStack.popPose();
-            }
-        };
-
-
-        int discordX = lilypadX - 2;
-        int discordY = lilypadY - 38;
+        int discordX = this.width - 1022;
+        int discordY = this.height - 95;
 
         this.discordButton = new AbstractWidget(discordX, discordY, 114, 38, Component.empty()) {
             @Override
@@ -188,7 +143,6 @@ public class TitleScreenMixin extends Screen {
         };
         this.mapsButton.setTooltip(Tooltip.create(Component.literal("Get RTS maps!")));
 
-        this.addRenderableWidget(this.lilypadButton);
         this.addRenderableWidget(this.discordButton);
         this.addRenderableWidget(this.mapsButton);
     }

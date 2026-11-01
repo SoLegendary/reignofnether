@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -596,6 +597,11 @@ public class PlayerServerEvents {
 
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
+
+            if (rtsPlayers.size() == 1)
+                for (BuildingPlacement bpl : BuildingServerEvents.getBuildings())
+                    if (bpl instanceof ItemShopPlacement isp)
+                        isp.resetStock();
         }
     }
 

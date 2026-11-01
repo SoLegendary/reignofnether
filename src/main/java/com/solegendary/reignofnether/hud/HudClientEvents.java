@@ -1775,6 +1775,9 @@ public class HudClientEvents {
             if (!observerButton.isHidden.get() || !diplomacyButton.isHidden.get()) {
                 xi = screenWidth - (StartButtons.ICON_SIZE * 4);
             }
+            if (SandboxClientEvents.isSandboxPlayer()) {
+                xi -= StartButtons.ICON_SIZE * 2;
+            }
             if (!beaconButton.isHidden.get()) {
                 beaconButton.tooltipOffsetY = 15;
                 beaconButton.render(evt.getGuiGraphics(),

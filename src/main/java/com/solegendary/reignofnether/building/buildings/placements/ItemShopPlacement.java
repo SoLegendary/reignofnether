@@ -99,6 +99,7 @@ public class ItemShopPlacement extends ProductionPlacement {
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
+
         for (StockedShopItem stockedItem : getStockedItems())
             stockedItem.tick();
 
@@ -122,5 +123,10 @@ public class ItemShopPlacement extends ProductionPlacement {
                 ItemShopClientboundPacket.syncItemShopStock(originPos, getStockedItems());
             }
         }
+    }
+
+    public void resetStock() {
+        for (StockedShopItem stockedItem : getStockedItems())
+            stockedItem.reset();
     }
 }
