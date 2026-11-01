@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -78,17 +79,21 @@ public class ResourcesClientEvents {
             boolean notInBuilding = !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp);
 
             if (res != null && res.resourceValue > 0 && (isItem || (workerSelected && notInBuilding))) {
-                String str = switch (res.resourceName) {
-                    case FOOD -> "\uE000  " + (res.resourceValue * itemCount);
-                    case WOOD -> "\uE001  " + (res.resourceValue * itemCount);
-                    case ORE -> "\uE002  " + (res.resourceValue * itemCount);
-                    case EMERALD -> "\uE010  " + (res.resourceValue * itemCount);
-                    case NONE -> "";
+                var label = switch (res.resourceName) {
+                    case FOOD -> new FloatingLabel("\uE000", Theme.FOOD);
+                    case WOOD -> new FloatingLabel("\uE001", Theme.WOOD);
+                    case ORE -> new FloatingLabel("\uE002", Theme.ORE);
+                    default -> new FloatingLabel("\uE010", Theme.EMERALD);
                 };
-                MyRenderer.renderTooltip(evt.getGuiGraphics(),
-                        List.of(fcsIcons(str)),
-                        evt.getMouseX(), evt.getMouseY()
-                );
+                // no box: drawn like the floating text of a drop-off
+                var g = evt.getGuiGraphics();
+                var text = Component.literal((res.resourceValue * itemCount) + "  " + label.glyph).withStyle(MyRenderer.iconStyle).getVisualOrderText();
+                g.pose().pushPose();
+                g.pose().translate(0, 0, 400);
+                MC.font.drawInBatch8xOutline(text, evt.getMouseX() + 10, evt.getMouseY() - 8, label.colour | 0xFF000000, 0xFF000000,
+                        g.pose().last().pose(), g.bufferSource(), 255);
+                g.flush();
+                g.pose().popPose();
             }
         }
     }
@@ -100,6 +105,7 @@ public class ResourcesClientEvents {
 
     // should never be run from clientside except via packet
     public static void addSubtractResources(Resources serverResources) {
+        IncomeTracker.recordSpend(serverResources.ownerName, serverResources.food, serverResources.wood, serverResources.ore);
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(serverResources.ownerName)) {
                 resources.changeOverTime(serverResources.food, serverResources.wood, serverResources.ore, serverResources.emerald);
@@ -107,6 +113,7 @@ public class ResourcesClientEvents {
     }
 
     public static void addSubtractResourcesInstantly(Resources serverResources) {
+        IncomeTracker.recordSpend(serverResources.ownerName, serverResources.food, serverResources.wood, serverResources.ore);
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(serverResources.ownerName)) {
                 resources.changeInstantly(serverResources.food, serverResources.wood, serverResources.ore, serverResources.emerald);
@@ -145,6 +152,8 @@ public class ResourcesClientEvents {
         }
     }
 
+    private record FloatingLabel(String glyph, int colour) { }
+
     // floating text for resource dropoffs
     public static final List<FloatingText> floatingTexts = new ArrayList<>();
     public static final int FLOATING_TEXT_MAX_AGE = 200;
@@ -153,37 +162,42 @@ public class ResourcesClientEvents {
         String text;
         BlockPos pos;
         int tickAge;
+        int colour;
 
-        public FloatingText(String text, BlockPos pos, int tickAge) {
+        public FloatingText(String text, BlockPos pos, int tickAge, int colour) {
             this.text = text;
             this.pos = pos;
             this.tickAge = tickAge;
+            this.colour = colour;
         }
     }
 
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
-        if (!OrthoviewClientEvents.isEnabled()) {
+        // every player's drop-offs reach every client, so spectators get everyone's income
+        IncomeTracker.record(res.ownerName, res.food, res.wood, res.ore);
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !player.getName().getString().equals(res.ownerName)) {
             return;
         }
-        if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName)) {
+        if (!OrthoviewClientEvents.isEnabled()) {
             return;
         }
 
         int tickAge = 0;
         if (res.food > 0) {
-            floatingTexts.add(new FloatingText("+" + res.food + "  \uE000", pos, tickAge));
+            floatingTexts.add(new FloatingText("+" + res.food + "  \uE000", pos, tickAge, Theme.FOOD));
             tickAge -= 25;
         }
         if (res.wood > 0) {
-            floatingTexts.add(new FloatingText("+" + res.wood + "  \uE001", pos, tickAge));
+            floatingTexts.add(new FloatingText("+" + res.wood + "  \uE001", pos, tickAge, Theme.WOOD));
             tickAge -= 25;
         }
         if (res.ore > 0) {
-            floatingTexts.add(new FloatingText("+" + res.ore + "  \uE002", pos, tickAge));
+            floatingTexts.add(new FloatingText("+" + res.ore + "  \uE002", pos, tickAge, Theme.ORE));
             tickAge -= 25;
         }
         if (res.emerald > 0) {
-            floatingTexts.add(new FloatingText("+" + res.emerald + "  \uE010", pos, tickAge));
+            floatingTexts.add(new FloatingText("+" + res.emerald + "  \uE010", pos, tickAge, Theme.EMERALD));
         }
     }
 
@@ -219,7 +233,6 @@ public class ResourcesClientEvents {
                 Font font = MC.font;
 
                 float f2 = (float) (-font.width(component) / 2);
-                float f1 = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
                 float alphaPercent =
                     ((FLOATING_TEXT_MAX_AGE - floatingText.tickAge) * 1.5f) / (float) FLOATING_TEXT_MAX_AGE;
                 if (alphaPercent < 0.05) {
@@ -228,18 +241,16 @@ public class ResourcesClientEvents {
                 if (alphaPercent > 1) {
                     alphaPercent = 1f;
                 }
-                int textCol = 0x00FFFFFF + ((int) (0xFF * alphaPercent) << 24);
-                int bgCol = (int) (f1 * 255.0F * alphaPercent) << 24;
+                int alpha = (int) (0xFF * alphaPercent) << 24;
 
-                font.drawInBatch(component,
+                // no name-tag box: a black outline keeps it readable on any ground, like the HUD's text
+                font.drawInBatch8xOutline(component.getVisualOrderText(),
                     f2,
                     0,
-                    textCol,
-                    false,
+                    (floatingText.colour & 0x00FFFFFF) | alpha,
+                    alpha,
                     poseStack.last().pose(),
                     MC.renderBuffers().bufferSource(),
-                    Font.DisplayMode.NORMAL,
-                    bgCol,
                     255
                 );
 

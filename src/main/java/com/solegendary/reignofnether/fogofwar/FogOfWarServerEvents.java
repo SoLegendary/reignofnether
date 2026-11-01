@@ -313,7 +313,7 @@ public class FogOfWarServerEvents {
 
         syncClientFog();
 
-        // fog means a competitive match: enemy picks hidden (the host can turn it back off)
+        // fog means a competitive match: enemy picks hidden (the host can turn it back)
         if (!wasEnabled && enabled && serverLevel != null) {
             serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
             GameruleClientboundPacket.setHideEnemyPicks(true);

@@ -1,10 +1,16 @@
 package com.solegendary.reignofnether.startpos;
 
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import java.util.Comparator;
+import javax.annotation.Nullable;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.server.MinecraftServer;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import com.solegendary.reignofnether.chat.SystemMessage;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RTSStartBlock;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -14,7 +20,6 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -26,12 +31,8 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.server.ServerLifecycleHooks;
-
-import javax.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,10 +103,13 @@ public class StartPosServerEvents {
         Map<String, Boolean> hiddenReady = new HashMap<>();
         for (StartPos sp : startPoses) {
             StartPosAction action = sp.enabled ? StartPosAction.ADD : StartPosAction.ADD_DISABLED;
-            StartPos sent = sp;
-            if (isHiddenFrom(sp, viewerSeat, viewerColor, hidePicks)) {
+            boolean isHidden = isHiddenFrom(sp, viewerSeat, viewerColor, hidePicks);
+            if (isHidden) {
                 hidden.add(sp.playerName);
                 hiddenReady.put(sp.playerName, sp.ready);
+            }
+            StartPos sent = sp;
+            if (isHidden) {
                 sent = new StartPos(sp.pos, sp.colorId);
                 sent.hidden = true;
             }
@@ -130,6 +134,11 @@ public class StartPosServerEvents {
     private static boolean hidePicks() {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         return server != null && server.getGameRules().getBoolean(GameRuleRegistrar.HIDE_ENEMY_PICKS);
+    }
+
+    // the singleplayer/Essential host or an op
+    public static boolean isHost(ServerPlayer player) {
+        return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
     }
 
     public static void setPosEnabled(BlockPos pos, boolean enable) {
@@ -166,7 +175,7 @@ public class StartPosServerEvents {
                 evt.setCanceled(true);
                 for (Player player : PlayerServerEvents.players)
                     if (player.distanceToSqr(Vec3.atCenterOf(evt.getPos())) < 100)
-                        player.sendSystemMessage(Component.translatable("startpos.reignofnether.max_positions"));
+                        player.sendSystemMessage(SystemMessage.error(Component.translatable("startpos.reignofnether.max_positions")));
             }
             if (evt.getLevel() instanceof ServerLevel serverLevel)
                 savePositions(serverLevel);
@@ -231,7 +240,7 @@ public class StartPosServerEvents {
             if (ticksToStart % 20 == 0) {
                 int secondsLeft = ticksToStart / 20;
                 if (secondsLeft > 0) {
-                    PlayerServerEvents.sendMessageToAllPlayersNoNewlines("startpos.reignofnether.starting_game", false, secondsLeft);
+                    PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.starting_game", false, secondsLeft);
                     SoundClientboundPacket.playSoundForAllPlayers(SoundAction.CHAT);
                 } else {
                     PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.started_game", true);
@@ -256,6 +265,7 @@ public class StartPosServerEvents {
                     } finally {
                         FogOfWarServerEvents.setStartingPlayers(List.of());
                     }
+                    RTSMapInfoServerEvents.syncTeamMode(); // catches a /gamerule during the lobby
                     // ally all players who start at the same color of start block
                     for (int i = 0; i < PlayerServerEvents.rtsPlayers.size(); i++) {
                         RTSPlayer p1 = PlayerServerEvents.rtsPlayers.get(i);
@@ -316,6 +326,7 @@ public class StartPosServerEvents {
     public static void loadPositionsFromMapInfo() {
         if (!RTSMapInfoServerEvents.usingMapInfoStartPositions())
             return;
+        RTSMapInfoServerEvents.syncTeamMode();
         int playerColorIndex = 0;
         List<StartPos> oldStartPoses = new ArrayList<>(startPoses);
         startPoses.clear();

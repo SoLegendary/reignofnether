@@ -1,18 +1,13 @@
 package com.solegendary.reignofnether.hud.buttons;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +32,8 @@ public class Button {
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
+    // size the HUD last drew this button at (for tutorial highlights)
+    public int drawnSize = DEFAULT_ICON_FRAME_SIZE;
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public int innerIconSizeModifier = 0;
@@ -73,11 +70,16 @@ public class Button {
 
     public Supplier<Boolean> isFlashing = () -> false;
 
+    // what this button costs to use (production, buildings), shown on the command card
+    @Nullable
+    public Supplier<ResourceCost> cost = null;
+
     // used for cooldown indication, productionItem progress, etc.
     // @ 0.0, appears clear and normal
     // @ 0.5, bottom half is greyed out
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
+    public long pressedMs = 0; // last click or hotkey, so the HUD cell can show it pressed in
 
     public Supplier<Float> getGreyPercent = null;
     public boolean greyWhenDisabled = true;
@@ -123,218 +125,24 @@ public class Button {
         this.tooltipLines = tooltipLines;
     }
 
-    public void renderHealthBar(PoseStack poseStack) {
-        if (entity != null)
-            HealthBarClientEvents.renderForEntity(poseStack, entity,
-                    x + ((float) iconFrameSize / 2), y - 5,
-                    iconFrameSize - 1,
-                    HealthBarClientEvents.RenderMode.GUI_ICON);
-        else if (building != null)
-            HealthBarClientEvents.renderForBuilding(poseStack, building,
-                    x + ((float) iconFrameSize / 2), y - 5,
-                    iconFrameSize - 1,
-                    HealthBarClientEvents.RenderMode.GUI_ICON);
-    }
+    /** Updates state that changes every frame (cooldown fill, counts). Called before drawing. */
+    public void refresh() { }
 
-    protected void renderHotkey(GuiGraphics guiGraphics, int x, int y) {
-        // hotkey letter
-        if (this.hotkey != null) {
-            String hotkeyStr = hotkey.getCurrentLabel();
-            hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
-
-            guiGraphics.pose().pushPose();
-            guiGraphics.drawCenteredString(MC.font,
-                    hotkeyStr,
-                    x + iconSize + 8 - (hotkeyStr.length() * 4),
-                    y + iconSize - 1,
-                    0xFFFFFF);
-            guiGraphics.pose().popPose();
-        }
-    }
-
-    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        this.x = x;
-        this.y = y;
-
-        int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
-
-        if (this.frameResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, bgColour);
-        }
-
-        if (!playerNameForHeadIcon.isBlank()) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderPlayerHead(guiGraphics, playerNameForHeadIcon, x + 5, y + 5, 12, bgIconResource);
-        } else if (bgIconResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            int iconX = x+4 + (7 - xyDiff - iconSize/2);
-            int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
-            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    bgIconResource,
-                    iconX,
-                    iconY,
-                    imageSize + (innerIconSizeModifier * 2)
-            );
-        }
-
-        // item/unit icon
-        if (iconResource != null) {
-            int iconX = x+4 + (7 - xyDiff - iconSize/2);
-            int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
-            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    iconResource,
-                    iconX, iconY,
-                    imageSize + (innerIconSizeModifier * 2)
-            );
-        }
-        if (iconItem != null) {
-            guiGraphics.pose().translate(0,0,1);
-            int offset = 2 + Math.round((1.0f - iconItemScale) * 8f);
-            MyRenderer.renderItem(guiGraphics, iconItem, x+offset + (7 - xyDiff - iconSize/2), y+offset + (7 - xyDiff - iconSize/2), iconItemScale);
-        }
-
-        // user is holding click or hotkey down over the button and render frame if so
-        if ((isEnabled.get() || showSelectedFrameWhenDisabled) &&
-            (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) &&
-                    ((MiscUtil.isLeftClickDown(MC) && onLeftClick != null) ||
-                    (MiscUtil.isRightClickDown(MC) && onRightClick != null))
-            ))) {
-
-            if (frameResource != null) {
-                ResourceLocation iconFrameSelectedResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
-                guiGraphics.pose().translate(0,0,1);
-                MyRenderer.renderIcon(
-                        guiGraphics,
-                        iconFrameSelectedResource,
-                        x-1 + xyDiff,y-1 + xyDiff,
-                        iconSelectedFrameSize
-                );
-            }
-        }
-        renderHotkey(guiGraphics, x, y);
-
-        // light up on hover
-        if (isEnabled.get() && isMouseOver(mouseX, mouseY) && lightUpOnHover) {
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.fill( // x1,y1, x2,y2,
-                    x + xyDiff, y + xyDiff,
-                    x + xyDiff + iconFrameSize,
-                    y + xyDiff + iconFrameSize,
-                    0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-
-        if (getGreyPercent != null) {
-            greyPercent = getGreyPercent.get();
-        }
-
-        if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
-            int greyHeightPx = Math.round(greyPercent * iconFrameSize);
-            if (!isEnabled.get())
-                greyHeightPx = 0;
-
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.fill( // x1,y1, x2,y2,
-                    x + xyDiff,
-                    y + xyDiff + (greyInverted ? 0 : greyHeightPx),
-                    x + xyDiff + iconFrameSize,
-                    y + xyDiff + (greyInverted ? greyHeightPx : iconFrameSize),
-                    0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-
-
-        if (isFlashing.get()) {
-            guiGraphics.fill(x, y,
-                x + iconFrameSize,
-                y + iconFrameSize,
-                (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0,1)) << 24))
-            ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-
-        if (bottomLeftText != null) {
-            String blText = bottomLeftText.get();
-            int drawX = x + 4 + ((blText.length() - 1) * 2);
-            int drawY = y + iconSize;
-
-            drawX += (DEFAULT_ICON_SIZE - iconSize) / 2;
-            drawY += (DEFAULT_ICON_SIZE - iconSize) / 2;
-
-            guiGraphics.pose().pushPose();
-
-            guiGraphics.pose().translate(drawX, drawY, 0);
-            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 5);
-
-            guiGraphics.drawCenteredString(MC.font,
-                    blText,
-                    drawX,
-                    drawY,
-                    bottomLeftTextColor);
-
-            guiGraphics.pose().popPose();
-        }
+    /** The HUD's tooltip for this button: its legacy lines restyled, or null when it has none. */
+    @Nullable
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        return tooltipLines == null || tooltipLines.isEmpty() ? null : com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines);
     }
 
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         MyRenderer.renderTooltip(guiGraphics, tooltipLines, mouseX, mouseY + tooltipOffsetY);
     }
 
-    public boolean isMouseOver(int mouseX, int mouseY) {
-        int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
-        return (mouseX >= x + xyDiff &&
-                mouseY >= y + xyDiff &&
-                mouseX < x + xyDiff + iconFrameSize &&
-                mouseY < y + xyDiff + iconFrameSize);
-    }
-
-    // must be done from mouse press event
-    public void checkClicked(int mouseX, int mouseY, boolean leftClick) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
-            if (leftClick && this.onLeftClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-                this.onLeftClick.run();
-            }
-            else if (!leftClick && this.onRightClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-                this.onRightClick.run();
-            }
-        }
-    }
-
-    // must be done from mouse press event
-    public void checkClickedReleased(int mouseX, int mouseY, boolean leftClick) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
-            if (leftClick && this.onLeftClickRelease != null) {
-                this.onLeftClickRelease.run();
-            }
-        }
-    }
-
-    // must be done from key press event
-    public void checkPressed(int key) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (hotkey != null && hotkey.getKey() == key) {
-            if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            if (this.onLeftClick != null)
-                this.onLeftClick.run();
-            if (this.onLeftClickRelease != null)
-                this.onLeftClickRelease.run();
-        }
+    /** What pressing this button's hotkey does: a full click (press then release). */
+    public void pressHotkey() {
+        if (this.onLeftClick != null)
+            this.onLeftClick.run();
+        if (this.onLeftClickRelease != null)
+            this.onLeftClickRelease.run();
     }
 }
