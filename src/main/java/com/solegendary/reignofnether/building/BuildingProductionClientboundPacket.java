@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -38,7 +39,7 @@ public class BuildingProductionClientboundPacket {
         if (server == null) return;
         BuildingPlacement b = findBuilding(false, buildingPos);
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-            if (ownerName.equals(sp.getName().getString()) ||
+            if (ownerName.equals(PlayerRoles.ownerOf(sp.getName().getString())) ||
                 (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b))) {
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
             }

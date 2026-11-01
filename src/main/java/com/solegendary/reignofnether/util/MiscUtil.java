@@ -793,6 +793,17 @@ public class MiscUtil {
                 .toLowerCase();
     }
 
+    private static final Map<String, ResourceLocation> MOB_HEAD_ICONS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    // eg. zombie -> reignofnether:textures/mobheads/zombie.png, cached since the HUD asks every frame
+    public static ResourceLocation mobHeadIcon(String iconName) {
+        return MOB_HEAD_ICONS.computeIfAbsent(iconName, n -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + n + ".png"));
+    }
+
+    public static ResourceLocation mobHeadIcon(Entity entity) {
+        return mobHeadIcon(getEntityIconName(entity));
+    }
+
     // eg. Zombie
     public static String getSimpleEntityName(Entity entity) {
         if (entity instanceof PhantomSummon)

@@ -893,6 +893,7 @@ public class BuildingPlacement {
             if (rtsPlayer != null)
                 rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);
         } else {
+            com.solegendary.reignofnether.chat.SpectatorFeed.built(ownerName, com.solegendary.reignofnether.hud.panels.SelectionPanel.buildingName(this));
             TutorialClientEvents.updateStage();
             if (this.isCapitol && !SandboxClientEvents.isSandboxPlayer() &&
                 getTotalCompletedBuildingsOwned(this.level.isClientSide(), ownerName) == 1)
