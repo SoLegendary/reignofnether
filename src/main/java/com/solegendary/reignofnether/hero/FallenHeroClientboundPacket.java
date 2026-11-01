@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hero;
 
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
@@ -31,7 +32,7 @@ public class FallenHeroClientboundPacket {
 
     public static void addFallenHero(HeroUnitSave heroUnitSave) {
         for (ServerPlayer sp : PlayerServerEvents.players) {
-            if (sp.getName().getString().equals(heroUnitSave.ownerName)) {
+            if (PlayerRoles.ownerOf(sp.getName().getString()).equals(heroUnitSave.ownerName)) { // co-commanders too
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp),
                         new FallenHeroClientboundPacket(heroUnitSave));
             }
