@@ -24,6 +24,7 @@ Bugfixes
 [✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
 [✅] Fixed units getting stuck on lanterns and rails
 [✅] Fixed pocket portals not working in classic mode
+[✅] Fixed wraith snow not causing attack speed reduction
 
 Languages
 ---------
