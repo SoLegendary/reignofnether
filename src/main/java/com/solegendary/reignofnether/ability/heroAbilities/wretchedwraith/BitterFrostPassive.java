@@ -22,7 +22,7 @@ public class BitterFrostPassive extends HeroAbility {
     public static final int SNOW_NO_MELT_RANGE = 5;
 
     public BitterFrostPassive() {
-        super(3, 35, UnitAction.NONE, 0, 0, 0, false);
+        super(3, 0, UnitAction.NONE, 0, 0, 0, false);
     }
 
     @Override
