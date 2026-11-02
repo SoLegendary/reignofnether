@@ -30,7 +30,7 @@ Quality of Life
 
 Bugfixes
 --------
-
+[🟡] Fixed the enchanter tether being rendred in fog
 
 Languages
 ---------
