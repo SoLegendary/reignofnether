@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.hud.panels.HudFrame;
+import com.solegendary.reignofnether.ui.EditorRows;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
@@ -39,8 +39,7 @@ public class CustomBuildingClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
 
     private static CustomBuilding customBuildingToEdit = null;
-    private static final ArrayList<Button> renderedButtons = new ArrayList<>();
-    private static final ArrayList<RectZone> hudZones = new ArrayList<>();
+    private static HudFrame frame = null; // the editor drawn last frame, for clicks
 
     public static boolean showCommandsMenu = false;
     public static boolean deregisterConfirm = false;
@@ -72,7 +71,7 @@ public class CustomBuildingClientEvents {
 
         for (CustomBuilding customBuilding : customBuildings) {
             if (customBuilding.name.equals(name)) {
-                MC.player.sendSystemMessage(Component.literal("ERROR (client): custom building '" + name + "' already exists"));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal("ERROR (client): custom building '" + name + "' already exists")));
                 return;
             }
         }
@@ -114,44 +113,21 @@ public class CustomBuildingClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        hudZones.clear();
-        renderedButtons.clear();
+        frame = null;
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
-            int blitX = 120;
-            int blitY = 20;
-            int width = 315;
-            int height = 260;
-            MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
-
-            renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));
-            renderedButtons.add(CustomBuildingMenu.renderCloseButton(evt, blitX + width - Button.itemIconSize - 12, blitY + 4));
-            renderedButtons.add(CustomBuildingMenu.renderDeregisterButton(evt, blitX + width - Button.itemIconSize - 12, blitY + height - 26));
-            if (!showCommandsMenu) {
-                renderedButtons.addAll(CustomBuildingMenu.renderCustomisationButtons(evt, customBuildingToEdit,blitX + 8, blitY + 38));
-            } else {
-                renderedButtons.addAll(CustomBuildingMenu.renderCommandsButtonsAndInputs(evt, customBuildingToEdit, blitX + 6, blitY + 38));
-            }
-            renderedButtons.addAll(CustomBuildingMenu.renderCommandsMenuButton(evt, blitX + 10, blitY + height - 32));
-            hudZones.add(new RectZone(blitX, blitY, blitX + width, blitY + height));
+            frame = EditorRows.begin(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
+            CustomBuildingMenu.render(frame, customBuildingToEdit);
+            EditorRows.end(frame);
         }
     }
 
     public static boolean isMouseOverHud(int mouseX, int mouseY) {
-        for (RectZone hudZone : hudZones)
-            if (hudZone.isMouseOver(mouseX, mouseY))
-                return true;
-        return false;
+        return EditorRows.isOver(frame, mouseX, mouseY);
     }
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        for (Button button : renderedButtons) {
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-            }
-        }
+        EditorRows.click(frame, evt.getMouseX(), evt.getMouseY(), evt.getButton());
     }
 
     @SubscribeEvent
@@ -161,9 +137,3 @@ public class CustomBuildingClientEvents {
         }
     }
 }
-
-
-
-
-
-

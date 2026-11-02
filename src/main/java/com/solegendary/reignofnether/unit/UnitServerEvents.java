@@ -26,7 +26,11 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayerScores;
+import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
@@ -301,7 +305,7 @@ public class UnitServerEvents {
                     currentPopulation += ResourceCosts.IRON_GOLEM.population;
                 }
             }
-        return currentPopulation;
+        return currentPopulation + PlayerRoles.soldiersOf(ownerName).size(); // each soldier takes 1
     }
 
     // manually provide all the variables required to do unit actions
@@ -392,7 +396,7 @@ public class UnitServerEvents {
         if (entity instanceof ItemEntity item && item.getOwner() instanceof Unit unitItemOwner) {
             ownerName2 = unitItemOwner.getOwnerName();
         } else if (entity instanceof Player player) {
-            ownerName2 = player.getName().getString();
+            ownerName2 = PlayerRoles.commanderOf(player.getName().getString()); // soldiers fight for their commander
         } else if (entity instanceof Unit) {
             ownerName2 = ((Unit) entity).getOwnerName();
         } else {
@@ -520,6 +524,11 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent evt) {
+        if (!evt.getEntity().level().isClientSide() && evt.getEntity() instanceof Unit victim) {
+            RTSPlayerScores.addToScore(victim.getOwnerName(), RTSPlayerScoresEnum.UNITS_LOST);
+            if (evt.getSource().getEntity() instanceof Unit killer && !killer.getOwnerName().equals(victim.getOwnerName()))
+                RTSPlayerScores.addToScore(killer.getOwnerName(), RTSPlayerScoresEnum.UNITS_KILLED);
+        }
         // Convert nearby blocks arond a death into something that is sculk convertible
         // supposed to add to sculk_spreadable.json tag under the data/minecraft/tags/blocks
         // but doesn't work for some reason

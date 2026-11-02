@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.debug;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents.DebugDisplayMode;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -101,8 +102,8 @@ public class RtsDebugPathPreview {
                 continue;
             PathDisplay pd = displayedPaths.get(entity.getId());
             if (pd == null || pd.nodes.size() < 2
-                    || !(unit.getOwnerName().equals(MC.player.getName().getString())
-                    || AlliancesClient.canControlAlly(unit.getOwnerName())))
+                    || !(unit.getOwnerName().equals(PlayerRolesClient.myOwner())
+                    || SharingClient.canControl(unit.getOwnerName())))
                 continue;
 
             // green for vanilla/A*/flow, red for failed-to-reach
