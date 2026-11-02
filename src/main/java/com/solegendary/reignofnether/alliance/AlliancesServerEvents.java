@@ -18,16 +18,6 @@ public class AlliancesServerEvents {
     public static final Map<String, Set<String>> pendingAlliances = new HashMap<>();
     public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
 
-    public static boolean canControlAlly(String player, LivingEntity entity) {
-        return entity instanceof Unit unit && canControlAlly(player, unit.getOwnerName());
-    }
-    public static boolean canControlAlly(String player, Unit unit) {
-        return canControlAlly(player, unit.getOwnerName());
-    }
-    public static boolean canControlAlly(String player, String ownerName) {
-        return (AlliancesServerEvents.isAllied(player, ownerName) &&
-                AlliancesServerEvents.playersWithAlliedControl.contains(ownerName));
-    }
 
     public static void addAlliance(String owner1, String owner2) {
         if (!owner1.equals(owner2)) {

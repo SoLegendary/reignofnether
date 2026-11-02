@@ -328,8 +328,6 @@
     "hud.helperbuttons.reignofnether.select_all_military_units": "Selecionar todas as unidades militares",
     "hud.helperbuttons.reignofnether.cancel": "Cancelar",
 
-    "hud.map.reignofnether.open": "Abrir mapa grande",
-    "hud.map.reignofnether.close": "Fechar",
 
     "hud.startbuttons.villagers.reignofnether.first": "Entrar no jogo como a Facção dos Aldeões.",
     "hud.startbuttons.villagers.reignofnether.second": "Cria %d aldeões no local alvo.",
@@ -345,9 +343,7 @@
     "hud.reignofnether.drop_off_resources": "Deixar recursos",
     "hud.reignofnether.gather_resources": "Coletar recursos (%s)",
     "hud.reignofnether.change_target_resource": "Clique para mudar o recurso alvo",
-    "hud.reignofnether.total_workers": "Total de Trabalhadores: %d",
     "hud.reignofnether.workers_on": "Trabalhadores em %s",
-    "hud.reignofnether.max_resources": "%s (Máx: %d)",
     "hud.reignofnether.players_resources": "Recursos de %s",
     "hud.reignofnether.you_are_spectator": "Você é um espectador",
     "hud.reignofnether.placed_capitol": "%s colocou seu edifício de capitólio!",

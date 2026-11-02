@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
@@ -72,7 +73,7 @@ public class ResourcesServerboundPacket {
                 success.set(false);
                 return;
             }
-            if (!player.getName().getString().equals(senderName)) {
+            if (!PlayerRoles.ownerOf(player.getName().getString()).equals(senderName)) {
                 ReignOfNether.LOGGER.warn("ResourcesServerboundPacket: Tried to process packet from " + player.getName() + " for: " + senderName);
                 success.set(false);
                 return;

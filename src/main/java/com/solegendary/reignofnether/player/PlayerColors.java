@@ -162,7 +162,7 @@ public class PlayerColors {
 
     public static int getPlayerColorHex(String playerName) {
         if (playerName == null || playerName.isBlank()) {
-            return COLOR_WHITE.hexCode;
+            return COLOR_NEUTRAL.hexCode;
         }
 
         int colorId = getPlayerColorId(playerName);
