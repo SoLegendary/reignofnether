@@ -27,8 +27,10 @@ public class ProductionItemList {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (Map.Entry<ProductionItem, Keybinding> production : productions.entrySet()) {
                 StartProductionButton button = production.getKey().getStartButton(placement, production.getValue());
-                if (button != null)
+                if (button != null) {
+                    button.cost = () -> production.getKey().getCost(true, placement.ownerName);
                     buttons.add(button);
+                }
             }
         }
         return buttons;

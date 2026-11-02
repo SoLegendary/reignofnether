@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -14,7 +15,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -214,6 +214,11 @@ public class FogOfWarClientEvents {
         return enabled && localIsRTSPlayer;
     }
 
+    /** Whether the match has fog of war, whatever this client's role (isEnabled is only true for RTS players). */
+    public static boolean isMatchFogOn() {
+        return enabled;
+    }
+
     // client-side mirror of WorldBorderServerEvents.isRtsOptimisedMap using the client's known border
     public static boolean isOnRtsOptimisedMap() {
         return MC.level != null
@@ -231,8 +236,7 @@ public class FogOfWarClientEvents {
                     // Fog only works on RTS-optimised maps; refuse locally so the toggle is effectively
                     // hidden on vanilla-sized maps instead of bouncing off the server.
                     if (!isOnRtsOptimisedMap()) {
-                        MC.player.sendSystemMessage(Component.literal(
-                                I18n.get("server.reignofnether.fog_requires_rts_map")));
+                        MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("server.reignofnether.fog_requires_rts_map")));
                         return -1;
                     }
                     setServerFog(true);

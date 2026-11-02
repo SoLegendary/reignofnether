@@ -529,7 +529,8 @@ public interface Unit {
 
     private static void checkAndPickupResources(Unit unit, List<ItemEntity> nearbyItems) {
         Mob unitMob = (Mob) unit;
-        if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
+        // resources and unit items are carried side by side; the HUD shows both
+        if (unitMob.canPickUpLoot()) {
             for (ItemEntity itementity : nearbyItems) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {

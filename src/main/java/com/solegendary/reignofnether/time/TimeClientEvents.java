@@ -1,46 +1,24 @@
 package com.solegendary.reignofnether.time;
 
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
-import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.matchstart.MatchStartScreen;
-import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.sounds.FadeableMusicInstance;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.ui.Theme;
+import com.solegendary.reignofnether.ui.Tooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.solegendary.reignofnether.time.TimeUtils.*;
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
+/** Client copy of the day/night time and blood moon state. The HUD clock panel draws it. */
 public class TimeClientEvents {
-
-    private static int xPos = 0;
-    private static int yPos = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -51,21 +29,8 @@ public class TimeClientEvents {
     public static long serverGameTime = 0;
     public static double ticksSinceLastUpdate = 0; // for counting partial ticks since serverGameTime is only updated once per second
 
-    public static boolean showClockTooltip = false;
+    // clicking the clock keeps its tooltip open
 
-    private static final Button clockButton = new Button("Clock",
-            10,
-            null,
-            null,
-            null,
-            () -> false,
-            () -> !OrthoviewClientEvents.isEnabled(),
-            () -> true,
-            () -> showClockTooltip = !showClockTooltip,
-            null,
-            null
-    );
-    private static Button bloodMoonButton = getBloodMoonButton();
     private static int bloodMoonTicksLeft = 0;
     private static BlockPos bloodMoonPos = null;
 
@@ -78,26 +43,13 @@ public class TimeClientEvents {
         return bloodMoonTicksLeft > 0;
     }
 
-    private static Button getBloodMoonButton() {
-        return new Button("Clock",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
-                null,
-                null,
-                () -> false,
-                () -> !OrthoviewClientEvents.isEnabled() || !isBloodMoonActive(),
-                () -> true,
-                null,
-                () -> {
-                    if (bloodMoonPos != null)
-                        OrthoviewClientEvents.centreCameraOnPos(bloodMoonPos);
-                },
-                List.of(
-                        fcs(I18n.get("abilities.reignofnether.blood_moon.clock_warning1"), Style.EMPTY.withColor(0xFF0000)),
-                        fcs(I18n.get("abilities.reignofnether.blood_moon.clock_warning2", getTimeStrFromTicks(bloodMoonTicksLeft))),
-                        fcs(I18n.get("abilities.reignofnether.blood_moon.clock_warning3"))
-                )
-        );
+    public static int getBloodMoonTicksLeft() {
+        return bloodMoonTicksLeft;
+    }
+
+    public static void centreOnBloodMoon() {
+        if (isBloodMoonActive() && bloodMoonPos != null)
+            OrthoviewClientEvents.centreCameraOnPos(bloodMoonPos);
     }
 
     public static void setBloodMoonTicks(int tickDuration, BlockPos pos) {
@@ -111,127 +63,45 @@ public class TimeClientEvents {
         }
     }
 
-    // render directly above the minimap
-    @SubscribeEvent
-    public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
-            return;
+    public static Tooltip clockTooltip() {
+        if (isBloodMoonActive()) {
+            return Tooltip.of(I18n.get("abilities.reignofnether.blood_moon.clock_warning1")).titleColour(Theme.ERROR)
+                    .body(I18n.get("abilities.reignofnether.blood_moon.clock_warning2", getTimeStrFromTicks(bloodMoonTicksLeft)))
+                    .body(I18n.get("abilities.reignofnether.blood_moon.clock_warning3"));
         }
+        boolean isDay = isDay(serverNormDayTime);
+        String timeStr = get12HourTimeStr(serverNormDayTime);
 
-        if (!isBloodMoonActive()) {
-            updateClockPos();
-            evt.getGuiGraphics().renderItem(new ItemStack(Items.CLOCK), xPos, yPos);
-            evt.getGuiGraphics().renderItemDecorations(MC.font, new ItemStack(Items.CLOCK), xPos, yPos);
+        Tooltip t;
+        if (targetClientTime != serverNormDayTime)
+            t = Tooltip.of(I18n.get("time.reignofnether.time_is_distorted"))
+                    .body(I18n.get("time.reignofnether.real_time", timeStr));
+        else
+            t = Tooltip.of(I18n.get(isDay ? "hud.reignofnether.clock.day_n" : "hud.reignofnether.clock.night_n", dayNumber()))
+                    .status(I18n.get("time.reignofnether.time", timeStr), Theme.BODY);
+
+        t.body(I18n.get(isDay ? "hud.reignofnether.clock.desc_day" : "hud.reignofnether.clock.desc_night"));
+        t.status(isDay ? I18n.get("time.reignofnether.time_until_night", getTimeUntilStr(serverNormDayTime, DUSK))
+                : I18n.get("time.reignofnether.time_until_day", getTimeUntilStr(serverNormDayTime, DAWN)), Theme.BODY);
+
+        if (SurvivalClientEvents.isEnabled) {
+            long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
+            t.status(I18n.get("time.reignofnether.time_until_next_wave",
+                    getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset)), Theme.ORANGE);
+        } else if (PlayerClientEvents.isRTSPlayer()) {
+            t.status(I18n.get("time.reignofnether.game_time", getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks)), Theme.BODY);
         }
+        return t;
     }
 
-    private static void updateClockPos() {
-        int screenWidth = MC.getWindow().getGuiScaledWidth();
-        int screenHeight = MC.getWindow().getGuiScaledHeight();
-        int radius = MinimapClientEvents.getMapGuiRadius();
-        int co = MinimapClientEvents.CORNER_OFFSET;
-        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
-            // clock centred ON the top-left corner of the visible square (half in / half out)
-            float baseHalf = (float) (radius / Math.sqrt(2));
-            float half = baseHalf * MinimapClientEvents.SQUARE_SCALE;
-            float brX = screenWidth - co;
-            float brY = screenHeight - co;
-            float tlX = brX - 2 * half;  // top-left corner X
-            float tlY = brY - 2 * half;  // top-left corner Y
-            // 16x16 clock nudged a few px up-left from the corner
-            xPos = (int) (tlX - 12);
-            yPos = (int) (tlY - 12);
-        } else {
-            xPos = screenWidth - radius - (co * 2) + 2;
-            yPos = screenHeight - (radius * 2) - (co * 2) - 6;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
-            return;
-        }
-
-        updateClockPos();
-
-        bloodMoonButton = getBloodMoonButton();
-        if (!bloodMoonButton.isHidden.get() && evt.getScreen() instanceof TopdownGui) {
-            bloodMoonButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
-            if (bloodMoonButton.isMouseOver(evt.getMouseX(), evt.getMouseY()))
-                bloodMoonButton.renderTooltip(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
-        } else if (!clockButton.isHidden.get() && evt.getScreen() instanceof TopdownGui)
-            clockButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
-    }
-
-    @SubscribeEvent
-    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-        } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-            bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onDrawTooltip(ScreenEvent.Render.Post evt) {
-        if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
-                !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
-            return;
-        }
-
-        final int GUI_LENGTH = 16;
-
-        boolean isMouseOver = evt.getMouseX() > xPos &&
-                evt.getMouseX() <= xPos + GUI_LENGTH &&
-                evt.getMouseY() > yPos &&
-                evt.getMouseY() <= yPos + GUI_LENGTH;
-
-        if (!isBloodMoonActive() && (isMouseOver || showClockTooltip)) {
-
-            // 'day' is when undead start burning, ~500
-            // 'night' is when undead stop burning, ~12500
-            boolean isDay = isDay(serverNormDayTime);
-            String timeStr = get12HourTimeStr(serverNormDayTime);
-
-            FormattedCharSequence timeUntilStr =
-                    fcs(isDay ? I18n.get("time.reignofnether.time_until_night",
-                                    getTimeUntilStr(serverNormDayTime, DUSK)) :
-                                    I18n.get("time.reignofnether.time_until_day",
-                                            getTimeUntilStr(serverNormDayTime, DAWN)));
-
-            ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
-
-            if (!showClockTooltip) {
-                if (targetClientTime != serverNormDayTime) {
-                    tooltip.add(fcs(I18n.get("time.reignofnether.time_is_distorted"), true));
-                    tooltip.add(fcs(I18n.get("time.reignofnether.real_time", timeStr)));
-                } else {
-                    tooltip.add(fcs(I18n.get("time.reignofnether" + ".time", timeStr)));
-                }
-            }
-            tooltip.add(timeUntilStr);
-
-            if (SurvivalClientEvents.isEnabled) {
-                long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
-                tooltip.add(fcs(I18n.get("time.reignofnether.time_until_next_wave",
-                        getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset))));
-            }
-
-            if (PlayerClientEvents.isRTSPlayer() && !SurvivalClientEvents.isEnabled) {
-                FormattedCharSequence gameLengthStr = fcs(I18n.get("time.reignofnether.game_time", getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks)));
-                tooltip.add(gameLengthStr);
-            }
-            if (showClockTooltip) {
-                MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltip, xPos + 57, yPos - 4);
-            } else {
-                MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltip, evt.getMouseX(), evt.getMouseY());
-            }
-        }
+    /**
+     * Which day of the match it is: 1 + the dawns since the match started, so a night is numbered after
+     * the day before it. ponytail: assumes the clock ran at normal speed since the start, distortion skews it.
+     */
+    public static int dayNumber() {
+        long now = normaliseTime(serverNormDayTime);
+        long start = now - PlayerClientEvents.rtsGameTicks;
+        return 1 + (int) (Math.floorDiv(now - DAWN, 24000L) - Math.floorDiv(start - DAWN, 24000L));
     }
 
     @SubscribeEvent
@@ -244,17 +114,3 @@ public class TimeClientEvents {
         return TimeClientEvents.serverGameTime + (long) TimeClientEvents.ticksSinceLastUpdate;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
