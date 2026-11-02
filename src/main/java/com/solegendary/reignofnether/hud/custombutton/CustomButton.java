@@ -5,11 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +38,6 @@ public class CustomButton extends Button {
 	public List<CustomButtonActions.CustomButtonAction> leftClickActions = new ArrayList<>();
 	public List<CustomButtonActions.CustomButtonAction> rightClickActions = new ArrayList<>();
 	public boolean isEnabled;
-	Minecraft MC = Minecraft.getInstance();
 	public CustomButton(
 		String name,
 		int iconSize,
@@ -123,10 +119,8 @@ public class CustomButton extends Button {
 			() -> false,
 			() -> false,
 			() -> isEnabled,
-			() -> {
-			},
-			() -> {
-			},
+			leftClickActions.isEmpty() ? null : () -> CustomButtonActionServerboundPacket.runLeftClickCommand(id),
+			rightClickActions.isEmpty() ? null : () -> CustomButtonActionServerboundPacket.runRightClickCommand(id),
 			null
 		);
 		this.id = id;
@@ -183,19 +177,4 @@ public class CustomButton extends Button {
 		return iconSize;
 	}
 	
-	@Override
-	public void checkClicked(int mouseX, int mouseY, boolean leftClick) {
-		if (!OrthoviewClientEvents.isEnabled() || !isEnabled)
-			return;
-		
-		if (isMouseOver(mouseX, mouseY) && MC.player != null) {
-			if (leftClick && this.onLeftClick != null && !this.leftClickActions.isEmpty()) {
-				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-				CustomButtonActionServerboundPacket.runLeftClickCommand(id);
-			} else if (!leftClick && this.onRightClick != null && !rightClickActions.isEmpty()) {
-				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-				CustomButtonActionServerboundPacket.runRightClickCommand(id);
-			}
-		}
-	}
 }

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hero;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
@@ -129,7 +130,7 @@ public class HeroServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (HeroUnitSave fallenHero : fallenHeroes) {
             if (evt.getEntity() instanceof ServerPlayer sp &&
-                fallenHero.ownerName.equals(sp.getName().getString())) {
+                fallenHero.ownerName.equals(PlayerRoles.ownerOf(sp.getName().getString()))) {
                 FallenHeroClientboundPacket.addFallenHero(sp, fallenHero);
             }
         }
