@@ -499,7 +499,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     private void syncToClient() {
         if (!this.level().isClientSide())
-            ItemClientboundPacket.syncInventory(this.getId(), getAllItems());
+            ItemClientboundPacket.syncInventory(this, getAllItems());
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))

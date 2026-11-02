@@ -1,7 +1,6 @@
 
 Fog of war
 ----------
-[❌] Allow spectators to see fog, but with vision of all players
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Eyes of ender reveal in fog (like wards)
 
@@ -13,8 +12,8 @@ Bugfixes
 [❌] Allow fog to be kept on in between singleplayer relogs
 
 
-Quality of Life Features
-------------------------
+Quality of Life
+---------------
 
 [❌] Updated the main menu panoramas with modern units and buildings
 

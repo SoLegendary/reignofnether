@@ -430,7 +430,9 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-        if (evt.getEntity() instanceof LivingEntity le &&
+        // serverside only: the clientside join also fires when an existing entity is merely discovered (fog,
+        // render distance), and the server's particles already reach every player who can see the spawn
+        if (!evt.getLevel().isClientSide() && evt.getEntity() instanceof LivingEntity le &&
                 (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon || le instanceof Unit))
             addUnitPoofs(evt.getLevel(), le);
 
@@ -806,7 +808,7 @@ public class UnitServerEvents {
                     UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
                 }
                 if (entity instanceof UnitInventory inv) {
-                    ItemClientboundPacket.syncInventory(entity.getId(), inv.getAllItems());
+                    ItemClientboundPacket.syncInventory(entity, inv.getAllItems());
                 }
             }
         }

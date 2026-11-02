@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1b
+1.20.1-1.5.1c
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -11,21 +11,27 @@ Balance
 
 Quality of Life
 ---------------
-[✅] Custom item shops now reset to their original starting stock when a match begins
-[✅] Units holding resources are prioritised towards the front of a group selection
-[✅] The Royal Guard's ultimate is no longer cancellable or interruptable
-[✅] The Lilypad sponsorship has ended so its banners have been removed
+[❌] rtsmap.json expansion for scenario whitelisted units/items/research
+    - whitelist
+        - unit
+            - scenarioIds: List<Int> (omitting means global)
+            - whitelist: [ unit1, unit2, unit3, ...]
+        - building
+        - research
+        - item
+
+    [❌] Commands to modify it in memory
+    [❌] Save as .dat file separately so we can retain modifications
+
+[❌] Allow spectators to see fog, but with vision of all players
+
+[🟡] Stopped sending a lot of unnecessary data about entities in fog
+
 
 Bugfixes
 --------
-[✅] Fixed wardens and iron golems not showing picked up items
-[✅] Fixed custom production items not working on server worlds
-[✅] The gamerules menu no longer overlaps with the beacon button in sandbox
-[✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
-[✅] Fixed units getting stuck on lanterns and rails
-[✅] Fixed pocket portals not working in classic mode
-[✅] Fixed wraith snow not causing attack speed reduction
+
 
 Languages
 ---------
-
+[❌] fr_fr update by EnderBreaker

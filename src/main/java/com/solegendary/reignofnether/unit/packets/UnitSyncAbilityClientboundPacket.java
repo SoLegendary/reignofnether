@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.packets;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -11,7 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -34,7 +33,7 @@ public class UnitSyncAbilityClientboundPacket {
             for (int i = 0; i < abilities.size(); i++) {
                 abilityCharges[i] = abilities.get(i).getCharges(unit);
             }
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                     new UnitSyncAbilityClientboundPacket(
                         UnitSyncAction.SYNC_ABILITIES,
                         entity.getId(),

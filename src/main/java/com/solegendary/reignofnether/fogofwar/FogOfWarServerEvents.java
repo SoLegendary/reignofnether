@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -18,8 +19,11 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -32,6 +36,7 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -230,6 +235,20 @@ public class FogOfWarServerEvents {
                 isBlockVisibleFor(sp, b.minCorner.getX(), b.maxCorner.getZ());
     }
 
+    // send an entity-specific packet only to players who can currently see that entity (everyone if fog is off)
+    public static void sendToPlayersWhoCanSee(Entity entity, Object packet) {
+        if (!enabled) {
+            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), packet);
+            return;
+        }
+        MinecraftServer server = entity.getServer();
+        if (server == null) return;
+        BlockPos bp = entity.blockPosition();
+        for (ServerPlayer sp : server.getPlayerList().getPlayers())
+            if (isBlockVisibleFor(sp, bp.getX(), bp.getZ()))
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
+    }
+
     private static void clearPlayerVision(UUID playerId) {
         playerLiveChunks.remove(playerId);
         playerEdgeChunks.remove(playerId);
@@ -322,8 +341,10 @@ public class FogOfWarServerEvents {
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
         if (wasEnabled && !enabled && serverLevel != null)
-            for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers())
+            for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
                 resendAllTrackedChunks(sp);
+                refreshEntityTracking(sp); // entities hidden by fog need re-tracking now that the gate is off
+            }
     }
 
     public static void resendAllTrackedChunks(ServerPlayer sp) {
@@ -365,6 +386,9 @@ public class FogOfWarServerEvents {
 
         ticksUntilUpdate = UPDATE_TICKS;
         updatePlayerBrightChunks();
+        for (ServerPlayer sp : serverLevel.players())
+            if (isFogActiveFor(sp))
+                refreshEntityTracking(sp);
         for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers) {
             // TODO: on server restart (or singleplayer map relog) unit ids change so fog units always get removed as soon as they're explored
             PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
@@ -375,6 +399,13 @@ public class FogOfWarServerEvents {
                 }
             }
         }
+    }
+
+    // vanilla only re-checks which entities a player tracks when the entity or player changes chunk section, but
+    // fog vision changes independently of that, so re-run the check (gated by TrackedEntityMixin) for every entity
+    private static void refreshEntityTracking(ServerPlayer sp) {
+        for (ChunkMap.TrackedEntity tracked : serverLevel.getChunkSource().chunkMap.entityMap.values())
+            tracked.updatePlayer(sp);
     }
 
     private static void updatePlayerBrightChunks() {
