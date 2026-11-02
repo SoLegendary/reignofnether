@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -55,7 +56,7 @@ public class AbilityServerboundPacket {
             for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
                 if (entity.getId() == this.unitId && entity instanceof Unit unit) {
 
-                    if (!player.getName().getString().equals(unit.getOwnerName())) {
+                    if (!PlayerRoles.ownerOf(player.getName().getString()).equals(unit.getOwnerName())) {
                         ReignOfNether.LOGGER.warn("AbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + unit.getOwnerName());
                         success.set(false);
                         return;

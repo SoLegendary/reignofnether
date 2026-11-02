@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -41,6 +43,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
@@ -49,6 +52,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,6 +65,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class CommandsServerEvents {
@@ -405,8 +411,50 @@ public class CommandsServerEvents {
 					return 1;
 				})
 		);
+
+		// vanilla only registers these on dedicated servers, which leaves LAN and P2P hosts unable to grant op
+		if (event.getCommandSelection() == Commands.CommandSelection.INTEGRATED) {
+			dispatcher.register(opCommand("op", true));
+			dispatcher.register(opCommand("deop", false));
+		}
 	}
-	
+
+	private static LiteralArgumentBuilder<CommandSourceStack> opCommand(String name, boolean op) {
+		return Commands.literal(name)
+			.requires(source -> source.isPlayer() && PlayerServerEvents.isOpOrHost(source.getPlayer()))
+			.then(Commands.argument("targets", GameProfileArgument.gameProfile())
+				.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+					ctx.getSource().getOnlinePlayerNames(), builder))
+				.executes(ctx -> setOp(ctx.getSource(), GameProfileArgument.getGameProfiles(ctx, "targets"), op))
+			);
+	}
+
+	private static int setOp(CommandSourceStack source, Collection<GameProfile> profiles, boolean op) {
+		PlayerList playerList = source.getServer().getPlayerList();
+		int changed = 0;
+		for (GameProfile profile : profiles) {
+			if (playerList.isOp(profile) == op)
+				continue;
+			if (op) {
+				// PlayerList.op() only grants level 2 on integrated servers, our op checks need 4
+				playerList.getOps().add(new ServerOpListEntry(profile, 4, false));
+				ServerPlayer player = playerList.getPlayer(profile.getId());
+				if (player != null)
+					playerList.sendPlayerPermissionLevel(player);
+			} else {
+				playerList.deop(profile);
+			}
+			source.sendSuccess(
+				() -> Component.translatable(op ? "commands.op.success" : "commands.deop.success", profile.getName()),
+				true
+			);
+			changed++;
+		}
+		if (changed == 0)
+			source.sendFailure(Component.translatable(op ? "commands.op.failed" : "commands.deop.failed"));
+		return changed;
+	}
+
 	private static ArgumentBuilder<CommandSourceStack, ?> placeBuildingTail(NameResolver ownerResolver) {
 		return Commands.argument("autoBuild", BoolArgumentType.bool())
 			.then(Commands.argument("pos", BlockPosArgument.blockPos())

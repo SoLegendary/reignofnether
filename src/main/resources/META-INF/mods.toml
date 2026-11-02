@@ -56,3 +56,10 @@ Minecraft, except it's an RTS
     versionRange="[1.20.1,1.21)"
     ordering="NONE"
     side="BOTH"
+# optional: Simple Voice Chat, for team voice channels during a match (voice/RonVoicechatPlugin)
+[[dependencies.reignofnether]]
+    modId="voicechat"
+    mandatory=false
+    versionRange="[1.20.1-2.4.0,)"
+    ordering="NONE"
+    side="BOTH"

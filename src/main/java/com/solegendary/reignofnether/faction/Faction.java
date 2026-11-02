@@ -102,7 +102,9 @@ public class Faction {
 	}
 	
 	public void addBuilding(Building building, Keybinding keybinding) {
-		BuildingPlaceButton buildButton = getBuilding(ReignOfNetherRegistries.BUILDING.getKey(building)).getBuildButton(keybinding);
+		Building registered = getBuilding(ReignOfNetherRegistries.BUILDING.getKey(building));
+		BuildingPlaceButton buildButton = registered.getBuildButton(keybinding);
+		buildButton.cost = () -> registered.cost;
 		buildingButtons.add(buildButton);
 	}
 	

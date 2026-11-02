@@ -329,8 +329,6 @@
   "hud.helperbuttons.reignofnether.select_all_military_units": "Vælg alle militære enheder",
   "hud.helperbuttons.reignofnether.cancel": "Annuller",
 
-  "hud.map.reignofnether.open": "Åbn stort kort",
-  "hud.map.reignofnether.close": "Luk",
 
   "hud.startbuttons.villagers.reignofnether.first": "Deltag i spillet som Villager Fraktionen.",
   "hud.startbuttons.villagers.reignofnether.second": "Spawnt %d villagers på målområdet.",
@@ -346,9 +344,7 @@
   "hud.reignofnether.drop_off_resources": "Aflæg ressourcer",
   "hud.reignofnether.gather_resources": "Indsaml ressourcer (%s)",
   "hud.reignofnether.change_target_resource": "Klik for at ændre målressource",
-  "hud.reignofnether.total_workers": "Samlet Arbejdere: %d",
   "hud.reignofnether.workers_on": "Arbejdere på %s",
-  "hud.reignofnether.max_resources": "%s (Max: %d)",
   "hud.reignofnether.players_resources": "%s's ressourcer",
   "hud.reignofnether.you_are_spectator": "Du er tilskuer",
   "hud.reignofnether.placed_capitol": "%s har placeret deres hovedbygning!",

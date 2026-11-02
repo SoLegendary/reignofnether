@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.research;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -68,7 +69,7 @@ public class ResearchClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        if (Minecraft.getInstance().player.getName().getString().equals(this.playerName)) {
+                        if (PlayerRolesClient.myOwner().equals(this.playerName)) {
                             if (isCheat) {
                                 if (value > 0)
                                     ResearchClient.addCheatWithValue(this.itemName, this.value);

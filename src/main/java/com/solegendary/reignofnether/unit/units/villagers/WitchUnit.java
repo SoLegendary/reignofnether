@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
@@ -51,6 +53,14 @@ import java.util.List;
 import java.util.Set;
 
 public class WitchUnit extends Witch implements Unit, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.HEALER, UnitRole.CASTER, UnitRole.AOE, UnitRole.HARMING);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.abilitySlot1);

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -65,6 +67,14 @@ import java.util.List;
 import java.util.Set;
 
 public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.HERO, UnitRole.RANGED, UnitRole.ANTI_AIR, UnitRole.CASTER, UnitRole.UNDEAD);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public final Abilities ABILITIES = new Abilities(
         List.of(
             new Pair<>(new RaiseDead(), Keybindings.abilitySlot1),

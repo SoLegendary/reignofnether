@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
+import com.solegendary.reignofnether.player.PlayerRole;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -24,12 +25,15 @@ public class StartPosClientboundPacket {
     int colorId;
     boolean ready = false;
     boolean hidden = false;
+    int botDifficulty = -1;
+    boolean pending = false;
 
     // seats are sent per player: with hideEnemyPicks each player only sees their own team's picks
     public static void sendTo(ServerPlayer player, StartPosAction action, StartPos sp) {
         StartPosClientboundPacket packet = new StartPosClientboundPacket(action, sp.pos, sp.faction, sp.playerName, sp.colorId);
         packet.ready = sp.ready;
         packet.hidden = sp.hidden;
+        packet.botDifficulty = sp.botDifficulty;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
@@ -38,6 +42,21 @@ public class StartPosClientboundPacket {
         StartPosClientboundPacket packet = new StartPosClientboundPacket(StartPosAction.HIDDEN_PLAYER, BlockPos.ZERO, Factions.NONE, playerName, 0);
         packet.ready = ready;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    // a soldier or co-commander the player may see (StartPosServerEvents.isHiddenFrom)
+    public static void sendJoin(ServerPlayer player, SeatJoin join) {
+        StartPosClientboundPacket packet = new StartPosClientboundPacket(
+                join.isSoldier() ? StartPosAction.JOIN_SOLDIER : StartPosAction.JOIN_CO_COMMANDER,
+                join.seat, Factions.NONE, join.playerName, join.colorId);
+        packet.ready = join.ready;
+        packet.pending = join.pending;
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static void sendBotFaction(ServerPlayer player, Faction faction) {
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+                new StartPosClientboundPacket(StartPosAction.BOT_FACTION, BlockPos.ZERO, faction, "", 0));
     }
 
     public static void clear(ServerPlayer player) {
@@ -91,6 +110,8 @@ public class StartPosClientboundPacket {
         this.colorId = buffer.readInt();
         this.ready = buffer.readBoolean();
         this.hidden = buffer.readBoolean();
+        this.botDifficulty = buffer.readInt();
+        this.pending = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -101,6 +122,8 @@ public class StartPosClientboundPacket {
         buffer.writeInt(this.colorId);
         buffer.writeBoolean(this.ready);
         buffer.writeBoolean(this.hidden);
+        buffer.writeInt(this.botDifficulty);
+        buffer.writeBoolean(this.pending);
     }
 
     // server-side packet-consuming functions
@@ -117,11 +140,22 @@ public class StartPosClientboundPacket {
                                 pos.enabled = action == StartPosAction.ADD;
                                 pos.ready = ready;
                                 pos.hidden = hidden;
+                                pos.botDifficulty = botDifficulty;
                                 StartPosClientEvents.startPoses.add(pos);
                             }
                             case CLEAR -> {
                                 StartPosClientEvents.startPoses.clear();
                                 StartPosClientEvents.hiddenPlayers.clear();
+                                StartPosClientEvents.joins.clear();
+                                StartPosClientEvents.botFactions.clear();
+                            }
+                            case BOT_FACTION -> StartPosClientEvents.botFactions.add(faction);
+                            case JOIN_SOLDIER, JOIN_CO_COMMANDER -> {
+                                SeatJoin join = new SeatJoin(playerName, action == StartPosAction.JOIN_SOLDIER ?
+                                        PlayerRole.SOLDIER : PlayerRole.COMMANDER, colorId, blockPos);
+                                join.ready = ready;
+                                join.pending = pending;
+                                StartPosClientEvents.joins.add(join);
                             }
                             case HIDDEN_PLAYER -> StartPosClientEvents.hiddenPlayers.put(playerName, ready);
                             case REMOVE -> {
