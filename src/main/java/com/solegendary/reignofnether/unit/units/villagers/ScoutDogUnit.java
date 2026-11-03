@@ -4,14 +4,13 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,15 +18,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -49,10 +45,10 @@ public class ScoutDogUnit extends Wolf implements Unit {
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -75,8 +71,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -96,7 +91,18 @@ public class ScoutDogUnit extends Wolf implements Unit {
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.STRING);
@@ -111,6 +117,12 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
     public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
             SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.STRING);
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        this.runOnDeathCommand(pReason);
+        super.remove(pReason);
+    }
 
     @Override
     protected void defineSynchedData() {
@@ -163,7 +175,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ScoutDogUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ScoutDogUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
@@ -203,7 +215,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
         happiness += 25;
         this.targetSquish = -0.5f;
         if (happiness >= 100) {
-            MiscUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
+            ParticleUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
             happiness = 0;
         }
     }

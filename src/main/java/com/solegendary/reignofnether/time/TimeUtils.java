@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.survival.WaveDifficulty;
+import net.minecraft.world.level.Level;
 
 public class TimeUtils {
 
@@ -56,6 +57,10 @@ public class TimeUtils {
     public static boolean isDay(long time) {
         long normTime = normaliseTime(time);
         return normTime > DAWN && normTime <= DUSK;
+    }
+
+    public static boolean isDay(Level level) {
+        return isDay(level.getDayTime());
     }
 
     // Helper to format ticks into min/sec string

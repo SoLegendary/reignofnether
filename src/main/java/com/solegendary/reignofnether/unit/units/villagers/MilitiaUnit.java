@@ -6,22 +6,12 @@ import com.solegendary.reignofnether.ability.abilities.BackToWorkUnit;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.abilities.WeaponSwapBow;
 import com.solegendary.reignofnether.ability.abilities.WeaponSwapSword;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
@@ -32,18 +22,12 @@ import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
@@ -57,10 +41,16 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Vindicator;
-import net.minecraft.world.entity.npc.*;
+import net.minecraft.world.entity.npc.VillagerData;
+import net.minecraft.world.entity.npc.VillagerDataHolder;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -70,8 +60,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
 public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, RangedAttackerUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -88,10 +76,10 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -109,12 +97,14 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -141,7 +131,18 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.STRING);
@@ -162,8 +163,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond)) * getAttackCooldownMultiplier());}
-    public float getBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return isUsingBow() ? AttackerUnit.super.getAttackRange() : 2;}
     public float getUnitAttackDamage() {
@@ -209,6 +208,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean bowEnchanted = false;
 
     final static public float attackDamage = 3.0f;
+    final static public float attackDamageRanged = 2.5f;
     final static public float attacksPerSecond = 0.5f;
     final static public float rangedAttacksPerSecond = 0.3f;
     final static public float attackRange = 10; // only used by ranged units or melee building attackers
@@ -255,6 +255,15 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         AttributeInstance ai3 = getAttribute(Attributes.ARMOR);
         if (ai3 != null)
             ai3.setBaseValue(useBow ? rangedArmorValue : armorValue);
+        AttributeInstance ai4 = getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        if (ai4 != null)
+            ai4.setBaseValue(useBow ? rangedAttacksPerSecond : attacksPerSecond);
+        AttributeInstance ai5 = getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        if (ai5 != null)
+            ai5.setBaseValue(useBow ? attackDamageRanged : attackDamage);
+        AttributeInstance ai6 = getAttribute(Attributes.ATTACK_DAMAGE);
+        if (ai6 != null)
+            ai6.setBaseValue(useBow ? attackDamageRanged : attackDamage);
 
         if (rangedAttackGoal != null && attackGoal != null) {
             if (useBow) {
@@ -294,7 +303,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, MilitiaUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, MilitiaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MilitiaUnit.maxHealth)
@@ -334,19 +343,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -395,6 +392,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeAttackUnitGoal(this, true);
         this.rangedAttackGoal = new UnitBowAttackGoal<>(this);
         this.attackBuildingGoal = new MeleeAttackBuildingGoal(this);

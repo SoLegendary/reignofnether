@@ -57,10 +57,6 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         return attackCooldown;
     }
 
-    public CrossbowState getCrossbowState() {
-        return crossbowState;
-    }
-
     public void setToMaxAttackCooldown() {
         this.attackCooldown = this.attackCooldownMax;
     }
@@ -115,6 +111,16 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
 
     public boolean requiresUpdateEveryTick() {
         return true;
+    }
+
+    // refresh the effect of any applied enchantments
+    public void unloadCrossbow() {
+        if (this.crossbowState != CHARGED && this.crossbowState != READY_TO_ATTACK)
+            return;
+        ItemStack itemstack = this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
+        CrossbowItem.setCharged(itemstack, false);
+        itemstack.removeTagKey("ChargedProjectiles");
+        this.crossbowState = UNCHARGED;
     }
 
     public void tickChargeCrossbow() {
@@ -188,10 +194,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
             }
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
-            else if (target instanceof GhastUnit ghastUnit)
-                attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
-            else if (target instanceof WindcallerUnit windcallerUnit)
-                attackRange += windcallerUnit.getAttackerRangeBonus(this.mob);
+            else if (target instanceof Unit targetUnit)
+                attackRange += targetUnit.getAttackerRangeBonus(this.mob);
 
             // dont consider garrison range here so the unit still moves towards the edge of the building
             if (!this.mob.isPassenger()) {
@@ -216,7 +220,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 if (this.attackCooldown <= 0) {
                     this.crossbowState = READY_TO_ATTACK;
                 }
-            } else if (this.crossbowState == READY_TO_ATTACK && canSeeTarget && distToTarget < attackRange) {
+            } else if (this.crossbowState == READY_TO_ATTACK && canSeeTarget && distToTarget < attackRange &&
+                    distToTarget >= ((AttackerUnit) this.mob).getMinAttackRange()) {
                 performAttack();
             }
         }
@@ -227,9 +232,5 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
         CrossbowItem.setCharged(itemstack1, false);
         this.crossbowState = UNCHARGED;
-    }
-
-    private boolean canRun() {
-        return this.crossbowState == UNCHARGED;
     }
 }

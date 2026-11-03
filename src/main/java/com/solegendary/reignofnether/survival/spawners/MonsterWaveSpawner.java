@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.survival.spawners;
 
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -8,7 +9,7 @@ import com.solegendary.reignofnether.survival.Wave;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
@@ -178,8 +179,8 @@ public class MonsterWaveSpawner {
                 break;
         }
         if (remainingPop > 0) {
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + remainingPop + "/" + pop + " population worth of monster units");
+            PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.failed_spawn_monsters", false, remainingPop, pop);
         }
-        lastFaction = Faction.MONSTERS;
+        lastFaction = Factions.MONSTERS;
     }
 }

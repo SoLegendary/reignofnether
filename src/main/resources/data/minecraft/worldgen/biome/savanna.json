@@ -1,7 +1,11 @@
 {
     "has_precipitation": false,
     "carvers": {
-      "air": []
+      "air": [
+        "minecraft:cave",
+        "minecraft:cave_extra_underground",
+        "minecraft:canyon"
+      ]
     },
     "downfall": 0.0,
     "effects": {

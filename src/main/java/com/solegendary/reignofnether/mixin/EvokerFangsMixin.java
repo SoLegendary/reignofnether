@@ -82,10 +82,10 @@ public abstract class EvokerFangsMixin extends Entity {
         } else if (--this.warmupDelayTicks < 0) {
             if (this.warmupDelayTicks == -8) {
                 List<LivingEntity> $$7 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.5, 0.0, 0.5));
-                Iterator var15 = $$7.iterator();
+                Iterator<LivingEntity> var15 = $$7.iterator();
 
                 while(var15.hasNext()) {
-                    LivingEntity $$8 = (LivingEntity)var15.next();
+                    LivingEntity $$8 = var15.next();
                     this.dealDamageTo($$8);
                 }
             }

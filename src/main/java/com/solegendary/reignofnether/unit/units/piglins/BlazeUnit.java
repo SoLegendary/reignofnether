@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -15,24 +15,19 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.damagesource.DamageSource;
@@ -73,10 +68,10 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -99,7 +94,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
     public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -124,7 +118,18 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(BlazeUnit.class, EntityDataSerializers.STRING);
@@ -167,7 +172,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 0.0f;
+    final static public float attackDamage = 0.01f;
     final static public float attacksPerSecond = 1.0f;
     final static public float attackRange = 14; // only used by ranged units or melee building attackers
     final static public float aggroRange = 14;
@@ -202,7 +207,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, BlazeUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, BlazeUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, BlazeUnit.maxHealth)
@@ -233,7 +238,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         AttackerUnit.tick(this);
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
             lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
@@ -242,19 +247,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -264,18 +257,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
-
-    @Override public void updateHighlightBps() {
-        if (!level().isClientSide())
-            return;
-        this.highlightBps.clear();
-        if (CursorClientEvents.getLeftClickAction() == UnitAction.SHOOT_FIREWALL) {
-            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), FirewallShot.RANGE + 1);
-            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
-                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
-            }
-        }
-    }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

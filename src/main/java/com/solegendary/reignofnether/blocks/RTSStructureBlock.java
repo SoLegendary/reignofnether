@@ -67,7 +67,7 @@ public class RTSStructureBlock extends BaseEntityBlock implements GameMasterBloc
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(new Property[]{MODE});
+        pBuilder.add(new Property<?>[]{MODE});
     }
 
     public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {

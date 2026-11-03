@@ -30,7 +30,7 @@ public class MarchOfProgress extends HeroAbility {
 
     public static final int RADIUS = 15;
 
-    public static final int MANA_COST_PER_SECOND = 3;
+    public static final float MANA_COST_PER_SECOND = 3.5f;
 
     public MarchOfProgress() {
         super(1, 0, UnitAction.MARCH_OF_PROGRESS_TOGGLE,  CD_MAX, 0, RADIUS, false);
@@ -61,7 +61,7 @@ public class MarchOfProgress extends HeroAbility {
                 this,
                 hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 
@@ -80,6 +80,7 @@ public class MarchOfProgress extends HeroAbility {
                 fcsIcons(I18n.get("abilities.reignofnether.march_of_progress.stats", CD_MAX / 20, radius, MANA_COST_PER_SECOND)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip1")),
+                fcs(I18n.get("abilities.reignofnether.march_of_progress.tether_effect")),
                 fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip2", MANA_COST_PER_SECOND))
         );
     }

@@ -152,7 +152,7 @@ public class BuildingCommands {
 						)
 					)
 					.then(Commands.argument("targets", BuildingArgument.buildings())
-						.executes((ctx) -> withBuildings(BuildingArgument.getBuildings(ctx, "targets", null), b -> b.ownerName = "", ctx, Component.literal("Change the owner of %d building(s) successfully")))
+						.executes((ctx) -> withBuildings(BuildingArgument.getBuildings(ctx, "targets", null), b -> b.ownerName = "", ctx, Component.translatable("commands.reignofnether.building.owner.change.success")))
 						.then(Commands.argument("ownerName", PlayerNameArgument.players())
 							.then(Commands.argument("newOwnerName", PlayerNameArgument.player())
 								.executes((ctx) -> withBuildings(
@@ -521,7 +521,7 @@ public class BuildingCommands {
 							BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
 							CommandsServerEvents.parseRotation(String.valueOf(IntegerArgumentType.getInteger(ctx, "rotation1")))
 						);
-						ctx.getSource().sendFailure(Component.literal("Deprecated Argument"));
+						ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.deprecated_argument"));
 						return 0;
 					})
 				)

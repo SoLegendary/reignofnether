@@ -15,12 +15,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchSculkAmplifiers extends ProductionItem {
 
@@ -54,14 +53,14 @@ public class ResearchSculkAmplifiers extends ProductionItem {
                     ResearchClient.hasResearch(ProductionItems.RESEARCH_SCULK_AMPLIFIERS),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.sculk_amplifiers"), Style.EMPTY.withBold(true)),
+                fcs(I18n.get("research.reignofnether.sculk_amplifiers"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("research.reignofnether.sculk_amplifiers.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("research.reignofnether.sculk_amplifiers.tooltip2", SPLIT_BOOM_AMOUNT, SPLIT_BOOM_RANGE), Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("research.reignofnether.sculk_amplifiers.tooltip3"), Style.EMPTY)
+                fcs(""),
+                    fcs(I18n.get("research.reignofnether.sculk_amplifiers.tooltip1")),
+                    fcs(I18n.get("research.reignofnether.sculk_amplifiers.tooltip2", SPLIT_BOOM_AMOUNT, SPLIT_BOOM_RANGE)),
+                    fcs(""),
+                    fcs(I18n.get("research.reignofnether.sculk_amplifiers.tooltip3"))
             ),
             this
         );

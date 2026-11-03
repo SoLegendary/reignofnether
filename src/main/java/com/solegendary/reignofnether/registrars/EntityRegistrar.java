@@ -347,6 +347,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "llama_unit").toString()));
 
+    public static final RegistryObject<EntityType<BeeUnit>> BEE_UNIT = ENTITIES.register("bee_unit",
+            () -> EntityType.Builder.of(BeeUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.BEE.getWidth(), EntityType.BEE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bee_unit").toString()));
+
     public static final RegistryObject<EntityType<PhantomSummon>> PHANTOM_SUMMON = ENTITIES.register("phantom_summon",
             () -> EntityType.Builder.of(PhantomSummon::new, MobCategory.MONSTER)
                     .sized(EntityType.PHANTOM.getWidth(), EntityType.PHANTOM.getHeight())
@@ -417,6 +423,38 @@ public class EntityRegistrar {
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "molten_bomb_projectile").toString()));
 
+    public static final RegistryObject<EntityType<TotemOfRegeneration>> TOTEM_OF_REGENERATION = ENTITIES.register("totem_of_regeneration",
+            () -> EntityType.Builder.of(TotemOfRegeneration::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.75f, 1.25f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_regeneration").toString()));
+
+    public static final RegistryObject<EntityType<TotemOfCasting>> TOTEM_OF_CASTING = ENTITIES.register("totem_of_casting",
+            () -> EntityType.Builder.of(TotemOfCasting::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.75f, 1.25f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_casting").toString()));
+
+    public static final RegistryObject<EntityType<TotemOfProtection>> TOTEM_OF_PROTECTION = ENTITIES.register("totem_of_protection",
+            () -> EntityType.Builder.of(TotemOfProtection::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.75f, 1.25f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_protection").toString()));
+
+    public static final RegistryObject<EntityType<TotemOfShielding>> TOTEM_OF_SHIELDING = ENTITIES.register("totem_of_shielding",
+            () -> EntityType.Builder.of(TotemOfShielding::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.75f, 1.25f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_shielding").toString()));
+
     public static void init(FMLJavaModLoadingContext context) {
         ENTITIES.register(context.getModEventBus());
     }
@@ -472,6 +510,7 @@ public class EntityRegistrar {
             case PandaProd.itemName -> EntityRegistrar.PANDA_UNIT.get();
             case WolfProd.itemName -> EntityRegistrar.WOLF_UNIT.get();
             case LlamaProd.itemName -> EntityRegistrar.LLAMA_UNIT.get();
+            case BeeProd.itemName -> EntityRegistrar.BEE_UNIT.get();
             case "Killer Rabbit" -> EntityRegistrar.KILLER_RABBIT_UNIT.get();
             case "Militia" -> EntityRegistrar.MILITIA_UNIT.get();
             default -> null;

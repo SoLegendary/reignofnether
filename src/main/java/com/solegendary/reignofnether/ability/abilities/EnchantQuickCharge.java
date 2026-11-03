@@ -12,9 +12,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CrossbowItem;
@@ -22,6 +20,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class EnchantQuickCharge extends EnchantAbility {
 
@@ -44,26 +43,22 @@ public class EnchantQuickCharge extends EnchantAbility {
                 "Quick Charge Enchantment",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/crossbow_arrow.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this,
+                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || Library.isAutoCasting(placement, this),
                 () -> false,
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
                     BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
-                    if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                    else
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, this);
+                    Library.toggleAutoCast(placement, this);
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot"), Style.EMPTY.withBold(true)),
+                        fcs(I18n.get("ability.reignofnether.enchant.quickshot"), true),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip3"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("ability.reignofnether.enchant.quickshot.tooltip1")),
+                        fcs(I18n.get("ability.reignofnether.enchant.quickshot.tooltip2")),
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.autocast"))
                 ),
                 this,
                 placement
@@ -74,14 +69,5 @@ public class EnchantQuickCharge extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof PillagerUnit &&
                 entity.getItemBySlot(equipmentSlot).getItem() instanceof CrossbowItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

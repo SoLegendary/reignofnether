@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -12,13 +14,13 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchMilitiaBows extends ProductionItem {
 
@@ -44,16 +46,17 @@ public class ResearchMilitiaBows extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> ProductionItems.RESEARCH_MILITIA_BOWS.itemIsBeingProduced(prodBuilding.ownerName)
-                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS),
-            () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows"),
-                    Style.EMPTY.withBold(true)
-                ),
+                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS)
+                || TutorialClientEvents.isEnabled(),
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS),
+            List.of(fcs(I18n.get("research.reignofnether.militia_bows"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.militia_bows.tooltip1")),
+                fcs(I18n.get("research.reignofnether.militia_bows.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.militia_bows.tooltip3"))
             ),
             this
         );

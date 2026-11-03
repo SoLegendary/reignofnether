@@ -1,6 +1,10 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.entities.TotemOfCasting;
+import com.solegendary.reignofnether.entities.TotemOfProtection;
+import com.solegendary.reignofnether.entities.TotemOfRegeneration;
+import com.solegendary.reignofnether.entities.TotemOfShielding;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
@@ -90,7 +94,7 @@ public class PortraitRendererModifiers {
             yOffset = 26;
         } else if (entity instanceof EnderMan) {
             yOffset = -15;
-        } else if (entity instanceof Ravager) {
+        } else if (entity instanceof Ravager ravager) {
             yOffset = -54;
             scale = -25;
         } else if (entity instanceof Dolphin) {
@@ -138,6 +142,18 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof BatUnit) {
             yOffset = -2;
             scale = -10;
+        } else if (entity instanceof TotemOfRegeneration) {
+            yOffset = -7;
+            scale = -7;
+        } else if (entity instanceof TotemOfShielding) {
+            yOffset = -8;
+            scale =-7;
+        } else if (entity instanceof TotemOfProtection) {
+            yOffset = -14;
+            scale = -7;
+        } else if (entity instanceof TotemOfCasting) {
+            yOffset = -6;
+            scale = -7;
         }
 
         return new Pair<>(yOffset, scale);

@@ -66,11 +66,11 @@ public class Avatar extends HeroAbility {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.AVATAR),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 

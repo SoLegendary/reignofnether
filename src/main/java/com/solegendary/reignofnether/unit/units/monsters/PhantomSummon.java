@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.time.NightUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -38,7 +38,7 @@ public class PhantomSummon extends Phantom {
     public int tickCountUntilDeath = 1200; // hard cap on lifespan
     public int attackCooldown = 0;
     public final int ATTACK_COOLDOWN_MAX = 120;
-    public static final float HERO_DAMAGE_MULT = 0.7f;
+    public static final float HERO_BUILDING_DAMAGE_MULT = 0.7f;
 
     public LivingEntity entityTarget = null;
 
@@ -50,9 +50,10 @@ public class PhantomSummon extends Phantom {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, InsomniaCurse.PHANTOM_DAMAGE)
-                .add(Attributes.MAX_HEALTH, PhantomSummon.maxHealth);
+                .add(Attributes.MAX_HEALTH, PhantomSummon.maxHealth)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0f);
     }
 
     @Override
@@ -299,10 +300,10 @@ public class PhantomSummon extends Phantom {
                 List<Player> $$0 = PhantomSummon.this.level().getNearbyPlayers(this.attackTargeting, PhantomSummon.this, PhantomSummon.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
                 if (!$$0.isEmpty()) {
                     $$0.sort(Comparator.comparing(player -> ((Entity) player).getY()).reversed());
-                    Iterator var2 = $$0.iterator();
+                    Iterator<Player> var2 = $$0.iterator();
 
                     while(var2.hasNext()) {
-                        Player $$1 = (Player)var2.next();
+                        Player $$1 = var2.next();
                         if (PhantomSummon.this.canAttack($$1, TargetingConditions.DEFAULT)) {
                             PhantomSummon.this.setTarget($$1);
                             return true;

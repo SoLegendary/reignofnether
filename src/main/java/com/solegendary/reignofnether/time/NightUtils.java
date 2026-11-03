@@ -1,10 +1,16 @@
 package com.solegendary.reignofnether.time;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -18,7 +24,7 @@ public class NightUtils {
             (!clientSide && TimeServerEvents.isBloodMoonActive())) {
             return true;
         }
-        List<BuildingPlacement> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(clientSide);
 
         Vec2 pos2d = new Vec2((float) pos.x, (float) pos.z);
 
@@ -34,6 +40,18 @@ public class NightUtils {
                 }
             }
         }
+        List<LivingEntity> units = clientSide ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
+        for (LivingEntity le : units) {
+            MobEffectInstance mei = le.getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+            if (mei != null) {
+                int range = mei.getAmplifier() + 1;
+                float nightRangeSqr = range * range;
+                Vec2 centrePos2d = new Vec2((float) le.position().x(), (float) le.position().z());
+                if (centrePos2d.distanceToSqr(pos2d) < nightRangeSqr) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
     public static boolean isSunBurnTick(Mob mob) {
@@ -43,7 +61,7 @@ public class NightUtils {
         if (mob instanceof Unit unit && ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
             return false;
 
-        if (mob.tickCount % 10 == 0 && TimeUtils.isDay(mob.level().getDayTime())) {
+        if (mob.tickCount % 10 == 0 && TimeUtils.isDay(mob.level())) {
             BlockPos blockpos = new BlockPos((int) mob.getX(), (int) mob.getEyeY(), (int) mob.getZ());
             boolean isProtected = mob.isInWaterRainOrBubble() || mob.isInPowderSnow || mob.wasInPowderSnow || mob.isOnFire();
             // Return early if mob is protected or sky is not visible

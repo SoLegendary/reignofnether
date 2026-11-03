@@ -4,13 +4,14 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -18,8 +19,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class IronGolemProd extends ProductionItem {
+public class IronGolemProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Iron Golem";
     public final static ResourceCost cost = ResourceCosts.IRON_GOLEM;
@@ -41,10 +43,10 @@ public class IronGolemProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip2"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.iron_golem_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.iron_golem_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.iron_golem_unit.tooltip2").getVisualOrderText()
                 )
         );
     }
@@ -57,12 +59,12 @@ public class IronGolemProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.iron_golem_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip2"), Style.EMPTY)
+                fcs(""),
+                Component.translatable("entity.reignofnether.iron_golem_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.iron_golem_unit.tooltip2").getVisualOrderText()
             ),
             this
         );

@@ -83,11 +83,11 @@ public class ThrowTNT extends HeroAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.THROW_TNT),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 
@@ -104,12 +104,12 @@ public class ThrowTNT extends HeroAbility {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.throw_tnt") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats",
-                        Math.round(explosionPower * AdjustablePrimedTnt.DAMAGE_PER_POWER),
+                        Math.round(8 + (explosionPower * 4)),
                         cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
-                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK))
         );
     }
 
@@ -120,7 +120,7 @@ public class ThrowTNT extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
-                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk)),
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank1"), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank2"), getRank(hero) == 1),

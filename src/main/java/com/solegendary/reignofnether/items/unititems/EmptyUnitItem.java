@@ -12,6 +12,7 @@ public class EmptyUnitItem extends UnitItem {
 
     public EmptyUnitItem() {
         super(UnitItemBuilder.of(Items.AIR)
+                .descId("empty")
                 .type(UnitItemType.NONE)
                 .enableTooltip(false));
     }

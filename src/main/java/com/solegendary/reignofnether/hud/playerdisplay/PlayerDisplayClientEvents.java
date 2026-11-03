@@ -18,9 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -75,7 +73,7 @@ public class PlayerDisplayClientEvents {
                     displayType = DisplayType.OBSERVER;
             },
             null,
-            List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_observer_player_displays"), Style.EMPTY)
+            List.of(fcs(I18n.get("alliances.reignofnether.tooltip.toggle_observer_player_displays"))
             ));
 
     public static final Button diplomacyButton = new Button(
@@ -93,7 +91,7 @@ public class PlayerDisplayClientEvents {
                     displayType = DisplayType.DIPLOMACY;
             },
             null,
-            List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_diplomacy_player_displays"), Style.EMPTY)
+            List.of(fcs(I18n.get("alliances.reignofnether.tooltip.toggle_diplomacy_player_displays"))
             ));
 
     private static int getNumFpvPlayers() {
@@ -121,7 +119,7 @@ public class PlayerDisplayClientEvents {
                     !AlliancesClient.sharingAllyControl()
             ),
             null,
-            List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_shared_unit_control"), Style.EMPTY)
+            List.of(fcs(I18n.get("alliances.reignofnether.tooltip.toggle_shared_unit_control"))
             ));
 
     @SubscribeEvent

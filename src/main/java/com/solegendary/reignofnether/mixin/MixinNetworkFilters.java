@@ -38,7 +38,8 @@ public class MixinNetworkFilters {
                     LOGGER.debug("Injected {} into {}", filter, manager);
                 }
             } catch (Exception e) {
-
+                // debug, not error: this overwrite exists to keep the vanilla filter failure out of the log
+                LOGGER.debug("Failed to inject {} into {}", key, manager, e);
             }
         });
     }

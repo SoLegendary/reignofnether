@@ -12,12 +12,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchGrandLibrary extends ProductionItem {
 
@@ -46,11 +45,11 @@ public class ResearchGrandLibrary extends ProductionItem {
                         (prodBuilding.getBuilding() instanceof Library && prodBuilding.getUpgradeLevel() > 0),
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("research.reignofnether.grand_library"), Style.EMPTY.withBold(true)),
+                        fcs(I18n.get("research.reignofnether.grand_library"), true),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("research.reignofnether.grand_library.tooltip1"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("research.reignofnether.grand_library.tooltip1"))
                 ),
                 this
         );

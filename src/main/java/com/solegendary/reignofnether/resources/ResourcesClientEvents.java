@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -20,7 +21,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,6 +36,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class ResourcesClientEvents {
 
@@ -55,8 +56,8 @@ public class ResourcesClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(ScreenEvent.Render evt) {
-        if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
+    public static void onClientTick(ScreenEvent.Render.Post evt) {
+        if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud() && MC.screen instanceof TopdownGui) {
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
             boolean isItem = false;
@@ -85,7 +86,7 @@ public class ResourcesClientEvents {
                     case NONE -> "";
                 };
                 MyRenderer.renderTooltip(evt.getGuiGraphics(),
-                        List.of(FormattedCharSequence.forward(str, MyRenderer.iconStyle)),
+                        List.of(fcsIcons(str)),
                         evt.getMouseX(), evt.getMouseY()
                 );
             }

@@ -28,7 +28,6 @@ public class ThrowLingeringRegenPotion extends Ability {
 
     public final Potion potion = Potions.STRONG_REGENERATION;
 
-    //TODO Fix potionThrowRange for Witches gathering on a building
     public ThrowLingeringRegenPotion(int potionThrowRange) {
         super(
             UnitAction.THROW_LINGERING_REGEN_POTION,

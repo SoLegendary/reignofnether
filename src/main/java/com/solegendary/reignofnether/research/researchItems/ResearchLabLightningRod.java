@@ -13,12 +13,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchLabLightningRod extends ProductionItem {
 
@@ -46,16 +45,14 @@ public class ResearchLabLightningRod extends ProductionItem {
             () -> itemIsBeingProducedAt(prodBuilding) ||
                     (prodBuilding.getBuilding() instanceof Laboratory && prodBuilding.getUpgradeLevel() > 0),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON),
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.lightning_rod"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.lightning_rod.tooltip3"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.lightning_rod.tooltip1")),
+                fcs(I18n.get("research.reignofnether.lightning_rod.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.lightning_rod.tooltip3"))
             ),
             this
         );

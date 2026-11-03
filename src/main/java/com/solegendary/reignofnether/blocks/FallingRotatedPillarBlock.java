@@ -24,7 +24,7 @@ public class FallingRotatedPillarBlock extends FallingBlock {
 
     public FallingRotatedPillarBlock(BlockBehaviour.Properties pProperties) {
         super(pProperties);
-        this.registerDefaultState((BlockState)this.defaultBlockState().setValue(AXIS, Direction.Axis.Y));
+        this.registerDefaultState(this.defaultBlockState().setValue(AXIS, Direction.Axis.Y));
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {
@@ -35,11 +35,11 @@ public class FallingRotatedPillarBlock extends FallingBlock {
         switch (pRotation) {
             case COUNTERCLOCKWISE_90:
             case CLOCKWISE_90:
-                switch ((Direction.Axis)pState.getValue(AXIS)) {
+                switch (pState.getValue(AXIS)) {
                     case X:
-                        return (BlockState)pState.setValue(AXIS, Direction.Axis.Z);
+                        return pState.setValue(AXIS, Direction.Axis.Z);
                     case Z:
-                        return (BlockState)pState.setValue(AXIS, Direction.Axis.X);
+                        return pState.setValue(AXIS, Direction.Axis.X);
                     default:
                         return pState;
                 }
@@ -49,11 +49,11 @@ public class FallingRotatedPillarBlock extends FallingBlock {
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(new Property[]{AXIS});
+        pBuilder.add(new Property<?>[]{AXIS});
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return (BlockState)this.defaultBlockState().setValue(AXIS, pContext.getClickedFace().getAxis());
+        return this.defaultBlockState().setValue(AXIS, pContext.getClickedFace().getAxis());
     }
 
     @Override

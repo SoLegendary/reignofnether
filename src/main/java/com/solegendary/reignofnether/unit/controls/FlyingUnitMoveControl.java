@@ -15,7 +15,7 @@ public class FlyingUnitMoveControl extends MoveControl {
 
     public FlyingUnitMoveControl(Mob mob) {
         super(mob);
-        this.mob = (Mob) mob;
+        this.mob = mob;
     }
 
     public void tick() {

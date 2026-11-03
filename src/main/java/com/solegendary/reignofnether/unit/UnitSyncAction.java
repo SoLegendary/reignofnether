@@ -12,4 +12,5 @@ public enum UnitSyncAction {
 
     SYNC_ABILITIES,
     REQUEST_SYNC_ABILITIES, // ask the server to sync cooldowns
+    REQUEST_SYNC_MOB_EFFECTS
 }

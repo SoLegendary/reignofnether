@@ -81,23 +81,23 @@ public abstract class LevelRendererMixin {
         double d1 = vec3.y();
         double d2 = vec3.z();
 
-        ObjectIterator var42 = this.destructionProgress.long2ObjectEntrySet().iterator();
+        ObjectIterator<Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>>> var42 = this.destructionProgress.long2ObjectEntrySet().iterator();
 
         while (var42.hasNext()) {
-            Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry = (Long2ObjectMap.Entry) var42.next();
+            Long2ObjectMap.Entry<SortedSet<BlockDestructionProgress>> entry = var42.next();
             BlockPos blockpos2 = BlockPos.of(entry.getLongKey());
             double d3 = (double) blockpos2.getX() - d0;
             double d4 = (double) blockpos2.getY() - d1;
             double d5 = (double) blockpos2.getZ() - d2;
             double distSqr = d3 * d3 + d4 * d4 + d5 * d5;
             if ((distSqr > 1024.0 && distSqr < 65536)) {
-                SortedSet<BlockDestructionProgress> sortedset1 = (SortedSet) entry.getValue();
+                SortedSet<BlockDestructionProgress> sortedset1 = entry.getValue();
                 if (sortedset1 != null && !sortedset1.isEmpty()) {
                     int k1 = (sortedset1.last()).getProgress();
                     pPoseStack.pushPose();
                     pPoseStack.translate((double) blockpos2.getX() - d0, (double) blockpos2.getY() - d1, (double) blockpos2.getZ() - d2);
                     PoseStack.Pose posestack$pose = pPoseStack.last();
-                    VertexConsumer vertexconsumer1 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer((RenderType) ModelBakery.DESTROY_TYPES.get(k1)), posestack$pose.pose(), posestack$pose.normal(), 1);
+                    VertexConsumer vertexconsumer1 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(k1)), posestack$pose.pose(), posestack$pose.normal(), 1);
                     ModelData modelData = this.level.getModelDataManager().getAt(blockpos2);
                     this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockpos2), blockpos2, this.level, pPoseStack, vertexconsumer1, modelData == null ? ModelData.EMPTY : modelData);
                     pPoseStack.popPose();

@@ -13,12 +13,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchCubeMagma extends ProductionItem {
 
@@ -46,14 +45,12 @@ public class ResearchCubeMagma extends ProductionItem {
             () -> ProductionItems.RESEARCH_CUBE_MAGMA.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_CUBE_MAGMA),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.cube_magma"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.cube_magma"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.cube_magma.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.cube_magma.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.cube_magma.tooltip1")),
+                fcs(I18n.get("research.reignofnether.cube_magma.tooltip2"))
             ),
             this
         );

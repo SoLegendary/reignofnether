@@ -40,9 +40,11 @@ public class UnitActionItem {
     private final int[] unitIds; // selected unit(s)
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos;
+    private final boolean groupMove; // issuing player held ctrl: MOVE / ATTACK_MOVE units move as a pack (GroupPace)
 
     public final UnitAction getAction() { return action; }
     public final int[] getUnitIds() { return unitIds; }
+    public final String getOwnerName() { return ownerName; }
     public final BlockPos getPreselectedBlockPos() { return preselectedBlockPos; }
 
     public boolean equals(UnitActionItem unitActionItem) {
@@ -54,6 +56,7 @@ public class UnitActionItem {
             preselectedBlockPos == null && unitActionItem.preselectedBlockPos == null || (preselectedBlockPos != null && preselectedBlockPos.equals(unitActionItem.preselectedBlockPos)) &&
             selectedBuildingPos == null && unitActionItem.selectedBuildingPos == null || (selectedBuildingPos != null && selectedBuildingPos.equals(unitActionItem.selectedBuildingPos)) &&
             unitId == unitActionItem.unitId &&
+            groupMove == unitActionItem.groupMove &&
             Arrays.equals(unitIds, unitActionItem.unitIds)
         );
     }
@@ -87,6 +90,7 @@ public class UnitActionItem {
         this.unitIds = unitIds;
         this.preselectedBlockPos = new BlockPos(0,0,0);
         this.selectedBuildingPos = new BlockPos(0,0,0);
+        this.groupMove = false;
     }
 
     public UnitActionItem(
@@ -97,12 +101,25 @@ public class UnitActionItem {
         BlockPos preselectedBlockPos,
         BlockPos selectedBuildingPos
     ) {
+        this(ownerName, action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos, false);
+    }
+
+    public UnitActionItem(
+        String ownerName,
+        UnitAction action,
+        int unitId,
+        int[] unitIds,
+        BlockPos preselectedBlockPos,
+        BlockPos selectedBuildingPos,
+        boolean groupMove
+    ) {
         this.ownerName = ownerName;
         this.action = action;
         this.unitId = unitId;
         this.unitIds = unitIds;
         this.preselectedBlockPos = preselectedBlockPos;
         this.selectedBuildingPos = selectedBuildingPos;
+        this.groupMove = groupMove;
     }
 
     private boolean canAffordManaCost(Ability ability, Unit unit) {
@@ -135,12 +152,15 @@ public class UnitActionItem {
     // clientside actions are purely for tracking data
     public void action(Level level) {
         Ability usedAbility = null;
+        LivingEntity targetEntity = level.getEntity(unitId) instanceof LivingEntity e ? e : null;
 
-        boolean isSandboxPlayer;
-        if (level.isClientSide())
-            isSandboxPlayer = SandboxClientEvents.isSandboxPlayer(this.ownerName);
-        else
-            isSandboxPlayer = SandboxServer.isSandboxPlayer(this.ownerName);
+        boolean isSandboxPlayer = true;
+        if (this.ownerName != null) {
+            if (level.isClientSide())
+                isSandboxPlayer = SandboxClientEvents.isSandboxPlayer(this.ownerName);
+            else
+                isSandboxPlayer = SandboxServer.isSandboxOp(this.ownerName);
+        }
 
         // filter out unowned units and non-unit entities
         ArrayList<Unit> actionableUnits = new ArrayList<>();
@@ -157,13 +177,14 @@ public class UnitActionItem {
                     alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
                     fullControl = NonUnitServerEvents.canControlAllMobs(entity.level(), this.ownerName);
                 }
-                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
+                if (this.ownerName == null || unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
                     actionableUnits.add(unit);
                 }
             }
         }
 
         ArrayList<Unit> formationUnits = new ArrayList<>();
+        ArrayList<Unit> groupMovers = new ArrayList<>(); // MOVE / ATTACK_MOVE units that get speed matched
 
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
@@ -276,9 +297,11 @@ public class UnitActionItem {
                         unit.setMoveTarget(preselectedBlockPos);
                     } else {
                         formationUnits.add(unit);
+                        groupMovers.add(unit);
                     }
                 }
                 case ATTACK_MOVE -> {
+                    groupMovers.add(unit);
                     // if the unit can't actually attack just treat this as a move action
                     if (unit instanceof AttackerUnit attackerUnit) {
                         MiscUtil.addUnitCheckpoint(unit, preselectedBlockPos, false);
@@ -292,7 +315,10 @@ public class UnitActionItem {
                     }
                 }
                 case ATTACK -> {
-                    LivingEntity le = (LivingEntity) level.getEntity(unitId);
+                    LivingEntity le = targetEntity;
+                    if (level.isClientSide() && le != null && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
+                        HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.target_too_close"));
+
                     if (unit instanceof AttackerUnit attackerUnit) {
                         if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le) && Unit.atMaxResources(unit)) {
                             if (level.isClientSide()) {
@@ -318,7 +344,7 @@ public class UnitActionItem {
                                 boolean hasDropOffCommandQueued = false;
                                 for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {
                                     for (int id : uai.getUnitIds()) {
-                                        if (id == le.getId() && (
+                                        if (id == ((Entity) unit).getId() && (
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES)) {
                                             hasDropOffCommandQueued = true;
@@ -336,7 +362,7 @@ public class UnitActionItem {
                                 }
                             }
                         }
-                    } else { // if the unit can't actually attack just treat this as a follow action
+                    } else if (le != null) { // if the unit can't actually attack just treat this as a follow action
                         unit.setFollowTarget(le);
                     }
                 }
@@ -349,7 +375,7 @@ public class UnitActionItem {
                     }
                 }
                 case FOLLOW -> {
-                    LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
+                    LivingEntity livingEntity = targetEntity;
                     if (livingEntity != null) {
                         MiscUtil.addUnitCheckpoint(unit, unitId, true);
                     }
@@ -432,10 +458,12 @@ public class UnitActionItem {
                             canAffordManaCost(ability, unit)
                         ) {
                             if (ability.canTargetEntities && this.unitId > 0) {
-                                ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
-                                usedAbility = ability;
-                                if (ability.oneClickOneUse) {
-                                    break actionableUnitsLoop;
+                                if (targetEntity != null) {
+                                    ability.use(level, unit, targetEntity);
+                                    usedAbility = ability;
+                                    if (ability.oneClickOneUse) {
+                                        break actionableUnitsLoop;
+                                    }
                                 }
                             } else {
                                 ability.use(level, unit, preselectedBlockPos);
@@ -451,6 +479,16 @@ public class UnitActionItem {
                         }
                     }
                 }
+            }
+        }
+
+        // a group's ground units move as a pack (GroupPace); flyers keep their own speed (they don't path with the group)
+        if (!level.isClientSide() && groupMove) {
+            List<Unit> walkers = groupMovers.stream().filter(u -> !u.isFlyingUnit()).toList();
+            if (walkers.size() >= 2) {
+                GroupPace pace = new GroupPace(walkers, preselectedBlockPos);
+                for (Unit u : walkers)
+                    u.getMoveGoal().pace = pace;
             }
         }
 
@@ -499,13 +537,14 @@ public class UnitActionItem {
 
         if (actionableBuilding != null && (
             actionableBuilding.ownerName.equals(ownerName) ||
-            SandboxServer.isSandboxPlayer(ownerName) ||
+            SandboxServer.isSandboxOp(ownerName) ||
             AlliancesServerEvents.canControlAlly(ownerName, actionableBuilding.ownerName))
         ) {
             for (Ability ability : actionableBuilding.getAbilities()) {
                 if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {
                     if (ability.canTargetEntities && this.unitId > 0) {
-                        ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
+                        if (targetEntity != null)
+                            ability.use(level, actionableBuilding, targetEntity);
                     } else {
                         ability.use(level, actionableBuilding, preselectedBlockPos);
                     }

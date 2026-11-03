@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.UnitChunkTickets;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -24,6 +25,7 @@ public class CommonModEvents {
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(PacketHandler::init);
+        event.enqueueWork(UnitChunkTickets::registerLoadingCallback);
     }
 
     @SubscribeEvent
@@ -33,6 +35,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PANDA_UNIT.get(), PandaUnit.createAttributes().build());
         evt.put(EntityRegistrar.WOLF_UNIT.get(), WolfUnit.createAttributes().build());
         evt.put(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BEE_UNIT.get(), BeeUnit.createAttributes().build());
         evt.put(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomSummon.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), ZombiePiglinUnit.createAttributes().build());
@@ -82,6 +85,10 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), PiglinMerchantUnit.createAttributes().build());
         evt.put(EntityRegistrar.WILDFIRE_UNIT.get(), WildfireUnit.createAttributes().build());
         evt.put(EntityRegistrar.KILLER_RABBIT_UNIT.get(), KillerRabbitUnit.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_REGENERATION.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_CASTING.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_PROTECTION.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_SHIELDING.get(), AbstractTotem.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -137,6 +144,7 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.PIGLIN_MERCHANT_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WOLF_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.LLAMA_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.BEE_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.PANDA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.GRIZZLY_BEAR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POLAR_BEAR_UNIT_SPAWN_EGG);
@@ -145,9 +153,10 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }
-        if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
+        if (BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
             event.accept(ItemRegistrar.THROWABLE_TNT);
             event.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE);
+            event.accept(ItemRegistrar.STAFF_OF_LIGHTNING);
         }
     }
 }

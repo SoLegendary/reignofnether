@@ -18,14 +18,13 @@ import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchPoisonSpiders extends ProductionItem {
 
@@ -61,16 +60,14 @@ public class ResearchPoisonSpiders extends ProductionItem {
             () -> ProductionItems.RESEARCH_POISON_SPIDERS.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR),
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.research_poison_spiders"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.research_poison_spiders"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_poison_spiders.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_poison_spiders.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_poison_spiders.tooltip3"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_poison_spiders.tooltip1")),
+                fcs(I18n.get("research.reignofnether.research_poison_spiders.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_poison_spiders.tooltip3"))
             ),
             this
         );

@@ -13,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-// force tintIndex=0 on untinted quads so the BlockColor fog wrap runs on every face
+// give untinted quads FOG_ONLY_TINT_INDEX so the BlockColor fog wrap runs on every face without the block's own
+// colour bleeding in (tintIndex 0 would paint grass-block dirt sides biome-green)
 public class FogTintingBakedModel extends BakedModelWrapper<BakedModel> {
 
     public FogTintingBakedModel(BakedModel original) {
@@ -42,7 +43,7 @@ public class FogTintingBakedModel extends BakedModelWrapper<BakedModel> {
         List<BakedQuad> out = new ArrayList<>(input.size());
         for (BakedQuad q : input) {
             if (q.getTintIndex() == -1) {
-                out.add(new BakedQuad(q.getVertices(), 0, q.getDirection(), q.getSprite(), q.isShade()));
+                out.add(new BakedQuad(q.getVertices(), FogTintingBlockColor.FOG_ONLY_TINT_INDEX, q.getDirection(), q.getSprite(), q.isShade()));
             } else {
                 out.add(q);
             }

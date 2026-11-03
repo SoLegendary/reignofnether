@@ -1,16 +1,36 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.GraveyardUnitProductionItem;
+import com.solegendary.reignofnether.building.production.ProdDupeRule;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -22,15 +42,15 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+import javax.annotation.Nullable;
 
 public class ProductionPlacement extends BuildingPlacement {
+    private static final int MAX_RALLY_POINTS = 64;
     protected ArrayList<BlockPos> rallyPoints = new ArrayList<>();
     protected LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
@@ -80,7 +100,7 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     public void addRallyPoint(BlockPos rallyPoint) {
-        if (!canSetRallyPoint())
+        if (!canSetRallyPoint() || rallyPoints.size() >= MAX_RALLY_POINTS)
             return;
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);
@@ -106,9 +126,6 @@ public class ProductionPlacement extends BuildingPlacement {
                 (rallyPointEntity instanceof Unit unit1 && !AlliancesServerEvents.isAlliedOrOwned(unit1.getOwnerName(), ownerName)));
     }
 
-    private boolean isProducing() {
-        return !this.productionQueue.isEmpty();
-    }
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
@@ -242,8 +259,11 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (!prodItem.canProduce(level, ownerName)) {
-                    HudClientboundPacket.showTempMessageI18n(ownerName, prodItem.getProduceErrorMsg(level, ownerName));
+                if (!prodItem.canProduce(this)) {
+                    String errorMsg = prodItem.getProduceErrorMsg(this);
+                    if (errorMsg != null) {
+                        HudClientboundPacket.showTempMessageI18n(ownerName, errorMsg);
+                    }
                 }
                 else if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
@@ -348,10 +368,7 @@ public class ProductionPlacement extends BuildingPlacement {
             if (nextItem.item.tick(this, nextItem)) {
                 if (!tickLevel.isClientSide()) {
                     productionQueue.remove(0);
-                    if (productionQueue.isEmpty())
-                        BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
-                    else
-                        BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
+                    BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
                 }
             }
         }

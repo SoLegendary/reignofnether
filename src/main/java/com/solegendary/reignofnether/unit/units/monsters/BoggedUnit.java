@@ -31,7 +31,7 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SkeletonUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, SkeletonUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
@@ -45,9 +45,9 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
-    public static final int POISON_DAMAGE = 6;
+    public static final int POISON_DAMAGE = 7;
 
-    final static public float attackDamage = 2.0f;
+    final static public float attackDamage = 1f;
 
     @Override
     protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor) {

@@ -1,9 +1,5 @@
 package com.solegendary.reignofnether.nether;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -12,11 +8,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherWartBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.material.MapColor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +58,7 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
 
-        if (bs.getBlock() == Blocks.OBSIDIAN)
+        if (bs.getBlock() == Blocks.OBSIDIAN || bs.getBlock() == BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get())
             return true;
 
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
@@ -83,14 +76,6 @@ public class NetherBlocks {
         return false;
     }
 
-    public static boolean isNetherPlantBlock(Level level, BlockPos bp) {
-        BlockState bs = level.getBlockState(bp);
-        for (Map.Entry<Block, List<Block>> entrySet : PLANT_MAPPINGS.entrySet())
-            if (!bs.isAir() && bs.getBlock().equals(entrySet.getKey()))
-                return true;
-        return false;
-    }
-
     // returns the first block in the list of overworld blocks for a nether block mapping
     public static BlockState getOverworldBlock(Level level, BlockPos overworldBp) {
         try {
@@ -103,6 +88,8 @@ public class NetherBlocks {
                         return Blocks.DIRT.defaultBlockState();
                     else if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
                         return entrySet.getValue().get(0).defaultBlockState();
+                    else if (netherBs.getBlock() == BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get())
+                        return Blocks.COBBLESTONE.defaultBlockState();
                 }
             }
         } catch (NullPointerException e) {

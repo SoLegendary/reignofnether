@@ -11,9 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -47,9 +45,9 @@ public class WeaponSwapBow extends Ability {
                 null,
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.weapon_swap_bow"), true),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip2"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip1")),
+                        fcs(I18n.get("abilities.reignofnether.weapon_swap_bow.tooltip2"))
                 ),
                 this,
                 unit

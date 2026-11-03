@@ -12,7 +12,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -20,8 +20,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class ZombieProd extends GraveyardUnitProductionItem {
+public class ZombieProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Zombie";
     public final static ResourceCost cost = ResourceCosts.ZOMBIE;
@@ -76,11 +77,11 @@ public class ZombieProd extends GraveyardUnitProductionItem {
                 ZombieProd.itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip2"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.zombie_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.zombie_unit.tooltip1").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.zombie_unit.tooltip2").getVisualOrderText()
                 )
         );
     }
@@ -94,13 +95,13 @@ public class ZombieProd extends GraveyardUnitProductionItem {
                         (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) || ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED)),
                 () -> true,
                 List.of(
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit"), Style.EMPTY.withBold(true)),
+                    Component.translatable("entity.reignofnether.zombie_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPopAndTime(cost),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip2"), Style.EMPTY)
+                    fcs(""),
+                    Component.translatable("entity.reignofnether.zombie_unit.tooltip1").getVisualOrderText(),
+                    fcs(""),
+                    Component.translatable("entity.reignofnether.zombie_unit.tooltip2").getVisualOrderText()
                 ),
                 this
         );

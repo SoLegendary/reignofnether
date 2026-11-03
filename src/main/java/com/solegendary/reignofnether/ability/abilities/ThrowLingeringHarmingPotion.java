@@ -28,7 +28,6 @@ public class ThrowLingeringHarmingPotion extends Ability {
 
     public final Potion potion = Potions.STRONG_HARMING;
 
-    //TODO Fix potionThrowRange for Witches gathering on a building
     public ThrowLingeringHarmingPotion(int potionThrowRange) {
         super(UnitAction.THROW_LINGERING_HARMING_POTION,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,

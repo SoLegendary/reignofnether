@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -26,6 +27,10 @@ public interface ConvertableUnit {
         if (newEntity == null)
             return null;
 
+        if (this instanceof UnitInventory inv1 && newEntity instanceof UnitInventory inv2)
+            for (int i = 0; i < UnitInventory.MAX_INVENTORY_SIZE; i++)
+                inv2.set(i, inv1.get(i));
+
         float maxHealthDiff = newEntity.getMaxHealth() - oldEntity.getMaxHealth();
 
         newEntity.setHealth(Math.max(1, oldEntity.getHealth() + maxHealthDiff));
@@ -33,6 +38,8 @@ public interface ConvertableUnit {
             newEntity.addEffect(effect);
 
         newEntity.copyPosition(oldEntity);
+        newEntity.setXRot(oldEntity.getXRot());
+        newEntity.setYRot(oldEntity.getYRot());
         ((Unit) newEntity).setOwnerName(oldUnit.getOwnerName());
         level.addFreshEntity(newEntity);
 

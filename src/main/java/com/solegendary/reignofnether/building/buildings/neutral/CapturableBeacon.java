@@ -10,16 +10,16 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CapturableBeacon extends Beacon {
 
@@ -53,10 +53,7 @@ public class CapturableBeacon extends Beacon {
         return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
     }
 
-    @Override
-    public Faction getFaction() {
-        return Faction.NONE;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         return new BuildingPlaceButton(
@@ -75,13 +72,13 @@ public class CapturableBeacon extends Beacon {
                     return list.isEmpty();
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip3"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.capturable_beacon").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.capturable_beacon.tooltip3").getVisualOrderText(),
+                        fcs(""),
+                        Component.translatable("buildings.reignofnether.capturable_beacon.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.capturable_beacon.tooltip2").getVisualOrderText(),
+                        fcs(""),
+                        Component.translatable("buildings.reignofnether.beacon.tooltip3").getVisualOrderText()
                 ),
                 this
         );

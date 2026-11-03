@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.util.FormattedCharSequence;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 // defined here because we need to be able to access in both
 // static (for ProductionItems) and nonstatic (for getCurrentPopulation) contexts
@@ -64,6 +65,7 @@ public class ResourceCosts {
     public static final ResourceCost PANDA = new ResourceCost(ID, "PANDA");
     public static final ResourceCost WOLF = new ResourceCost(ID, "WOLF");
     public static final ResourceCost LLAMA = new ResourceCost(ID, "LLAMA");
+    public static final ResourceCost BEE = new ResourceCost(ID, "BEE");
     public static final ResourceCost KILLER_RABBIT = new ResourceCost(ID, "KILLER_RABBIT");
     public static final ResourceCost SILVERFISH = new ResourceCost(ID, "SILVERFISH");
 
@@ -88,7 +90,7 @@ public class ResourceCosts {
     public static final ResourceCost STRONGHOLD = new ResourceCost(ID, "STRONGHOLD");
     public static final ResourceCost ALTAR_OF_DARKNESS = new ResourceCost(ID, "ALTAR_OF_DARKNESS");
     public static final ResourceCost MONSTER_MARKET = new ResourceCost(ID, "MONSTER_MARKET");
-    //Villagers
+    //VillagersFaction
     public static final ResourceCost TOWN_CENTRE = new ResourceCost(ID, "TOWN_CENTRE");
     public static final ResourceCost VILLAGER_HOUSE = new ResourceCost(ID, "VILLAGER_HOUSE");
     public static final ResourceCost WHEAT_FARM = new ResourceCost(ID, "WHEAT_FARM");
@@ -106,6 +108,7 @@ public class ResourceCosts {
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
     public static final ResourceCost CIVILIAN_PORTAL = new ResourceCost(ID, "CIVILIAN_PORTAL");
+    public static final ResourceCost POCKET_PORTAL = new ResourceCost(ID, "POCKET_PORTAL");
     public static final ResourceCost NETHERWART_FARM = new ResourceCost(ID, "NETHERWART_FARM");
     public static final ResourceCost BASTION = new ResourceCost(ID, "BASTION");
     public static final ResourceCost HOGLIN_STABLES = new ResourceCost(ID, "HOGLIN_STABLES");
@@ -123,6 +126,7 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_MILITIA_BOWS = new ResourceCost(ID, "RESEARCH_MILITIA_BOWS");
     public static final ResourceCost RESEARCH_LAB_LIGHTNING_ROD = new ResourceCost(ID, "RESEARCH_LAB_LIGHTNING_ROD");
     public static final ResourceCost RESEARCH_RESOURCE_CAPACITY = new ResourceCost(ID, "RESEARCH_RESOURCE_CAPACITY");
+    public static final ResourceCost RESEARCH_ITEM_BACKPACKS = new ResourceCost(ID, "RESEARCH_ITEM_BACKPACK");
     public static final ResourceCost RESEARCH_SPIDER_JOCKEYS = new ResourceCost(ID, "RESEARCH_SPIDER_JOCKEYS");
     public static final ResourceCost RESEARCH_SPIDER_WEBS = new ResourceCost(ID, "RESEARCH_SPIDER_WEBS");
     public static final ResourceCost RESEARCH_POISON_SPIDERS = new ResourceCost(ID, "RESEARCH_POISON_SPIDERS");
@@ -164,6 +168,7 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BEACON_LEVEL3 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL3");
     public static final ResourceCost RESEARCH_BEACON_LEVEL4 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL4");
     public static final ResourceCost RESEARCH_BEACON_LEVEL5 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL5");
+    public static final ResourceCost RESEARCH_UPGRADE_MARKET = new ResourceCost(ID, "RESEARCH_UPGRADE_MARKET");
 
     // ABILITIES
 
@@ -194,16 +199,16 @@ public class ResourceCosts {
         if (str.isEmpty())
             str += "\uE000  0     ";
         str = str.trim();
-        return FormattedCharSequence.forward(str, MyRenderer.iconStyle);
+        return fcsIcons(str);
     }
     public static FormattedCharSequence getFormattedPopAndTime(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE003  " + resCost.population + "     \uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
+        return fcsIcons("\uE003  " + resCost.population + "     \uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s");
     }
     public static FormattedCharSequence getFormattedPop(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE003  " + resCost.population, MyRenderer.iconStyle);
+        return fcsIcons("\uE003  " + resCost.population);
     }
     public static FormattedCharSequence getFormattedTime(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
+        return fcsIcons("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s");
     }
 
     public static final int REPLANT_WOOD_COST = 1;
@@ -235,7 +240,7 @@ public class ResourceCosts {
         WRETCHED_WRAITH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WRETCHED_WRAITH);
         ZOMBIE_PIGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE_PIGLIN);
         ZOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOGLIN);
-        // Villagers
+        // VillagersFaction
         VILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.VILLAGER);
         SCOUT_DOG.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_DOG);
         SCOUT_CAT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_CAT);
@@ -269,6 +274,7 @@ public class ResourceCosts {
         PANDA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PANDA);
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
+        BEE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BEE);
         KILLER_RABBIT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.KILLER_RABBIT);
         SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SILVERFISH);
 
@@ -296,7 +302,7 @@ public class ResourceCosts {
         STRONGHOLD.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.STRONGHOLD);
         ALTAR_OF_DARKNESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.ALTAR_OF_DARKNESS);
         MONSTER_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.MONSTER_MARKET);
-        // Villagers
+        // VillagersFaction
         TOWN_CENTRE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.TOWN_CENTRE);
         VILLAGER_HOUSE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_HOUSE);
         WHEAT_FARM.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WHEAT_FARM);
@@ -314,6 +320,7 @@ public class ResourceCosts {
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
         CIVILIAN_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CIVILIAN_PORTAL);
+        POCKET_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.POCKET_PORTAL);
         NETHERWART_FARM.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.NETHERWART_FARM);
         BASTION.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASTION);
         HOGLIN_STABLES.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.HOGLIN_STABLES);
@@ -329,6 +336,7 @@ public class ResourceCosts {
         RESEARCH_MILITIA_BOWS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_MILITIA_BOWS);
         RESEARCH_LAB_LIGHTNING_ROD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_LAB_LIGHTNING_ROD);
         RESEARCH_RESOURCE_CAPACITY.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_RESOURCE_CAPACITY);
+        RESEARCH_ITEM_BACKPACKS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_ITEM_BACKPACK);
         RESEARCH_SPIDER_JOCKEYS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SPIDER_JOCKEYS);
         RESEARCH_SPIDER_WEBS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SPIDER_WEBS);
         RESEARCH_POISON_SPIDERS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_POISON_SPIDERS);
@@ -370,6 +378,7 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL3.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL3);
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
+        RESEARCH_UPGRADE_MARKET.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_UPGRADE_MARKET);
         RESEARCH_VINDICATOR_AXES.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_VINDICATOR_AXES);
         RESEARCH_PILLAGER_CROSSBOWS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS);
         // ******************* ABILITIES ******************* //

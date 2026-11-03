@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ability.TradeAction;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,15 +26,16 @@ public class PlayerClientboundPacket {
     TradeAction tradeAction; // for updating market rates
     BlockPos pos;
     boolean isDogPerson;
+    boolean isForLogin;
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isForLogin) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction, isDogPerson));
+                new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction, isDogPerson, isForLogin));
     }
 
     public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction, true));
+                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction, true, true));
     }
 
     public static void removeRTSPlayer(String playerName) {
@@ -95,6 +98,11 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks));
     }
 
+    public static void syncItemsDropped(String playerName, long itemsDropped) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.SYNC_ITEMS_DROPPED, playerName, itemsDropped));
+    }
+
     public static void setRTSCamera(String playerName, boolean value) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0)));
@@ -115,21 +123,22 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = 0L;
         this.value2 = 0;
-        this.faction = Faction.NONE;
-        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.faction = Factions.NONE;
+        this.tradeAction = TradeAction.EMERALD_FOR_FOOD; // dummy value
         this.pos = pos;
         this.isDogPerson = true;
     }
 
-    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction, boolean isDogPerson) {
+    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction, boolean isDogPerson, boolean isForLogin) {
         this.playerAction = playerAction;
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = value2;
         this.faction = faction;
-        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.tradeAction = TradeAction.EMERALD_FOR_FOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = isDogPerson;
+        this.isForLogin = isForLogin;
     }
 
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1) {
@@ -137,8 +146,8 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = 0;
-        this.faction = Faction.NONE;
-        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.faction = Factions.NONE;
+        this.tradeAction = TradeAction.EMERALD_FOR_FOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = true;
     }
@@ -148,7 +157,7 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = 0;
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.tradeAction = tradeAction;
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = true;
@@ -159,10 +168,11 @@ public class PlayerClientboundPacket {
         this.playerName = buffer.readUtf();
         this.value1 = buffer.readLong();
         this.value2 = buffer.readInt();
-        this.faction = buffer.readEnum(Faction.class);
+        this.faction = Factions.getFaction(buffer.readResourceLocation());
         this.tradeAction = buffer.readEnum(TradeAction.class);
         this.pos = buffer.readBlockPos();
         this.isDogPerson = buffer.readBoolean();
+        this.isForLogin = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -170,10 +180,11 @@ public class PlayerClientboundPacket {
         buffer.writeUtf(this.playerName);
         buffer.writeLong(this.value1);
         buffer.writeInt(this.value2);
-        buffer.writeEnum(this.faction);
+        buffer.writeResourceLocation(this.faction.key);
         buffer.writeEnum(this.tradeAction);
         buffer.writeBlockPos(this.pos);
         buffer.writeBoolean(this.isDogPerson);
+        buffer.writeBoolean(this.isForLogin);
     }
 
     // server-side packet-consuming functions
@@ -187,7 +198,7 @@ public class PlayerClientboundPacket {
                             case TELEPORT -> OrthoviewClientEvents.centreCameraOnPosForPlayer(playerName, pos);
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
-                            case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2, isDogPerson);
+                            case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2, isDogPerson, isForLogin);
                             case ADD_SCENARIO_NPC_RTS_PLAYER -> PlayerClientEvents.addScenarioNPCRTSPlayer(playerName, faction, value1, value2);
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);
@@ -201,6 +212,7 @@ public class PlayerClientboundPacket {
                             case SYNC_BEACON_OWNER_TICKS -> PlayerClientEvents.syncBeaconOwnerTicks(playerName, value1);
                             case SET_RTS_CAMERA -> OrthoviewClientEvents.tryToSetCamera(playerName, value1 == 1L);
                             case SET_MARKET_RATE -> PlayerClientEvents.setMarketRate(tradeAction, playerName, Math.toIntExact(value1));
+                            case SYNC_ITEMS_DROPPED -> PlayerClientEvents.setItemsDropped(playerName, Math.toIntExact(value1));
                         }
                         success.set(true);
                     });

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building.buildings.placements;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
@@ -24,7 +23,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemShopPlacement extends BuildingPlacement {
+public class ItemShopPlacement extends ProductionPlacement {
 
     public static final int UNIT_SERVE_RANGE = 3;
 
@@ -42,9 +41,10 @@ public class ItemShopPlacement extends BuildingPlacement {
     }
 
     public boolean canServeUnit(Unit unit) {
-        if (unit instanceof LivingEntity le && unit instanceof UnitInventory) {
-            boolean friendly = AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), ownerName);
-            return friendly && isPosInsideBuilding(le.getOnPos(), UNIT_SERVE_RANGE);
+        if (getStockedItems().isEmpty()) return false;
+        if (unit instanceof Mob mob && unit instanceof UnitInventory inv && inv.canPickupUnitItems()) {
+            boolean friendly = MiscUtil.isAlliedOrOwned(mob.level(), unit.getOwnerName(), ownerName);
+            return friendly && isPosInsideBuilding(mob.getOnPos(), UNIT_SERVE_RANGE);
         }
         return false;
     }
@@ -99,6 +99,7 @@ public class ItemShopPlacement extends BuildingPlacement {
     @Override
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
+
         for (StockedShopItem stockedItem : getStockedItems())
             stockedItem.tick();
 
@@ -122,5 +123,10 @@ public class ItemShopPlacement extends BuildingPlacement {
                 ItemShopClientboundPacket.syncItemShopStock(originPos, getStockedItems());
             }
         }
+    }
+
+    public void resetStock() {
+        for (StockedShopItem stockedItem : getStockedItems())
+            stockedItem.reset();
     }
 }

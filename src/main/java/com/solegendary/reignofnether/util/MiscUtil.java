@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.blocks.WraithSnowLayerBlock;
 import com.solegendary.reignofnether.building.*;
@@ -14,24 +15,26 @@ import com.solegendary.reignofnether.building.buildings.placements.CustomBuildin
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.targeting.EntityTargetIndex;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
@@ -49,6 +52,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -63,6 +67,9 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -96,6 +103,8 @@ import static com.solegendary.reignofnether.blocks.BlockUtils.isLeafBlock;
 import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL;
 
 
 public class MiscUtil {
@@ -331,113 +340,55 @@ public class MiscUtil {
     }
 
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
-        Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
-        var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
-        AABB aabb = new AABB(
-                unitPosition.x - range,
-                unitPosition.y - range,
-                unitPosition.z - range,
-                unitPosition.x + range,
-                unitPosition.y + range,
-                unitPosition.z + range
-        );
-        var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
-        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
-        entities.sort(Comparator.comparingDouble(
-            e -> {
-                double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
-                boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer)
-                    dist += 100;
-                return dist;
-            }
-        ));
+        boolean isUnit = unitMob instanceof Unit;
+        String ownerName = isUnit ? ((Unit) unitMob).getOwnerName() : null;
+        Faction faction = isUnit ? Factions.getFaction((Unit) unitMob) : null;
+        boolean isMelee = unitMob instanceof AttackerUnit attacker &&
+                attacker.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
 
-        // Determine priority effect filter for specific unit types
-        Predicate<LivingEntity> priorityFilter = null;
+        Predicate<LivingEntity> preferred = null;
         if (unitMob instanceof BoggedUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffects.POISON);
+            preferred = entity -> !entity.hasEffect(MobEffects.POISON);
         } else if (unitMob instanceof WraithUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffectRegistrar.FEARFUL.get());
+            preferred = entity -> !entity.hasEffect(MobEffectRegistrar.FEARFUL.get());
         } else if (unitMob instanceof WitherSkeletonUnit) {
-            priorityFilter = e -> e.hasEffect(MobEffects.WITHER);
+            preferred = entity -> entity.hasEffect(MobEffects.WITHER);
         } else if (unitMob instanceof WindcallerUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffects.LEVITATION);
+            preferred = entity -> !entity.hasEffect(MobEffects.LEVITATION);
         }
 
-        Vec3 unitVec = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
-
-        Predicate<LivingEntity> baseFilter = e ->
-                e.position().distanceTo(unitVec) <= range &&
-                e.level().getWorldBorder().isWithinBounds(e.blockPosition());
-
-        // Try priority pass first, then fall back to base filter
-        List<Predicate<LivingEntity>> passes = priorityFilter != null
-                ? List.of(baseFilter.and(priorityFilter), baseFilter)
-                : List.of(baseFilter);
-
-        for (Predicate<LivingEntity> filter : passes) {
-            for (LivingEntity entity : entities) {
-                if (filter.test(entity) &&
-                        isIdleOrMoveAttackable(unitMob, entity, neutralAggro) &&
+        return EntityTargetIndex.get(level).findClosest(unitMob.position(), range,
+                group -> isAttackableGroup(group, isUnit, ownerName, faction, neutralAggro, unitMob instanceof GhastUnit),
+                preferred,
+                entity -> attackTargetPenalty(entity, isMelee),
+                entity -> entity.getId() != unitMob.getId() &&
+                        !(entity instanceof Player player && (player.isCreative() || player.isSpectator())) &&
+                        !(isMelee && entity instanceof Unit unit && unit.isFlyingUnit()) &&
+                        entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()) &&
                         hasLineOfSightForAttacks(unitMob, entity) &&
-                        !(entity instanceof Unit unit && unit.isGarrisoned())) {
-                    return entity;
-                }
-            }
-        }
-        return null;
+                        !(unitMob instanceof AttackerUnit attacker && attacker.isBelowMinAttackRange(entity)) &&
+                        !(entity instanceof Unit unit1 && unit1.isGarrisoned()));
     }
 
-    // does not cover explicit attack commands
-    private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro) {
-        Relationship rs = Relationship.NEUTRAL;
-        if (unitMob instanceof Unit) {
-            rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, targetEntity);
-
-            // don't aggro against blood moon enemies as a ghast so that buildings don't get friendly fired
-            if (targetEntity instanceof Unit targetUnit &&
-                    targetUnit.getOwnerName().equals(BloodMoon.ENEMY_NAME) &&
-                    unitMob instanceof GhastUnit)
-                return false;
-
-            // don't target vanilla units of the same faction
-            if (!(targetEntity instanceof Unit) && NonUnitServerEvents.getNonUnitFaction(targetEntity) == ((Unit) unitMob).getFaction())
-                return false;
+    // Owner/faction/type rules are evaluated once per group, before enumerating any of its entities.
+    private static boolean isAttackableGroup(EntityTargetIndex.TargetGroup group, boolean isUnit,
+                                             String ownerName, Faction faction, boolean neutralAggro,
+                                             boolean isGhast) {
+        if (isUnit) {
+            if (isGhast && group.unit() && BloodMoon.ENEMY_NAME.equals(group.ownerName())) return false;
+            if (!group.unit() && group.faction().equals(faction)) return false;
         }
-
-        if (targetEntity instanceof Player player && (player.isCreative() || player.isSpectator()))
-            return false;
-
-        // If the relationship is FRIENDLY, do not allow the attack
-        if (rs == Relationship.FRIENDLY)
-            return false;
-
-        // Prevents certain attacks based on specific unit and goal conditions
-        if (targetEntity instanceof Unit unit &&
-                unit.isFlyingUnit() &&
-                unitMob instanceof AttackerUnit attackerUnit &&
-                attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal) {
-            return false;
-        }
-        boolean isPassiveNonUnit = !(targetEntity instanceof Unit) &&
-                (targetEntity instanceof Animal || targetEntity instanceof AbstractFish || targetEntity instanceof Villager);
-
-
-
-        // Checks if neutral units can be attacked based on neutralAggro flag and other conditions
-        boolean canAttackNeutral =
-                rs == Relationship.NEUTRAL && neutralAggro &&
-                        !(targetEntity instanceof Vex) &&
-                        !(targetEntity instanceof ArmorStand) &&
-                        !(targetEntity instanceof PhantomSummon) &&
-                        !isPassiveNonUnit;
-
-        return (rs == Relationship.HOSTILE || canAttackNeutral) &&
-                targetEntity.getId() != unitMob.getId();
+        Relationship relationship = isUnit ? group.relationshipTo(ownerName) : Relationship.NEUTRAL;
+        return relationship == Relationship.HOSTILE ||
+                (relationship == Relationship.NEUTRAL && neutralAggro && group.neutralAttackable());
     }
 
+    private static double attackTargetPenalty(LivingEntity entity, boolean isMelee) {
+        return entity instanceof PhantomSummon || (entity instanceof Unit unit && unit.isScout()) ||
+                (isMelee && entity instanceof Unit unit1 && unit1.isFlyingUnit()) || entity instanceof BeeUnit ||
+                entity.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()) ? 100 : 0;
+    }
 
     public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range) {
         List<BuildingPlacement> buildings = unitMob.level().isClientSide() ?
@@ -722,16 +673,6 @@ public class MiscUtil {
             if (radius <= 0)
                 return new HashSet<>();
 
-            // skip rendering entirely if we are fully inside another circle
-            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
-                for (Pair<BlockPos, Integer> os : overlapSources) {
-                    Vec2 centre1 = new Vec2(center.getX(), center.getZ());
-                    Vec2 centre2 = new Vec2(os.getFirst().getX(), os.getFirst().getZ());
-                    int overlapRange = os.getSecond();
-                    if (!center.equals(os.getFirst()) && radius < overlapRange && centre1.distanceToSqr(centre2) < radius * radius)
-                        return Set.of();
-                }
-            }
             Set<BlockPos> circleBps = getCircle(center, radius);
 
             for (Pair<BlockPos, Integer> os : overlapSources) {
@@ -895,64 +836,6 @@ public class MiscUtil {
         );
     }
 
-    public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos) {
-        addParticleExplosion(particleType, amount, level, pos, 0.2f);
-    }
-
-    public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos, double velocityScale) {
-        RandomSource rand = RandomSource.create();
-        for (int j = 0; j < amount; ++j) {
-            double d0 = rand.nextGaussian() * velocityScale;
-            double d1 = rand.nextGaussian() * velocityScale;
-            double d2 = rand.nextGaussian() * velocityScale;
-            if (level.isClientSide()) {
-                level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
-            } else {
-                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 1, d0, d1, d2, 0);
-            }
-        }
-    }
-
-    // called for flying windcallers and levitating mobs
-    public static void spawnFlyingCloudParticles(Entity entity) {
-        double px = entity.getX();
-        double py = entity.getY();
-        double pz = entity.getZ();
-
-        // Spawn a loose ring of cloud puffs around the feet
-        int numPuffs = 1;
-        for (int i = 0; i < numPuffs; i++) {
-            double angle = (entity.tickCount * 0.25 + (Math.PI * 2.0 / numPuffs) * i) % (Math.PI * 2.0);
-            double radius = 0.3 + RANDOM.nextDouble() * 0.2;
-            double ox = Math.cos(angle) * radius;
-            double oz = Math.sin(angle) * radius;
-            double oy = -0.1 + RANDOM.nextDouble() * 0.1; // slightly below/at foot level
-
-            // Gentle upward and outward drift
-            double vx = ox * 0.015;
-            double vy = 0.005 + RANDOM.nextDouble() * 0.01;
-            double vz = oz * 0.015;
-
-            entity.level().addParticle(
-                    ParticleTypes.CLOUD,
-                    px + ox, py + oy, pz + oz,
-                    vx, vy, vz
-            );
-        }
-
-        // Occasional extra wisp for density variation
-        if (entity.tickCount % 10 == 0) {
-            double ox = (RANDOM.nextDouble() - 0.5) * 0.5;
-            double oz = (RANDOM.nextDouble() - 0.5) * 0.5;
-            entity.level().addParticle(
-                    ParticleTypes.CLOUD,
-                    px + ox, py - 0.05, pz + oz,
-                    0, 0.008, 0
-            );
-        }
-    }
-
-
     public static ResourceLocation getTextureForBlock(@NotNull Block block) {
         if (block == Blocks.COMMAND_BLOCK)
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
@@ -995,17 +878,7 @@ public class MiscUtil {
         return (calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) == 31) ||
                 (calendar.get(Calendar.MONTH) + 1 == 1 && calendar.get(Calendar.DATE) == 1);
     }
-
-    public static ResourceLocation getFactionIcon(Faction faction) {
-        return switch (faction) {
-            case VILLAGERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-            case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-            case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-            case RANDOM -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark_bg.png");
-            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
-        };
-    }
-
+    
     public static boolean isConnected() {
         return Minecraft.getInstance().getConnection() != null;
     }
@@ -1016,7 +889,7 @@ public class MiscUtil {
     }
 
     public static String getFactionName(Faction faction) {
-        return I18n.get(String.format("hud.faction.reignofnether.%s", faction.toString().toLowerCase()));
+        return I18n.get(String.format("hud.faction.reignofnether.%s", faction.getName()));
     }
 
     private record ColorEntry(int mapColorId, int hex, String englishName) {}
@@ -1065,5 +938,63 @@ public class MiscUtil {
             throw new IllegalArgumentException("List must not be null or empty");
         }
         return list.get(RANDOM.nextInt(list.size()));
+    }
+
+    public static <T> T getNextItem(List<T> list, T object) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("List must not be null or empty");
+        }
+        int index = list.indexOf(object);
+        return index == -1 ? list.get(0) : list.get((index + 1) % list.size());
+    }
+
+    public static <T> T getLastItem(List<T> list, T object) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("List must not be null or empty");
+        }
+        int index = list.indexOf(object);
+        return index == -1 ? list.get(0) : list.get((index - 1 + list.size()) % list.size());
+    }
+
+    public static String getAttrString(Attribute attr, AttributeModifier modifier) {
+        String descId = attr.getDescriptionId();
+        boolean isMoveSpeed = attr == Attributes.MOVEMENT_SPEED;
+        if (isMoveSpeed) {
+            descId = "attribute.reignofnether.tooltip.movement_speed";
+        }
+        String attrName = Component.translatable(descId).getString();
+
+        boolean isPercentStat = List.of(
+                AttributeRegistrar.EVASION_CHANCE.get(),
+                AttributeRegistrar.CRITICAL_HIT_CHANCE.get(),
+                AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
+                AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
+                AttributeRegistrar.LIFESTEAL.get(),
+                AttributeRegistrar.MANA_ON_HIT.get(),
+                AttributeRegistrar.FASTER_COOLDOWNS.get()
+        ).contains(attr);
+
+        String valueStr;
+        if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isPercentStat) {
+            valueStr = formatSigned((int) (modifier.getAmount() * 100)) + "%";
+        } else {
+            valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
+        }
+        return valueStr + " " + attrName;
+    }
+
+    // drops trailing ".0" on whole numbers, always shows a sign
+    public static String formatSigned(double value) {
+        String num = (value == Math.floor(value))
+                ? String.valueOf((int) value)
+                : String.valueOf(value);
+        return (value >= 0 ? "+" : "") + num;
+    }
+
+    public static boolean isAlliedOrOwned(Level level, String owner1, String owner2) {
+        if (level.isClientSide())
+            return AlliancesClient.isAlliedOrOwned(owner1, owner2);
+        else
+            return AlliancesServerEvents.isAlliedOrOwned(owner1, owner2);
     }
 }

@@ -19,14 +19,13 @@ import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MountSpider extends Ability {
     public MountSpider() {
@@ -44,7 +43,7 @@ public class MountSpider extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_SPIDER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_SPIDER),
-            List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_spider"), Style.EMPTY)),
+            List.of(fcs(I18n.get("abilities.reignofnether.mount_spider"))),
             this,
             unit
         );

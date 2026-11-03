@@ -19,7 +19,7 @@ public class ArmouredHoglinUnit extends HoglinUnit implements Unit, AttackerUnit
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, HoglinUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, HoglinUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, HoglinUnit.maxHealth)
@@ -31,6 +31,7 @@ public class ArmouredHoglinUnit extends HoglinUnit implements Unit, AttackerUnit
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 1.0);
     }
 }

@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -176,9 +175,6 @@ public class WaveEnemy {
             attackMoveNearestUnit();
     }
 
-    // done when attacked
-    public void retaliateCommand() { }
-
     private BuildingPlacement getNearestAttackableBuilding() {
         List<BuildingPlacement> buildings = new ArrayList<>();
         for (BuildingPlacement buildingPlacement : BuildingServerEvents.getBuildings()) {
@@ -259,34 +255,6 @@ public class WaveEnemy {
             else
                 UnitServerEvents.addActionItem(unit.getOwnerName(), UnitAction.MOVE, -1,
                         new int[]{entity.getId()},  targetBp, new BlockPos(0,0,0));
-        }
-    }
-
-    private void attackMoveRandomBuilding() {
-        unit.resetBehaviours();
-
-        ArrayList<BuildingPlacement> buildings = BuildingServerEvents.getBuildings();
-        Collections.shuffle(buildings);
-
-        List<BuildingPlacement> playerBuildings = new ArrayList<>();
-        for (BuildingPlacement b : buildings) {
-            if (!SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank()) {
-                playerBuildings.add(b);
-            }
-        }
-
-        BlockPos targetBp = null;
-        if (!playerBuildings.isEmpty())
-            targetBp = buildings.get(0).getClosestGroundPos(((Entity) unit).getOnPos(), 1);
-
-
-        if (targetBp != null) {
-            if (unit instanceof AttackerUnit)
-                UnitServerEvents.addActionItem(unit.getOwnerName(), UnitAction.ATTACK_MOVE, -1,
-                        new int[]{((Entity) unit).getId()},  targetBp, new BlockPos(0,0,0));
-            else
-                UnitServerEvents.addActionItem(unit.getOwnerName(), UnitAction.MOVE, -1,
-                        new int[]{((Entity) unit).getId()},  targetBp, new BlockPos(0,0,0));
         }
     }
 

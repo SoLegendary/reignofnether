@@ -31,6 +31,10 @@ public class Ability {
     public boolean isAutocasting(BuildingPlacement placement) { return placement.hasAutocast(this); }
     protected Keybinding defaultHotkey = Keybindings.abilitySlot1;
 
+    public boolean showRangeLine = false;
+    public boolean showRadiusCircle = false;
+    public boolean showRangeCircle = true;
+
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         this.action = action;
         this.cooldownMax = cooldownMax;
@@ -85,8 +89,8 @@ public class Ability {
 
     public void setToMaxCooldown(Unit unit) {
         unit.setCooldown(this, cooldownMax);
-        if (usesCharges() && unit.getCharges(this) > 0)
-            unit.setCharges(this, unit.getCharges(this) - 1);
+        if (usesCharges() && unit.getAbilityCharges(this) > 0)
+            unit.setCharges(this, unit.getAbilityCharges(this) - 1);
     }
 
     public void setToMaxCooldown(BuildingPlacement building) {
@@ -104,8 +108,8 @@ public class Ability {
             HudClientEvents.setLowestCdHudEntity();
         }
         unit.setCooldown(this, Math.min(cooldown, cooldownMax));
-        if (useCharge && usesCharges() && unit.getCharges(this) > 0)
-            unit.setCharges(this, unit.getCharges(this) - 1);
+        if (useCharge && usesCharges() && unit.getAbilityCharges(this) > 0)
+            unit.setCharges(this, unit.getAbilityCharges(this) - 1);
     }
 
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) { }
@@ -146,7 +150,7 @@ public class Ability {
     }
 
     public int getCharges(Unit unit) {
-        return unit.getCharges(this);
+        return unit.getAbilityCharges(this);
     }
 
     public int getCharges(BuildingPlacement placement) {

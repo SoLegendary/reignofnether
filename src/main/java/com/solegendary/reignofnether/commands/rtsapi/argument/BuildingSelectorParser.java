@@ -306,7 +306,7 @@ public class BuildingSelectorParser {
 		suggestionsbuilder.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allBuilding"));
 		suggestionsbuilder.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomBuilding"));
 		suggestionsbuilder.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestBuilding"));
-		suggestionsbuilder.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.currentLocationBuilding")); //TODO: player?
+		suggestionsbuilder.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.currentLocationBuilding"));
 		p_121323_.add(suggestionsbuilder);
 		return p_121323_.buildFuture();
 	}

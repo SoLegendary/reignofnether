@@ -12,12 +12,11 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchOverflowingGraveyard extends ProductionItem {
 
@@ -49,14 +48,14 @@ public class ResearchOverflowingGraveyard extends ProductionItem {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_overflowing_graveyard"), Style.EMPTY.withBold(true)),
+                fcs(I18n.get("research.reignofnether.research_overflowing_graveyard"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip1", Graveyard.OVERFLOW_AMOUNT), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip3"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip1", Graveyard.OVERFLOW_AMOUNT)),
+                fcs(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_overflowing_graveyard.tooltip3"))
             ),
             this
         );

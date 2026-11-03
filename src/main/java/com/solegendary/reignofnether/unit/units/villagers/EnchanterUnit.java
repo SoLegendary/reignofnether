@@ -6,11 +6,14 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.*;
-import com.solegendary.reignofnether.building.RangeIndicator;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -30,20 +33,19 @@ import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimatio
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -62,19 +64,24 @@ import org.jetbrains.annotations.NotNull;
 import oshi.util.tuples.Pair;
 
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
-        List.of(
-            new Pair<>(new CivilEnchantment(), Keybindings.abilitySlot1),
-            new Pair<>(new MartialEnchantment(), Keybindings.abilitySlot2),
-            new Pair<>(new ProtectiveEnchantment(), Keybindings.abilitySlot3),
-            new Pair<>(new MarchOfProgress(), Keybindings.abilitySlot4)
-        )
+            List.of(
+                    new Pair<>(new EnchantedTether(), Keybindings.abilitySlot1),
+                    new Pair<>(new MartialEnchantment(), Keybindings.abilitySlot2),
+                    new Pair<>(new ProtectiveEnchantment(), Keybindings.abilitySlot3),
+                    new Pair<>(new MarchOfProgress(), Keybindings.abilitySlot4)
+            )
     );
 
     boolean needsStatSync = false;
@@ -93,10 +100,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
     Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
@@ -123,7 +130,6 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
     public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -137,8 +143,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
-    private GenericTargetedSpellGoal castEnchantCivilGoal;
-    public GenericTargetedSpellGoal getCastEnchantCivilGoal() { return castEnchantCivilGoal; }
+    private GenericTargetedSpellGoal castEnchantedTetherGoal;
+    public GenericTargetedSpellGoal getCastEnchantedTetherGoal() { return castEnchantedTetherGoal; }
     private GenericTargetedSpellGoal castEnchantMilitaryGoal;
     public GenericTargetedSpellGoal getCastEnchantMartialGoal() { return castEnchantMilitaryGoal; }
     private GenericTargetedSpellGoal castEnchantProtectiveGoal;
@@ -164,7 +170,18 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.STRING);
@@ -174,11 +191,11 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.INT);
-    
+
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
     public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
-        SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.STRING);
 
     public boolean isAuraEnabled() { return this.entityData.get(auraEnabledAccessor); }
     public void setAuraEnabled(boolean value) { this.entityData.set(auraEnabledAccessor, value); }
@@ -273,9 +290,16 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     private static final float AUTOCAST_ENCHANT_RANGE = 15;
     private static final int ENCHANT_EXP = 40;
 
+    // tether bonus ratios (fraction of the enchanter's attack damage and item bonuses given to tethered units)
+    private static final double TETHER_BONUS_RATIO = 1.0d;
+    private static final double TETHER_BONUS_RATIO_AMPLIFIED = 1.5d;
+    private static final String TETHER_ITEM_MOD_PREFIX = "reignofnether:tether_item:";
+
     // non-looping animations
     public AnimationDefinition activeAnimDef = null;
     public AnimationState activeAnimState = null;
+
+    public boolean renderTether = true; // temporarily turned off during portrait rendering
 
     public void stopAllAnimations() {
         idleAnimState.stop();
@@ -290,6 +314,13 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public boolean animateScaleReducing = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
+
+    public final Set<LivingEntity> tetheredEntities = new HashSet<>();
+
+    private record TetherItemMod(Attribute attribute, double amount, AttributeModifier.Operation operation) {}
+
+    // target entity UUID -> attributes we have put tether item modifiers on (so stale ones can be cleaned up)
+    private final Map<UUID, Set<Attribute>> tetherItemAttributes = new ConcurrentHashMap<>();
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
         animateScaleReducing = false;
@@ -341,7 +372,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, EnchanterUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, EnchanterUnit.attackDamage)
                 .add(Attributes.ARMOR, EnchanterUnit.armorValue)
@@ -354,7 +385,6 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
@@ -375,8 +405,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             animateTicks -= 1;
         }
         this.castEnchantMilitaryGoal.tick();
-        this.castEnchantCivilGoal.tick();
         this.castEnchantProtectiveGoal.tick();
+        this.castEnchantedTetherGoal.tick();
         this.castAuraGoal.tick();
 
         BlockPos targetBp = castEnchantMilitaryGoal.getCastTarget();
@@ -406,7 +436,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                     SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_AMBIENT, blockPosition(), 1.5f);
                     for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), MarchOfProgress.RADIUS, Mob.class, level())) {
                         if (UnitServerEvents.getUnitToEntityRelationship(this, mob) == Relationship.FRIENDLY &&
-                            mob instanceof Unit unit && unit.hasAnyEnchants()) {
+                                mob instanceof Unit unit && (unit.hasAnyEnchants() || tetheredEntities.contains(mob))) {
                             mob.addEffect(new MobEffectInstance(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(), 30, 0, true, false));
                         }
                     }
@@ -418,7 +448,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             List<Mob> mobs = MiscUtil.getEntitiesWithinRange(position(), MarchOfProgress.RADIUS, Mob.class, level());
             for (Mob mob : mobs) {
                 if (mob.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) ||
-                    mob.hasEffect(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
+                        mob.hasEffect(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
                     level().addParticle(
                             ParticleRegistrar.BIG_ENCHANT.get(),
                             mob.position().x,
@@ -433,26 +463,199 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
+
+        if (tickCount % 20 == 0 && !level().isClientSide())
+            updateTetheredEntities();
+    }
+
+    public Set<LivingEntity> getTetheredEntities() {
+        return tetheredEntities;
+    }
+
+    public void updateTetheredEntities() {
+        boolean removed = false;
+        synchronized (tetheredEntities) {
+            tetheredEntities.forEach(e -> {
+                if (e.distanceTo(this) > EnchantedTether.BREAK_RANGE)
+                    e.removeEffect(MobEffectRegistrar.ENCHANTED_TETHER.get());
+            });
+            removed = tetheredEntities.removeIf(e -> {
+                boolean mismatch = e.getPersistentData().getInt("lastTetherSourceId") != getId();
+                boolean lost = e.isRemoved() || !e.isAlive() || mismatch
+                        || !e.hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get());
+                if (lost) {
+                    if (!mismatch) removeTetherBonuses(e);
+                    AbilityClientboundPacket.doAbility(getId(), UnitAction.ENCHANTED_TETHER_REMOVE, e.getId());
+                }
+                return lost;
+            });
+            tetheredEntities.forEach(this::updateTetherBonuses);
+        }
+        if (removed) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_DEACTIVATE, blockPosition(), 1.5f);
+        }
+        for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), EnchantedTether.BREAK_RANGE, Mob.class, level())) {
+            CompoundTag tag = mob.getPersistentData();
+            if (mob instanceof Unit unit && mob.hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get()) &&
+                    tag.contains("lastTetherSourceId") && tag.getInt("lastTetherSourceId") == getId() &&
+                    MiscUtil.isAlliedOrOwned(level(), getOwnerName(), unit.getOwnerName())) {
+                tetheredEntities.add(mob);
+                AbilityClientboundPacket.doAbility(getId(), UnitAction.ENCHANTED_TETHER, mob.getId());
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Tether bonuses: tethered units get a fraction of the enchanter's attack damage and held item
+    // bonuses (50%, or 75% if the target has the enchantment amplifier effect).
+    // ---------------------------------------------------------------------------------------------
+
+    private double getTetherBonusRatio(LivingEntity target) {
+        return target.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())
+                ? TETHER_BONUS_RATIO_AMPLIFIED
+                : TETHER_BONUS_RATIO;
+    }
+
+    private void updateTetherBonuses(LivingEntity target) {
+        updateTetherAttackBonus(target);
+        updateTetherItemBonuses(target);
+    }
+
+    private void removeTetherBonuses(LivingEntity target) {
+        AttributeInstance inst = target.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        if (inst != null)
+            inst.removeModifier(MobEffectRegistrar.ENCHANTED_TETHER_UUID);
+        removeTetherItemBonuses(target);
+    }
+
+    private void updateTetherAttackBonus(LivingEntity target) {
+        AttributeInstance inst = target.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        if (inst == null) return;
+
+        double bonus = this.getUnitAttackDamage() * getTetherBonusRatio(target);
+        AttributeModifier existing = inst.getModifier(MobEffectRegistrar.ENCHANTED_TETHER_UUID);
+        if (existing != null) {
+            if (existing.getAmount() == bonus) return; // already up to date
+            inst.removeModifier(MobEffectRegistrar.ENCHANTED_TETHER_UUID);
+        }
+        inst.addTransientModifier(new AttributeModifier(
+                MobEffectRegistrar.ENCHANTED_TETHER_UUID,
+                "Enchanted Tether attack damage",
+                bonus,
+                AttributeModifier.Operation.ADDITION
+        ));
+    }
+
+    private static UUID deriveTetherModifierUUID(UUID itemUuid, int modifierIndex) {
+        return UUID.nameUUIDFromBytes(("tether:" + itemUuid + "#" + modifierIndex).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void updateTetherItemBonuses(LivingEntity target) {
+        double ratio = getTetherBonusRatio(target);
+
+        // work out what the target should currently have, based on the enchanter's held items
+        Map<UUID, TetherItemMod> desired = new HashMap<>();
+        Set<Attribute> nonStackableApplied = new HashSet<>();
+
+        for (ItemStack stack : ((UnitInventory) this).getAllItems()) {
+            if (stack.isEmpty()) continue;
+            UnitItem unitItem = ItemUtil.getUnitItem(stack);
+            CompoundTag tag = stack.getTag();
+            if (unitItem == null || unitItem.attributes.isEmpty() || tag == null || !tag.hasUUID("uuid"))
+                continue;
+
+            UUID itemUuid = tag.getUUID("uuid");
+            int i = 0;
+            for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
+                Attribute attr = entry.getKey();
+                AttributeModifier modifier = entry.getValue();
+                int index = i++;
+
+                // attack damage is already covered by the tether's own attack bonus (avoids double counting)
+                if (attr == AttributeRegistrar.ATTACK_DAMAGE.get() || attr == Attributes.ATTACK_DAMAGE)
+                    continue;
+
+                // same non-stacking rules as ron$applyItemAttributes
+                boolean nonStackable = attr == Attributes.MOVEMENT_SPEED || attr == AttributeRegistrar.EVASION_CHANCE.get();
+                if (!nonStackable || nonStackableApplied.add(attr)) {
+                    desired.put(deriveTetherModifierUUID(itemUuid, index), new TetherItemMod(
+                            attr,
+                            modifier.getAmount() * ratio,
+                            modifier.getOperation()
+                    ));
+                }
+            }
+        }
+
+        // remove modifiers that are stale or have changed amount
+        Set<Attribute> previous = tetherItemAttributes.getOrDefault(target.getUUID(), Set.of());
+        Set<Attribute> touched = new HashSet<>(previous);
+        desired.values().forEach(m -> touched.add(m.attribute()));
+
+        for (Attribute attr : touched) {
+            AttributeInstance inst = target.getAttribute(attr);
+            if (inst == null) continue;
+            for (AttributeModifier mod : new ArrayList<>(inst.getModifiers())) {
+                if (!mod.getName().startsWith(TETHER_ITEM_MOD_PREFIX)) continue;
+                TetherItemMod want = desired.get(mod.getId());
+                if (want == null || want.attribute() != attr ||
+                        want.amount() != mod.getAmount() || want.operation() != mod.getOperation()) {
+                    inst.removeModifier(mod.getId());
+                }
+            }
+        }
+
+        // add anything missing
+        int n = 0;
+        for (Map.Entry<UUID, TetherItemMod> entry : desired.entrySet()) {
+            TetherItemMod m = entry.getValue();
+            AttributeInstance inst = target.getAttribute(m.attribute());
+            if (inst != null && inst.getModifier(entry.getKey()) == null) {
+                inst.addTransientModifier(new AttributeModifier(
+                        entry.getKey(), TETHER_ITEM_MOD_PREFIX + (n++), m.amount(), m.operation()));
+            }
+        }
+
+        if (desired.isEmpty()) {
+            tetherItemAttributes.remove(target.getUUID());
+        } else {
+            Set<Attribute> now = new HashSet<>();
+            desired.values().forEach(m -> now.add(m.attribute()));
+            tetherItemAttributes.put(target.getUUID(), now);
+        }
+    }
+
+    private void removeTetherItemBonuses(LivingEntity target) {
+        Set<Attribute> attrs = tetherItemAttributes.remove(target.getUUID());
+        if (attrs == null) return;
+        for (Attribute attr : attrs) {
+            AttributeInstance inst = target.getAttribute(attr);
+            if (inst == null) continue;
+            for (AttributeModifier mod : new ArrayList<>(inst.getModifiers())) {
+                if (mod.getName().startsWith(TETHER_ITEM_MOD_PREFIX))
+                    inst.removeModifier(mod.getId());
+            }
+        }
+        if (target.getHealth() > target.getMaxHealth())
+            target.setHealth(target.getMaxHealth());
     }
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
+        this.runOnDeathCommand(pReason);
+        if (!this.level().isClientSide() && !tetheredEntities.isEmpty()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_DEACTIVATE, blockPosition(), 1.5f);
+        }
+        synchronized (tetheredEntities) {
+            tetheredEntities.forEach(le -> {
+                removeTetherBonuses(le);
+                le.removeEffect(MobEffectRegistrar.ENCHANTED_TETHER.get());
+            });
+            tetheredEntities.clear();
         }
         super.remove(pReason);
     }
@@ -463,17 +666,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
-    @Override public void updateHighlightBps() {
+    @Override
+    public void updateHighlightBps(Level level) {
+        RangeIndicator.super.updateHighlightBps(level());
         if (level().isClientSide()) {
-            highlightBps.clear();
-            for (Ability ability : getAbilities().get()) {
-                if (CursorClientEvents.getLeftClickAction() == ability.action) {
-                    setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
-                            (int) (ability.range - 1),
-                            level()
-                    ));
-                }
-            }
             if (isAuraEnabled()) {
                 int radius = MarchOfProgress.RADIUS;
                 this.highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
@@ -517,12 +713,12 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.castEnchantCivilGoal = new GenericTargetedSpellGoal(
+        this.castEnchantProtectiveGoal = new GenericTargetedSpellGoal(
                 this,
                 0,
                 10,
                 UnitAnimationAction.CAST_SPELL,
-                this::enchantCivilian,
+                this::enchantArmour,
                 null,
                 null
         );
@@ -535,12 +731,12 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                 null,
                 null
         );
-        this.castEnchantProtectiveGoal = new GenericTargetedSpellGoal(
+        this.castEnchantedTetherGoal = new GenericTargetedSpellGoal(
                 this,
                 0,
                 10,
                 UnitAnimationAction.CAST_SPELL,
-                this::enchantArmour,
+                this::tether,
                 null,
                 null
         );
@@ -578,7 +774,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void resetBehaviours() {
         animateScaleReducing = true;
         this.castEnchantMilitaryGoal.stop();
-        this.castEnchantCivilGoal.stop();
+        this.castEnchantProtectiveGoal.stop();
         this.castAuraGoal.stop();
     }
 
@@ -631,12 +827,15 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             if (entity instanceof WindcallerUnit windcallerUnit) {
                 windcallerUnit.updateFlyingStates(false);
             }
+            if (entity instanceof PillagerUnit pillagerUnit) {
+                pillagerUnit.unloadCrossbow();
+            }
         }
         if (!level().isClientSide)
             playEnchantSound();
 
-        if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
-            addExperience(ENCHANT_EXP);
+        //if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
+        //    addExperience(ENCHANT_EXP);
     }
 
     public void enchantArmour(LivingEntity entity) {
@@ -645,14 +844,63 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         entity.getItemBySlot(EquipmentSlot.CHEST).enchant(EnchantmentRegistrar.FORTYIFYING.get(), 1);
         playEnchantSound();
 
-        if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
-            addExperience(ENCHANT_EXP);
+        //if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
+        //    addExperience(ENCHANT_EXP);
+    }
+
+    // clientside
+    public void tether(int id, boolean add) {
+        Entity entity = level().getEntity(id);
+        synchronized (tetheredEntities) {
+            if (entity instanceof LivingEntity le) {
+                if (add) {
+                    tetheredEntities.add(le);
+                } else {
+                    tetheredEntities.remove(le);
+                }
+            }
+        }
+    }
+
+    public void tether(LivingEntity entity) {
+        if (level().isClientSide) return;
+
+        MobEffectInstance mei = entity.getEffect(MobEffectRegistrar.ENCHANTED_TETHER.get());
+        if (mei != null && mei.getDuration() > 200) {
+            HudClientboundPacket.showTempMessageI18n(getOwnerName(), "abilities.reignofnether.enchanted_tether.error1");
+            return;
+        }
+        if (!(entity instanceof Unit unit) || !AlliancesServerEvents.isAlliedOrOwned(getOwnerName(), unit.getOwnerName()) || entity instanceof HeroUnit) {
+            HudClientboundPacket.showTempMessageI18n(getOwnerName(), "abilities.reignofnether.enchanted_tether.error2");
+            return;
+        }
+        entity.addEffect(new MobEffectInstance(MobEffectRegistrar.ENCHANTED_TETHER.get(), EnchantedTether.DURATION_SECONDS * 20));
+        entity.getPersistentData().putInt("lastTetherSourceId", getId());
+        synchronized (tetheredEntities) {
+            tetheredEntities.add(entity);
+        }
+        SoundClientboundPacket.playSoundAtPos(SoundAction.ENCHANTERS_TOME, blockPosition(), 1.5f);
+        AbilityClientboundPacket.doAbility(getId(), UnitAction.ENCHANTED_TETHER, entity.getId());
+    }
+
+    public float getBeamAlpha(LivingEntity le) {
+        MobEffectInstance mei = le.getEffect(MobEffectRegistrar.ENCHANTED_TETHER.get());
+        if (mei != null) {
+            if (mei.getDuration() < 100) {
+                return MiscUtil.getOscillatingFloat(0, 1.0, 0, 500);
+            } if (mei.getDuration() < 200) {
+                return MiscUtil.getOscillatingFloat(0, 1.0, 0, 1000);
+            } else {
+                return 1.0f;
+            }
+        }
+        return 0f;
     }
 
     public void toggleAura() {
         setAuraEnabled(!isAuraEnabled());
         if (level().isClientSide) {
-            updateHighlightBps();
+            updateHighlightBps(level());
         } else {
             if (isAuraEnabled()) {
                 AbilityClientboundPacket.doAbility(getId(), UnitAction.MARCH_OF_PROGRESS_SET, 1f);

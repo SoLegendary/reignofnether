@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.gamerules;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -35,11 +36,13 @@ public class GameruleClient {
     public static boolean slantedBuilding = true;
     public static int allowedHeroes = 2;
     public static boolean lockAlliances = false;
+    public static boolean hideEnemyPicks = true;
     public static boolean scenarioMode = false;
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
     public static boolean rtsPathfinding = false; // only for GUI
     public static int animalSpawnYDiff = 5;
+    public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_SAME_RARITY;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -168,6 +171,10 @@ public class GameruleClient {
                 () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
                 I18n.get("commands.reignofnether.gamerule.lock_alliances")
         ));
+        buttons.add(new GameruleBooleanButton("hideEnemyPicks", hideEnemyPicks,
+                () -> GameruleServerboundPacket.setHideEnemyPicks(!hideEnemyPicks),
+                I18n.get("commands.reignofnether.gamerule.hide_enemy_picks")
+        ));
         buttons.add(new GameruleBooleanButton("coopMode", coopMode,
                 () -> GameruleServerboundPacket.setCoopMode(!coopMode),
                 I18n.get("commands.reignofnether.gamerule.coop_mode")
@@ -250,20 +257,25 @@ public class GameruleClient {
                 fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
             )
         ));
-        buttons.add(new GameruleIntegerButton("animalSpawnYDiff: " + Math.round(animalSpawnYDiff),
-            () -> {
-                int value = Math.min(100, animalSpawnYDiff + (Keybindings.shiftMod.isDown() ? 5 : 1));
-                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
-            },
-            () -> {
-                int value = Math.max(1, animalSpawnYDiff - (Keybindings.shiftMod.isDown() ? 5 : 1));
-                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
-            },
-            List.of(
-                    fcs(I18n.get("commands.reignofnether.gamerule.animal_spawn_y_diff")),
-                    fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                    fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-            )
+        buttons.add(new GameruleIntegerButton("randomItemDrops: " + Math.round(randomItemDrops.getValue()),
+                () -> {
+                    int value = randomItemDrops.getValue() + 1;
+                    if (value > 3) value = 0;
+                    GameruleServerboundPacket.setRandomItemDrops(value);
+                },
+                () -> {
+                    int value = randomItemDrops.getValue() - 1;
+                    if (value < 0) value = 3;
+                    GameruleServerboundPacket.setRandomItemDrops(value);
+                },
+                List.of(
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point1")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point2")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point3")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point4")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point5"))
+                )
         ));
 
         int height = (buttons.size() * 18) - 12;

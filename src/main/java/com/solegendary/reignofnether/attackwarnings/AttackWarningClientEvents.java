@@ -9,15 +9,14 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class AttackWarningClientEvents {
 
@@ -51,8 +50,8 @@ public class AttackWarningClientEvents {
                 lastAttackPos = null;
             },
             List.of(
-                FormattedCharSequence.forward(I18n.get("attack_warning.reignofnether.go_to"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("attack_warning.reignofnether.ignore"), Style.EMPTY)
+                fcs(I18n.get("attack_warning.reignofnether.go_to")),
+                fcs(I18n.get("attack_warning.reignofnether.ignore"))
             )
         );
     }

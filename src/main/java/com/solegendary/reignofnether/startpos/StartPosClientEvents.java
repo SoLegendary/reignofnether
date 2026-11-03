@@ -3,17 +3,15 @@ package com.solegendary.reignofnether.startpos;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
-import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -21,36 +19,43 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class StartPosClientEvents {
 
     // client player is considered to have reserved a spot if selectedFaction != NONE && startPosIndex >= 0
     public static ArrayList<StartPos> startPoses = new ArrayList<>();
-    public static Faction selectedFaction = Faction.NONE;
+    public static Faction selectedFaction = Factions.NONE;
     public static boolean isStarting = false; // game is counting down to start
+    // players on other teams whose seats the server hides (hideEnemyPicks): name -> ready
+    public static final Map<String, Boolean> hiddenPlayers = new LinkedHashMap<>();
 
     public static boolean isEnabled() {
         return ClientGameModeHelper.gameMode == GameMode.CLASSIC && !startPoses.isEmpty();
     }
 
     public static void setPlayerReady(String playerName, boolean ready) {
+        boolean changed = false;
         for (StartPos startPos : startPoses) {
-            if (startPos.playerName.equals(playerName)) {
-                if (startPos.ready != ready) {
-                    startPos.ready = ready;
-                    if (MC.player != null) {
-                        if (startPos.ready) {
-                            MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_ready",
-                                    playerName, getNumPlayersReady(), getNumEnabledPoses()));
-                        } else {
-                            MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_not_ready", playerName));
-                        }
-                    }
-                }
+            if (startPos.playerName.equals(playerName) && startPos.ready != ready) {
+                startPos.ready = ready;
+                changed = true;
+            }
+        }
+        Boolean hiddenReady = hiddenPlayers.get(playerName);
+        if (hiddenReady != null && hiddenReady != ready) {
+            hiddenPlayers.put(playerName, ready);
+            changed = true;
+        }
+        if (changed && MC.player != null) {
+            if (ready) {
+                MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_ready",
+                        playerName, getNumPlayersReady(), getNumEnabledPoses()));
+            } else {
+                MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_not_ready", playerName));
             }
         }
     }
@@ -62,7 +67,7 @@ public class StartPosClientEvents {
                 if (!startPos.enabled) {
                     startPos.playerName = "";
                     startPos.ready = false;
-                    startPos.faction = Faction.NONE;
+                    startPos.faction = Factions.NONE;
                 }
             }
         }
@@ -72,78 +77,28 @@ public class StartPosClientEvents {
         return getPos() != null;
     }
 
-    private static boolean isReady() {
-        for (StartPos startPos : startPoses) {
-            if (MC.player != null && MC.player.getName().getString().equals(startPos.playerName) && startPos.ready) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static Button getReadyButton() {
-        return new Button("Ready",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> false,
-                () -> !isEnabled() || isStarting || isReady(),
-                () -> hasReservedPos() && selectedFaction != Faction.NONE,
-                () -> {
-                    if (MC.player != null)
-                        StartPosServerboundPacket.readyPlayer(MC.player.getName().getString());
-                },
-                null,
-                getReadyButtonTooltip()
-        );
-    }
-
     private static int getNumPlayersReady() {
         int readyPlayers = 0;
         for (StartPos startPose : startPoses)
-            if (startPose.faction != Faction.NONE && startPose.ready && !startPose.playerName.isBlank())
+            if (startPose.faction != Factions.NONE && startPose.ready && !startPose.playerName.isBlank())
+                readyPlayers++;
+        for (boolean ready : hiddenPlayers.values())
+            if (ready)
                 readyPlayers++;
         return readyPlayers;
     }
     private static int getNumEnabledPoses() {
-        int enabledPoses = 0;
-        for (StartPos startPose : startPoses)
+        // hidden seats are sent without their player, who is counted in hiddenPlayers instead
+        int enabledPoses = hiddenPlayers.size();
+        for (StartPos startPose : startPoses) {
             if (startPose.enabled)
                 enabledPoses++;
+            if (startPose.hidden)
+                enabledPoses--;
+        }
         return enabledPoses;
     }
 
-    private static List<FormattedCharSequence> getReadyButtonTooltip() {
-        ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
-        fcsList.add(fcs(I18n.get("startpos.reignofnether.ready_button.ready"), true));
-        if (!hasReservedPos())
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_reserved_pos")));
-        if (selectedFaction == Faction.NONE)
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_faction")));
-        return fcsList;
-    }
-
-
-    public static Button getUnreadyButton() {
-        return new Button("Unready",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> false,
-                () -> !isEnabled() || !isReady(),
-                () -> true,
-                () -> {
-                    if (MC.player != null)
-                        StartPosServerboundPacket.unreadyPlayer(MC.player.getName().getString());
-                },
-                null,
-                List.of(
-                        fcs(I18n.get("startpos.reignofnether.ready_button.unready"), true)
-                )
-        );
-    }
 
     public static StartPos getPos() {
         for (StartPos startPos : startPoses)
@@ -163,7 +118,7 @@ public class StartPosClientEvents {
     public static void onChangeGamemode(PlayerEvent.PlayerChangeGameModeEvent evt) {
         StartPos startPos = getPos();
         if (evt.getEntity() == MC.player && startPos != null && MC.player != null) {
-            selectedFaction = Faction.NONE;
+            selectedFaction = Factions.NONE;
             StartPosServerboundPacket.unreservePos(startPos.pos);
         }
     }
@@ -176,13 +131,8 @@ public class StartPosClientEvents {
             return;
 
         for (StartPos startPos : startPoses) {
-            if (startPos.faction != Faction.NONE) {
-                Building capitolBuilding = null;
-                switch (startPos.faction) {
-                    case VILLAGERS -> capitolBuilding = Buildings.TOWN_CENTRE;
-                    case MONSTERS -> capitolBuilding = Buildings.MAUSOLEUM;
-                    case PIGLINS -> capitolBuilding = Buildings.CENTRAL_PORTAL;
-                }
+            if (startPos.faction != Factions.NONE) {
+                Building capitolBuilding = startPos.faction.getBuilding(startPos.faction.capitolBuilding);
                 int forceColour = 2;
                 if (startPos.playerName.equals(MC.player.getName().getString()))
                     forceColour = 1;
@@ -199,8 +149,9 @@ public class StartPosClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
 
     public static void resetAll() {
-        selectedFaction = Faction.NONE;
+        selectedFaction = Factions.NONE;
         isStarting = false;
+        hiddenPlayers.clear();
         for (StartPos startPos : startPoses)
             startPos.reset();
     }

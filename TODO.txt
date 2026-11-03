@@ -1,57 +1,31 @@
 
-1.20.1-1.4.4c
+1.20.1-1.5.1b
 
-[✔] Done and tested
+[✅] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
 
-
-
-Hero Items
-----------
-Emerald Resource
-    [❌] Market trading all has to go via emeralds
-    [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
-    [❌] Used to buy items from shops
-    [❌] Show in top left if you have any
-    [❌] Neutrals now give emerald bounties
-
-Shops
-    [❌] Custom Item Shops
-        - Items placed in container blocks in a custom building's structure stocks that building as a shop
-        - Custom tags:
-            - Max Stock
-            - Restock
-            - Buy cooldown
-
-Unit Items
-    [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        [❌] Should be visible to all players
-    [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
-
-    [❌] Mana costs
-    [❌] Cooldown
-        - Tie cooldown to item slot and prevent inventory actions on that slot if there is a cooldown active
-    [❌] Attribute modifiers
-        - Ensure attack animations match bonus attack speeds
-
-
 Balance
 -------
-[❌] Slimes and magma cubes now roll on attack too
-[❌] Add roof to dark watchtower
-
 
 Quality of Life
 ---------------
-[❌] Create a new homing projectile entity from the ground up
-
+[✅] Custom item shops now reset to their original starting stock when a match begins
+[✅] Units holding resources are prioritised towards the front of a group selection
+[✅] The Royal Guard's ultimate is no longer cancellable or interruptable
+[✅] The Lilypad sponsorship has ended so its banners have been removed
 
 Bugfixes
 --------
-[❌] Units don't show clientside population until loaded the first time
-[❌] Grass blocks are tinted weirdly even when fog of war is off
+[✅] Fixed wardens and iron golems not showing picked up items
+[✅] Fixed custom production items not working on server worlds
+[✅] The gamerules menu no longer overlaps with the beacon button in sandbox
+[✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
+[✅] Fixed units getting stuck on lanterns and rails
+[✅] Fixed pocket portals not working in classic mode
+[✅] Fixed wraith snow not causing attack speed reduction
 
 Languages
 ---------
+

@@ -1,0 +1,32 @@
+
+[✔] Done and tested
+[🟡] Partially done and/or needs testing
+[❌] Not done, including unmerged PRs
+
+
+Passives
+--------
+
+
+Actives
+-------
+
+
+Later ideas:
+------------
+
+Enchanted grass (epic): transform an enemy into a sheep for 10s, disarming them and causing them to take 2x damage and move slower
+            (half duration on heroes)
+
+Eye of Ender - hangs in the air and reveals a location for 2mins
+
+Scroll of Recall ++ (building-targeted, consumable)  - Channel for a few seconds to teleport your hero and all nearby friendly units back to the targeted capitol building
+
+Orbs for each faction
+    - Particle effects on hit
+    - Custom projectiles for ranged heroes
+
+Staff of Purging / Devour Magic?
+
+Vanilla items:
+    - Book of Knowledge (to level up)

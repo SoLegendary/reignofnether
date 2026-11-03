@@ -3,16 +3,17 @@ package com.solegendary.reignofnether.player;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
 import com.solegendary.reignofnether.survival.WaveDifficulty;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
@@ -33,6 +34,7 @@ import java.util.function.Supplier;
 
 public class PlayerServerboundPacket {
     PlayerAction action;
+    public Faction faction;
     public int playerId;
     public double x;
     public double y;
@@ -73,24 +75,14 @@ public class PlayerServerboundPacket {
 
         if (MC.player != null && MC.level != null) {
             BlockState bs = MC.level.getBlockState(new BlockPos(x.intValue(), y.intValue(), z.intValue()));
-            if (!bs.getFluidState().isEmpty() && faction != Faction.NONE) {
+            if (!bs.getFluidState().isEmpty() && faction != Factions.NONE) {
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.invalid_start_location"));
                 return;
             }
-            if (faction == Faction.NEUTRAL)
-                faction = Faction.NONE;
-            PlayerAction playerAction = switch (faction) {
-                case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
-                case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
-                case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
-                case RANDOM -> MiscUtil.getRandomItem(List.of(
-                    PlayerAction.START_RTS_VILLAGERS,
-                    PlayerAction.START_RTS_MONSTERS,
-                    PlayerAction.START_RTS_PIGLINS
-                ));
-                default -> PlayerAction.START_RTS_SANDBOX;
-            };
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, MC.player.getId(), x, y, z));
+            if (faction == Factions.NEUTRAL)
+                faction = Factions.NONE;
+            PlayerAction playerAction = faction.equals(Factions.NONE) ? PlayerAction.START_RTS_SANDBOX : PlayerAction.START_RTS;
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, faction, MC.player.getId(), x, y, z));
             GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
             if (ClientGameModeHelper.gameMode == GameMode.SURVIVAL) {
                 SurvivalServerboundPacket.startSurvivalMode(SurvivalClientEvents.difficulty);
@@ -147,23 +139,6 @@ public class PlayerServerboundPacket {
             }
         }
     }
-
-    /*
-    public static void startRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-
-        public static void cancelStartRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-     */
 
     public static void startRTSScenario(int roleIndex) {
         Minecraft MC = Minecraft.getInstance();
@@ -225,6 +200,15 @@ public class PlayerServerboundPacket {
         this.y = y;
         this.z = z;
     }
+    
+    public PlayerServerboundPacket(PlayerAction action, Faction faction, int playerId, Double x, Double y, Double z) {
+        this.action = action;
+        this.faction = faction;
+        this.playerId = playerId;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
     public PlayerServerboundPacket(PlayerAction action, int playerId) {
         this.action = action;
@@ -237,6 +221,8 @@ public class PlayerServerboundPacket {
 
     public PlayerServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(PlayerAction.class);
+		if (this.action == PlayerAction.START_RTS)
+			this.faction = Factions.getFaction(buffer.readResourceLocation());
         this.playerId = buffer.readInt();
         this.x = buffer.readDouble();
         this.y = buffer.readDouble();
@@ -245,6 +231,8 @@ public class PlayerServerboundPacket {
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
+        if (this.action == PlayerAction.START_RTS) 
+			buffer.writeResourceLocation(this.faction.key);
         buffer.writeInt(this.playerId);
         buffer.writeDouble(this.x);
         buffer.writeDouble(this.y);
@@ -253,7 +241,13 @@ public class PlayerServerboundPacket {
 
     private static final List<PlayerAction> opOnlyActions = List.of(
             PlayerAction.RESET_RTS,
-            PlayerAction.RESET_RTS_HARD
+            PlayerAction.RESET_RTS_HARD,
+            PlayerAction.START_RTS_SANDBOX,
+            PlayerAction.LOCK_RTS,
+            PlayerAction.UNLOCK_RTS,
+            PlayerAction.PUBLISH_SCENARIO_MAP,
+            PlayerAction.ENABLE_RTS_SYNCING,
+            PlayerAction.DISABLE_RTS_SYNCING
     );
 
     // server-side packet-consuming functions
@@ -270,8 +264,20 @@ public class PlayerServerboundPacket {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Tried to process packet from " + player.getName() + " for id: " + this.playerId);
                 success.set(false);
                 return;
-            } else if (opOnlyActions.contains(action) && !player.hasPermissions(4)) {
+            } else if (opOnlyActions.contains(action) && !PlayerServerEvents.isOpOrHost(player)) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Non-op player " + player.getName() + " tried to run action: " + this.action.name());
+                if (action == PlayerAction.START_RTS_SANDBOX)
+                    player.sendSystemMessage(Component.translatable("server.reignofnether.sandbox_op_only"));
+                success.set(false);
+                return;
+            } else if (action == PlayerAction.START_RTS && (faction == Factions.NONE || faction == Factions.NEUTRAL)) {
+                // unknown faction keys decode to NONE, which would start a sandbox without the op check
+                ReignOfNether.LOGGER.warn("PlayerServerboundPacket: " + player.getName() + " tried to start RTS with faction: " + faction.key);
+                success.set(false);
+                return;
+            } else if (action == PlayerAction.START_RTS_SANDBOX &&
+                    player.level().getGameRules().getRule(GameRuleRegistrar.PVP_MODES_ONLY).get()) {
+                ReignOfNether.LOGGER.warn("PlayerServerboundPacket: " + player.getName() + " tried to start sandbox while pvpModesOnly is on");
                 success.set(false);
                 return;
             }
@@ -282,14 +288,10 @@ public class PlayerServerboundPacket {
                 case TELEPORT -> PlayerServerEvents.movePlayer(this.playerId, this.x, this.y, this.z);
                 case ENABLE_ORTHOVIEW -> PlayerServerEvents.enableOrthoview(this.playerId);
                 case DISABLE_ORTHOVIEW -> PlayerServerEvents.disableOrthoview(this.playerId);
-                case START_RTS_VILLAGERS ->
-                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.VILLAGERS);
-                case START_RTS_MONSTERS ->
-                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.MONSTERS);
-                case START_RTS_PIGLINS ->
-                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
+				case START_RTS ->
+                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Factions.getFaction(this.faction.key));
                 case START_RTS_SANDBOX ->
-                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.NONE);
+                    PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Factions.NONE);
                 case START_RTS_SCENARIO ->
                         PlayerServerEvents.startRTSScenario(this.playerId, (int) this.x);
                 case PUBLISH_SCENARIO_MAP ->

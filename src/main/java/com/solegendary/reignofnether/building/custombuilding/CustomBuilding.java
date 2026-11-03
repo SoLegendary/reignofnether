@@ -2,24 +2,24 @@ package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
-import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
-import com.solegendary.reignofnether.building.addon.NightSourceAddon;
-import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.addon.*;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.CustomProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -27,7 +27,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -38,16 +37,18 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class CustomBuilding extends ProductionBuilding implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon {
+public class CustomBuilding extends ProductionBuilding implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon, ItemShopAddon {
     public static final List<Block> INVULNERABLE_BLOCKS = List.of(
             BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
             BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
@@ -86,6 +87,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     public int numSpawnBlocks = 0;
     public ArrayList<BuildingCommand> commands = new ArrayList<>(List.of(new BuildingCommand()));
     private final Random random = new Random();
+    public final ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {
         this(structureName, structureSize, portraitBlock, structureNbt, null, null);
@@ -132,15 +134,6 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             this.unpackCommandsNbt();
         }
 
-        List<Block> storageBlocks = List.of(
-                Blocks.BARREL,
-                Blocks.CHEST,
-                Blocks.TRAPPED_CHEST,
-                Blocks.DISPENSER,
-                Blocks.DROPPER,
-                Blocks.HOPPER
-        );
-
         ArrayList<ListTag> listTags = new ArrayList<>();
         for (BuildingBlock bb : buildingBlocks) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ZONE_BLOCK.get()) {
@@ -152,24 +145,27 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()) {
                 numSpawnBlocks += 1;
             } else if (bb.getBlockNbt() != null &&
-                        storageBlocks.contains(bb.getBlockState().getBlock()) &&
+                        BlockUtils.STORAGE_BLOCKS.contains(bb.getBlockState().getBlock()) &&
                         bb.getBlockNbt().contains("Items")) {
                 listTags.add(bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND));
             }
         }
-
+        checkAndAddShopItems(listTags);
         checkAndAddProductionItems(listTags);
+
         if (this.productions.get().isEmpty())
             this.canSetRallyPoint = false;
 
         if (maxHealth <= 0)
             setToDefaultMaxHealth();
 
-        //TODO made this toggelable
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
         setActiveAddon(NetherConvertingAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);
+        if (!stockedItems.isEmpty()) {
+            setActiveAddon(ItemShopAddon.class, this, true);
+        }
     }
 
     private static final List<Keybinding> HOTKEYS = List.of(
@@ -184,6 +180,67 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             Keybindings.abilitySlot9,
             Keybindings.abilitySlot10
     );
+
+    // check the chest items for any RoN unit spawn eggs and add production items for them
+    public void checkAndAddShopItems(List<ListTag> itemsLists) {
+        for (ListTag items : itemsLists) {
+            for (Tag tag : items) {
+                try {
+                    CompoundTag itemTag = (CompoundTag) tag;
+                    ResourceLocation itemId = ResourceLocation.tryParse(itemTag.getString("id"));
+                    Item item = ForgeRegistries.ITEMS.getValue(itemId);
+
+                    UnitItem unitItem = ItemUtil.getUnitItem(item);
+                    if (stockedItems.stream().map(si -> si.item).toList().contains(unitItem))
+                        continue;
+
+                    if (unitItem == null)
+                        continue;
+
+                    int buyCost = unitItem.buyCost;
+                    int maxStock = 1;
+                    int restockTicks = 60 * 20;
+                    int startingStock = maxStock;
+
+                    CompoundTag stackNbt = itemTag.contains("tag", Tag.TAG_COMPOUND)
+                            ? itemTag.getCompound("tag")
+                            : null;
+
+                    if (stackNbt != null) {
+                        if (stackNbt.contains("buyCost", Tag.TAG_INT))
+                            buyCost = stackNbt.getInt("buyCost");
+                        if (stackNbt.contains("maxStock", Tag.TAG_INT))
+                            maxStock = stackNbt.getInt("maxStock");
+                        if (stackNbt.contains("startingStock", Tag.TAG_INT))
+                            startingStock = stackNbt.getInt("startingStock");
+                        if (stackNbt.contains("restockTicks", Tag.TAG_INT))
+                            restockTicks = stackNbt.getInt("restockTicks");
+                    }
+                    StockedShopItem stockedItem = new StockedShopItem(
+                            unitItem,
+                            buyCost,
+                            maxStock,
+                            startingStock,
+                            restockTicks
+                    );
+                    stockedItems.add(stockedItem);
+                }
+                catch (Exception e) {
+                    ReignOfNether.LOGGER.warn("Failed to load custom building shop item", e);
+                }
+            }
+        }
+    }
+
+    private boolean hasCustomProductionTag(CompoundTag tag) {
+        if (tag == null)
+            return false;
+        List<String> customIntTags = List.of("foodCost", "woodCost", "oreCost", "popCost", "ticksToTrain");
+        for (String customTag : customIntTags)
+            if (tag.contains(customTag, Tag.TAG_INT))
+                return true;
+        return false;
+    }
 
     // check the chest items for any RoN unit spawn eggs and add production items for them
     public void checkAndAddProductionItems(List<ListTag> itemsLists) {
@@ -205,8 +262,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
 
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
                         ProductionItem originalProdItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                        if (originalProdItem != null) {
 
+                        if (originalProdItem != null) {
                             ResourceCost newCost = ResourceCost.Unit(
                                 originalProdItem.defaultCost.food,
                                 originalProdItem.defaultCost.wood,
@@ -219,15 +276,21 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             ArrayList<FormattedCharSequence> newTooltipLines = new ArrayList<>();
                             ArrayList<FormattedCharSequence> newToolTip = new ArrayList<>();
 
+                            int emeraldBounty = -1;
+
                             if (stackNbt != null) {
-                                if (stackNbt.contains("foodCost", Tag.TAG_INT))
+                                 if (stackNbt.contains("foodCost", Tag.TAG_INT))
                                     newCost.food = stackNbt.getInt("foodCost");
                                 if (stackNbt.contains("woodCost", Tag.TAG_INT))
                                     newCost.wood = stackNbt.getInt("woodCost");
                                 if (stackNbt.contains("oreCost", Tag.TAG_INT))
                                     newCost.ore = stackNbt.getInt("oreCost");
+                                if (stackNbt.contains("popCost", Tag.TAG_INT))
+                                    newCost.population = stackNbt.getInt("popCost");
                                 if (stackNbt.contains("ticksToTrain", Tag.TAG_INT))
                                     newCost.ticks = stackNbt.getInt("ticksToTrain");
+                                if (stackNbt.contains("emeraldBounty", Tag.TAG_INT))
+                                    emeraldBounty = stackNbt.getInt("emeraldBounty");
 
                                 if (stackNbt.contains("tooltipTitle", Tag.TAG_STRING))
                                     newTooltipTitle = fcs(stackNbt.getString("tooltipTitle"), true);
@@ -238,11 +301,14 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                                 };
                             }
 
-                            if (newTooltipTitle != null || !newTooltipLines.isEmpty()) {
+                            // custom costs need our own tooltip, else CustomProductionItem keeps the original item's tooltip (with original costs)
+                            if (FMLEnvironment.dist.isClient() &&
+                                (hasCustomProductionTag(stackNbt) || newTooltipTitle != null || !newTooltipLines.isEmpty())) {
+                                // : fcs("") is placeholder only and is replaced with the original title later
                                 newToolTip = new ArrayList<>(List.of(
                                         newTooltipTitle != null ? newTooltipTitle : fcs(""),
                                         ResourceCosts.getFormattedCost(newCost),
-                                        ResourceCosts.getFormattedTime(newCost)
+                                        ResourceCosts.getFormattedPopAndTime(newCost)
                                 ));
                                 if (!newTooltipLines.isEmpty()) {
                                     newToolTip.add(fcs(""));
@@ -256,13 +322,16 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
                             if (stackNbt != null && stackNbt.contains("EntityTag")) {
+                                stackNbt.getCompound("EntityTag").putInt("popCost", newCost.population);
+                                if (emeraldBounty >= 0)
+                                    stackNbt.getCompound("EntityTag").putInt("emeraldBounty", emeraldBounty);
                                 this.unitProductionNbts.put(type, stackNbt.getCompound("EntityTag"));
                             }
                             hotkeyIndex += 1;
                         }
                     }
                 } catch (Exception e) {
-                    continue;
+                    ReignOfNether.LOGGER.warn("Failed to load custom building production item", e);
                 }
             }
         }
@@ -292,9 +361,11 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         attributesNbt.putInt("foodCost", this.cost.food);
         attributesNbt.putInt("woodCost", this.cost.wood);
         attributesNbt.putInt("oreCost", this.cost.ore);
+        attributesNbt.putInt("popSupply", this.cost.population);
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
+        attributesNbt.putBoolean("drawAggro", this.drawAggro);
     }
 
 	private void unpackAttributesNbt() {
@@ -312,6 +383,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
 		this.cost.food = attributesNbt.getInt("foodCost");
 		this.cost.wood = attributesNbt.getInt("woodCost");
 		this.cost.ore = attributesNbt.getInt("oreCost");
+        this.cost.population = attributesNbt.getInt("popSupply");
 		this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
 		this.garrisonRange = attributesNbt.getInt("garrisonRange");
 		if (attributesNbt.contains("maxHealth"))
@@ -340,9 +412,16 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         }
     }
 
+    public ArrayList<StockedShopItem> getStockedItems() {
+        return stockedItems;
+    }
+
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new CustomBuildingPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
+        CustomBuildingPlacement cbp = new CustomBuildingPlacement(this, level, pos, rotation, ownerName,
+                getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
+        cbp.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, getStockedItems());
+        return cbp;
     }
 
     @Override
@@ -350,7 +429,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         return BuildingBlockData.getBuildingBlocksFromNbt(structureNbt);
     }
 
-    public Faction getFaction() {return Faction.NONE;}
+    public Faction getFaction() {return Factions.NONE;}
 
     public BuildingPlaceButton getWorkerBuildButton(Keybinding hotkey) {
         return new BuildingPlaceButton(
@@ -370,6 +449,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         tooltips.add(fcs(this.name, true));
         if (cost.food > 0 || cost.ore > 0 || cost.wood > 0)
             tooltips.add(ResourceCosts.getFormattedCost(cost));
+        if (cost.population > 0)
+            tooltips.add(ResourceCosts.getFormattedPop(cost));
         if (capturable)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label")));
         if (invulnerable)
@@ -384,6 +465,10 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_garrison_capacity.label") + ": " + garrisonCapacity));
         if (garrisonRange > 0)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_garrison_range.label") + ": " + garrisonRange));
+        if (productions.get().size() > 0)
+            tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + productions.get().size()));
+        if (stockedItems.size() > 0)
+            tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + stockedItems.size()));
         return tooltips;
     }
 
@@ -450,7 +535,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             this.commands.remove(index);
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in deleteCommand");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in deleteCommand", e);
         }
     }
 
@@ -458,7 +543,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             this.commands.get(index).commandStr = text;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandText");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandText", e);
         }
     }
 
@@ -467,14 +552,14 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             cooldownTicks = Integer.parseInt(cooldownTicksStr);
         } catch (NumberFormatException e) {
-            System.out.println("NumberFormatException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("NumberFormatException in setCommandCooldown", e);
             return;
         }
         try {
             this.commands.get(index).tickCooldownMax = cooldownTicks;
             this.commands.get(index).tickCooldown = cooldownTicks;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandCooldown", e);
         }
     }
 
@@ -483,13 +568,13 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
         } catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IllegalArgumentException in setCommandTrigger", e);
             return;
         }
         try {
             this.commands.get(index).condition = triggerCond;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandTrigger", e);
         }
     }
     // GarrisonableBuilding

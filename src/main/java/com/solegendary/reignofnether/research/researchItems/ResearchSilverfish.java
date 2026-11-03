@@ -15,12 +15,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchSilverfish extends ProductionItem {
 
@@ -50,19 +49,17 @@ public class ResearchSilverfish extends ProductionItem {
             () -> ProductionItems.RESEARCH_SILVERFISH.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_SILVERFISH),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.research_silverfish"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip1",
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_silverfish.tooltip1",
                         SILVERFISH_SPAWN_CHANCE * 100 + "%"
-                ), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip3"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_silverfish.tooltip4"), Style.EMPTY)
+                )),
+                fcs(I18n.get("research.reignofnether.research_silverfish.tooltip2")),
+                fcs(I18n.get("research.reignofnether.research_silverfish.tooltip3")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_silverfish.tooltip4"))
             ),
             this
         );

@@ -1,24 +1,30 @@
 package com.solegendary.reignofnether.items;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
-import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
+import org.openjdk.nashorn.internal.ir.annotations.Immutable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -33,58 +39,114 @@ import java.util.function.Predicate;
 
 // construct via UnitItemBuilder, eg. UnitItemBuilder.of(Items.IRON_SWORD).sellValue(25).build()
 
-public abstract class UnitItem {
+public abstract class UnitItem implements RangeIndicator {
 
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = true;
+
+    public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
     protected final Item item;
-    public final UUID uuid;
-    public final ResourceLocation iconRl;
+    public final int defaultStackCount;
+    public final String descId;
+    public ResourceLocation iconRl;
     public final UnitItemType type;
+    public Rarity rarity;
     public final int sellValue;
     public final int buyCost;
-    public final String desc;
+    public final LocalizedText desc;
+    protected final List<LocalizedText> pointDescs;
     public final Keybinding hotkey;
     public boolean enableTooltip;
     protected final List<Pair<Enchantment, Integer>> enchantments;
-    protected final List<String> pointDescs;
-    public final List<AttributeModifier> getAttributeModifiers;
+    public final HashMap<Attribute, AttributeModifier> attributes;
     public BiPredicate<Unit, BlockPos> onUseGround;
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
     public Predicate<Unit> onUse;
-    public String onUseGroundError;
-    public String onUseEntityError;
-    public String onUseBuildingError;
-    public String onUseError;
+    public boolean toggleActiveOnUse;
     public final boolean consumeOnUse;
     public int manaCost;
-    public int cooldownTicks;
+    public int cooldownTicksMax;
+    public int channelTicks;
+    public float range;
+    public float radius;
+    public boolean showRangeCircle;
+    public boolean showRangeLine;
+    public boolean showRadiusCircle;
+    public boolean showRadiusAtCursor;
+    public boolean suppressDefaultError;
+    public boolean doCastAnimation;
+    public boolean resetBehaviours;
+    public boolean forceAutocast;
+    public boolean canRandomDrop;
+    public boolean nonHeroUseable;
+    public int maxStackSize; // only affects units; players can stack any items
+
+    // default values only, can be overwritten with calls to .buyCost() and .sellValue()
+    public static final Map<Rarity, Integer> RARITY_VALUES = ImmutableMap.of(
+            Rarity.COMMON, 300,
+            Rarity.UNCOMMON, 400,
+            Rarity.RARE, 500,
+            Rarity.EPIC, 600,
+            UnitItemRarity.LEGENDARY, 750,
+            UnitItemRarity.MYTHIC, 1000
+    );
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
-        this.uuid = builder.uuid;
-        this.iconRl = builder.iconRl;
+        this.defaultStackCount = builder.defaultStackCount;
+        if (builder.descId == null || builder.descId.isBlank()) {
+            throw new IllegalArgumentException("UnitItemBuilder descId is null or blank!");
+        }
+        this.descId = builder.descId;
+        if (builder.iconRl == null) {
+            try {
+                this.iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/" + descId + ".png");
+            } catch (ResourceLocationException exception) {
+                this.iconRl = null;
+            }
+        } else {
+            this.iconRl = builder.iconRl;
+        }
         this.type = builder.type;
         this.sellValue = builder.sellValue;
         this.buyCost = builder.buyCost;
-        this.desc = builder.desc;
+        this.rarity = builder.rarity;
+        this.desc = builder.desc != null
+                ? builder.desc
+                : new LocalizedText("item.reignofnether." + descId + ".desc");
         this.hotkey = builder.hotkey;
         this.enchantments = List.copyOf(builder.enchantments);
         this.pointDescs = List.copyOf(builder.pointDescs);
         this.enableTooltip = builder.enableTooltip;
-        this.getAttributeModifiers = builder.attributeModifiers;
+        this.attributes = builder.attributes;
         this.onUseGround = builder.onUseGround;
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
-        this.onUseGroundError = builder.onUseGroundError;
-        this.onUseEntityError = builder.onUseEntityError;
-        this.onUseBuildingError = builder.onUseBuildingError;
-        this.onUseError = builder.onUseError;
-        this.consumeOnUse = builder.consumeOnUse;
+        this.toggleActiveOnUse = builder.toggleActiveOnUse;
+        this.consumeOnUse = type == UnitItemType.CONSUMABLE || builder.consumeOnUse;
         this.manaCost = builder.manaCost;
-        this.cooldownTicks = builder.cooldownTicks;
+        this.cooldownTicksMax = builder.cooldownTicksMax;
+        this.channelTicks = builder.channelTicks;
+        this.range = builder.range;
+        this.radius = builder.radius;
+        this.showRangeCircle = builder.showRangeCircle;
+        this.showRangeLine = builder.showRangeLine;
+        this.showRadiusCircle = builder.showRadiusCircle;
+        this.showRadiusAtCursor = builder.showRadiusAtCursor;
+        this.suppressDefaultError = builder.suppressDefaultError;
+        this.doCastAnimation = builder.doCastAnimation;
+        this.resetBehaviours = builder.resetBehaviours;
+        this.forceAutocast = builder.forceAutocast;
+        this.canRandomDrop = builder.canRandomDrop;
+        this.maxStackSize = builder.maxStackSize;
+        this.nonHeroUseable = builder.nonHeroUseable;
     }
 
     public Item getItem() {
@@ -97,6 +159,7 @@ public abstract class UnitItem {
             itemStack.enchant(pair.getFirst(), pair.getSecond());
         }
         itemStack.getOrCreateTag().putUUID("uuid", UUID.randomUUID());
+        itemStack.setCount(defaultStackCount);
         return itemStack;
     }
 
@@ -109,31 +172,32 @@ public abstract class UnitItem {
     }
 
     public String getDescription() {
-        return desc;
-    }
-
-    public String getUseError() {
-        return onUseError;
-    }
-
-    public String getOnUseGroundError() {
-        return onUseGroundError;
-    }
-
-    public String getOnUseEntityError() {
-        return onUseEntityError;
-    }
-
-    public String getOnUseBuildingError() {
-        return onUseBuildingError;
+        return desc.resolve();
     }
 
     /** One string per bullet in the tooltip's passive stat list. */
-    public List<String> getPointDescs() {
+    public List<String> getPointDescriptions() {
+        if (!pointDescs.isEmpty()) {
+            List<String> lines = new ArrayList<>();
+            for (LocalizedText text : pointDescs) {
+                String line = text.resolve();
+                if (!line.isBlank())
+                    lines.add(line);
+            }
+            return lines;
+        }
+        return autoDiscoverPointDescs();
+    }
+
+    private List<String> autoDiscoverPointDescs() {
         List<String> lines = new ArrayList<>();
-        for (String desc : pointDescs)
-            if (!desc.isBlank())
-                lines.add(desc);
+        for (int i = 1; i <= 20; i++) {
+            String key = "item.reignofnether." + descId + ".point" + i;
+            String resolved = Component.translatable(key).getString();
+            if (resolved.equals(key))
+                break;
+            lines.add(resolved);
+        }
         return lines;
     }
 

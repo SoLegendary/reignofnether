@@ -2,10 +2,11 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalPocket;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -121,10 +122,10 @@ public class BuildingValidators {
             return true;
         }
         boolean netherTerrainCustomBuilding = building instanceof CustomBuilding cb && cb.netherTerrainOnly;
-        if (!netherTerrainCustomBuilding && building.getFaction() != Faction.PIGLINS || building instanceof CentralPortal) {
+        if (!netherTerrainCustomBuilding && !building.getFaction().equals(Factions.PIGLINS) || building instanceof CentralPortal) {
             return true;
         }
-        if (building instanceof PortalBasic) {
+        if (building instanceof PortalBasic || building instanceof PortalPocket) {
             return true;
         }
         return isOnNetherBlocks(level, blocks, originPos, true);
@@ -230,7 +231,7 @@ public class BuildingValidators {
         BlockPos minPos = BuildingUtils.getMinCorner(blocks);
         int placeableBlocks = 0;
         for (BuildingBlock block : blocks)
-            if (!AbstractBridge.shouldCullBlock(originPos, block, level, true) && !block.getBlockState()
+            if (!AbstractBridge.shouldCullBlock(originPos, block, level, false) && !block.getBlockState()
                     .isAir()) {
                 placeableBlocks += 1;
             }

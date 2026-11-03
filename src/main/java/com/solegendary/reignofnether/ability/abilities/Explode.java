@@ -10,12 +10,11 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Explode extends Ability {
     public Explode() {
@@ -40,7 +39,7 @@ public class Explode extends Ability {
             () -> UnitClientEvents.sendUnitCommand(UnitAction.EXPLODE),//CursorClientEvents.setLeftClickAction(UnitAction.EXPLODE),
             null,
             List.of(
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.explode"), Style.EMPTY)
+                fcs(I18n.get("abilities.reignofnether.explode"))
             ),
             null,
             unit

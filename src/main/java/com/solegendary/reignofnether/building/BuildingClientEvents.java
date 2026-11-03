@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -19,6 +20,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -101,16 +103,21 @@ public class BuildingClientEvents {
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
     // can only be one preselected building as you can't box-select them like units
-    public static BuildingPlacement  getPreselectedBuilding() {
+    // non-bridge buildings are prioritised over bridges at the same location
+    public static BuildingPlacement getPreselectedBuilding() {
         BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
-        for (BuildingPlacement building : buildings)
-            if (building.isPosInsideBuilding(preSelBp)) {
-                if (building.getBuilding() instanceof AbstractBridge && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
-                    return null;
-                }
+        BuildingPlacement preSelBridge = null;
+        for (BuildingPlacement building : buildings) {
+            if (!building.isPosInsideBuilding(preSelBp))
+                continue;
+            if (!(building.getBuilding() instanceof AbstractBridge))
                 return building;
-            }
-        return null;
+            if (preSelBridge == null)
+                preSelBridge = building;
+        }
+        if (preSelBridge != null && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE)
+            return null;
+        return preSelBridge;
     }
 
     public static ArrayList<BuildingPlacement> getSelectedBuildings() {
@@ -190,7 +197,7 @@ public class BuildingClientEvents {
                 buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                 buildingRotation = Rotation.NONE;
             } catch (Exception e) {
-                e.printStackTrace();
+                ReignOfNether.LOGGER.error("Failed to load building block data", e);
             }
             lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
         }
@@ -260,7 +267,7 @@ public class BuildingClientEvents {
         int maxX = -999999;
         int maxY = -999999;
         int maxZ = -999999;
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
@@ -347,18 +354,6 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
     }
 
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        if (MC.level == null)
-            return;
-
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "dist to border: " + MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()),
-        });
-    }
-     */
-
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
@@ -376,12 +371,15 @@ public class BuildingClientEvents {
         );
 
         Map<BlockPos, List<BuildingBlock>> fogBlocksToDraw = new HashMap<>();
+        Set<BlockPos> buildingOrigins = new HashSet<>();
+        for (BuildingPlacement b : buildings)
+            buildingOrigins.add(b.originPos);
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
                 MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
             {
                 Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
-                fogBlocks.keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
+                fogBlocks.keySet().removeIf(buildingOrigins::contains);
                 for (BlockPos pos : fogBlocks.keySet())
                     fogBlocksToDraw.put(pos, fogBlocks.get(pos));
             }
@@ -419,12 +417,13 @@ public class BuildingClientEvents {
                     }
                 }
             }
-            if (MinimapClientEvents.shouldUnderline() && inWorldBorderOrInSandbox)
+            // never underline a building this player hasn't seen through the fog
+            if (MinimapClientEvents.shouldUnderline() && inWorldBorderOrInSandbox && building.isExploredClientside)
                 MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, r, g, b, 0.5f);
         }
 
         // draw rally points and lines
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         var vertexConsumerNoDepthLine = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
         var vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
@@ -441,7 +440,7 @@ public class BuildingClientEvents {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                             MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
-                                    ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
+                                    MyRenderer.WHITE_TEXTURE);
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         }
@@ -491,7 +490,7 @@ public class BuildingClientEvents {
                     blocksToDraw = bridge.getRelativeBlockData(MC.level, isBridgeDiagonal());
                     buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ReignOfNether.LOGGER.error("Failed to load building block data", e);
                 }
                 Rotation rotationDelta = List.of(0, 1).contains(bridgePlaceState)
                                          ? Rotation.NONE
@@ -670,9 +669,8 @@ public class BuildingClientEvents {
                     if (Keybindings.shiftMod.isDown() && !deselected
                         && getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
                         addSelectedBuilding(preSelBuilding);
-                    } else if (!deselected && UnitClientEvents.getPreselectedUnits().size()
-                        == 0) { // select a single building - this should be the only code path that allows you to
-                        // select a non-owned building
+                    } else if (!deselected && UnitClientEvents.getPreselectedUnits().size() == 0 && !ItemClientEvents.hasLeftClickAction()) {
+                        // select a single building - this should be the only code path that allows you to select a non-owned building
                         clearSelectedBuildings();
                         addSelectedBuilding(preSelBuilding);
                     }
@@ -930,19 +928,6 @@ public class BuildingClientEvents {
             }
         }
         return false;
-    }
-
-    // does the player own one of these buildings?
-    public static int numFinishedBuildings(Building building) {
-        int count = 0;
-        for (BuildingPlacement bpl : buildings) {
-            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
-                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
-                            allyHasFinishedBuilding(building))) {
-                count += 1;
-            }
-        }
-        return count;
     }
 
     // does the selected ally's unit own one of these buildings?

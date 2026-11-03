@@ -1,39 +1,67 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.ParticleRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.time.NightUtils;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
+import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(Mob.class)
 public abstract class UnitInventoryMobMixin extends LivingEntity implements UnitInventory {
+
+    @Shadow public abstract InteractionResult interact(Player pPlayer, InteractionHand pHand);
 
     @Unique
     private static final String RON$UNIT_ITEMS_KEY = "reignofnether:UnitItems";
@@ -52,9 +80,21 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean isFull() {
+    public boolean isFull(UnitItem item) {
+        for (ItemStack itemStack : getAllItems()) {
+            if (itemStack.isEmpty() || itemStack == ItemStack.EMPTY)
+                return false;
+            UnitItem held = ItemUtil.getUnitItem(itemStack);
+            if (held != null && held == item && itemStack.getCount() < Math.max(1, held.maxStackSize))
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isEmpty() {
         for (ItemStack itemStack : getAllItems())
-            if (itemStack == ItemStack.EMPTY || itemStack.isEmpty())
+            if (itemStack != ItemStack.EMPTY && !itemStack.isEmpty())
                 return false;
         return true;
     }
@@ -69,8 +109,19 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     public ItemStack get(UUID uuid) {
         for (ItemStack itemStack : this.unitItems) {
             if (itemStack.getTag() != null &&
-                itemStack.getTag().hasUUID("uuid") &&
-                itemStack.getTag().getUUID("uuid").equals(uuid)) {
+                    itemStack.getTag().hasUUID("uuid") &&
+                    itemStack.getTag().getUUID("uuid").equals(uuid)) {
+                return itemStack;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public ItemStack get(UnitItem unitItem) {
+        for (ItemStack itemStack : this.unitItems) {
+            if (ItemUtil.getUnitItem(itemStack) == unitItem) {
                 return itemStack;
             }
         }
@@ -79,12 +130,17 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public void set(int index, ItemStack stack) {
+        ItemStack old = this.unitItems.get(index);
+        if (!old.isEmpty()) ron$removeItemAttributes(old);
         if (stack != null) {
             CompoundTag tag = stack.getOrCreateTag();
             if (!tag.hasUUID("uuid"))
                 tag.putUUID("uuid", UUID.randomUUID());
         }
-        this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
+        ItemStack newStack = stack == null ? ItemStack.EMPTY : stack;
+        this.unitItems.set(index, newStack);
+        if (!newStack.isEmpty()) ron$applyItemAttributes(newStack);
+        if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
         syncToClient();
     }
 
@@ -112,7 +168,9 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     if (!stack.isEmpty()) {
                         BehaviorUtils.throwItem(this, stack, bp.getCenter(), new Vec3(0.25f,0.25f,0.25f), 0.3F);
                     }
+                    ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
                     syncToClient();
                     return true;
                 }
@@ -122,7 +180,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean deleteUUID(UUID uuid) {
+    public boolean deleteItem(UUID uuid) {
         for (int i = 0; i < unitItems.size(); i++) {
             ItemStack stack = get(i);
             if (stack != null && stack.getTag() != null && stack.getItem() != Items.AIR) {
@@ -131,7 +189,29 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     if (EnchantmentHelper.hasBindingCurse(stack)) {
                         return false;
                     }
+                    ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
+                    syncToClient();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteItem(UnitItem item) {
+        for (int i = 0; i < unitItems.size(); i++) {
+            ItemStack stack = get(i);
+            if (stack != null && stack.getTag() != null && stack.getItem() == item.getItem()) {
+                if (!stack.isEmpty()) {
+                    if (EnchantmentHelper.hasBindingCurse(stack)) {
+                        return false;
+                    }
+                    ron$removeItemAttributes(stack);
+                    this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
                     syncToClient();
                     return true;
                 }
@@ -142,30 +222,57 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public boolean tryAdding(ItemStack newItemStack) {
-        if (!ItemUtil.isUnitItem(newItemStack))
+        UnitItem unitItem = ItemUtil.getUnitItem(newItemStack);
+        if (unitItem == null || newItemStack.isEmpty())
             return false;
-        for (int i = 0; i < getAllItems().size(); i++) {
-            if (getAllItems().get(i).getItem() == Items.AIR) {
-                set(i, newItemStack);
-                syncToClient();
-                return true;
-            }
+
+        int startCount = newItemStack.getCount();
+        int maxStack = Math.max(1, unitItem.maxStackSize);
+        NonNullList<ItemStack> items = getAllItems();
+
+        // top up existing partial stacks
+        for (ItemStack existing : items) {
+            if (newItemStack.isEmpty()) break;
+            if (existing.isEmpty() || ItemUtil.getUnitItem(existing) != unitItem) continue;
+            int space = maxStack - existing.getCount();
+            if (space <= 0) continue;
+            int toMove = Math.min(space, newItemStack.getCount());
+            existing.grow(toMove);
+            newItemStack.shrink(toMove);
         }
-        return false;
+        // spill the rest into empty slots, respecting max stack size
+        for (int i = 0; i < items.size() && !newItemStack.isEmpty(); i++) {
+            if (!items.get(i).isEmpty()) continue;
+            int toMove = Math.min(maxStack, newItemStack.getCount());
+            ItemStack copy = newItemStack.copy();
+            copy.setCount(toMove);
+            if (copy.getTag() != null)
+                copy.getTag().remove("uuid"); // set() assigns a fresh one
+            newItemStack.shrink(toMove);
+            set(i, copy);
+        }
+        boolean added = newItemStack.getCount() < startCount;
+        if (added) {
+            syncToClient();
+            if (this instanceof Unit unit)
+                unit.dropAllResources();
+        }
+        return added;
     }
 
     @Override
     public void giveTo(UUID uuid, UnitInventory inv) {
-        ItemStack itemStack = get(uuid);
-        if (itemStack != null && !EnchantmentHelper.hasBindingCurse(itemStack)) {
-            if (inv.tryAdding(get(uuid))) {
-                this.deleteUUID(uuid);
-                ItemEntity itemEntity = this.spawnAtLocation(itemStack);
-                if (itemEntity != null) {
-                    ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
-                    itemEntity.discard();
-                }
-            }
+        ItemStack stack = get(uuid);
+        if (stack == null || EnchantmentHelper.hasBindingCurse(stack)) return;
+
+        ItemStack toGive = stack.copy();
+        if (inv.tryAdding(toGive)) {
+            int moved = stack.getCount() - toGive.getCount();
+            if (moved >= stack.getCount())
+                deleteItem(uuid); // whole stack went across
+            else
+                stack.shrink(moved); // keep the remainder
+            syncToClient();
         }
     }
 
@@ -174,16 +281,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && unitItem.onUseGround != null) {
+            if (unitItem != null && unitItem.onUseGround != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseGround.test(unit, blockPos)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseGroundError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_ground");
                 }
             }
         }
@@ -195,16 +298,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null) {
+            if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseEntity.test(unit, entity)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseEntityError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_entity");
                 }
             }
         }
@@ -216,16 +315,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null) {
+            if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseBuilding.test(unit, building)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseBuildingError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_building");
                 }
             }
         }
@@ -237,20 +332,169 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null) {
+            if (unitItem != null && canUseItem(unitItem) && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUse.test(unit)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
+                    CompoundTag tag = itemStack.getTag();
+                    if (itemStack.getTag() != null && unitItem.toggleActiveOnUse) {
+                        if (!tag.contains("active"))
+                            tag.putBoolean("active", true);
+                        else
+                            tag.putBoolean("active", !tag.getBoolean("active"));
                     }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use");
                 }
+            } else if (unitItem != null && !canUseItem(unitItem)) {
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isHolding(UnitItem unitItem) {
+        if (!(this instanceof HeroUnit))
+            return false;
+        for (ItemStack itemStack : getAllItems()) {
+            UnitItem heldUnitItem = ItemUtil.getUnitItem(itemStack);
+            if (heldUnitItem != null && heldUnitItem.descId.equals(unitItem.descId))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isHoldingActive(UnitItem unitItem) {
+        for (ItemStack itemStack : getAllItems()) {
+            UnitItem heldUnitItem = ItemUtil.getUnitItem(itemStack);
+            if (heldUnitItem != null && heldUnitItem.descId.equals(unitItem.descId))
+                if (ItemUtil.isActive(itemStack))
+                    return true;
+        }
+        return false;
+    }
+
+    private void afterUse(UnitItem unitItem, ItemStack itemStack, UUID uuid) {
+        if (unitItem.consumeOnUse) {
+            if (itemStack.getCount() <= 1)
+                this.deleteItem(uuid);
+            else
+                itemStack.shrink(1);
+        }
+        if (this instanceof HeroUnit heroUnit && unitItem.manaCost > 0)
+            heroUnit.setMana(heroUnit.getMana() - unitItem.manaCost);
+        if (unitItem.cooldownTicksMax > 0)
+            itemStack.getOrCreateTag().putLong(UnitItem.RON$COOLDOWN_KEY, this.level().getGameTime() + unitItem.cooldownTicksMax);
+        //if (this instanceof KeyframeAnimated && unitItem.doCastAnimation) {
+        //    UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CAST_SPELL, this);
+        //}
+        syncToClient();
+    }
+
+    @Override
+    public boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack) {
+        if (!canAffordManaCost(unitItem)) {
+            if (!level().isClientSide()) {
+                HudClientboundPacket.showTempMessageI18n(((Unit) this).getOwnerName(), "item.reignofnether.error.not_enough_mana");
+            } else {
+                HudClientEvents.showTempMessageI18n("item.reignofnether.error.not_enough_mana");
+            }
+            return false;
+        }
+        if (!isOffCooldown(unitItem, itemStack)) {
+            long cooldownSecondsLeft = ItemUtil.getCooldownTicksLeft(itemStack, level()) / 20;
+            String str = Component.translatable("item.reignofnether.error.on_cooldown", cooldownSecondsLeft).getString();
+            if (!level().isClientSide()) {
+                HudClientboundPacket.showTempMessageI18n(((Unit) this).getOwnerName(), str);
+            } else {
+                HudClientEvents.showTemporaryMessage(str);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Unique
+    private void ron$applyItemAttributes(ItemStack stack) {
+        if (this.level().isClientSide() || stack.isEmpty() || !(this instanceof HeroUnit)) return;
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+        if (unitItem == null || unitItem.attributes.isEmpty()) return;
+
+        CompoundTag stackTag = stack.getOrCreateTag();
+        if (!stackTag.hasUUID("uuid"))
+            stackTag.putUUID("uuid", UUID.randomUUID());
+        UUID itemUuid = stackTag.getUUID("uuid");
+        int i = 0;
+        for (Attribute attr : unitItem.attributes.keySet()) {
+            AttributeModifier modifier = unitItem.attributes.get(attr);
+            AttributeInstance instance = this.getAttribute(attr);
+            if (instance != null) {
+                Set<Attribute> NON_STACKABLE_ATTRIBUTES = Set.of(
+                        Attributes.MOVEMENT_SPEED,
+                        AttributeRegistrar.EVASION_CHANCE.get()
+                );
+                boolean isNonStackable = NON_STACKABLE_ATTRIBUTES.contains(attr);
+                boolean hasExistingMod = false;
+
+                if (isNonStackable) {
+                    for (AttributeModifier mod : instance.getModifiers()) {
+                        if (mod.getName().startsWith("reignofnether:item:")) {
+                            hasExistingMod = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isNonStackable || !hasExistingMod) {
+                    UUID modUuid = ron$deriveModifierUUID(itemUuid, i);
+                    if (instance.getModifier(modUuid) == null) {
+                        instance.addTransientModifier(new AttributeModifier(
+                                modUuid, "reignofnether:item:" + i,
+                                modifier.getAmount(), modifier.getOperation()));
+                    }
+                }
+            }
+            i++;
+        }
+    }
+
+    @Unique
+    private void ron$removeItemAttributes(ItemStack stack) {
+        if (this.level().isClientSide() || stack.isEmpty() || !(this instanceof HeroUnit)) return;
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+        CompoundTag tag = stack.getTag();
+        if (unitItem == null || tag == null || !tag.hasUUID("uuid")) return;
+
+        UUID itemUuid = tag.getUUID("uuid");
+        int i = 0;
+        for (Attribute attribute : unitItem.attributes.keySet()) {
+            AttributeInstance instance = this.getAttribute(attribute);
+            if (instance != null)
+                instance.removeModifier(ron$deriveModifierUUID(itemUuid, i));
+            i++;
+        }
+    }
+
+    @Unique
+    private static UUID ron$deriveModifierUUID(UUID itemUuid, int modifierIndex) {
+        return UUID.nameUUIDFromBytes((itemUuid + "#" + modifierIndex).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private boolean canAffordManaCost(UnitItem unitItem) {
+        if (unitItem.manaCost <= 0)
+            return true;
+        return this instanceof HeroUnit heroUnit && heroUnit.getMana() >= unitItem.manaCost;
+    }
+
+    private boolean isOffCooldown(UnitItem unitItem, ItemStack itemStack) {
+        if (unitItem.cooldownTicksMax <= 0)
+            return true;
+        CompoundTag tag = itemStack.getTag();
+        if (tag == null || !tag.contains(UnitItem.RON$COOLDOWN_KEY))
+            return true;
+        long gameTime = this.level().isClientSide() ? TimeClientEvents.serverGameTime : this.level().getGameTime();
+        return gameTime >= tag.getLong(UnitItem.RON$COOLDOWN_KEY);
     }
 
     private void syncToClient() {
@@ -276,15 +520,20 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (!tag.contains(RON$UNIT_ITEMS_KEY, Tag.TAG_LIST)) return;
         ListTag list = tag.getList(RON$UNIT_ITEMS_KEY, Tag.TAG_COMPOUND);
         for (int i = 0; i < this.unitItems.size(); i++) {
-            this.unitItems.set(i, i < list.size()
-                    ? ItemStack.of(list.getCompound(i))
-                    : ItemStack.EMPTY);
+            ItemStack stack = i < list.size() ? ItemStack.of(list.getCompound(i)) : ItemStack.EMPTY;
+            if (!stack.isEmpty()) {
+                CompoundTag t = stack.getOrCreateTag();
+                if (!t.hasUUID("uuid"))
+                    t.putUUID("uuid", UUID.randomUUID());
+            }
+            this.unitItems.set(i, stack);
+            if (!stack.isEmpty()) ron$applyItemAttributes(stack);
         }
     }
 
     @Inject(method = "dropCustomDeathLoot", at = @At("RETURN"))
     private void ron$dropUnitItemsOnDeath(DamageSource source, int looting, boolean recentlyHit, CallbackInfo ci) {
-        if ((Object) this instanceof HeroUnit) return; // heroes keep their gear
+        if (this instanceof HeroUnit) return; // heroes keep their gear
 
         for (int i = 0; i < this.unitItems.size(); i++) {
             ItemStack stack = this.unitItems.get(i);
@@ -293,5 +542,62 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             }
             this.unitItems.set(i, ItemStack.EMPTY);
         }
+    }
+
+    @Inject(
+        method = "tick",
+        at = @At("TAIL")
+    )
+    public void tick(CallbackInfo ci) {
+        if (tickCount % 20 == 0 && this instanceof Unit unit) {
+            if (isHoldingActive(UnitItems.BELL_OF_ARMS)) {
+                addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
+            }
+            boolean hasHorrorArmour = isHolding(UnitItems.HUNGRY_HORROR_ARMOUR);
+            boolean hasPiglinArmour = isHolding(UnitItems.GOLDEN_PIGLIN_ARMOUR);
+            if (hasHorrorArmour || hasPiglinArmour) {
+                for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), UnitItems.ARMOUR_AURA_RANGE, Mob.class, level())) {
+                    if (mob instanceof Unit unit2 && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName()) && !(unit2 instanceof AbstractTotem)) {
+                        if (hasHorrorArmour && NightUtils.isInRangeOfNightSource(mob.position(), mob.level().isClientSide()))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.LIFESTEAL.get(), 30, 0, true, false));
+                        if (hasPiglinArmour && MiscUtil.isOnNetherTerrain(mob))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.PIGLIN_FERVOR.get(), 30, 0, true, false));
+                    }
+                }
+            }
+            for (ItemStack itemStack : getAllItems()) {
+                if (itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid")) {
+                    UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
+                    if (unitItem != null && unitItem.forceAutocast && canUseItem(unitItem) &&
+                        isOffCooldown(unitItem, itemStack) && canAffordManaCost(unitItem)) {
+                        UUID itemUUID = itemStack.getTag().getUUID("uuid");
+                        use(itemUUID);
+                    }
+                }
+            }
+            if (!isEmpty() && !(this instanceof HeroUnit)) {
+                ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 2, level(), position(), 0.05);
+            }
+        }
+    }
+
+    @Override
+    public boolean canPickupUnitItems() {
+        boolean hasBackpack = false;
+        if (this instanceof Unit unit) {
+            if (level().isClientSide()) {
+                hasBackpack = ResearchClient.hasResearch(ProductionItems.RESEARCH_ITEM_BACKPACKS);
+            } else {
+                hasBackpack = ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ProductionItems.RESEARCH_ITEM_BACKPACKS);
+            }
+        }
+        return ((Mob) (Object) this).canPickUpLoot() && (hasBackpack || (this instanceof HeroUnit));
+    }
+
+    @Override
+    public boolean canUseItem(UnitItem unitItem) {
+        if (unitItem instanceof MerchantEquipmentItem mei && mei.isCompatibleTarget.test(this))
+            return true;
+        return this instanceof HeroUnit || (unitItem != null && unitItem.nonHeroUseable);
     }
 }

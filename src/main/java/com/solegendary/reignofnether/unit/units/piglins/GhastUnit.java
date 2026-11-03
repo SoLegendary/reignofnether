@@ -20,23 +20,18 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -83,10 +78,10 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -108,8 +103,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public MoveToTargetBlockGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -133,7 +127,18 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(GhastUnit.class, EntityDataSerializers.STRING);
@@ -226,7 +231,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, GhastUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, GhastUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, GhastUnit.maxHealth)
@@ -248,7 +253,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         if (this.isAlive() && this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
             boolean flag = false;
             AABB aabb = this.getBoundingBox().inflate(0.2);
-            Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
+            Iterator<BlockPos> var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
 
             label62:
             while(true) {
@@ -257,7 +262,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
                 do {
                     if (!var8.hasNext())
                         break label62;
-                    blockpos = (BlockPos)var8.next();
+                    blockpos = var8.next();
                     BlockState blockstate = this.level().getBlockState(blockpos);
                     block = blockstate.getBlock();
                 } while(!(block instanceof LeavesBlock));
@@ -274,7 +279,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public void tick() {
         if (tickCount % 10 == 0) {
             BlockPos bp = MiscUtil.getHighestNonAirBlock(level(), blockPosition(), false, true);
-            BlockState lowestBs = level().getBlockState(bp.below());
+            BlockState lowestBs = level().getBlockState(bp.above());
             if (lowestBs.isAir()) {
                 addEffect(new MobEffectInstance(MobEffectRegistrar.DISARM.get(), 15, 1, true, false));
             }
@@ -296,19 +301,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -405,7 +398,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     }
 
     // range bonus that an attacker gets when targeting this ghast, so that we can't just float high up out of range
-    public int getAttackerRangeBonus(Mob attacker) {
+    public double getAttackerRangeBonus(Mob attacker) {
         Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
         Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
@@ -413,9 +406,9 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
         // if we're directly under the ghast, just allow anything to attack it
         if (horizDist < 4)
-            return (int) vertiDist;
+            return vertiDist;
         else
-            return (int) (vertiDist * 0.5f);
+            return vertiDist * 0.5f;
     }
 
     @Override

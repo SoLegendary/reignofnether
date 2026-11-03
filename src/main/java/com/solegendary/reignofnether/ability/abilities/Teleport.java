@@ -10,16 +10,15 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.neutral.EndermanUnit;
 import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class Teleport extends Ability {
 
@@ -41,12 +40,9 @@ public class Teleport extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.TELEPORT),
             null,
             List.of(
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.teleport"), Style.EMPTY.withBold(true)),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.teleport.tooltip1", CD_MAX_SECONDS) + RANGE,
-                    MyRenderer.iconStyle
-                ),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.teleport.tooltip2"), Style.EMPTY)
+                fcs(I18n.get("abilities.reignofnether.teleport"), true),
+                fcsIcons(I18n.get("abilities.reignofnether.teleport.tooltip1", CD_MAX_SECONDS) + RANGE),
+                fcs(I18n.get("abilities.reignofnether.teleport.tooltip2"))
             ),
             this,
             unit

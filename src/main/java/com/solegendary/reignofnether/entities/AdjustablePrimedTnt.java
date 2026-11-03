@@ -14,8 +14,6 @@ public class AdjustablePrimedTnt extends PrimedTnt {
 
     private float explosionPower;
 
-    public static final float DAMAGE_PER_POWER = 6.67f;
-
     private final int DEFAULT_FUSE_TICKS = 40;
 
     public AdjustablePrimedTnt(EntityType<? extends PrimedTnt> pEntityType, Level pLevel) {
@@ -35,8 +33,18 @@ public class AdjustablePrimedTnt extends PrimedTnt {
         this.explosionPower = explosionPower;
     }
 
+    @Override
+    @Nullable
+    public LivingEntity getOwner() {
+        return this.owner;
+    }
+
     public float getExplosionPower() {
         return explosionPower;
+    }
+
+    public float getExplosionBuildingDamage() {
+        return 8 + (explosionPower * 4);
     }
 
     protected void explode() {

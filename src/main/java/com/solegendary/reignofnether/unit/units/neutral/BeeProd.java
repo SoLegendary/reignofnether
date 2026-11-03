@@ -1,0 +1,82 @@
+package com.solegendary.reignofnether.unit.units.neutral;
+
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
+import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceCosts;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+
+import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
+public class BeeProd extends ProductionItem implements IUnitProductionItem {
+
+    public final static String itemName = "Bee";
+    public final static ResourceCost cost = ResourceCosts.BEE;
+
+    public BeeProd() {
+        super(cost);
+        this.onComplete = (Level level, ProductionPlacement placement) -> {
+            if (!level.isClientSide()) {
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.BEE_UNIT.get(), placement.ownerName, true);
+            }
+        };
+    }
+
+    public String getItemName() {
+        return BeeProd.itemName;
+    }
+
+    public UnitSpawnButton getPlaceButton() {
+        return new UnitSpawnButton(
+            itemName,
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bee.png"),
+            List.of(
+                Component.translatable("entity.reignofnether.bee_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                fcs(""),
+                Component.translatable("entity.reignofnether.bee_unit.tooltip1").getVisualOrderText()
+            )
+        );
+    }
+
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
+                itemName,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bee.png"),
+                hotkey,
+                () -> false,
+                () -> true,
+                List.of(
+                        Component.translatable("entity.reignofnether.bee_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        ResourceCosts.getFormattedCost(cost),
+                        ResourceCosts.getFormattedPopAndTime(cost),
+                        fcs(""),
+                        Component.translatable("entity.reignofnether.bee_unit.tooltip1").getVisualOrderText()
+                ),
+                this
+        );
+    }
+
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
+                itemName,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bee.png"),
+                prodBuilding,
+                this,
+                first
+        );
+    }
+}

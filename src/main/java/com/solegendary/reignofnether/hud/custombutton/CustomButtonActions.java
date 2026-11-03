@@ -262,36 +262,4 @@ public class CustomButtonActions {
 			}
 		}
 	}
-
-//	public record ExplodeAction(List<ResourceLocation> loots) implements CustomButtonAction {
-//		public static final ResourceLocation TYPE = new ResourceLocation(ReignOfNether.MOD_ID, "explode");
-//		public static final MapCodec<ExplodeAction> CODEC = RecordCodecBuilder.mapCodec(
-//			instance -> instance.group(
-//				ResourceLocation.CODEC.listOf().optionalFieldOf("loots", List.of()).forGetter(ExplodeAction::loots)
-//			).apply(instance, ExplodeAction::new)
-//		);
-//		
-//		@Override
-//		public MapCodec<? extends CustomButtonAction> codec() {
-//			return CODEC;
-//		}
-//		
-//		@Override
-//		public void execute(ServerPlayer player) {
-//			LootParams lootparams = (new LootParams.Builder(player.serverLevel())).withParameter(LootContextParams.THIS_ENTITY, player).withParameter(LootContextParams.ORIGIN, player.position()).withLuck(player.getLuck()).create(LootContextParamSets.SELECTOR);
-//			for (ResourceLocation resourcelocation : loots) {
-//				for (ItemStack itemstack : player.server.getLootData().getLootTable(resourcelocation).getRandomItems(lootparams)) {
-//					if (player.addItem(itemstack)) {
-//						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-//					} else {
-//						ItemEntity itementity = player.drop(itemstack, false);
-//						if (itementity != null) {
-//							itementity.setNoPickUpDelay();
-//							itementity.setTarget(player.getUUID());
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
 }

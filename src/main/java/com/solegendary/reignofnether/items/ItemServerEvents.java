@@ -1,31 +1,57 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class ItemServerEvents {
 
     public static final boolean ENABLED = UnitItem.ENABLED;
 
+    // for making every RTS player have the same drops
+    public static final Long ITEM_DROPS_SEED = new Random().nextLong(1, Long.MAX_VALUE);
+    public static final Long ITEM_RARITY_SEED = new Random().nextLong(1, Long.MAX_VALUE);
+
     public static void buyItem(
             Unit unit,
-            UUID itemUuid,
+            String descId,
             BlockPos shopPos
     ) {
         if (!ENABLED) return;
@@ -34,7 +60,7 @@ public class ItemServerEvents {
             if (bpl.originPos.equals(shopPos) && bpl instanceof ItemShopPlacement itemShopPlacement && bpl.isBuilt) {
                 ItemShopAddon itemShopAddon = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
                 if (itemShopAddon != null && unit instanceof UnitInventory) {
-                    itemShopAddon.buyItem(unit, itemShopPlacement, ItemUtil.getUnitItem(itemUuid));
+                    itemShopAddon.buyItem(unit, itemShopPlacement, ItemUtil.getUnitItem(descId));
                     break;
                 }
             }
@@ -65,22 +91,168 @@ public class ItemServerEvents {
         ServerLevel level = null;
         if (server != null) level = server.getLevel(Level.OVERWORLD);
 
-        if (unit instanceof UnitInventory inv &&
-            unit.getItemGoal() != null && level != null) {
-
-            Entity entity = level.getEntity(targetId);
-            ItemStack itemInHand = inv.get(itemUuid);
-            if (action == ItemAction.USE) {
-                if (inv.use(ItemUtil.getUUID(itemInHand)))
-                    Unit.fullResetBehaviours(unit);
+        if (unit instanceof UnitInventory inv) {
+            if (inv.canPickupUnitItems() && unit.getItemGoal() != null && level != null) {
+                Entity entity = level.getEntity(targetId);
+                ItemStack itemInHand = inv.get(itemUuid);
+                if (action == ItemAction.USE) {
+                    if (inv.use(ItemUtil.getUUID(itemInHand)))
+                        Unit.fullResetBehaviours(unit);
+                } else if (action == ItemAction.GIVE && entity instanceof UnitInventory invTarget && !invTarget.canPickupUnitItems()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_hold_items");
+                } else {
+                    ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
+                    LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
+                    BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
+                    boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
+                    boolean canUseItem = false;
+                    if (useItem && itemInHand != null) {
+                        UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
+                        if (unitItem != null)
+                            canUseItem = inv.canUseItem(unitItem);
+                        if (!canUseItem)
+                            HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
+                    }
+                    if (canUseItem || !useItem) {
+                        Unit.fullResetBehaviours(unit);
+                        if (action == ItemAction.USE_ON_BLOCK)
+                            buildingTarget = null;
+                        unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+                    }
+                }
+            } else if (action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
+                if (inv.deleteItem(itemUuid))
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.hud.item_deleted");
             } else {
-                ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
-                LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
-                BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
-                boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
-                Unit.fullResetBehaviours(unit);
-                unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
+        }
+    }
+
+    // Points needed for each successive drop increase range from 15 to 45
+    private static int getCreepScoreThreshold(int itemsDropped) {
+        int total = 0;
+        for (int i = 0; i <= itemsDropped; i++)
+            total += Math.min(12 + (i * 4), 48);
+        return total;
+    }
+
+    public static void dropNextItem(RTSPlayer rtsPlayer, LivingEntity dropper) {
+        if (rtsPlayer.itemDropQueue.isEmpty())
+            return;
+
+        UnitItem unitItem = rtsPlayer.itemDropQueue.pollFirst();
+        if (unitItem == null)
+            return;
+
+        ItemStack itemStack = new ItemStack(unitItem.item);
+        itemStack.setCount(unitItem.defaultStackCount);
+        ItemEntity itemEntity = new ItemEntity(dropper.level(), dropper.getX(), dropper.getY(), dropper.getZ(), itemStack);
+        dropper.level().addFreshEntity(itemEntity);
+
+        SoundClientboundPacket.playSoundAtPos(getItemDropSound(unitItem.rarity), dropper.blockPosition(), 2.5f);
+
+        ReignOfNether.LOGGER.info(rtsPlayer.name + " received item drop #" + rtsPlayer.itemsDropped);
+    }
+
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        LivingEntity killedEntity = evt.getEntity();
+        if (killedEntity instanceof Unit unitKilled) {
+            String killerName = "";
+            Entity directEntity = evt.getSource().getDirectEntity();
+            Entity sourceEntity = evt.getSource().getEntity();
+            CompoundTag tag = killedEntity.getPersistentData();
+            String lastHurtByRTSPlayer = tag.contains("lastHurtByRTSPlayer") ? tag.getString("lastHurtByRTSPlayer") : "";
+
+            if (directEntity instanceof Unit unit)
+                killerName = unit.getOwnerName();
+            else if (directEntity != null && directEntity.getPersistentData().contains("ownerName"))
+                killerName = directEntity.getPersistentData().getString("ownerName");
+            else if (sourceEntity instanceof Unit unit)
+                killerName = unit.getOwnerName();
+            else if (sourceEntity != null && sourceEntity.getPersistentData().contains("ownerName"))
+                killerName = sourceEntity.getPersistentData().getString("ownerName");
+            else if (!lastHurtByRTSPlayer.isBlank())
+                killerName = lastHurtByRTSPlayer;
+            else if (directEntity instanceof AdjustablePrimedTnt tnt && tnt.getOwner() instanceof Unit unit)
+                killerName = unit.getOwnerName();
+
+            boolean isNeutral = unitKilled.getOwnerName().isBlank();
+            boolean willDropOwnItem = unitKilled instanceof UnitInventory inv && !inv.isEmpty() && !(unitKilled instanceof HeroUnit);
+            if (!killerName.isBlank() && isNeutral && !willDropOwnItem) {
+                RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(killerName);
+                if (rtsPlayer != null) {
+                    int creepScore = unitKilled.getCost().population + 3;
+                    if (killedEntity.getPersistentData().contains("isFromSpawner") &&
+                        killedEntity.getPersistentData().getBoolean("isFromSpawner")) {
+                        creepScore = Math.max(1, unitKilled.getCost().population);
+                    }
+                    rtsPlayer.creepScore += creepScore;
+                    ReignOfNether.LOGGER.info("+" + creepScore + " creepScore for: " + rtsPlayer.name);
+
+                    if (!killedEntity.level().isClientSide()) {
+                        // while, not if: one big kill could cross more than one threshold
+                        while (rtsPlayer.creepScore >= getCreepScoreThreshold(rtsPlayer.itemsDropped)) {
+                            dropNextItem(rtsPlayer, killedEntity);
+                            rtsPlayer.itemsDropped += 1;
+                            PlayerClientboundPacket.syncItemsDropped(rtsPlayer.name, rtsPlayer.itemsDropped);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static SoundAction getItemDropSound(Rarity rarity) {
+        if (rarity == Rarity.RARE || rarity == Rarity.EPIC)
+            return SoundAction.ITEM_DROP_RARE;
+        if (rarity == UnitItemRarity.LEGENDARY || rarity == UnitItemRarity.MYTHIC)
+            return SoundAction.ITEM_DROP_LEGENDARY;
+        return SoundAction.ITEM_DROP_COMMON;
+    }
+
+    // give items to regular units to hold and drop on death
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract evt) {
+        if (evt.getLevel().isClientSide()) return;
+        if (evt.getHand() != InteractionHand.MAIN_HAND) return;
+
+        Player player = evt.getEntity();
+        ItemStack stack = evt.getItemStack();
+        Entity target = evt.getTarget();
+        String mobName = target.getName().getString();
+        String itemName = stack.getHoverName().getString();
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+
+        if (target instanceof Mob && target instanceof UnitInventory inv &&
+            (inv.canPickupUnitItems() || player.isCreative()) &&
+            !stack.isEmpty() && unitItem != null
+        ) {
+            evt.setCanceled(true);
+
+            if (inv.isFull(unitItem)) {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.error.full_inventory", mobName));
+                evt.setCancellationResult(InteractionResult.FAIL);
+            } else if (inv.tryAdding(new ItemStack(stack.getItem(), 1))) {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.hud.give_to_unit", itemName, mobName));
+                if (!player.isCreative()) {
+                    stack.setCount(stack.getCount() - 1);
+                }
+                evt.setCancellationResult(InteractionResult.SUCCESS);
+            }
+            else {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.error.failed_other", mobName));
+                evt.setCancellationResult(InteractionResult.FAIL);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity item
+                && ItemUtil.isUnitItem(item.getItem())) {
+            item.setInvulnerable(true);
         }
     }
 }

@@ -10,12 +10,10 @@ import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -28,13 +26,11 @@ import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimation
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -70,10 +66,10 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -93,12 +89,14 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -122,7 +120,18 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
@@ -260,7 +269,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, MarauderUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, MarauderUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MarauderUnit.maxHealth)
@@ -303,19 +312,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -325,7 +322,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         if (isNextHitBig()) {
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(new AttributeModifier("knockback", 1.5f, AttributeModifier.Operation.ADDITION));
             result = super.doHurtTarget(pEntity);
-            if (pEntity instanceof LivingEntity le) {
+            if (result && pEntity instanceof LivingEntity le && (!(pEntity instanceof Unit unit) || !unit.uninterruptable())) {
                 le.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
             }
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).removeModifiers();
@@ -343,8 +340,9 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 int extraHitsLeft = 2;
                 for (Mob mob : closestMobs) {
                     if (UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY && mob.getId() != pEntity.getId()) {
-                        super.doHurtTarget(mob);
-                        mob.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 20));
+                        if (super.doHurtTarget(mob)) {
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 20));
+                        }
                         extraHitsLeft -= 1;
                         if (extraHitsLeft <= 0) {
                             break;
@@ -386,6 +384,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);

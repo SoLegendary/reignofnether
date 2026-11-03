@@ -83,11 +83,11 @@ public class MaceSlam extends HeroAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.MACE_SLAM),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 

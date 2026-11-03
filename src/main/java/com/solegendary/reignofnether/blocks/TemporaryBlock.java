@@ -49,16 +49,23 @@ public class TemporaryBlock {
         }
         else if (isPlaced && tickAge >= lifespan &&
                 level.getBlockState(bp).getBlock() == bs.getBlock()) {
-            if (oldBs.isAir()) {
-                level.destroyBlock(bp, false);
-            } else {
-                level.setBlockAndUpdate(bp, oldBs);
-            }
-            if (bsAbove != null && level.getBlockState(bp.above()).getBlock() == bsAbove.getBlock()) {
-                level.destroyBlock(bp.above(), false);
-            }
+            revert(level);
             return true;
         }
         return false;
+    }
+
+    // put back what was there, if this block is still in place
+    public void revert(ServerLevel level) {
+        if (!isPlaced || level.getBlockState(bp).getBlock() != bs.getBlock())
+            return;
+        if (oldBs.isAir()) {
+            level.destroyBlock(bp, false);
+        } else {
+            level.setBlockAndUpdate(bp, oldBs);
+        }
+        if (bsAbove != null && level.getBlockState(bp.above()).getBlock() == bsAbove.getBlock()) {
+            level.destroyBlock(bp.above(), false);
+        }
     }
 }

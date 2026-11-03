@@ -1,16 +1,20 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.MyMobEffect;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+
+import java.util.UUID;
 
 
 public class MobEffectRegistrar {
@@ -88,6 +92,43 @@ public class MobEffectRegistrar {
 
     // for striders to maintain visuals slightly off terrain
     public static final RegistryObject<MobEffect> WARM = MOB_EFFECTS.register("warm", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
+
+    // cooldown reduction
+    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF)
+            .addAttributeModifier(AttributeRegistrar.FASTER_COOLDOWNS.get(), "c967f9cf-ef58-46be-a775-d69c80c688ed", 0.5f, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), "e47194b6-8fc3-42c1-99fb-4957cbaa23eb", 1.0, AttributeModifier.Operation.ADDITION));
+
+    // no knockback taken or received, not pushable
+    public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
+            .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "709b8a00-a856-4161-b32a-32c4970c1490", 1.0f, AttributeModifier.Operation.ADDITION));
+
+    // temporary night zone
+    public static final RegistryObject<MobEffect> NIGHT_WARPING = MOB_EFFECTS.register("night_warping", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000));
+
+    public static final RegistryObject<MobEffect> COLD = MOB_EFFECTS.register("cold", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 3402751)
+            .addAttributeModifier(Attributes.MOVEMENT_SPEED, "14dfe523-ff36-4744-9ba3-41937d0b8eb5", -0.1, AttributeModifier.Operation.MULTIPLY_BASE)
+            .addAttributeModifier(AttributeRegistrar.ATTACKS_PER_SECOND.get(), "0278ceb0-fc3a-456d-b40a-14be53a1aed6", -0.1, AttributeModifier.Operation.MULTIPLY_BASE)
+            .addAttributeModifier(Attributes.ATTACK_SPEED, "0278ceb0-fc3a-456d-b40a-14be53a1aed6", -0.1,AttributeModifier.Operation.MULTIPLY_BASE));
+
+    public static final RegistryObject<MobEffect> INVINCIBLE = MOB_EFFECTS.register("invincible", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 5559980)
+            .addAttributeModifier(Attributes.ARMOR, "f16f1e7e-3f89-4ac8-b918-621366dc13bc", 100, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), "4c9d4fd6-6354-420c-a21b-4b6810f2d07b", 100, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "f89ff503-070c-4a85-9512-44fe0ec3b153", 1, AttributeModifier.Operation.ADDITION));
+
+    public static final RegistryObject<MobEffect> VILLAGER_INSPIRATION = MOB_EFFECTS.register("villager_inspiration", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x66ffcc));
+
+    // visual only
+    public static final RegistryObject<MobEffect> LIMITED_LIFESPAN = MOB_EFFECTS.register("limited_lifespan", () -> new InstantenousMobEffect(MobEffectCategory.NEUTRAL, 0xffffff));
+
+    public static final RegistryObject<MobEffect> LIFESTEAL = MOB_EFFECTS.register("lifesteal", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.LIFESTEAL.get(), "c159f105-f0cd-464d-86fe-82213a34dac7", UnitItems.HUNGRY_HORROR_ARMOUR_LIFESTEAL, AttributeModifier.Operation.ADDITION));
+
+    public static final RegistryObject<MobEffect> PIGLIN_FERVOR = MOB_EFFECTS.register("piglin_fervor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.ATTACK_DAMAGE.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_DAMAGE, AttributeModifier.Operation.MULTIPLY_BASE));
+
+    public static final UUID ENCHANTED_TETHER_UUID = UUID.fromString("12fd7bff-d0a0-470c-84ea-fc6fe49ce319");
+    public static final RegistryObject<MobEffect> ENCHANTED_TETHER = MOB_EFFECTS.register("enchanted_tether", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.SCALE.get(), "12fd7bff-d0a0-470c-84ea-fc6fe49ce319", 0.3, AttributeModifier.Operation.ADDITION));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

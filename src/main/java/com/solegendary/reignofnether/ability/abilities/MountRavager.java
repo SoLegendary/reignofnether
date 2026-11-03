@@ -20,14 +20,13 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MountRavager extends Ability {
     public MountRavager() {
@@ -46,8 +45,8 @@ public class MountRavager extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.MOUNT_RAVAGER),
             () -> UnitClientEvents.sendUnitCommand(UnitAction.MOUNT_RAVAGER),
             List.of(
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_ravager"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.mount_ravager.tooltip1"), Style.EMPTY)
+                fcs(I18n.get("abilities.reignofnether.mount_ravager")),
+                fcs(I18n.get("abilities.reignofnether.mount_ravager.tooltip1"))
             ),
             this,
             unit

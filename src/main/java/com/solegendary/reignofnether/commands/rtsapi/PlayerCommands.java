@@ -17,14 +17,17 @@ import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
 import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -394,6 +397,17 @@ public class PlayerCommands {
 						.executes(ctx -> CommandsServerEvents.setStartingTeamsMode(ctx, StringArgumentType.getString(ctx, "mode")))
 					)
 				)
+				.then(Commands.literal("start-scenario-role")
+					.then(Commands.argument("player", PlayerNameArgument.player())
+						.then(Commands.argument("scenarioId", IntegerArgumentType.integer(0))
+							.executes(ctx -> startScenarioRole(
+								ctx,
+								PlayerNameArgument.getPlayerName(ctx, "player"),
+								IntegerArgumentType.getInteger(ctx, "scenarioId")
+							))
+						)
+					)
+				)
 			);
 	}
 
@@ -411,9 +425,9 @@ public class PlayerCommands {
 			return 0;
 		}
 		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel);
-        String forcePanTicksText = forcePanTicks > 0 ? I18n.get("commands.reignofnether.player.move_camera.force_pan_ticks", forcePanTicks) : "";
-		String lockTicksText = lockTicks > 0 ? I18n.get("commands.reignofnether.player.move_camera.lock_ticks", lockTicks) : "";
-		String zoomLevelText = zoomLevel > 0 ? I18n.get("commands.reignofnether.player.move_camera.zoom_level", zoomLevel) : "";
+        Component forcePanTicksText = forcePanTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.force_pan_ticks", forcePanTicks) : Component.empty();
+		Component lockTicksText = lockTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.lock_ticks", lockTicks) : Component.empty();
+		Component zoomLevelText = zoomLevel > 0 ? Component.translatable("commands.reignofnether.player.move_camera.zoom_level", zoomLevel) : Component.empty();
 		ctx.getSource().sendSuccess(
 				() -> Component.translatable("commands.reignofnether.player.move_camera", playerName, pos.getX(), pos.getZ(), forcePanTicksText, lockTicksText, zoomLevelText),
 				true
@@ -441,6 +455,53 @@ public class PlayerCommands {
 		return 1;
 	}
 
+
+	private static int startScenarioRole(
+		CommandContext<CommandSourceStack> ctx,
+		String playerName,
+		int roleIndex
+	) {
+		if (!ctx.getSource().getServer().getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.not_scenario_mode"));
+			return 0;
+		}
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.offline", playerName));
+			return 0;
+		}
+		if (PlayerServerEvents.isRTSPlayer(playerName)) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.already_rts_player", playerName));
+			return 0;
+		}
+		ScenarioRole role = ScenarioUtils.getScenarioRole(false, roleIndex);
+		if (role == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.unknown_role", roleIndex));
+			return 0;
+		}
+		if (role.isNpc) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_npc", roleIndex));
+			return 0;
+		}
+		synchronized (PlayerServerEvents.rtsPlayers) {
+			for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
+				if (rtsPlayer.scenarioRoleIndex == roleIndex) {
+					ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_taken", roleIndex, rtsPlayer.name));
+					return 0;
+				}
+			}
+		}
+		if (PlayerServerEvents.rtsLocked) {
+			ctx.getSource().sendFailure(Component.translatable("server.reignofnether.locked"));
+			return 0;
+		}
+		PlayerServerEvents.startRTSScenario(player.getId(), roleIndex);
+		ctx.getSource().sendSuccess(
+			() -> Component.translatable("commands.reignofnether.scenario.start_role.success", playerName, role.name, roleIndex),
+			true
+		);
+		return 1;
+	}
 
 	private static int changeResources(
 		CommandContext<CommandSourceStack> ctx,
@@ -472,7 +533,7 @@ public class PlayerCommands {
 					}
 					ResourcesClientboundPacket.syncResources(ResourcesServerEvents.resourcesList);
 					ctx.getSource().sendSuccess(
-						() -> Component.translatable("commands.reignofnether.player.resource.set", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+						() -> Component.translatable("commands.reignofnether.player.resource.set", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 						true
 					);
 					return 1;
@@ -485,7 +546,7 @@ public class PlayerCommands {
 			int emerald = resource == ResourceName.EMERALD ? amount : 0;
 			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 			ctx.getSource().sendSuccess(
-				() -> Component.translatable("commands.reignofnether.player.resource.add", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+				() -> Component.translatable("commands.reignofnether.player.resource.add", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 				true
 			);
 			return 1;

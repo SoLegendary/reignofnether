@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleRegistrar {
@@ -28,6 +29,8 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_THREADS;
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
     public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
+    public static GameRules.Key<GameRules.IntegerValue> RANDOM_ITEM_DROPS;
+    public static GameRules.Key<GameRules.BooleanValue> HIDE_ENEMY_PICKS;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -86,6 +89,10 @@ public class GameRuleRegistrar {
         SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
                 GameRules.BooleanValue.create(false)
         );
+        // in the match lobby, other teams' factions and chosen start positions are hidden
+        HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(true)
+        );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
         COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
@@ -123,5 +130,17 @@ public class GameRuleRegistrar {
         ANIMAL_SPAWN_Y_DIFF = GameRules.register("animalSpawnYDiff", GameRules.Category.MOBS,
                 GameRules.IntegerValue.create(5)
         );
+        // Difference in level that animals can spawn around capitols at
+        RANDOM_ITEM_DROPS = GameRules.register("randomItemDrops", GameRules.Category.DROPS,
+                boundedInt(1, 0, 3)
+        );
+    }
+
+    private static GameRules.Type<GameRules.IntegerValue> boundedInt(int def, int min, int max) {
+        return GameRules.IntegerValue.create(def, (server, value) -> {
+            int clamped = Mth.clamp(value.get(), min, max);
+            if (clamped != value.get())
+                value.set(clamped, server); // only re-set if different, avoids infinite recursion
+        });
     }
 }

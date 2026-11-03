@@ -3,10 +3,9 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ToggleFlying;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -17,7 +16,6 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
-import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
@@ -31,22 +29,20 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WindcallerAnimations;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -59,15 +55,12 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.stringtemplate.v4.misc.Misc;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -88,10 +81,10 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
 
@@ -109,12 +102,14 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public Abilities getAbilities() {return abilities;};
+	public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {
         return isFlying() ? flyingMoveGoal : moveGoal;
@@ -150,7 +145,18 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WindcallerUnit.class, EntityDataSerializers.STRING);
@@ -193,7 +199,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     // endregion
 
-    final static public int LEVITATE_TICKS = 80;
+    final static public int LEVITATE_TICKS = 100;
     final static public int LONGSHOT_BONUS_RANGE = 4;
 
     final static public float attackDamage = 5.0f;
@@ -342,7 +348,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     @Override
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
         if (!this.level().isClientSide && this.fallDistance > 3.0F && pOnGround && !pState.isAir()) {
-            MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
+            ParticleUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
         }
         // super.super method logic (entity.class)
         if (pOnGround) {
@@ -408,7 +414,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WindcallerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WindcallerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WindcallerUnit.maxHealth)
@@ -434,14 +440,14 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
         updateRotation();
 
         if (level().isClientSide() && isFlying()) {
-            MiscUtil.spawnFlyingCloudParticles(this);
+            ParticleUtil.spawnFlyingCloudParticles(this);
         }
 
         // Apply deferred ground target once the windcaller has actually landed
@@ -453,19 +459,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -529,6 +523,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         this.flyingMoveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new UnitRangedAttackGoal<>(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
@@ -546,16 +541,16 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         this.goalSelector.addGoal(3, flyingMoveGoal);
     }
 
-    public int getAttackerRangeBonus(Mob attacker) {
+    public double getAttackerRangeBonus(Mob attacker) {
         Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
         Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
         double vertiDist = Math.max(0, this.getY() - attacker.getY());
 
         if (horizDist < 4)
-            return (int) (vertiDist * 0.5f);
+            return vertiDist * 0.5f;
         else
-            return (int) (vertiDist * 0.25f);
+            return vertiDist * 0.25f;
     }
 
     @Override
@@ -574,29 +569,13 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         if (pTarget == null)
             return;
 
-        // Lead the shot by predicting where the target will be when the projectile arrives
-        /*
-        Vec3 shooterPos = this.getEyePosition();
-        Vec3 targetPos = pTarget.getEyePosition().subtract(0,0.5,0);
-        Vec3 targetDelta = pTarget.getDeltaMovement();
-
-        if (pTarget.onGround())
-            targetDelta = targetDelta.multiply(1,0,1);
-
-        double distanceTicks = shooterPos.distanceTo(targetPos) * 1.5f;
-        Vec3 predictedPos = targetPos.add(targetDelta.multiply(distanceTicks * 1.5f, distanceTicks, distanceTicks * 1.5f));
-
-        double x = predictedPos.x() - shooterPos.x();
-        double y = predictedPos.y() - shooterPos.y();
-        double z = predictedPos.z() - shooterPos.z();
-         */
-
         double x = pTarget.getX() - this.getX();
         double y = isFlying() ? (pTarget.getY() - this.getEyeY()) : (pTarget.getEyeY() - 0.5 - this.getEyeY());
         double z = pTarget.getZ() - this.getZ();
 
         WindcallerProjectile proj = new WindcallerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 
@@ -615,6 +594,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public boolean hasBonusRange() {
-        return hasLongshot();
+        return AttackerUnit.super.hasBonusRange() || hasLongshot();
     }
 }

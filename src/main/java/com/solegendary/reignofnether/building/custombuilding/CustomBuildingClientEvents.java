@@ -14,6 +14,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -86,6 +87,7 @@ public class CustomBuildingClientEvents {
         CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt, commandsNbt);
 
         customBuildings.add(building);
+
     }
 
     @SubscribeEvent
@@ -116,9 +118,9 @@ public class CustomBuildingClientEvents {
         renderedButtons.clear();
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
             int blitX = 120;
-            int blitY = 30;
+            int blitY = 20;
             int width = 315;
-            int height = 240;
+            int height = 260;
             MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
 
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));

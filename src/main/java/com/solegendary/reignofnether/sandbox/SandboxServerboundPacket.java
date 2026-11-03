@@ -76,8 +76,8 @@ public class SandboxServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if (!SandboxServer.isAnyoneASandboxPlayer()) {
-                ReignOfNether.LOGGER.warn("SandboxServerboundPacket: Tried to process packet from " + player.getName() + " while sandbox is disabled");
+            else if (!SandboxServer.isSandboxOp(player)) {
+                ReignOfNether.LOGGER.warn("SandboxServerboundPacket: Tried to process packet from non-sandbox or non-op player " + player.getName());
                 success.set(false);
                 return;
             }

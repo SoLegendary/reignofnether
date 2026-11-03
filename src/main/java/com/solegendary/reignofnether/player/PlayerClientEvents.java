@@ -1,35 +1,41 @@
 package com.solegendary.reignofnether.player;
 
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.PlayerChunksClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.healthbars.BarStates;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -91,7 +97,7 @@ public class PlayerClientEvents {
         for (RTSPlayer rtsPlayer : rtsPlayers)
             if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
                 return rtsPlayer.faction;
-        return Faction.NONE;
+        return Factions.NONE;
     }
 
     public static RTSPlayer getPlayer(String playerName) {
@@ -99,15 +105,6 @@ public class PlayerClientEvents {
             if (rtsPlayer.name.equals(playerName))
                 return rtsPlayer;
         return null;
-    }
-
-    public static Integer getPlayerId(String playerName) {
-        var player = getPlayer(playerName);
-        if (player == null) {
-            return null;
-        }
-
-        return player.id;
     }
 
     public static Integer getPlayerIndex(String playerName) {
@@ -128,15 +125,6 @@ public class PlayerClientEvents {
         return player.startPosColorId; // corresponds to a MapColor.id
     }
 
-    public static Faction getPlayerFaction(String playerName) {
-        var player = getPlayer(playerName);
-        if (player == null) {
-            return Faction.NONE;
-        }
-
-        return player.faction;
-    }
-
     public static String getPlayerName() {
         return MC.player != null ? MC.player.getName().getString() : "";
     }
@@ -147,8 +135,14 @@ public class PlayerClientEvents {
                 rtsPlayer.tradeRates.put(tradeAction, rate);
 
         for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
-            if (bpl.getBuilding() instanceof AbstractMarket)
+            if (bpl instanceof ItemShopPlacement shop && !shop.getStockedItems().isEmpty())
                 bpl.updateButtons();
+    }
+
+    public static void setItemsDropped(String playerName, int itemsDropped) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.itemsDropped = itemsDropped;
     }
 
     @SubscribeEvent
@@ -248,30 +242,33 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
-            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson));
+            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L, -1L));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (faction != Faction.NONE) {
+                if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
-                    ResearchClient.removeAllCheats();
+                    if (!isSyncing)
+                        ResearchClient.removeAllCheats();
                 }
                 PlayerServerboundPacket.requestMarketRates();
             }
+            if (!isSyncing)
+                HeroClientEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
         }
     }
 
     public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
         if (!isRTSPlayer(playerName)) {
-            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true);
+            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true, -1L, -1L);
             rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
             rtsPlayers.add(rtsPlayer);
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (faction != Faction.NONE) {
+                    if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }
@@ -313,13 +310,34 @@ public class PlayerClientEvents {
         HeroClientEvents.fallenHeroes.clear();
         PlayerDisplayClientEvents.resetDisplay();
         PlayerColors.reset();
-        CustomBuildingClientEvents.customBuildings.clear();
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
         RTSMapInfoClientEvents.reset();
-        MinimapClientEvents.clearMinimapUnits();
+        MinimapClientEvents.clearVirtualUnits();
         PlayerDisplayClientEvents.clearAll();
         rtsPlayers.clear();
+        synchronized (UnitClientEvents.mobEffectIcons) {
+            UnitClientEvents.mobEffectIcons.clear();
+        }
+        // nothing from the old world left selected, armed or open in the next one
+        HudClientEvents.hudSelectedEntity = null;
+        HudClientEvents.hudSelectedPlacement = null;
+        BuildingClientEvents.setBuildingToPlace(null);
+        CursorClientEvents.setLeftClickAction(null);
+        CursorClientEvents.setLeftClickSandboxAction(null);
+        ItemClientEvents.resetActions();
+        ItemClientEvents.hoveredInvItem = null;
+        ItemClientEvents.openItemShop = null;
+        AlliancesClient.inboundPendingAlliances.clear();
+        AlliancesClient.outboundPendingAlliances.clear();
+        MinimapClientEvents.mapMarkers.clear();
+        // PlayerLoggedOutEvent fires on the integrated server thread in singleplayer
+        MC.execute(() -> {
+            ScenarioClientEvents.resetRoles();
+            PlayerChunksClientEvents.reset();
+            BarStates.clear();
+            CustomBuildingClientEvents.customBuildings.clear();
+        });
     }
 
     @SubscribeEvent
@@ -350,7 +368,7 @@ public class PlayerClientEvents {
 
     // allow tab player list menu on the orthoview screen
     @SubscribeEvent
-    public static void onScreenRender(ScreenEvent.Render evt) {
+    public static void onScreenRender(ScreenEvent.Render.Post evt) {
         if (OrthoviewClientEvents.isEnabled() && Keybindings.tab.isDown() && MC.level != null) {
             if (!MC.isLocalServer()) {
                 MC.gui.getTabList().setVisible(true);
@@ -448,91 +466,4 @@ public class PlayerClientEvents {
         if (MC.level != null)
             lastUsedBlockState = MC.level.getBlockState(evt.getPos());
     }
-
-    /*
-    public static double red = 0.0d;
-    public static double green = 0.0d;
-    public static double blue = 0.0d;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (Keybindings.shiftMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                red -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                red += 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                green -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                green += 0.02f;
-            }
-        } else {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                blue -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                blue += 0.02f;
-            }
-        }
-    }
-     */
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-                "red: " + red,
-                "green: " + green,
-                "blue: " + blue,
-        });
-    }
-
-
-    public static int titleX = -56;
-    public static int titleY = 5;
-    public static int width = 380;
-    public static int height = 127;
-    public static int editionY = 92;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (Keybindings.shiftMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                titleX -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                titleX += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                titleY -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                titleY += 1;
-            }
-        } else if (Keybindings.ctrlMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                editionY -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                editionY += 1;
-            }
-        } else {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                width -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                width += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                height += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                height -= 1;
-            }
-        }
-    }
-     */
 }

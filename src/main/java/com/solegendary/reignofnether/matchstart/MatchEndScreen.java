@@ -1,7 +1,5 @@
 package com.solegendary.reignofnether.matchstart;
 
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket.MatchStatRow;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.time.TimeUtils;
@@ -144,7 +142,7 @@ public class MatchEndScreen extends Screen {
                 g.blit(skin, cl, y, HEAD, HEAD, 40.0f, 8.0f, 8, 8, 64, 64);
 
                 // faction icon
-                ResourceLocation fIcon = MiscUtil.getFactionIcon(row.faction);
+                ResourceLocation fIcon = row.faction.icon;
                 if (fIcon != null)
                     MyRenderer.renderIcon(g, fIcon, cl + HEAD + 4, y, HEAD);
 

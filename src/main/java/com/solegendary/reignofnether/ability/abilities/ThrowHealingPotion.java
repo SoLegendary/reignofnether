@@ -30,7 +30,6 @@ public class ThrowHealingPotion extends Ability {
 
     public final Potion potion = Potions.STRONG_HEALING;
 
-    //TODO Fix potionThrowRange for Witches gathering on a building
     public ThrowHealingPotion(int potionThrowRange) {
         super(UnitAction.THROW_HEALING_POTION,
             CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND,

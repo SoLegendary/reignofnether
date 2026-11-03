@@ -26,18 +26,17 @@ import java.util.Map;
 @OnlyIn(Dist.CLIENT)
 public class PiglinUnitRenderer extends HumanoidMobRenderer<Mob, PiglinUnitModel<Mob>> {
     private static final Map<EntityType<?>, ResourceLocation> TEXTURES;
-    private static final float PIGLIN_CUSTOM_HEAD_SCALE = 1.0019531F;
 
     // See class EntityRenderers for the original code
     public PiglinUnitRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, createModel(pContext.getModelSet(), ModelLayers.PIGLIN, false), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
-        this.addLayer(new HumanoidArmorLayer(this,
-                    new HumanoidArmorModel(pContext.bakeLayer(ModelLayers.ZOMBIE_INNER_ARMOR)),
-                    new HumanoidArmorModel(pContext.bakeLayer(ModelLayers.ZOMBIE_OUTER_ARMOR)), pContext.getModelManager()));
+        this.addLayer(new HumanoidArmorLayer<>(this,
+                    new HumanoidArmorModel<>(pContext.bakeLayer(ModelLayers.ZOMBIE_INNER_ARMOR)),
+                    new HumanoidArmorModel<>(pContext.bakeLayer(ModelLayers.ZOMBIE_OUTER_ARMOR)), pContext.getModelManager()));
     }
 
     private static PiglinUnitModel<Mob> createModel(EntityModelSet p_174350_, ModelLayerLocation pLayer, boolean p_174352_) {
-        PiglinUnitModel<Mob> $$3 = new PiglinUnitModel(p_174350_.bakeLayer(pLayer));
+        PiglinUnitModel<Mob> $$3 = new PiglinUnitModel<>(p_174350_.bakeLayer(pLayer));
         if (p_174352_) {
             $$3.rightEar.visible = false;
         }

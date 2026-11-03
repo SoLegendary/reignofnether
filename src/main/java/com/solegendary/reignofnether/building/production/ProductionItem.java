@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
@@ -45,12 +46,12 @@ public abstract class ProductionItem {
     }
 
     // is the player allowed to start this production item?
-    public boolean canProduce(Level level, String ownerName) {
-        return getProduceErrorMsg(level, ownerName) == null;
+    public boolean canProduce(ProductionPlacement pp) {
+        return getProduceErrorMsg(pp) == null;
     }
 
     @Nullable
-    public String getProduceErrorMsg(Level level, String ownerName) {
+    public String getProduceErrorMsg(ProductionPlacement pp) {
         return null;
     }
 
@@ -124,7 +125,7 @@ public abstract class ProductionItem {
     }
 
     public boolean itemIsBeingProduced(boolean isClientSide, String ownerName) {
-        List<BuildingPlacement> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building.ownerName.equals(ownerName) && building instanceof ProductionPlacement prodBuilding)
@@ -140,7 +141,7 @@ public abstract class ProductionItem {
     }
 
     public boolean itemIsBeingProducedAt(boolean isClientSide, ProductionPlacement pp) {
-        List<BuildingPlacement> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building == pp)

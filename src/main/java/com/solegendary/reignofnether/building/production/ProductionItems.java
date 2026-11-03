@@ -73,12 +73,14 @@ public class ProductionItems {
     public static final PandaProd PANDA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "panda"), new PandaProd());
     public static final WolfProd WOLF = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wolf"), new WolfProd());
     public static final LlamaProd LLAMA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "llama"), new LlamaProd());
+    public static final BeeProd BEE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bee"), new BeeProd());
 
     public static final ResearchVindicatorAxes RESEARCH_VINDICATOR_AXES = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "vindicator_axes"), new ResearchVindicatorAxes());
     public static final ResearchPillagerCrossbows RESEARCH_PILLAGER_CROSSBOWS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "pillager_crossbows"), new ResearchPillagerCrossbows());
     public static final ResearchMilitiaBows RESEARCH_MILITIA_BOWS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "militia_bows"), new ResearchMilitiaBows());
     public static final ResearchLabLightningRod RESEARCH_LAB_LIGHTNING_ROD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "lab_lightning_rod"), new ResearchLabLightningRod());
     public static final ResearchResourceCapacity RESEARCH_RESOURCE_CAPACITY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_capacity"), new ResearchResourceCapacity());
+    public static final ResearchItemBackpacks RESEARCH_ITEM_BACKPACKS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_backpacks"), new ResearchItemBackpacks());
     public static final ResearchSpiderJockeys RESEARCH_SPIDER_JOCKEYS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "spider_jockeys"), new ResearchSpiderJockeys());
     public static final ResearchPoisonSpiders RESEARCH_POISON_SPIDERS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_poison_spiders"), new ResearchPoisonSpiders());
     public static final ResearchHusks RESEARCH_HUSKS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_husks"), new ResearchHusks());
@@ -114,6 +116,9 @@ public class ProductionItems {
     public static final ResearchBloodlust RESEARCH_BLOODLUST = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bloodlust"), new ResearchBloodlust());
     public static final ResearchCubeMagma RESEARCH_CUBE_MAGMA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "cube_magma"), new ResearchCubeMagma());
     public static final ResearchSoulFireballs RESEARCH_SOUL_FIREBALLS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soul_fireballs"), new ResearchSoulFireballs());
+    public static final ResearchMarketUpgradeVillager RESEARCH_MARKET_UPGRADE_VILLAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_market_upgrade_villager"), new ResearchMarketUpgradeVillager());
+    public static final ResearchMarketUpgradeMonster RESEARCH_MARKET_UPGRADE_MONSTERS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_market_upgrade_monster"), new ResearchMarketUpgradeMonster());
+    public static final ResearchMarketUpgradePiglin RESEARCH_MARKET_UPGRADE_PIGLINS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_market_upgrade_piglin"), new ResearchMarketUpgradePiglin());
 
     public static final ResearchPortalForCivilian RESEARCH_PORTAL_FOR_CIVILIAN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_for_civilian"), new ResearchPortalForCivilian());
     public static final ResearchPortalForMilitary RESEARCH_PORTAL_FOR_MILITARY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_for_military"), new ResearchPortalForMilitary());

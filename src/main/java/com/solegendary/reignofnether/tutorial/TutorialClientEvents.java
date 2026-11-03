@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
@@ -23,7 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
@@ -32,7 +33,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -48,6 +48,7 @@ import java.util.function.Supplier;
 import static com.solegendary.reignofnether.registrars.SoundRegistrar.ALLY;
 import static com.solegendary.reignofnether.registrars.SoundRegistrar.CHAT;
 import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class TutorialClientEvents {
 
@@ -107,7 +108,7 @@ public class TutorialClientEvents {
         },
         () -> {
         },
-        List.of(FormattedCharSequence.forward(I18n.get("tutorial.reignofnether.tutorial_help"), Style.EMPTY))
+        List.of(fcs(I18n.get("tutorial.reignofnether.tutorial_help")))
     );
 
     public static void loadStage(TutorialStage stage) {
@@ -137,10 +138,6 @@ public class TutorialClientEvents {
         helpButtonText = "";
     }
 
-    public static int getStageProgress() {
-        return stageProgress;
-    }
-
     public static boolean isEnabled() {
         return enabled && MC.hasSingleplayerServer();
     }
@@ -162,18 +159,6 @@ public class TutorialClientEvents {
 
     private static void nextStage() {
         tutorialStage = tutorialStage.next();
-        ticksOnStage = 0;
-        stageProgress = 0;
-        blockUpdateStage = false;
-        clearHelpButtonText();
-        TutorialRendering.clearButtonName();
-        updateStage();
-        shouldPauseTicking = () -> false;
-        TutorialServerboundPacket.saveStage(tutorialStage);
-    }
-
-    private static void prevStage() {
-        tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
         stageProgress = 0;
         blockUpdateStage = false;
@@ -914,7 +899,7 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_B);
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                        if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Faction.VILLAGERS
+                        if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Factions.VILLAGERS
                             && damagedBuildings.size() < 3) {
                             damagedBuildings.add(building);
                         }
@@ -1003,7 +988,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 } else if (stageProgress == 3) {
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-                        if (building.getFaction() == Faction.MONSTERS
+                        if (building.getFaction() == Factions.MONSTERS
                             && building.getHealth() < building.getMaxHealth()) {
                             msg("tutorial.reignofnether.tip.monster_capitol");
                             progressStage();
@@ -1013,7 +998,7 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 4) {
                     boolean botAlive = false;
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                        if (building.getFaction() == Faction.MONSTERS) {
+                        if (building.getFaction() == Factions.MONSTERS) {
                             botAlive = true;
                         }
 

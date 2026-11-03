@@ -31,11 +31,11 @@ public interface ItemShopAddon extends BuildingAddon {
     DataType<ArrayList<StockedShopItem>> STOCKED_ITEMS = DataType.createRegistered(
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stocked_items"),
             (nbt, server) -> { // decode
-                ArrayList<StockedShopItem> itemsAndStock = new ArrayList<>();
+                ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
                 ListTag ltag = nbt.getList("list", Tag.TAG_COMPOUND);
                 for (int i = 0; i < ltag.size(); i++) {
                     CompoundTag tag = ltag.getCompound(i);
-                    UnitItem unitItem = ItemUtil.getUnitItem(tag.getUUID("uuid"));
+                    UnitItem unitItem = ItemUtil.getUnitItem(tag.getString("descId"));
                     if (unitItem != null) {
                         StockedShopItem stock = new StockedShopItem(
                                 unitItem,
@@ -43,24 +43,26 @@ public interface ItemShopAddon extends BuildingAddon {
                                 tag.getInt("maxStock"),
                                 tag.getInt("stock"),
                                 tag.getInt("maxRestockTicks"),
-                                tag.getInt("restockTicks")
+                                tag.getInt("restockTicks"),
+                                tag.getInt("startingStock")
                         );
-                        itemsAndStock.add(stock);
+                        stockedItems.add(stock);
                     }
                 }
-                return itemsAndStock;
+                return stockedItems;
             },
-            itemsAndStock -> { // encode
+            stockedItems -> { // encode
                 CompoundTag tag = new CompoundTag();
                 ListTag ltag = new ListTag();
-                for (StockedShopItem stockedShopItem : itemsAndStock) {
+                for (StockedShopItem stockedShopItem : stockedItems) {
                     CompoundTag tag2 = new CompoundTag();
-                    tag2.putUUID("uuid", stockedShopItem.item.uuid);
+                    tag2.putString("descId", stockedShopItem.item.descId);
                     tag2.putInt("buyCost", stockedShopItem.getBuyCost());
                     tag2.putInt("maxStock", stockedShopItem.maxStock);
                     tag2.putInt("stock", stockedShopItem.stock);
                     tag2.putInt("maxRestockTicks", stockedShopItem.maxRestockTicks);
                     tag2.putInt("restockTicks", stockedShopItem.getTicksToNextRestock());
+                    tag2.putInt("startingStock", stockedShopItem.startingStock);
                     ltag.add(tag2);
                 }
                 tag.put("list", ltag);
@@ -73,11 +75,11 @@ public interface ItemShopAddon extends BuildingAddon {
         ArrayList<StockedShopItem> shopStocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
         if (!bpl.isBuilt || shopStocks == null) return;
         if (!bpl.canServeUnit(unit)) return;
-        if (!(unit instanceof UnitInventory inv)) return;
+        if (!(unit instanceof UnitInventory inv && inv.canPickupUnitItems())) return;
         if (((Entity) unit).level().isClientSide()) return;
 
         for (StockedShopItem shopStock : shopStocks) {
-            if (item.uuid.equals(shopStock.item.uuid)) {
+            if (item.descId.equals(shopStock.item.descId)) {
 
                 if (!bpl.isPosInsideBuilding(((LivingEntity) unit).getOnPos(), ItemShopPlacement.UNIT_SERVE_RANGE)) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.too_far_away");
@@ -88,7 +90,7 @@ public interface ItemShopAddon extends BuildingAddon {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), outOfStock);
                     return;
                 }
-                if (inv.isFull()) {
+                if (inv.isFull(item)) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.full_inventory");
                     return;
                 }
@@ -102,6 +104,10 @@ public interface ItemShopAddon extends BuildingAddon {
                 }
 
                 ItemStack itemStack = item.getNewItemStack();
+                if (shopStock.buyCost != item.buyCost) {
+                    itemStack.getOrCreateTag().putInt("sellValue", shopStock.buyCost / 2);
+                }
+
                 if (inv.tryAdding(itemStack)) {
                     ItemEntity itemEntity = ((LivingEntity) inv).spawnAtLocation(itemStack);
                     if (itemEntity != null) {
@@ -109,7 +115,7 @@ public interface ItemShopAddon extends BuildingAddon {
                         itemEntity.discard();
                     }
                     shopStock.stock -= 1;
-                    ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), item.buyCost));
+                    ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), -item.buyCost));
                     SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, ((LivingEntity) unit).getOnPos());
                     ItemShopClientboundPacket.syncItemShopStock(bpl.originPos, bpl.getStockedItems());
                 } else {

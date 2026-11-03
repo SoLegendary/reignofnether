@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.Predicate;
 
 @Mixin(Witch.class)
 public class WitchMixin {
@@ -25,8 +24,8 @@ public class WitchMixin {
     )
     public void aiStep(CallbackInfo ci) {
         if (healRaidersGoal == null)
-            healRaidersGoal = new NearestHealableRaiderTargetGoal(((Witch)(Object)this), Raider.class, true, (p_34159_) -> false);
+            healRaidersGoal = new NearestHealableRaiderTargetGoal<>(((Witch)(Object)this), Raider.class, true, (p_34159_) -> false);
         if (attackPlayersGoal == null)
-            attackPlayersGoal = new NearestAttackableWitchTargetGoal(((Witch)(Object)this), Player.class, 10, true, false, (Predicate)null);
+            attackPlayersGoal = new NearestAttackableWitchTargetGoal<>(((Witch)(Object)this), Player.class, 10, true, false, null);
     }
 }

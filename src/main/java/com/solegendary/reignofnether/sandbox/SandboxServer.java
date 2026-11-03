@@ -8,8 +8,9 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,14 +23,25 @@ public class SandboxServer {
 
     public static boolean isSandboxPlayer(String playerName) {
         for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
-            if (rtsPlayer.faction == Faction.NONE && playerName.equals(rtsPlayer.name))
+            if (rtsPlayer.faction == Factions.NONE && playerName.equals(rtsPlayer.name))
                 return true;
         return false;
     }
 
+    // only sandbox players with op rights may act on units and buildings they don't own
+    public static boolean isSandboxOp(ServerPlayer player) {
+        return isSandboxPlayer(player.getName().getString()) && PlayerServerEvents.isOpOrHost(player);
+    }
+
+    // for code that only has the (already sender-checked) owner name, eg. queued unit actions
+    public static boolean isSandboxOp(String playerName) {
+        ServerPlayer player = serverLevel == null ? null : serverLevel.getServer().getPlayerList().getPlayerByName(playerName);
+        return player != null && isSandboxOp(player);
+    }
+
     public static boolean isAnyoneASandboxPlayer() {
         for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
-            if (rtsPlayer.faction == Faction.NONE)
+            if (rtsPlayer.faction == Factions.NONE)
                 return true;
         return false;
     }
@@ -76,7 +88,7 @@ public class SandboxServer {
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             for (int entityId : entityIds) {
                 if (entity.getId() == entityId && entity instanceof Unit unit) {
-                    unit.setAnchor(null);
+                    unit.setAnchor(new BlockPos(0,0,0));
                     UnitSyncClientboundPacket.sendRemoveAnchorPosPacket(entity);
                 }
             }

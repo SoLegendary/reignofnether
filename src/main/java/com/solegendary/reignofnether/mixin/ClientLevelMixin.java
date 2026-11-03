@@ -101,9 +101,11 @@ public class ClientLevelMixin {
     // not a mixin, but called by them
     private void playSoundActual(double pX, double pY, double pZ, SoundEvent pSoundEvent, SoundSource pSource,
                            float pVolume, float pPitch, boolean pDistanceDelay, long pSeed) {
+        // sounds played on the local player (eg. attack warnings) must still be heard if the camera is over fog
+        boolean atPlayer = this.minecraft.player != null && this.minecraft.player.distanceToSqr(pX, pY, pZ) < 1;
         if (!FogOfWarClientEvents.isInBrightChunk(new BlockPos((int) (pX + 0.5f), (int) (pY + 0.5f), (int) (pZ + 0.5f))) &&
                 !pSoundEvent.getLocation().getPath().contains("ui.button.click") &&
-                !pSoundEvent.getLocation().getNamespace().contains("reignofnether"))
+                !atPlayer)
             return;
 
         Vec3 soundPos = getOrthoviewSoundPos(new Vec3(pX, pY, pZ));

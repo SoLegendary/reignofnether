@@ -77,6 +77,8 @@ public class PathNavigationMixin {
         // validate the landing node below it and commit to the fall, instead of spinning on the ledge unable to
         // reach a node it's standing right above. +0.5 so a drop of exactly MAX_FALL_DROP still validates.
         if (reignofnether$isClimbingSpider()) return 16.0;
+        // Water nodes sit on top of the surface but a floating body rides below it, up to a full block when wading.
+        if (reignofnether$usesRtsPaths() && mob.isInWater()) return 1.5;
         return reignofnether$isWideUnit() ? PathfinderConfig.MAX_FALL_DROP + 0.5 : original;
     }
 

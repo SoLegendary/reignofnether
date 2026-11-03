@@ -21,9 +21,6 @@ public class SlimeRollMoveControl extends MoveControl {
     /** How long the "wind up" squish-contraction lasts before the burst fires, in ticks. */
     private int windUpDurationTicks = 4;
 
-    /** Multiplier applied to the mob's movement speed attribute while actively sliding. */
-    private double burstSpeedMultiplier = 1;
-
     /** How far negative (contracted) the squish target goes during wind-up. Negative = squashed flat. */
     private float windUpSquishTarget = 0.45F;
 

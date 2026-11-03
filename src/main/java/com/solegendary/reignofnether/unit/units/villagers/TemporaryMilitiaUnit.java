@@ -3,7 +3,10 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -23,29 +26,42 @@ public class TemporaryMilitiaUnit extends MilitiaUnit {
     @Override
     public void tick() {
         super.tick();
-        if (!shouldDiscard()) {
+        if (!shouldDiscard() && !isDeadOrDying()) {
             if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
                     !level().isClientSide()) {
-
-                BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
-                        (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
-
-                int range = TownCentre.MILITIA_RANGE;
-
-                if (building == null) {
+                if (!inRangeOfTownCentre() && !inRangeOfBellHolder())
                     convertToVillager();
-                } else {
-                    Vec3 tcCentre = new Vec3( // ignore vertical distance
-                        building.centrePos.getCenter().x(),
-                        this.getEyeY(),
-                        building.centrePos.getCenter().z()
-                    );
-                    if (this.getEyePosition().distanceToSqr(tcCentre) > range * range) {
-                        convertToVillager();
-                    }
-                }
             }
         }
+    }
+
+    private boolean inRangeOfTownCentre() {
+        BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
+                (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
+
+        int range = TownCentre.MILITIA_RANGE;
+
+        if (building == null) {
+            return false;
+        } else {
+            Vec3 tcCentre = new Vec3( // ignore vertical distance
+                    building.centrePos.getCenter().x(),
+                    this.getEyeY(),
+                    building.centrePos.getCenter().z()
+            );
+            return this.getEyePosition().distanceToSqr(tcCentre) <= range * range;
+        }
+    }
+
+    private boolean inRangeOfBellHolder() {
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof UnitInventory inv && inv.isHoldingActive(UnitItems.BELL_OF_ARMS)) {
+                int range = UnitItems.BELL_OF_ARMS_RANGE;
+                if (this.getEyePosition().distanceToSqr(le.position()) <= range * range)
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override

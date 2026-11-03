@@ -2,7 +2,11 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
@@ -13,22 +17,20 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Stronghold extends ProductionBuilding implements GarrisonableBuildingAddon, RangeIndicatorAddon, NightSourceAddon {
     public final static int MAX_OCCUPANTS = 7;
@@ -59,9 +61,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         setActiveAddon(NightSourceAddon.class, this, true);
     }
 
-    public Faction getFaction() {
-        return Faction.MONSTERS;
-    }
+    
 
     private boolean hasPrerequisiteBuildings() {
         int count = 0;
@@ -74,32 +74,22 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/reinforced_deepslate_side.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.STRONGHOLD,
             () -> false,
             () -> hasPrerequisiteBuildings() || ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(Component.translatable("buildings.reignofnether.stronghold").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip2",
-                    Stronghold.MAX_OCCUPANTS
-                ), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip3",
-                    nightRange
-                ), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip4"),
-                    Style.EMPTY
-                )
+                fcs(""),
+                Component.translatable("buildings.reignofnether.stronghold.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.stronghold.tooltip2", Stronghold.MAX_OCCUPANTS).getVisualOrderText(),
+                fcs(""),
+                Component.translatable("buildings.reignofnether.stronghold.tooltip3", nightRange).getVisualOrderText(),
+                fcs(""),
+                Component.translatable("buildings.reignofnether.stronghold.tooltip4").getVisualOrderText()
             ),
             this
         );

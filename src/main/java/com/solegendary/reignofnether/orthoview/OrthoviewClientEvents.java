@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -19,7 +20,7 @@ import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.CameraType;
@@ -44,10 +45,12 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.DoubleBuffer;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -74,6 +77,7 @@ public class OrthoviewClientEvents {
     public static LeafHideMethod hideLeavesMethod = LeafHideMethod.NONE;
     public static int enabledCount = 0;
     public static boolean enabled = false;
+    private static boolean snapYOnJoin = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
     private static final Minecraft MC = Minecraft.getInstance();
@@ -91,6 +95,7 @@ public class OrthoviewClientEvents {
 
     private static final int FORCE_PAN_TICKS_DEFAULT = 20;
     private static int forcePanTicksLeft = 0;
+    private static int forcePanTicksMax = FORCE_PAN_TICKS_DEFAULT;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
     private static float forcePanOriginalX = 0;
@@ -121,6 +126,14 @@ public class OrthoviewClientEvents {
     public static double orthoviewPlayerBaseY = 100;
     public static double orthoviewPlayerMaxY = 160;
     private static double minOrthoviewY = 0;
+
+    private static final List<Keybinding> CAMERA_KEYBINDS = List.of(
+            Keybindings.getFnum(4),
+            Keybindings.getFnum(5),
+            Keybindings.getFnum(6),
+            Keybindings.getFnum(7)
+    );
+    private static final HashMap<Keybinding, Vec3> cameraHotkeys = new HashMap<>();
 
     public static void setMinOrthoviewY(double value) {
         minOrthoviewY = value;
@@ -276,6 +289,7 @@ public class OrthoviewClientEvents {
     public static void forceMoveCam(int x, int z, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
             forcePanTicksLeft = forcePanTicks;
+            forcePanTicksMax = forcePanTicksLeft;
             forcePanTargetX = x;
             forcePanTargetZ = z;
             cameraLockTicksLeft = forcePanTicks + cameraLockTicks;
@@ -332,6 +346,18 @@ public class OrthoviewClientEvents {
             return;
         }
 
+        // on join, wait for the chunks under the camera then teleport to the right height once,
+        // instead of the per-tick correction sliding there (it reads unloaded chunks as a drop)
+        if (snapYOnJoin) {
+            BlockPos bp = MC.player.blockPosition();
+            if (!MC.level.hasChunksAt(bp.getX() - 10, bp.getZ() - 10, bp.getX() + 10, bp.getZ() + 10))
+                return;
+            snapYOnJoin = false;
+            updateOrthoviewY();
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), orthoviewPlayerBaseY, MC.player.getZ());
+            return;
+        }
+
         if (MiscUtil.isGroundBlock(MC.level, MC.player.blockPosition().offset(0, -5, 0))
             && MC.player.getOnPos().getY() <= orthoviewPlayerMaxY) {
             panCam(0, 1f, 0);
@@ -342,15 +368,20 @@ public class OrthoviewClientEvents {
         }
 
         if (forcePanTicksLeft > 0) {
-            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_DEFAULT;
-            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_DEFAULT;
-            float zoomDiff = (forceZoom - forcePanOriginalZoom) / FORCE_PAN_TICKS_DEFAULT;
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / forcePanTicksMax;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / forcePanTicksMax;
+            float zoomDiff = (forceZoom - forcePanOriginalZoom) / forcePanTicksMax;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
             clampPlayerToWorldBorder();
             forcePanTicksLeft -= 1;
         }
         updateOrthoviewY();
+    }
+
+    @SubscribeEvent
+    public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
+        snapYOnJoin = true;
     }
 
     @SubscribeEvent
@@ -399,7 +430,7 @@ public class OrthoviewClientEvents {
             PlayerServerboundPacket.disableOrthoview();
             TopdownGuiServerboundPacket.closeTopdownGui(MC.player.getId());
             if (StartPosClientEvents.hasReservedPos()) {
-                StartPosClientEvents.selectedFaction = Faction.NONE;
+                StartPosClientEvents.selectedFaction = Factions.NONE;
                 StartPosServerboundPacket.unreservePos(StartPosClientEvents.getPos().pos);
             }
         }
@@ -461,12 +492,25 @@ public class OrthoviewClientEvents {
     public static void onInput(InputEvent.Key evt) {
         // Prevent repeated key actions
         if (evt.getAction() == GLFW.GLFW_PRESS) {
-
             if (evt.getKey() == Keybindings.getFnum(12).getKey()) {
                 tryToToggleEnable();
-            }
-            else if (evt.getKey() == Keybindings.reset.getKey()) {
+            } else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
+            }
+            int i = 1;
+            for (Keybinding keybind : CAMERA_KEYBINDS) {
+                if (enabled && MC.player != null && evt.getKey() == keybind.getKey()) {
+                    if (Keybindings.shiftMod.isDown()) {
+                        cameraHotkeys.put(keybind, MC.player.position());
+                        BlockPos bp = MC.player.blockPosition();
+                        String bpStr = "(" + bp.getX() + ", " + + bp.getY() + ", " + + bp.getZ() + ")";
+                        HudClientEvents.showTempMessageI18n(I18n.get("hud.reignofnether.camera_hotkey_set", i, bpStr));
+                    } else if (cameraHotkeys.containsKey(keybind)) {
+                        Vec3 vec3 = cameraHotkeys.get(keybind);
+                        PlayerServerboundPacket.teleportPlayer(vec3.x, vec3.y, vec3.z);
+                    }
+                }
+                i += 1;
             }
         }
     }
@@ -560,7 +604,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -570,7 +614,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!enabled || !(evt.getScreen() instanceof TopdownGui)) {
             return;
         }
@@ -675,7 +719,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -693,7 +737,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -703,7 +747,7 @@ public class OrthoviewClientEvents {
             cameraMovingByMouse = true;
 
             // Normalize drag delta by frame time to prevent drift when Vsync is off
-            float frameTimeNormalizer = Math.min((float) MC.getDeltaFrameTime(), 5.0f);
+            float frameTimeNormalizer = Math.min(MC.getDeltaFrameTime(), 5.0f);
             if (frameTimeNormalizer <= 0) frameTimeNormalizer = 1.0f;
             float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
             float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;

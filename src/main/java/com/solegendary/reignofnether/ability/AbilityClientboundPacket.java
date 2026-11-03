@@ -141,6 +141,12 @@ public class AbilityClientboundPacket {
                     } else if (this.unitAction == UnitAction.BLIZZARD) {
                         if (unit instanceof WretchedWraithUnit wraithUnit)
                             wraithUnit.blizzard();
+                    } else if (this.unitAction == UnitAction.ENCHANTED_TETHER) {
+                        if (unit instanceof EnchanterUnit enchanterUnit)
+                            enchanterUnit.tether((int) this.value, true);
+                    } else if (this.unitAction == UnitAction.ENCHANTED_TETHER_REMOVE) {
+                        if (unit instanceof EnchanterUnit enchanterUnit)
+                            enchanterUnit.tether((int) this.value, false);
                     }
                 });
         });

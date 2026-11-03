@@ -1,30 +1,39 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.NetherZone;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
-
 public class PiglinMarket extends AbstractMarket implements NetherConvertingAddon {
 
     public static final String buildingName = "Commercial Portal";
-    public static final String structureName = "market_piglins";
+    public static final String structureName = "market_piglins1";
+    public static final String upgradedStructureName = "market_piglins2";
     public static final ResourceCost cost = ResourceCosts.PIGLIN_MARKET;
 
     public PiglinMarket() {
@@ -35,34 +44,68 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
 
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+
+        this.productions.add(ProductionItems.RESEARCH_MARKET_UPGRADE_PIGLINS, Keybindings.abilitySlot4);
     }
 
     @Override
-    protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
-        return new ArrayList<>();
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
     }
 
-    public Faction getFaction() { return Faction.PIGLINS; }
+    @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return Component.translatable("buildings.reignofnether.piglin_market_upgraded").getString();
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks())
+            if (block.getBlockState().getBlock() == Blocks.CRIMSON_STAIRS) {
+                return 1;
+            }
+        return 0;
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getStartingStockedItems() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.BROADSWORD, 1, 180 * 20),
+                new StockedShopItem(UnitItems.HEART_MEDALLION, 1, 180 * 20),
+                new StockedShopItem(UnitItems.AZURE_MEDALLION, 1, 180 * 20)
+        ));
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getUpgradedStockedItems() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.POCKET_PORTAL, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MAGMA_WALKER_BOOTS, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GOLDEN_PIGLIN_ARMOUR, 1, 600 * 20)
+        ));
+    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/raw_gold_block.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.PORTAL_CIVILIAN) >= 4 ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> true,
                 List.of(
-                        fcs(I18n.get("buildings.reignofnether.piglin_market"), true),
+                        Component.translatable("buildings.reignofnether.piglin_market").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip1")),
-                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip2")),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip3"))
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.piglin_market.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.piglin_market.tooltip2").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.piglin_market.tooltip3").getVisualOrderText()
                 ),
                 this
         );

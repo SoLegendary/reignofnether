@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -14,24 +16,27 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
-import com.solegendary.reignofnether.items.ItemClientEvents;
-import com.solegendary.reignofnether.items.ItemServerboundPacket;
-import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcons;
+import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -58,16 +63,20 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -80,6 +89,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
@@ -88,6 +98,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
@@ -121,6 +132,8 @@ public class UnitClientEvents {
     // tracking of all existing units
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
+    public static final Map<Integer, HashMap<MobEffect, MobEffectIcon>> mobEffectIcons = new ConcurrentHashMap<>();
+
     @Nullable
     private static UnitActionItem lastClientUAIActioned = null;
 
@@ -138,6 +151,10 @@ public class UnitClientEvents {
 
 
 
+    private static int getHeldResourcesValue(LivingEntity entity) {
+        return entity instanceof Unit unit ? Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() : 0;
+    }
+
     public static ArrayList<LivingEntity> getSortedSelectedUnits() {
         if (!sortedSelectedUnitsChanged) {
             return sortedSelectedUnits;
@@ -148,7 +165,10 @@ public class UnitClientEvents {
             var isHeroB = b instanceof HeroUnit;
             if (isHeroA && !isHeroB) return -1;
             if (!isHeroA && isHeroB) return 1;
-            return HudClientEvents.getModifiedEntityName(a).compareTo(HudClientEvents.getModifiedEntityName(b));
+            int nameCompare = HudClientEvents.getModifiedEntityName(a).compareTo(HudClientEvents.getModifiedEntityName(b));
+            if (nameCompare != 0) return nameCompare;
+            // favour units holding more resources (eg. so a worker with resources is shown first)
+            return Integer.compare(getHeldResourcesValue(b), getHeldResourcesValue(a));
         });
         sortedSelectedUnits = units;
         sortedSelectedUnitsChanged = false;
@@ -225,10 +245,21 @@ public class UnitClientEvents {
     public static int getCurrentPopulation(String playerName) {
         int currentPopulation = 0;
         if (MC.level != null) {
+            List<Integer> allUnitIds = allUnits.stream().map(Entity::getId).toList();
             for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit)
-                    if (unit.getOwnerName().equals(playerName))
-                        currentPopulation += unit.getCost().population;
+                if (entity instanceof Unit unit) {
+                    if (unit.getOwnerName().equals(playerName)) {
+                        if (entity.getPersistentData().contains("popCost")) {
+                            currentPopulation += entity.getPersistentData().getInt("popCost");
+                        } else {
+                            currentPopulation += unit.getCost().population;
+                        }
+                    }
+                }
+            }
+            for (VirtualUnit virtualUnit : MinimapClientEvents.virtualUnits) {
+                if (virtualUnit.ownerName.equals(playerName) && !allUnitIds.contains(virtualUnit.id))
+                    currentPopulation += virtualUnit.population;
             }
             for (BuildingPlacement building : BuildingClientEvents.getBuildings())
                 if (building.ownerName.equals(playerName))
@@ -292,7 +323,8 @@ public class UnitClientEvents {
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos,
-                Keybindings.shiftMod.isDown()
+                Keybindings.shiftMod.isDown(),
+                Keybindings.ctrlMod.isDown()
             ));
         }
     }
@@ -316,7 +348,8 @@ public class UnitClientEvents {
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos,
-                        Keybindings.shiftMod.isDown()
+                        Keybindings.shiftMod.isDown(),
+                        Keybindings.ctrlMod.isDown()
                 ));
             }
         }
@@ -331,21 +364,21 @@ public class UnitClientEvents {
 
         if (action.name().toLowerCase().contains("startrts")) {
             if (action == UnitAction.STARTRTS_VILLAGERS) {
-                PlayerServerboundPacket.startRTS(Faction.VILLAGERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.VILLAGERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             } else if (action == UnitAction.STARTRTS_MONSTERS) {
-                PlayerServerboundPacket.startRTS(Faction.MONSTERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.MONSTERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             } else if (action == UnitAction.STARTRTS_PIGLINS) {
-                PlayerServerboundPacket.startRTS(Faction.PIGLINS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.PIGLINS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             }
             return;
         }
         else if (action.name().toLowerCase().contains("sandbox_spawn")) {
             if (action == UnitAction.STARTRTS_VILLAGERS) {
-                PlayerServerboundPacket.startRTS(Faction.VILLAGERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.VILLAGERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             } else if (action == UnitAction.STARTRTS_MONSTERS) {
-                PlayerServerboundPacket.startRTS(Faction.MONSTERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.MONSTERS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             } else if (action == UnitAction.STARTRTS_PIGLINS) {
-                PlayerServerboundPacket.startRTS(Faction.PIGLINS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
+                PlayerServerboundPacket.startRTS(Factions.PIGLINS, (double) bp.getX(), (double) bp.getY(), (double) bp.getZ());
             }
             return;
         }
@@ -384,7 +417,8 @@ public class UnitClientEvents {
                 ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0),
-                Keybindings.shiftMod.isDown()
+                Keybindings.shiftMod.isDown(),
+                Keybindings.ctrlMod.isDown()
             ));
         }
     }
@@ -405,7 +439,15 @@ public class UnitClientEvents {
         doResolveMoveAction();
     }
 
+    @Nullable
+    private static ItemEntity getPreselectedItem() {
+        List<ItemEntity> items = ItemClientEvents.getPreselectedItems();
+        return items.isEmpty() ? null : items.get(0);
+    }
+
     private static void doResolveMoveAction() {
+        ItemEntity preSelItem = getPreselectedItem();
+
         // open shop
         if (ItemClientEvents.ENABLED && HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
                 BuildingClientEvents.getPreselectedBuilding() instanceof ItemShopPlacement itemShop && MC.player != null &&
@@ -420,21 +462,39 @@ public class UnitClientEvents {
             return;
         }
         // pickup item
-        else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
-                !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
-            unit.getCheckpoints().clear();
-            unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
+        else if (ItemClientEvents.ENABLED &&
+                HudClientEvents.hudSelectedEntity instanceof Unit unit &&
+                unit instanceof UnitInventory inv &&
+                unit instanceof Mob mob &&
+                preSelItem != null) {
 
-            if (ItemClientEvents.ENABLED) {
-                ItemServerboundPacket.pickup(
-                        HudClientEvents.hudSelectedEntity.getId(),
-                        ItemClientEvents.getPreselectedItems().get(0).getId()
-                );
-                return;
+            if (ResourceSources.getFromItem(preSelItem.getItem().getItem()) != null) {
+                if (!mob.canPickUpLoot()) {
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_hold_resources"));
+                } else if (inv.isEmpty()) {
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
+                    sendUnitCommand(UnitAction.MOVE);
+                } else {
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_pick_resources"));
+                }
+            } else if (ItemUtil.isUnitItem(preSelItem)) {
+                if (inv.canPickupUnitItems()) {
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
+                    ItemServerboundPacket.pickup(
+                            HudClientEvents.hudSelectedEntity.getId(), preSelItem.getId());
+                } else if (ItemUtil.getUnitItem(preSelItem.getItem()) instanceof MerchantEquipmentItem mei && mei.isCompatibleTarget.test(hudSelectedEntity)) {
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
+                    sendUnitCommand(UnitAction.MOVE);
+                } else {
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_hold_items"));
+                }
             }
         }
         // follow friendly unit
-        if (preselectedUnits.size() == 1 && !targetingSelf()) {
+        else if (preselectedUnits.size() == 1 && !targetingSelf()) {
             if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {
@@ -472,21 +532,29 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName) {
+    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName, int population) {
+        if (MC.level == null)
+            return;
+        boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+
         for (LivingEntity entity : allUnits) {
-            if (entity.getId() == entityId && MC.level != null) {
-                boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+            if (entity.getId() == entityId) {
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
-                    // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
-                    MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
-                } else {
-                    MinimapClientEvents.removeMinimapUnit(entityId);
                 }
                 entity.setAbsorptionAmount(absorb);
+                if (entity instanceof Unit unit)
+                    if (population >= 0 && population != unit.getCost().population)
+                        entity.getPersistentData().putInt("popCost", population);
                 return;
             }
+        }
+        // if the unit doesn't exist at all clientside, create a VirtualUnit to track its minimap position and population usage
+        if (!isLoadedClientside) {
+            MinimapClientEvents.syncVirtualUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName, population);
+        } else {
+            MinimapClientEvents.removeVirtualUnit(entityId);
         }
     }
 
@@ -506,7 +574,7 @@ public class UnitClientEvents {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof Unit unit) {
-                    unit.getItems().removeIf(i -> !ItemUtil.isPreparedEdibleFood(i.getItem()));
+                    unit.getItems().removeIf(i -> !ItemUtil.isEdibleFoodOrDrink(i.getItem()));
                     unit.getItems().add(new ItemStack(Items.SUGAR, res.food));
                     unit.getItems().add(new ItemStack(Items.STICK, res.wood));
                     unit.getItems().add(new ItemStack(Items.STONE, res.ore));
@@ -531,7 +599,7 @@ public class UnitClientEvents {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof Unit unit) {
-                    unit.setAnchor(null);
+                    unit.setAnchor(new BlockPos(0,0,0));
                     break;
                 }
             }
@@ -613,8 +681,11 @@ public class UnitClientEvents {
         //System.out.println("preselectedUnits removed entity: " + entityId);
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
-        MinimapClientEvents.removeMinimapUnit(entityId);
+        MinimapClientEvents.removeVirtualUnit(entityId);
         markSelectedUnitsChanged();
+        synchronized (mobEffectIcons) {
+            mobEffectIcons.remove(entityId);
+        }
     }
     /**
      * Add and update entities from clientside action
@@ -638,11 +709,13 @@ public class UnitClientEvents {
             unit.setupEquipmentAndUpgradesClient();
 
             UnitSyncServerboundPacket.requestSyncAbilities(entity.getId());
+            UnitSyncServerboundPacket.requestSyncMobEffects(entity.getId());
 
             if (entity instanceof HeroUnit)
                 HeroServerboundPacket.requestHeroSync(entity.getId());
         }
         markSelectedUnitsChanged();
+        MinimapClientEvents.removeVirtualUnit(entity.getId());
     }
 
     @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
@@ -989,7 +1062,7 @@ public class UnitClientEvents {
                     boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
                     // render outline for each selected and preselected entities
                     for (Entity entity : unitsToDraw) {
-                        if (!FogOfWarClientEvents.isInBrightChunk(entity))
+                        if (!FogOfWarClientEvents.isInBrightChunk(entity) || entity.isRemoved())
                             continue;
 
                         AABB entityAABB = entity.getBoundingBox();
@@ -1022,7 +1095,7 @@ public class UnitClientEvents {
 
                     for (LivingEntity entity : allUnits) {
                         if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
-                                entity.isPassenger())
+                                entity.isPassenger() || entity.isRemoved())
                             continue;
 
                         float alpha = 0.5f;
@@ -1064,17 +1137,19 @@ public class UnitClientEvents {
                 }
             }
 
-            // render items in front of face for eating units
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood()) {
-                    MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+            // render items in front of face for eating units (once per frame)
+            if (evt.getStage() == AFTER_ENTITIES) {
+                for (LivingEntity entity : getAllUnits()) {
+                    if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
+                        MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+                    }
                 }
             }
         }
 
         if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_ENTITIES) {
             VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINE_STRIP);
-            ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+            ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
             VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
@@ -1103,7 +1178,7 @@ public class UnitClientEvents {
                                         cp.isGreen ? 1 : 0,
                                         0,
                                         a,
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             } else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, cp.bp, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
@@ -1128,7 +1203,7 @@ public class UnitClientEvents {
                                     aabb,
                                     Direction.UP,
                                     1, 1, 0, a,
-                                    ResourceLocation.parse("forge:textures/white.png")
+                                    MyRenderer.WHITE_TEXTURE
                             );
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, ap, 1, 1, 0, a);
@@ -1157,7 +1232,7 @@ public class UnitClientEvents {
                                         aabb,
                                         Direction.UP,
                                         1, 0, 0, MiscUtil.getOscillatingFloat(0.25f, 0.75f),
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             }  else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, blockTarget, 1, 0, 0, a);
@@ -1169,7 +1244,7 @@ public class UnitClientEvents {
 
             if (FormationDragMove.isDragging()) {
                 VertexConsumer vertexConsumerLineFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
-                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("forge:textures/white.png")));
+                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(MyRenderer.WHITE_TEXTURE));
                 float a = 0.5f;
 
                 Vec3 lineStart = FormationDragMove.getLineStart();
@@ -1189,7 +1264,7 @@ public class UnitClientEvents {
                                 1,
                                 0,
                                 a,
-                                ResourceLocation.parse("forge:textures/white.png")
+                                MyRenderer.WHITE_TEXTURE
                         );
                     } else {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucentFd, Direction.UP, bp, 0, 1, 0, a);
@@ -1500,10 +1575,67 @@ public class UnitClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onMobEffectAdded(MobEffectEvent.Added evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        MobEffectInstance mei = evt.getEffectInstance();
+
+        synchronized (mobEffectIcons) {
+            // add/update mob effect icon
+            mobEffectIcons
+                    .computeIfAbsent(entity.getId(), id -> new HashMap<>())
+                    .put(mei.getEffect(), MobEffectIcons.getIcon(mei));
+        }
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    @SubscribeEvent
+    public static void onMobEffectRemoved(MobEffectEvent.Remove evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        removeMobEffectIcon(entity.getId(), evt.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    // Without this, icons stay behind when an effect simply runs out
+    @SubscribeEvent
+    public static void onMobEffectExpired(MobEffectEvent.Expired evt) {
+        LivingEntity entity = evt.getEntity();
+        MobEffectInstance mei = evt.getEffectInstance();
+        if (!(entity instanceof Unit) || mei == null)
+            return;
+
+        removeMobEffectIcon(entity.getId(), mei.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    private static void removeMobEffectIcon(int entityId, MobEffect effect) {
+        synchronized (mobEffectIcons) {
+            // remove mob effect icon
+            HashMap<MobEffect, MobEffectIcon> icons = mobEffectIcons.get(entityId);
+            if (icons != null) {
+                icons.remove(effect);
+                if (icons.isEmpty())
+                    mobEffectIcons.remove(entityId);
+            }
+        }
+    }
+
     public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
+        MobEffect effect = MobEffect.byId(effectId);
+        if (effect == null)
+            return;
+
         for (LivingEntity entity : getAllUnits()) {
-            MobEffect effect = MobEffect.byId(effectId);
-            if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
+            if (entityId == entity.getId() && entity instanceof Unit) {
                 if (duration > 0) {
                     entity.addEffect(new MobEffectInstance(effect, duration, amplifier));
                 } else if (entity.getEffect(effect) != null) {
@@ -1512,136 +1644,4 @@ public class UnitClientEvents {
             }
         }
     }
-
-    /*
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_P) {
-            if (AFTER_SKY.equals(stage)) {
-                stage = AFTER_SOLID_BLOCKS;
-            } else if (AFTER_SOLID_BLOCKS.equals(stage)) {
-                stage = AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
-            } else if (AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS.equals(stage)) {
-                stage = AFTER_CUTOUT_BLOCKS;
-            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
-                stage = AFTER_ENTITIES;
-            } else if (AFTER_ENTITIES.equals(stage)) {
-                stage = AFTER_BLOCK_ENTITIES;
-            } else if (AFTER_BLOCK_ENTITIES.equals(stage)) {
-                stage = AFTER_TRANSLUCENT_BLOCKS;
-            } else if (AFTER_TRANSLUCENT_BLOCKS.equals(stage)) {
-                stage = AFTER_TRIPWIRE_BLOCKS;
-            } else if (AFTER_TRIPWIRE_BLOCKS.equals(stage)) {
-                stage = AFTER_PARTICLES;
-            } else if (AFTER_PARTICLES.equals(stage)) {
-                stage = AFTER_WEATHER;
-            } else if (AFTER_WEATHER.equals(stage)) {
-                stage = AFTER_LEVEL;
-            } else if (AFTER_LEVEL.equals(stage)) {
-                stage = AFTER_SKY;
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-            "stage: " + stage.toString(),
-        });
-    }
-     */
-
-    /*
-    public static int yOffset = 0;
-    public static int scale = 0;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
-            yOffset += sign;
-        }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
-            scale += sign;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-                "yOffset: " +  yOffset,
-                "scale: " + scale,
-        });
-    }
-     */
-
-
-    /*
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-
-        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_W) {
-                slime.sideAngleX += 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_A) {
-                slime.sideAngleY -= 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_S) {
-                slime.sideAngleX -= 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_D) {
-                slime.sideAngleY += 90;
-            }
-        }*/
-
-
-        /*
-        if (Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                    "",
-                    UnitAction.DEBUG1, 0, new int[]{0},
-                    new BlockPos(0,0,0),
-                    new BlockPos(0,0,0)
-            ));
-        }
-        if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                    "",
-                    UnitAction.DEBUG2, 0, new int[]{0},
-                    new BlockPos(0,0,0),
-                    new BlockPos(0,0,0)
-            ));
-        }
-
-
-    }*/
-
-    /*
-    public static int pitch = 0;
-    public static int yaw = 0;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
-            yaw += sign;
-        }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
-            pitch += sign;
-        }
-    }
-
-     */
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
-            MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[]{
-                    "rollAngle: " + slime.rollAngle,
-                    "sideAngleX: " + slime.sideAngleX,
-                    "sideAngleY: " + slime.sideAngleY,
-            });
-        }
-    }
-     */
 }

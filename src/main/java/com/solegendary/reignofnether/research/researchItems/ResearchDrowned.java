@@ -18,14 +18,13 @@ import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchDrowned extends ProductionItem {
 
@@ -65,14 +64,14 @@ public class ResearchDrowned extends ProductionItem {
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD),
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned"), Style.EMPTY.withBold(true)),
+                fcs(I18n.get("research.reignofnether.research_drowned"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_drowned.tooltip3"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_drowned.tooltip1")),
+                fcs(I18n.get("research.reignofnether.research_drowned.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_drowned.tooltip3"))
             ),
             this
         );

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -71,6 +72,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
     }
+    public static void setHideEnemyPicks(boolean hideEnemyPicks) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_HIDE_ENEMY_PICKS, "", hideEnemyPicks ? 1L : 0L));
+    }
     public static void setCoopMode(boolean coopMode) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
@@ -83,6 +88,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", animalSpawnYDiff));
     }
+    public static void setRandomItemDrops(long randomItemDrops) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", randomItemDrops));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -93,7 +102,7 @@ public class GameruleServerboundPacket {
     public GameruleServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(GameruleAction.class);
         this.playerName = buffer.readUtf();
-        this.value = buffer.readLong();
+        this.value = Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, buffer.readLong()));
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -178,6 +187,11 @@ public class GameruleServerboundPacket {
                     gameRules.getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(booleanValue, server);
                     GameruleClientboundPacket.setLockAlliances(booleanValue);
                 }
+                case SET_HIDE_ENEMY_PICKS -> {
+                    gameRules.getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(booleanValue, server);
+                    GameruleClientboundPacket.setHideEnemyPicks(booleanValue);
+                    StartPosServerEvents.syncAll(booleanValue);
+                }
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);
                     GameruleClientboundPacket.setCoopMode(booleanValue);
@@ -190,6 +204,10 @@ public class GameruleServerboundPacket {
                 case SET_ANIMAL_SPAWN_Y_DIFF -> {
                     gameRules.getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setAnimalSpawnYDiff(value);
+                }
+                case SET_RANDOM_ITEM_DROPS -> {
+                    gameRules.getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).set(Math.toIntExact(value), server);
+                    GameruleClientboundPacket.setRandomItemDrops(value);
                 }
             }
             success.set(true);

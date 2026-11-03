@@ -67,6 +67,7 @@ public class UnitSyncMobEffectsClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
+                    // rest is handled by MobEffectEvent.Added event
                     UnitClientEvents.syncMobEffect(this.entityId, this.effectId, this.amplifier, this.duration);
                 });
         });

@@ -9,12 +9,11 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchUpgradedWindcallers extends ProductionItem {
 
@@ -42,13 +41,11 @@ public class ResearchUpgradedWindcallers extends ProductionItem {
             () -> ProductionItems.RESEARCH_UPGRADED_WINDCALLERS.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_UPGRADED_WINDCALLERS),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.upgraded_windcallers"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.upgraded_windcallers"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.upgraded_windcallers.tooltip1"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.upgraded_windcallers.tooltip1"))
             ),
             this
         );

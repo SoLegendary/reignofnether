@@ -6,17 +6,14 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.entities.models.MagicProjectileModel;
-import com.solegendary.reignofnether.entities.renderers.NecromancerProjectileRenderer;
-import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
-import com.solegendary.reignofnether.entities.renderers.WindcallerProjectileRenderer;
+import com.solegendary.reignofnether.entities.renderers.*;
 import com.solegendary.reignofnether.fogofwar.FogTintingBakedModel;
 import com.solegendary.reignofnether.fogofwar.FogTintingBlockColor;
 import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.particles.BigEnchantParticle;
-import com.solegendary.reignofnether.particles.BigSoulFlameParticle;
-import com.solegendary.reignofnether.particles.LevelUpParticle;
+import com.solegendary.reignofnether.particles.*;
 import com.solegendary.reignofnether.registrars.*;
+import com.solegendary.reignofnether.unit.modelling.layers.GlintLayer;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
 import net.minecraft.client.color.block.BlockColor;
@@ -31,6 +28,7 @@ import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -48,6 +46,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.HashSet;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
@@ -86,7 +85,8 @@ public class ClientModEvents {
                 BlockRegistrar.WRAITH_SNOW_LAYER.get()
         );
 
-        // wrap every block's provider with the fog multiplier; skip biome-tinted (BiomeColorsMixin handles those)
+        // wrap every block's provider with the fog multiplier; biome-tinted ones only fog their untinted quads
+        // (BiomeColorsMixin fogs the biome colour itself)
         java.util.Set<Block> biomeTinted = java.util.Set.of(
                 Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN,
                 Blocks.PINK_PETALS, Blocks.SUGAR_CANE, Blocks.LARGE_FERN, Blocks.TALL_GRASS,
@@ -98,9 +98,8 @@ public class ClientModEvents {
         java.util.Map<Holder.Reference<Block>, BlockColor> map =
                 ((BlockColorsAccessor) (Object) blockColors).getBlockColors();
         for (Block block : ForgeRegistries.BLOCKS.getValues()) {
-            if (biomeTinted.contains(block)) continue;
             BlockColor existing = map.get(ForgeRegistries.BLOCKS.getDelegateOrThrow(block));
-            evt.register(new FogTintingBlockColor(existing), block);
+            evt.register(new FogTintingBlockColor(existing, biomeTinted.contains(block)), block);
         }
     }
 
@@ -133,7 +132,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WARDEN_UNIT.get(), WardenRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GRUNT_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.STRIDER_UNIT.get(), StriderRenderer::new);
@@ -160,6 +159,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.PANDA_UNIT.get(), PandaRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WOLF_UNIT.get(), WolfRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BEE_UNIT.get(), BeeRenderer::new);
 
         evt.registerEntityRenderer(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.KILLER_RABBIT_UNIT.get(), RabbitRenderer::new);
@@ -171,6 +171,10 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_PROJECTILE.get(), WindcallerProjectileRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WRAITH_SNOWBALL.get(), ThrownItemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MOLTEN_BOMB_PROJECTILE.get(), (ctx) -> new ThrownItemRenderer<>(ctx, 3.0F, true));
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_REGENERATION.get(), TotemOfRegenerationRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_CASTING.get(), TotemOfCastingRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_PROTECTION.get(), TotemOfProtectionRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_SHIELDING.get(), TotemOfShieldingRenderer::new);
     }
 
     @SubscribeEvent
@@ -259,6 +263,10 @@ public class ClientModEvents {
         event.registerLayerDefinition(WildfireModel.LAYER_LOCATION, WildfireModel::createBodyLayer);
         event.registerLayerDefinition(WindcallerModel.LAYER_LOCATION, WindcallerModel::createBodyLayer);
         event.registerLayerDefinition(WraithModel.LAYER_LOCATION, WraithModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfRegenerationModel.LAYER_LOCATION, TotemOfRegenerationModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfCastingModel.LAYER_LOCATION, TotemOfCastingModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfShieldingModel.LAYER_LOCATION, TotemOfShieldingModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfProtectionModel.LAYER_LOCATION, TotemOfProtectionModel::createBodyLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_OUTER_LAYER, IllagerArmorModel::createOuterArmorLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_INNER_LAYER, IllagerArmorModel::createInnerArmorLayer);
     }
@@ -278,6 +286,43 @@ public class ClientModEvents {
                 ParticleRegistrar.LEVEL_UP.get(),
                 LevelUpParticle.Provider::new
         );
+        evt.registerSpriteSet(
+                ParticleRegistrar.FLOATING_CRIT.get(),
+                AbstractFloatingParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.FLOATING_HEART.get(),
+                FloatingHeartParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.MANA.get(),
+                ManaParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.BIG_VIBRATION.get(),
+                BigVibrationParticle.Provider::new
+        );
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SubscribeEvent
+    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+        for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES.getValues()) {
+            LivingEntityRenderer living;
+            try {
+                living = event.getRenderer((EntityType) type);
+            } catch (ClassCastException e) {
+                continue; // not a living entity renderer
+            }
+            if (living != null) {
+                living.addLayer(new GlintLayer(living));
+            }
+        }
+        // Players use separate renderers
+        for (String skin : event.getSkins()) {
+            LivingEntityRenderer player = event.getSkin(skin);
+            if (player != null) player.addLayer(new GlintLayer(player));
+        }
     }
 }
 

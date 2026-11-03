@@ -3,9 +3,9 @@ package com.solegendary.reignofnether.sounds;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
@@ -69,14 +69,7 @@ public class SoundClientEvents {
 
     public static void playFactionCalmTheme(Faction faction, String playerName) {
         if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
-            switch (faction) {
-                case VILLAGERS ->
-                        SoundClientEvents.playFadeableMusicInstance(new FadeableMusicInstance(SoundRegistrar.VILLAGER_CALM_THEME_SONG.get()), 5200);
-                case MONSTERS ->
-                        SoundClientEvents.playFadeableMusicInstance(new FadeableMusicInstance(SoundRegistrar.MONSTER_CALM_THEME_SONG.get()), 5200);
-                case PIGLINS ->
-                        SoundClientEvents.playFadeableMusicInstance(new FadeableMusicInstance(SoundRegistrar.PIGLIN_CALM_THEME_SONG.get()), 5200);
-            }
+            SoundClientEvents.playFadeableMusicInstance(new FadeableMusicInstance(faction.sound), 5200);
         }
     }
 
@@ -242,6 +235,7 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.BEACON_ACTIVATE, SoundEvents.BEACON_ACTIVATE);
         SOUND_MAP.put(SoundAction.BEACON_AMBIENT, SoundEvents.BEACON_AMBIENT);
         SOUND_MAP.put(SoundAction.ENCHANT, SoundEvents.ENCHANTMENT_TABLE_USE);
+        SOUND_MAP.put(SoundAction.ENCHANTERS_TOME, SoundRegistrar.ENCHANTERS_TOME.get());
         SOUND_MAP.put(SoundAction.FORGE_ARMOUR, SoundEvents.SMITHING_TABLE_USE);
         SOUND_MAP.put(SoundAction.LEVEL_UP, SoundEvents.PLAYER_LEVELUP);
         SOUND_MAP.put(SoundAction.BLOODLUST, SoundRegistrar.BLOODLUST.get());
@@ -264,5 +258,22 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.WINDCALLER_LIFT, SoundRegistrar.WINDCALLER_LIFT.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_YELL, SoundRegistrar.WINDCALLER_YELL.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_WIND_ATTACK, SoundRegistrar.WINDCALLER_WIND_ATTACK.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_COMMON, SoundRegistrar.ITEM_DROP_COMMON.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_RARE, SoundRegistrar.ITEM_DROP_RARE.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_LEGENDARY, SoundRegistrar.ITEM_DROP_LEGENDARY.get());
+        SOUND_MAP.put(SoundAction.BUILDING_SMASH, SoundRegistrar.BUILDING_SMASH.get());
+        SOUND_MAP.put(SoundAction.BUZZY_NEST, SoundRegistrar.BUZZY_NEST.get());
+        SOUND_MAP.put(SoundAction.CRITICAL_HIT, SoundRegistrar.CRITICAL_HIT.get());
+        SOUND_MAP.put(SoundAction.GHOST_CLOAK, SoundRegistrar.GHOST_CLOAK.get());
+        SOUND_MAP.put(SoundAction.GONG_OF_WEAKNING, SoundRegistrar.GONG_OF_WEAKNING.get());
+        SOUND_MAP.put(SoundAction.ICE_WAND, SoundRegistrar.ICE_WAND.get());
+        SOUND_MAP.put(SoundAction.SHADOW_SHIFTER, SoundRegistrar.SHADOW_SHIFTER.get());
+        SOUND_MAP.put(SoundAction.TOME_OF_DUPLICATION, SoundRegistrar.TOME_OF_DUPLICATION.get());
+        SOUND_MAP.put(SoundAction.TOTEM_PLACE, SoundRegistrar.TOTEM_PLACE.get());
+        SOUND_MAP.put(SoundAction.WAR_HORN, SoundRegistrar.WAR_HORN.get());
+        SOUND_MAP.put(SoundAction.POTION_POP, SoundRegistrar.POTION_POP.get());
+        SOUND_MAP.put(SoundAction.TELEPORT, SoundEvents.ENDERMAN_TELEPORT);
+        SOUND_MAP.put(SoundAction.THROW_PEARL, SoundEvents.ENDER_PEARL_THROW);
+        SOUND_MAP.put(SoundAction.THROW_EGG, SoundEvents.EGG_THROW);
     }
 }

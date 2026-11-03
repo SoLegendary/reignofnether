@@ -8,11 +8,12 @@ import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument
 import com.solegendary.reignofnether.commands.rtsapi.argument.UnitArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.options.BuildingSelectorOptions;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
-import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActions;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonMappingManager;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
+import com.solegendary.reignofnether.items.CreativeModeTabsRegistrar;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -80,7 +81,7 @@ import java.util.function.Supplier;
 public class ReignOfNether {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "reignofnether";
-    public static final String VERSION_STRING = "1.4.4c";
+    public static final String VERSION_STRING = "1.5.1b";
 
     // Fields from ClientReset
     public static final Field handshakeField;
@@ -91,9 +92,7 @@ public class ReignOfNether {
     public static SimpleChannel handshakeChannel;
     
     public ReignOfNether(FMLJavaModLoadingContext mlctx) {
-        // Registering all components
         EnchantmentRegistrar.init(mlctx);
-        
         AttributeRegistrar.init(mlctx);
         ItemRegistrar.init(mlctx);
         EntityRegistrar.init(mlctx);
@@ -103,7 +102,6 @@ public class ReignOfNether {
         BlockEntityRegistrar.init(mlctx);
         GameRuleRegistrar.init();
         Buildings.init();
-        FactionRegistries.register();
         ProductionItems.init();
         MobEffectRegistrar.init(mlctx);
         ParticleRegistrar.init(mlctx);
@@ -111,6 +109,7 @@ public class ReignOfNether {
         CustomButtonActions.init(mlctx);
         BuildingSelectorOptions.bootStrap();
         ResourceObjectiveCriteria.init();
+        CreativeModeTabsRegistrar.init(mlctx);
         
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
@@ -166,6 +165,8 @@ public class ReignOfNether {
         }
         ResourceCosts.deferredLoadResourceCosts();
         event.enqueueWork(() -> {
+	        Factions.register();
+			
             ArgumentTypeInfos.registerByClass(BuildingArgument.class, CommandArgumentRegistrar.BUILDING_ARGUMENT.get());
             ArgumentTypeInfos.registerByClass(PlayerNameArgument.class, CommandArgumentRegistrar.PLAYER_NAME_ARGUMENT.get());
             ArgumentTypeInfos.registerByClass(UnitArgument.class, CommandArgumentRegistrar.UNIT_ARGUMENT.get());
@@ -182,7 +183,7 @@ public class ReignOfNether {
         
         if (context.getDirection() != NetworkDirection.LOGIN_TO_CLIENT
             && context.getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
-            connection.disconnect(Component.literal("Illegal packet received, terminating connection"));
+            connection.disconnect(Component.translatable("disconnect.reignofnether.illegal_packet"));
             throw new IllegalStateException("Invalid packet received, aborting connection");
         }
         
@@ -255,7 +256,7 @@ public class ReignOfNether {
             return true;
         } catch (Exception ex) {
             logger.error(RESETMARKER, "Failed to clear, closing connection", ex);
-            context.getNetworkManager().disconnect(Component.literal("Failed to clear, closing connection"));
+            context.getNetworkManager().disconnect(Component.translatable("disconnect.reignofnether.clear_failed"));
             return false;
         }
     }

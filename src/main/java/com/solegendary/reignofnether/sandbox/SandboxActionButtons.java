@@ -37,13 +37,6 @@ public class SandboxActionButtons {
     public static Button removeAnchor;
     public static Button removeBuildingPlacement;
 
-    private static boolean neutralUnitsSelected() {
-        for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
-            if (entity instanceof Unit unit && !unit.getOwnerName().isBlank())
-                return false;
-        return true;
-    }
-
     private static boolean selectedUnitsHaveAnchor() {
         for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
             if (entity instanceof Unit unit && unit.getAnchor() != null && !unit.getAnchor().equals(new BlockPos(0, 0, 0)))

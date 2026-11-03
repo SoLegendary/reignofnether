@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.BuildingAddon;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // Registered object in Buildings
 // is a member of BuildingPlacement and is generally not instantiated directly
@@ -30,6 +32,7 @@ public abstract class Building {
     public final boolean isCapitol;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public boolean canAcceptResources = false; // can workers drop off resources here?
+    private Faction faction;
 
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
@@ -39,7 +42,6 @@ public abstract class Building {
     protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
     protected float repairTimeModifier = 1.25f; // only affects built buildings
 
-    public int captureRange = 20;
     public boolean capturable = false;
     public boolean invulnerable = false;
     public boolean repairable = true;
@@ -67,7 +69,7 @@ public abstract class Building {
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
-    public final ArrayList<Block> startingBlockTypes = new ArrayList();
+    public final ArrayList<Block> startingBlockTypes = new ArrayList<>();
 
     public int foundationYLayers = 1; // how many Y layers from the bottom are part of the foundation
 
@@ -97,7 +99,13 @@ public abstract class Building {
         return new BuildingPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-    public abstract Faction getFaction();
+    public void setFaction(ResourceLocation faction) {
+        this.faction = Factions.getFaction(faction);
+    }
+    
+    public Faction getFaction() {
+        return this.faction == null ? Factions.NONE : this.faction;
+    }
 
     public int getUpgradeLevel(BuildingPlacement placement) {
         return 0;
@@ -115,7 +123,7 @@ public abstract class Building {
 
     @Nullable
     public <T extends BuildingAddon> T getActiveAddon(Class<T> addonClass) {
-        return (T) activeAddons.get(addonClass);
+        return addonClass.cast(activeAddons.get(addonClass));
     }
 
     public <T extends BuildingAddon> void setActiveAddon(Class<T> addonClass, T addon, boolean active) {

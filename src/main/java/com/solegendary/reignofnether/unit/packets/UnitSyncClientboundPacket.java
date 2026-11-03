@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,26 +37,27 @@ public class UnitSyncClientboundPacket {
     private final int wood;
     private final int ore;
     private final int emerald;
+    private final int population;
     private final String ownerName;
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                        entity.getId(),0,0,0,0,0,0,0,0,0,0, "")
+                        entity.getId(),0,0,0,0,0,0,0,0,0,0,0, "")
         );
     }
 
     public static void sendSyncOwnerNamePacket(Unit unit) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.SYNC_OWNERNAME,
-                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0,0,0, unit.getOwnerName())
+                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0,0,0,0, unit.getOwnerName())
         );
     }
 
     public static void sendSyncScenarioRoleIndexPacket(Unit unit) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.SYNC_SCENARIO_ROLE_INDEX,
-                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0,0, "")
+                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -65,13 +68,22 @@ public class UnitSyncClientboundPacket {
 
         for (ServerPlayer player : players) {
             if (FogOfWarServerEvents.isBlockVisibleFor(player, entity.getOnPos().getX(), entity.getOnPos().getZ())) {
+                int pop = 0;
+                if (entity instanceof Unit unit) {
+                    CompoundTag tag = entity.getPersistentData();
+                    if (tag.contains("popCost", Tag.TAG_INT)) {
+                        pop = tag.getInt("popCost");
+                    } else {
+                        pop = unit.getCost().population;
+                    }
+                }
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                         new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
                                 entity.getId(), 0,
                                 entity.getHealth(),
                                 entity.getAbsorptionAmount(),
                                 entity.getX(), entity.getY(), entity.getZ(),
-                                0,0,0,0, owner)
+                                0,0,0,0, pop, owner)
                 );
             }
         }
@@ -82,7 +94,7 @@ public class UnitSyncClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                 ((LivingEntity) unit).getId(), 0,0,0,0,0,0,
-                res.food, res.wood, res.ore, res.emerald, "")
+                res.food, res.wood, res.ore, res.emerald, 0, "")
         );
     }
 
@@ -91,7 +103,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.MAKE_VILLAGER_VETERAN,
                         entity.getId(), 0,
-                        0, 0,0,0,0,0,0,0,0, "")
+                        0,0,0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -100,7 +112,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
                         entity.getId(), 0,0,
-                        0, bp.getX(), bp.getY(), bp.getZ(),0,0,0,0, "")
+                        0, bp.getX(), bp.getY(), bp.getZ(),0,0,0,0,0, "")
         );
     }
 
@@ -109,7 +121,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
                         entity.getId(), 0,0,
-                        0,0,0,0,0,0,0,0, "")
+                        0,0,0,0,0,0,0,0,0,"")
         );
     }
 
@@ -127,6 +139,7 @@ public class UnitSyncClientboundPacket {
         int wood,
         int ore,
         int emerald,
+        int population,
         String ownerName
     ) {
         // filter out non-owned entities so we can't control them
@@ -142,6 +155,7 @@ public class UnitSyncClientboundPacket {
         this.wood = wood;
         this.emerald = emerald;
         this.ore = ore;
+        this.population = population;
         this.ownerName = ownerName;
     }
 
@@ -158,6 +172,7 @@ public class UnitSyncClientboundPacket {
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
         this.emerald = buffer.readInt();
+        this.population = buffer.readInt();
         this.ownerName = buffer.readUtf();
     }
 
@@ -174,6 +189,7 @@ public class UnitSyncClientboundPacket {
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
         buffer.writeInt(this.emerald);
+        buffer.writeInt(this.population);
         buffer.writeUtf(this.ownerName);
     }
 
@@ -193,7 +209,8 @@ public class UnitSyncClientboundPacket {
                                 this.health,
                                 this.absorb,
                                 new Vec3(this.posX, this.posY, this.posZ),
-                                this.ownerName
+                                this.ownerName,
+                                this.population
                         );
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,

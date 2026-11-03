@@ -6,6 +6,9 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -14,7 +17,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,8 +26,10 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
@@ -43,7 +48,7 @@ public class SurvivalServerEvents {
     private static final ArrayList<WaveEnemy> enemies = new ArrayList<>();
     public static final String ENEMY_OWNER_NAME = "Enemy";
     private static final Random random = new Random();
-    public static Faction lastFaction = Faction.NONE;
+    public static Faction lastFaction = Factions.NONE;
 
     public static final ArrayList<WavePortal> portals = new ArrayList<>();
 
@@ -69,6 +74,19 @@ public class SurvivalServerEvents {
         survivalData.save();
         level.getDataStorage().save();
         //ReignOfNether.LOGGER.info("saved survival data in serverevents");
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    // (not reset(): that kills enemies and writes the save)
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        enemies.clear();
+        portals.clear();
+        lastPortals.clear();
+        currentWave = null;
+        lastKilledEnemy = null;
+        lastTime = -1;
+        lastEnemyCount = 0;
     }
 
     @SubscribeEvent
@@ -106,7 +124,6 @@ public class SurvivalServerEvents {
         if (ticks % TICK_INTERVAL != 0)
             return;
 
-        long time = evt.level.getDayTime();
         long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
 
         if (!isStarted()) {
@@ -136,9 +153,9 @@ public class SurvivalServerEvents {
 
         int enemyCount = getCurrentEnemies().size() + portals.size();
         if (enemyCount < lastEnemyCount && enemyCount <= 3) {
-            if (enemyCount == 0)
+            if (enemyCount == 0) {
                 waveCleared((ServerLevel) evt.level);
-            else if (enemyCount == 1) {
+            } else if (enemyCount == 1) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies_one");
             } else {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies", false, enemyCount);
@@ -172,6 +189,7 @@ public class SurvivalServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("debug-end-wave")
+                .requires(s -> s.hasPermission(2))
                 .executes((command) -> {
                     if (command.getSource().getPlayer() != null) {
                         String name = command.getSource().getPlayer().getName().getString();
@@ -181,6 +199,7 @@ public class SurvivalServerEvents {
                     return endCurrentWave();
                 }));
         evt.getDispatcher().register(Commands.literal("debug-next-night")
+                .requires(s -> s.hasPermission(2))
                 .executes((command) -> {
                     if (command.getSource().getPlayer() != null) {
                         String name = command.getSource().getPlayer().getName().getString();
@@ -189,7 +208,7 @@ public class SurvivalServerEvents {
                     }
                     if (!isEnabled())
                         return 0;
-                    PlayerServerEvents.sendMessageToAllPlayers("Advancing to next night and wave");
+                    PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.advancing_next_night");
                     serverLevel.setDayTime(12450);
                     return 1;
                 }));
@@ -198,7 +217,7 @@ public class SurvivalServerEvents {
     public static int endCurrentWave() {
         if (!isEnabled())
             return 0;
-        PlayerServerEvents.sendMessageToAllPlayers("Ending current wave");
+        PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.ending_wave");
         ArrayList<WaveEnemy> enemiesCopy = new ArrayList<>(enemies);
         for (WaveEnemy enemy : enemiesCopy)
             enemy.getEntity().kill();
@@ -264,6 +283,15 @@ public class SurvivalServerEvents {
         }
     }
 
+    private static LivingEntity lastKilledEnemy = null;
+
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof Unit unit && unit.getOwnerName().equals(ENEMY_OWNER_NAME)) {
+            lastKilledEnemy = evt.getEntity();
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         if (evt.getEntity() instanceof Unit unit &&
@@ -273,12 +301,6 @@ public class SurvivalServerEvents {
 
             enemies.removeIf(e -> e.getEntity().getId() == entity.getId());
         }
-    }
-
-
-
-    public static long getDayLength() {
-        return 12000 - getWaveSurvivalTimeModifier(difficulty);
     }
 
     public static void setToStartingDayTime() {
@@ -313,18 +335,14 @@ public class SurvivalServerEvents {
         return pop;
     }
 
-    public static boolean isWaveInProgress() {
-        return !getCurrentEnemies().isEmpty();
-    }
-
     // triggered at nightfall
     public static void startNextWave(ServerLevel level) {
         saveData(level);
         currentWave = nextWave;
-        System.out.println("starting wave: " + nextWave.faction.name());
+        ReignOfNether.LOGGER.info("starting wave: " + nextWave.faction.getName());
         nextWave.start(level);
         nextWave = Wave.getWave(nextWave.number + 1);
-        System.out.println("next wave: " + nextWave.faction.name());
+        ReignOfNether.LOGGER.info("next wave: " + nextWave.faction.getName());
         SurvivalClientboundPacket.setWaveNumber(nextWave.number);
     }
 
@@ -333,6 +351,9 @@ public class SurvivalServerEvents {
         PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.wave_cleared", true);
         SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
         currentWave = null;
+        if (lastKilledEnemy != null)
+            for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
+                ItemServerEvents.dropNextItem(rtsPlayer, lastKilledEnemy);
     }
 
     public static void setWaveNumber(int waveNumber) {

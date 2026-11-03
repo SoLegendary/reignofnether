@@ -23,12 +23,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Dashboard for RTS players to make/break alliances and send resources to each other
 public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
@@ -138,9 +137,9 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     resourcesToSend.ore = Math.max(resourcesToSend.ore, 0);
                 },
                 switch (resourceName) {
-                    case FOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_food"), Style.EMPTY));
-                    case WOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_wood"), Style.EMPTY));
-                    case ORE -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_ore"), Style.EMPTY));
+                    case FOOD -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_food")));
+                    case WOOD -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_wood")));
+                    case ORE -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_ore")));
                     default -> null;
                 }
         );
@@ -169,7 +168,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 () -> resourcesToSend.getTotalValue() > 0 && isPlayerLoggedIn(),
                 this::sendResources,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.confirm_send_resources"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.confirm_send_resources")))
         );
         confirmButton.render(guiGraphics, x, y, mouseX, mouseY);
 
@@ -183,7 +182,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 () -> resourcesToSend.getTotalValue() > 0,
                 this::resetResources,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.cancel_send_resources"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.cancel_send_resources")))
         );
         cancelButton.render(guiGraphics, x + Button.DEFAULT_ICON_FRAME_SIZE, y, mouseX, mouseY);
 
@@ -201,7 +200,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 this::isPlayerLoggedIn,
                 this::requestAlliance,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.request_alliance"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.request_alliance")))
         );
         Button allyCancelRequestButton = new Button(
                 "Cancel Request Alliance",
@@ -213,7 +212,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 () -> true,
                 this::cancelAllianceRequest,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.cancel_request_alliance"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.cancel_request_alliance")))
         );
         allyCancelRequestButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png");
         Button allyConfirmButton = new Button(
@@ -226,7 +225,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 () -> true,
                 this::acceptAllianceRequest,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.accept_alliance"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.accept_alliance")))
         );
         Button disbandButton = new Button(
                 "Disband Alliance",
@@ -238,7 +237,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                 this::isAllied,
                 this::disbandAlliance,
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.disband_alliance"), Style.EMPTY))
+                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.disband_alliance")))
         );
 
         Button renderedButton;
@@ -356,7 +355,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     OrthoviewClientEvents.centreCameraOnPos(this.player.position());
             },
             null,
-            List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.goto_player"), Style.EMPTY))
+            List.of(fcs(I18n.get("alliances.reignofnether.tooltip.goto_player")))
     );
 
     // render and return all relevant buttons

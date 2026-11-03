@@ -56,12 +56,13 @@ public class ButtonBuilder {
     private float greyPercent = 0.0f;
     private boolean greyWhenDisabled = true;
     private boolean showSelectedFrameWhenDisabled = false;
-    private boolean stretchIconToBorders = false;
+    private int innerIconSizeModifier = 0;
     private int tooltipOffsetY = 0;
     private String playerNameForHeadIcon = "";
     private int bgColour = 0x64000000;
     private ItemStack iconItem = null;
     private float iconItemScale = 1.0f;
+    private Supplier<String> bottomLeftText = null;
 
     /**
      * Creates a new builder with the two required fields.
@@ -103,8 +104,8 @@ public class ButtonBuilder {
         return this;
     }
 
-    public ButtonBuilder stretchIconToBorders() {
-        this.stretchIconToBorders = true;
+    public ButtonBuilder innerIconSizeModifier(int size) {
+        this.innerIconSizeModifier = size;
         return this;
     }
 
@@ -209,6 +210,11 @@ public class ButtonBuilder {
         return this;
     }
 
+    public ButtonBuilder bottomLeftText(Supplier<String> bottomLeftText) {
+        this.bottomLeftText = bottomLeftText;
+        return this;
+    }
+
     // -------------------------------------------------------------------------
     // Build
     // -------------------------------------------------------------------------
@@ -250,7 +256,7 @@ public class ButtonBuilder {
         button.greyPercent = greyPercent;
         button.greyWhenDisabled = greyWhenDisabled;
         button.showSelectedFrameWhenDisabled = showSelectedFrameWhenDisabled;
-        button.stretchIconToBorders = stretchIconToBorders;
+        button.innerIconSizeModifier = innerIconSizeModifier;
         button.tooltipOffsetY = tooltipOffsetY;
         button.lightUpOnHover = lightUpOnHover;
         button.imageSize = imageSize;
@@ -258,6 +264,7 @@ public class ButtonBuilder {
         button.bgColour = bgColour;
         button.iconItem = iconItem;
         button.iconItemScale = iconItemScale;
+        button.bottomLeftText = bottomLeftText;
 
         return button;
     }

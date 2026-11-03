@@ -1,18 +1,22 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.google.common.collect.Lists;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -24,7 +28,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -75,43 +78,15 @@ public abstract class AbstractArrowMixin extends Projectile {
         return building != null && building.isPosInsideBuilding(result.getBlockPos()) && !insideForeignEntity;
     }
 
-    /*
-    // prevent arrows from colliding with the building that a garrisoned unit is inside of
-    @Inject(
-            method = "isNoPhysics",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
-        if (this.getOwner() instanceof AttackerUnit aUnit) {
-            // garrisoned unit -> ground
-            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
-            if (isInsideBuildingAndNotForeignEntity(building)) {
-                cir.setReturnValue(true);
-            }
-
-            // ground -> garrisoned unit - allow through at 1/2 accuracy
-            // can't use random() here or the nophysics status will change every tick
-            //if (this.getId() % 2 == 0 &&
-            //    ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
-            //    if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
-            //        isInsideTopOfBuilding(building)) {
-
-            //        // nophysics all the time means they wouldn't collide with the actual target
-            //        if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
-            //             cir.setReturnValue(true);
-            //    }
-            //}
-        }
-    }
-    */
-
     // correct angle of nophysics arrows
     @Inject(
             method = "tick",
             at = @At("TAIL")
     )
     public void tick(CallbackInfo ci) {
+        if (!this.level().isClientSide() && this.getOwner() instanceof PillagerUnit pUnit)
+            reignofnether$shooter = pUnit;
+
         if (this.isNoPhysics()) {
             Vec3 vec3 = this.getDeltaMovement();
             double d4 = vec3.horizontalDistance();
@@ -152,10 +127,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                 entity instanceof Unit unit2) {
             String owner1 = unit1.getOwnerName();
             String owner2 = unit2.getOwnerName();
-            if (entity.level().isClientSide())
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesClient.isAllied(owner1, owner2);
-            else
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesServerEvents.isAllied(owner1, owner2);
+            isAlliedOrOwned = MiscUtil.isAlliedOrOwned(entity.level(), owner1, owner2);
         }
         return this.getOwner() instanceof Unit unit1 &&
                 entity instanceof Unit unit2 &&
@@ -168,6 +140,30 @@ public abstract class AbstractArrowMixin extends Projectile {
     private boolean reignofnether$boggedArrowCollidedWithPoisonedEnemy(Entity entity) {
         return this.getOwner() instanceof BoggedUnit boggedUnit && entity instanceof LivingEntity le && le.hasEffect(MobEffects.POISON) &&
                 !(boggedUnit.getTargetGoal().forced && boggedUnit.getTargetGoal().getTarget() == entity);
+    }
+
+    // the pillager that fired this arrow, remembered because getOwner() returns null once it has been removed (eg. died)
+    @Unique
+    private PillagerUnit reignofnether$shooter = null;
+
+    // siege mode pillagers' primary arrows have a larger explosion
+    @Unique
+    private float reignofnether$getExplosionRadius() {
+        return this.getTags().contains(RangedAttackerUnit.SIEGE_ARROW_TAG) ? 2f : 1f;
+    }
+
+    // arrows fired by mounted pillagers explode, regardless of whether the pillager is still mounted or alive on impact
+    // an arrow only ever explodes once, even if it pierces or hits a block after hitting an entity
+    @Unique
+    private void reignofnether$explodeOnce(DamageSource source, Vec3 pos, Level.ExplosionInteraction interaction) {
+        if (this.level().isClientSide() ||
+                !this.getTags().contains(RangedAttackerUnit.EXPLOSIVE_ARROW_TAG) ||
+                this.getTags().contains(RangedAttackerUnit.EXPLODED_ARROW_TAG))
+            return;
+        this.addTag(RangedAttackerUnit.EXPLODED_ARROW_TAG);
+        Entity shooter = this.getOwner() != null ? this.getOwner() : reignofnether$shooter;
+        this.level().explode(shooter, source, null, pos.x, pos.y, pos.z,
+                reignofnether$getExplosionRadius(), false, interaction);
     }
 
     protected boolean canHitEntity(Entity entity) {
@@ -212,11 +208,13 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
 
         Entity entity1 = this.getOwner();
+        // the real arrow must be the direct entity so that its tags are visible in damage events
+        AbstractArrow thisArrow = (AbstractArrow) (Object) this;
         DamageSource damagesource;
         if (entity1 == null) {
-            damagesource = damageSources().arrow(new Arrow(this.level(), this.xo, this.yo, this.zo), this);//DamageSource.arrow(this, this);
+            damagesource = damageSources().arrow(thisArrow, this);
         } else {
-            damagesource = damageSources().arrow(new Arrow(this.level(), this.xo, this.yo, this.zo), entity1);
+            damagesource = damageSources().arrow(thisArrow, entity1);
             if (entity1 instanceof LivingEntity) {
                 ((LivingEntity)entity1).setLastHurtMob(entity);
             }
@@ -229,6 +227,7 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
 
         if (entity.hurt(damagesource, (float)i)) {
+            this.addTag(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG);
             if (flag) {
                 return;
             }
@@ -289,15 +288,15 @@ public abstract class AbstractArrowMixin extends Projectile {
             this.piercingIgnoreEntityIds.add(entity.getId());
         }
 
-        if (this.getOwner() instanceof PillagerUnit pUnit &&
-            !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this.getOwner(), damagesource, null,
-                    pResult.getEntity().getEyePosition().x,
-                    pResult.getEntity().getEyePosition().y,
-                    pResult.getEntity().getEyePosition().z,
-                    1f,
-                    false,
-                    Level.ExplosionInteraction.BLOCK);
+        reignofnether$explodeOnce(damagesource, pResult.getEntity().getEyePosition(), Level.ExplosionInteraction.BLOCK);
+
+        if (level() instanceof ServerLevel serverLevel &&
+            this.getTags().contains(RangedAttackerUnit.SNOW_ARROW_TAG) &&
+            random.nextFloat() < StrayUnit.SNOW_ON_HIT_CHANCE) {
+            BlockServerEvents.getSnowPositions(level(), entity.getOnPos().above(), 0)
+                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                        BlockServerEvents.placeWraithSnow(serverLevel, pos, this.getOwner() != null ? this.getOwner().getId() : -1);
+                    }));
         }
     }
 
@@ -307,16 +306,7 @@ public abstract class AbstractArrowMixin extends Projectile {
             cancellable = true
     )
     protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
-        if (this.getOwner() instanceof PillagerUnit pUnit &&
-                !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this.getOwner(), null, null,
-                    pResult.getLocation().x,
-                    pResult.getLocation().y,
-                    pResult.getLocation().z,
-                    1f,
-                    false,
-                    Level.ExplosionInteraction.TNT);
-        }
+        reignofnether$explodeOnce(null, pResult.getLocation(), Level.ExplosionInteraction.TNT);
 
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground
@@ -324,6 +314,18 @@ public abstract class AbstractArrowMixin extends Projectile {
             if (isInsideBuildingAndNotForeignEntity(pResult, building)) {
                 ci.cancel();
             }
+        }
+        if (level() instanceof ServerLevel serverLevel &&
+                this.getTags().contains(RangedAttackerUnit.SNOW_ARROW_TAG) &&
+                random.nextFloat() < StrayUnit.SNOW_ON_HIT_CHANCE) {
+
+            Vec3 loc = pResult.getLocation();
+            BlockPos bpLoc = new BlockPos((int) loc.x, (int) loc.y, (int) loc.z);
+
+            BlockServerEvents.getSnowPositions(level(), bpLoc, 0)
+                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                        BlockServerEvents.placeWraithSnow(serverLevel, pos, this.getOwner() != null ? this.getOwner().getId() : -1);
+                    }));
         }
     }
 

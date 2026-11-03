@@ -11,14 +11,14 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SpiderLair extends ProductionBuilding {
 
@@ -42,11 +42,10 @@ public class SpiderLair extends ProductionBuilding {
         this.productions.add(ProductionItems.POISON_SPIDER, Keybindings.abilitySlot2);
     }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobweb.png"),
@@ -56,12 +55,12 @@ public class SpiderLair extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.spider_lair").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
+                        fcs(""),
+                        Component.translatable("buildings.reignofnether.spider_lair.tooltip1").getVisualOrderText(),
+                        fcs(""),
+                        Component.translatable("buildings.reignofnether.spider_lair.tooltip2").getVisualOrderText()
                 ),
                 this
         );

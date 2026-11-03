@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -48,14 +47,11 @@ public class TitleScreenMixin extends Screen {
             ResourceLocation.parse("textures/gui/title/edition.png");
     private static final ResourceLocation DISCORD_TEXTURE =
             ResourceLocation.parse( "textures/gui/title/discord.png");
-    private static final ResourceLocation LILYPAD_TEXTURE =
-            ResourceLocation.parse( "textures/gui/title/lilypad.png");
 
     @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
     @Shadow private long fadeInStart;
     @Nullable @Shadow(remap = false) private TitleScreenModUpdateIndicator modUpdateNotification;
-    private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
     private AbstractWidget mapsButton;
 
@@ -63,61 +59,10 @@ public class TitleScreenMixin extends Screen {
         super(pTitle);
     }
 
-    private boolean textureExists(ResourceLocation resource) {
-        try {
-            ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-            return resourceManager.getResource(resource).isPresent();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     @Inject(method = "init", at = @At("TAIL"))
     private void init(CallbackInfo ci) {
-        int lilypadX = this.width - 100;
-        int lilypadY = this.height - 57;
-
-        this.lilypadButton = new AbstractWidget(lilypadX, lilypadY, 110, 40, Component.empty()) {
-            @Override
-            public void onClick(double pMouseX, double pMouseY) {
-                openLink("https://lilypad.gg/reignofnether");
-            }
-
-            @Override
-            protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-                narrationElementOutput.add(NarratedElementType.TITLE, Component.literal("Choose Lilypad Hosting"));
-            }
-
-            @Override
-            public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-                PoseStack pPoseStack = guiGraphics.pose();
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderTexture(0, LILYPAD_TEXTURE);
-
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-
-                pPoseStack.pushPose();
-                float scale = 0.8f;
-                pPoseStack.translate(this.getX(), this.getY(), 0);
-                pPoseStack.scale(scale, scale, 1.0f);
-
-                guiGraphics.blit(LILYPAD_TEXTURE, 0, 0, 0, 0, this.width, this.height, this.width, this.height);
-
-                if (isHoveredOrFocused())
-                    guiGraphics.fill( // x1,y1, x2,y2,
-                            0,0,
-                            this.width,
-                            this.height,
-                            0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-
-                pPoseStack.popPose();
-            }
-        };
-
-
-        int discordX = lilypadX - 2;
-        int discordY = lilypadY - 38;
+        int discordX = this.width - 102;
+        int discordY = this.height - 57;
 
         this.discordButton = new AbstractWidget(discordX, discordY, 114, 38, Component.empty()) {
             @Override
@@ -198,7 +143,6 @@ public class TitleScreenMixin extends Screen {
         };
         this.mapsButton.setTooltip(Tooltip.create(Component.literal("Get RTS maps!")));
 
-        this.addRenderableWidget(this.lilypadButton);
         this.addRenderableWidget(this.discordButton);
         this.addRenderableWidget(this.mapsButton);
     }
@@ -209,7 +153,7 @@ public class TitleScreenMixin extends Screen {
             URI uri = new URI(url);
             Util.getPlatform().openUri(uri);
         } catch (Exception e) {
-            System.err.println("Failed to open URL: " + e.getMessage());
+            ReignOfNether.LOGGER.error("Failed to open URL: " + url, e);
         }
     }
 
@@ -303,29 +247,4 @@ public class TitleScreenMixin extends Screen {
             RenderSystem.disableBlend();
         }
     }
-
-    /*
-    @Shadow private Component getMultiplayerDisabledReason() { return null; }
-    @Shadow private void realmsButtonClicked() { }
-
-    private final int menuOffsetY = 20;
-
-    @Inject(method = "createNormalMenuOptions", at = @At("HEAD"), cancellable = true)
-    private void createNormalMenuOptions(int pY, int pRowHeight, CallbackInfo ci) {
-        ci.cancel();
-        this.addRenderableWidget(Button.builder(Component.translatable("menu.singleplayer"), (p_280833_) -> {
-            this.minecraft.setScreen(new SelectWorldScreen(this));
-        }).bounds(this.width / 2 - 100, pY + menuOffsetY, 200, 20).build());
-        Component component = this.getMultiplayerDisabledReason();
-        boolean flag = component == null;
-        Tooltip tooltip = component != null ? Tooltip.create(component) : null;
-        ((Button)this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), (p_210872_) -> {
-            Screen screen = this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this);
-            this.minecraft.setScreen((Screen)screen);
-        }).bounds(this.width / 2 - 100, pY + menuOffsetY + pRowHeight * 1, 200, 20).tooltip(tooltip).build())).active = flag;
-        ((Button)this.addRenderableWidget(Button.builder(Component.translatable("menu.online"), (p_210872_) -> {
-            this.realmsButtonClicked();
-        }).bounds(this.width / 2 + 2, pY + menuOffsetY + pRowHeight * 2, 98, 20).tooltip(tooltip).build())).active = flag;
-    }
-     */
 }

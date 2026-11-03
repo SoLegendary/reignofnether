@@ -1,0 +1,24 @@
+{
+    "targets": [
+        "swap",
+        "final"
+    ],
+    "passes": [
+        {
+            "name": "entity_outline",
+            "intarget": "final",
+            "outtarget": "swap"
+        },
+        {
+            "name": "blit",
+            "intarget": "swap",
+            "outtarget": "final",
+            "uniforms": [
+                {
+                    "name": "ColorModulate",
+                    "values": [ 1.0, 1.0, 1.0, 0.7 ]
+                }
+            ]
+        }
+    ]
+}

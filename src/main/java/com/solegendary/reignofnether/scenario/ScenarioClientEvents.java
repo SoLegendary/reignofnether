@@ -68,6 +68,17 @@ public class ScenarioClientEvents {
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
     private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
+    // statics outlive the world: back to the defaults, or the next world inherits these
+    public static void resetRoles() {
+        scenarioRoles.clear();
+        for (int i = 0; i < 8; i++)
+            scenarioRoles.add(new ScenarioRole(i));
+        roleIndexToEdit = 0;
+        roleIndexToPlay = 0;
+        setMenuOpen(false);
+        confirmPublishScenario = false;
+    }
+
     public static void cycleRoleIndexToEdit(boolean reverse) {
         roleIndexToEdit += reverse ? -1 : 1;
         if (roleIndexToEdit < 0)
@@ -91,7 +102,7 @@ public class ScenarioClientEvents {
     public static Button getCycleRoleToPlayButton() {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>();
         ScenarioRole role = scenarioRoles.get(roleIndexToPlay);
-        tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.choose_scenario_role", role.name, role.faction.name())));
+        tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.choose_scenario_role", role.name, role.faction.getName())));
 
         if (role.isNpc) {
             tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.npc_scenario_role")));
@@ -110,7 +121,7 @@ public class ScenarioClientEvents {
         }
 
         return new ButtonBuilder("Change Scenario Role")
-                .iconResource(MiscUtil.getFactionIcon(role.faction))
+                .iconResource(role.faction.icon)
                 .onLeftClick(() -> {
                     roleIndexToPlay += 1;
                     if (roleIndexToPlay >= scenarioRoles.size())

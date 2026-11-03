@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyF
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.GreedIsGoodPassive;
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.LootExplosion;
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.ThrowTNT;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -31,17 +31,14 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.PiglinMerchantAnimations;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -95,10 +92,10 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
     Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
@@ -124,8 +121,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -162,7 +158,18 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     private BlockPos attackMoveTarget = null;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(PiglinMerchantUnit.class, EntityDataSerializers.STRING);
@@ -326,7 +333,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, PiglinMerchantUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, PiglinMerchantUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PiglinMerchantUnit.maxHealth)
@@ -338,7 +345,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
@@ -359,7 +365,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
@@ -374,7 +380,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -382,19 +388,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -412,7 +406,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         if (this.horizontalCollision) {
             boolean flag = false;
             AABB aabb = this.getBoundingBox().inflate(0.2);
-            Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
+            Iterator<BlockPos> var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
             label62:
             while(true) {
                 BlockPos blockpos;
@@ -423,7 +417,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                             this.jumpFromGround();
                         break label62;
                     }
-                    blockpos = (BlockPos)var8.next();
+                    blockpos = var8.next();
                     BlockState blockstate = this.level().getBlockState(blockpos);
                     block = blockstate.getBlock();
                 } while(!(block instanceof LeavesBlock));
@@ -482,6 +476,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 SoundClientboundPacket.playSoundAtPos(SoundAction.PIGLIN_MERCHANT_LOOT_EXPLOSION, blockPosition());
             }
         });
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
@@ -489,6 +484,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, itemGoal);
@@ -550,15 +546,16 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .multiply(1,0,1)
                 .scale(0.04)
                 .add(0,0.4,0);
+
         tnt.setDeltaMovement(dMove);
+        tnt.setOwner(this);
         level().addFreshEntity(tnt);
-        level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
-                SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+        SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, blockPosition());
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.WOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_CHUNK_RESOURCES));
         throwTNT.setCooldown(cooldown, this);
@@ -572,7 +569,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.FOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
 
@@ -661,7 +658,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.ORE, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);

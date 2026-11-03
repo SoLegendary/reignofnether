@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -48,7 +49,7 @@ public class BridgePlacement extends BuildingPlacement {
     @Override
     public double getHealthPerBlock() {
         int solidBlocks = getSolidBlocks().size();
-        return (double) (getMaxHealth() / solidBlocks) * 2;
+        return getMaxHealth() / (double) Math.max(1, solidBlocks) * 2;
     }
 
     @Override

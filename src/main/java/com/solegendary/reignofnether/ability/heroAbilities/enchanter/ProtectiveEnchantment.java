@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -90,7 +91,7 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
                 this,
                 hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 
@@ -130,14 +131,6 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
         );
     }
 
-
-    @Override
-    public boolean canEnchant(LivingEntity le) {
-        return le instanceof Unit &&
-                !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
-                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get());
-    }
-
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
@@ -152,5 +145,13 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
         }
         ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setAbility(this);
         ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setTarget(targetEntity);
+    }
+
+    @Override
+    public boolean canEnchant(LivingEntity le) {
+        return le instanceof Unit &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments()
+                        .containsKey(EnchantmentRegistrar.FORTYIFYING.get());
     }
 }

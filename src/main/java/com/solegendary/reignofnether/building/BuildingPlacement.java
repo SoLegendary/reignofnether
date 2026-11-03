@@ -28,6 +28,7 @@ import com.solegendary.reignofnether.building.data.DataStorage;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
@@ -35,6 +36,8 @@ import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.items.ItemServerEvents;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
@@ -74,6 +77,8 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -86,6 +91,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -303,11 +310,7 @@ public class BuildingPlacement {
         initPlacedBlocks();
 
         // offset ticks from other buildings of the same type so we can tell which ones were built first
-        List<BuildingPlacement> bpls;
-        if (level.isClientSide())
-            bpls = BuildingClientEvents.getBuildings();
-        else
-            bpls = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> bpls = BuildingUtils.getBuildingsList(level.isClientSide());
 
         for (BuildingPlacement bpl : bpls)
             if (bpl.getBuilding().isTypeOf(this.getBuilding()) && bpl != this && bpl.ownerName.equals(this.ownerName))
@@ -522,22 +525,12 @@ public class BuildingPlacement {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     public void queueNextBlock(ServerLevel level, String builderName) {
-        if (blocksPerBuild <= 0)
+        if (blocksPerBuild <= 0 || blockPlaceQueue.size() >= blocksPerBuild)
             return;
-
-        // if the building is already constructed then start subtracting resources for repairs
-        if (isBuilt) {
-            if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
-                ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true, true);
-                return;
-            } else {
-                ResourcesServerEvents.addSubtractResources(new Resources(builderName, 0, -1, 0));
-            }
-        }
 
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>();
         for (BuildingBlock block : blocks) {
-            if (!blockPlaceQueue.contains(block) && !block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
+            if (!block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
         }
 
         int minY = getMinCorner(unplacedBlocks).getY();
@@ -570,6 +563,15 @@ public class BuildingPlacement {
             }
         }
         if (!validBlocks.isEmpty()) {
+            // if the building is already constructed then start subtracting resources for repairs
+            if (isBuilt) {
+                if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
+                    ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true, true);
+                    return;
+                } else {
+                    ResourcesServerEvents.addSubtractResources(new Resources(builderName, 0, -1, 0));
+                }
+            }
             if (getBuilding() instanceof AbstractBridge) {
                 ArrayList<WorkerUnit> builders = getBuilders();
                 if (!builders.isEmpty()) {
@@ -615,6 +617,10 @@ public class BuildingPlacement {
             return false;
         }
         return block.isPlaced(getLevel());
+    }
+
+    public void damage(double amount) {
+        destroyRandomBlocks(amount / 2);
     }
 
     public void destroyRandomBlocks(double amount) {
@@ -755,11 +761,11 @@ public class BuildingPlacement {
     private void awardBounty() {
         if (lastAttacker instanceof Unit unit && !unit.getOwnerName().isEmpty()) {
             ResourceCost cost = building.cost;
-            Resources resources = new Resources(unit.getOwnerName(),
-                (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
-            );
+            Resources resources;
+            int food = (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int wood = (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int ore =  (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            resources = new Resources(unit.getOwnerName(), food, wood, ore);
             if (resources.getTotalValue() > 0) {
                 ResourcesClientboundPacket.showFloatingText(resources, centrePos);
                 ResourcesServerEvents.addSubtractResources(resources);
@@ -772,7 +778,7 @@ public class BuildingPlacement {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (this.getFaction() == Faction.MONSTERS && ResearchServerEvents.playerHasResearch(this.ownerName,
+        if (this.getFaction().equals(Factions.MONSTERS) && ResearchServerEvents.playerHasResearch(this.ownerName,
             ProductionItems.RESEARCH_SILVERFISH
         )) {
             randomSilverfishSpawn(pos);
@@ -1095,7 +1101,9 @@ public class BuildingPlacement {
                         be.setChanged();
                     }
                 } else {
-                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                    CompoundTag tagToLoad = BlockUtils.STORAGE_BLOCKS.contains(bs.getBlock())
+                            ? stripUnwantedItems(bNbt) : bNbt;
+                    BlockEntity be = BlockEntity.loadStatic(bp, bs, tagToLoad);
                     if (be != null)
                         level.setBlockEntity(be);
                 }
@@ -1118,6 +1126,29 @@ public class BuildingPlacement {
                 highestBlockCountReached = this.getBlocksPlaced();
             }
         }
+    }
+
+    // remove spawn eggs and hero items from chests so they can't be looted by FPV players or upon destruction
+    private static boolean shouldStripItem(ItemStack stack) {
+        return !stack.isEmpty()
+                && (ItemUtil.isUnitItem(stack) || stack.getItem() instanceof SpawnEggItem);
+    }
+
+    private static CompoundTag stripUnwantedItems(CompoundTag tag) {
+        CompoundTag copy = tag.copy();
+        if (!copy.contains("Items", Tag.TAG_LIST))
+            return copy;
+
+        ListTag items = copy.getList("Items", Tag.TAG_COMPOUND);
+        ListTag filtered = new ListTag();
+        for (int i = 0; i < items.size(); i++) {
+            CompoundTag itemTag = items.getCompound(i);
+            ItemStack stack = ItemStack.of(itemTag);
+            if (!shouldStripItem(stack))
+                filtered.add(itemTag); // keeps original "Slot" byte intact
+        }
+        copy.put("Items", filtered);
+        return copy;
     }
 
     // if there aren't already too many animals nearby, spawn some random huntable animals
@@ -1445,7 +1476,7 @@ public class BuildingPlacement {
         try {
             this.commands.remove(index);
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in deleteCommand");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in deleteCommand", e);
         }
     }
     
@@ -1453,7 +1484,7 @@ public class BuildingPlacement {
         try {
             this.commands.get(index).commandStr = text;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandText");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandText", e);
         }
     }
     
@@ -1462,7 +1493,7 @@ public class BuildingPlacement {
             this.commands.get(index).tickCooldownMax = cooldownTicks;
             this.commands.get(index).tickCooldown = cooldownTicks;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandCooldown", e);
         }
     }
     
@@ -1471,13 +1502,13 @@ public class BuildingPlacement {
         try {
             triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
         } catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IllegalArgumentException in setCommandTrigger", e);
             return;
         }
         try {
             this.commands.get(index).condition = triggerCond;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandTrigger", e);
         }
     }
 }

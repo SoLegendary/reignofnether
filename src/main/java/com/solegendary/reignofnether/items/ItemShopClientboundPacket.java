@@ -16,68 +16,74 @@ import java.util.function.Supplier;
 public class ItemShopClientboundPacket {
 
     private final BlockPos buildingPos;
-    private final ArrayList<UUID> uuids;
+    private final ArrayList<String> descIds;
     private final ArrayList<Integer> buyCosts;
     private final ArrayList<Integer> maxStocks;
     private final ArrayList<Integer> stocks;
+    private final ArrayList<Integer> startingStock;
     private final ArrayList<Integer> maxRestockTicks;
     private final ArrayList<Integer> restockTicks;
 
-    public static void syncItemShopStock(BlockPos buildingPos, ArrayList<StockedShopItem> itemsAndStock) {
+    public static void syncItemShopStock(BlockPos buildingPos, ArrayList<StockedShopItem> stockedItems) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new ItemShopClientboundPacket(buildingPos, itemsAndStock)
+                new ItemShopClientboundPacket(buildingPos, stockedItems)
         );
     }
 
-    public ItemShopClientboundPacket(BlockPos buildingPos, ArrayList<StockedShopItem> itemsAndStock) {
+    public ItemShopClientboundPacket(BlockPos buildingPos, ArrayList<StockedShopItem> stockedItems) {
         this.buildingPos = buildingPos;
-        this.uuids = new ArrayList<>();
+        this.descIds = new ArrayList<>();
         this.buyCosts = new ArrayList<>();
         this.maxStocks = new ArrayList<>();
         this.stocks = new ArrayList<>();
         this.maxRestockTicks = new ArrayList<>();
         this.restockTicks = new ArrayList<>();
+        this.startingStock = new ArrayList<>();
 
-        for (StockedShopItem stock : itemsAndStock) {
-            uuids.add(stock.item.uuid);
+        for (StockedShopItem stock : stockedItems) {
+            descIds.add(stock.item.descId);
             buyCosts.add(stock.getBuyCost());
             maxStocks.add(stock.maxStock);
             stocks.add(stock.stock);
             maxRestockTicks.add(stock.maxRestockTicks);
             restockTicks.add(stock.getTicksToNextRestock());
+            startingStock.add(stock.startingStock);
         }
     }
 
     public ItemShopClientboundPacket(FriendlyByteBuf buffer) {
         this.buildingPos = buffer.readBlockPos();
         int size = buffer.readInt();
-        this.uuids = new ArrayList<>();
+        this.descIds = new ArrayList<>();
         this.buyCosts = new ArrayList<>();
         this.maxStocks = new ArrayList<>();
         this.stocks = new ArrayList<>();
         this.maxRestockTicks = new ArrayList<>();
         this.restockTicks = new ArrayList<>();
+        this.startingStock = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
-            uuids.add(buffer.readUUID());
+            descIds.add(buffer.readUtf());
             buyCosts.add(buffer.readInt());
             maxStocks.add(buffer.readInt());
             stocks.add(buffer.readInt());
             maxRestockTicks.add(buffer.readInt());
             restockTicks.add(buffer.readInt());
+            startingStock.add(buffer.readInt());
         }
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(buildingPos);
-        buffer.writeInt(uuids.size());
-        for (int i = 0; i < uuids.size(); i++) {
-            buffer.writeUUID(uuids.get(i));
+        buffer.writeInt(descIds.size());
+        for (int i = 0; i < descIds.size(); i++) {
+            buffer.writeUtf(descIds.get(i));
             buffer.writeInt(buyCosts.get(i));
             buffer.writeInt(maxStocks.get(i));
             buffer.writeInt(stocks.get(i));
             buffer.writeInt(maxRestockTicks.get(i));
             buffer.writeInt(restockTicks.get(i));
+            buffer.writeInt(startingStock.get(i));
         }
     }
 
@@ -88,21 +94,22 @@ public class ItemShopClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        ArrayList<StockedShopItem> itemsAndStock = new ArrayList<>();
-                        for (int i = 0; i < uuids.size(); i++) {
-                            UnitItem unitItem = ItemUtil.getUnitItem(uuids.get(i));
+                        ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
+                        for (int i = 0; i < descIds.size(); i++) {
+                            UnitItem unitItem = ItemUtil.getUnitItem(descIds.get(i));
                             if (unitItem == null)
                                 continue;
-                            itemsAndStock.add(new StockedShopItem(
+                            stockedItems.add(new StockedShopItem(
                                     unitItem,
                                     buyCosts.get(i),
                                     maxStocks.get(i),
                                     stocks.get(i),
+                                    startingStock.get(i),
                                     maxRestockTicks.get(i),
                                     restockTicks.get(i)
                             ));
                         }
-                        ItemClientEvents.setStockedShopItems(buildingPos, itemsAndStock);
+                        ItemClientEvents.setStockedShopItems(buildingPos, stockedItems);
                         success.set(true);
                     });
         });

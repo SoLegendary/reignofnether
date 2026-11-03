@@ -6,11 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.SculkCatalystBlock;
-import net.minecraft.world.level.block.SculkShriekerBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 
 // classifies one cell (x, y, z) as LAND / WATER / FIRE / LAVA / BLOCKED.
@@ -48,7 +46,13 @@ public final class WalkabilityBuilder {
 
         FluidState feetFluid = feetBs.getFluidState();
         if (feetFluid.is(FluidTags.LAVA)) return KIND_LAVA;
-        if (!feetFluid.isEmpty())          return KIND_WATER;
+        // the water surface is the floor: units float, so the walkable cell is the air on top of the water (see
+        // the floor fluid check below), never a cell inside it. only exceptions: waterfalls, and a low ceiling
+        // (eg. a bridge) that leaves no room for the cell on top.
+        if (!feetFluid.isEmpty()) {
+            if (coversFluid(headBs.getFluidState())) return KIND_BLOCKED;
+            return isFalling(feetFluid) || MiscUtil.isSolidBlocking(level, head.above()) ? KIND_WATER : KIND_BLOCKED;
+        }
 
         if (floorBs.getBlock() == Blocks.SLIME_BLOCK) return KIND_SLIME;
         if (feetBs.getBlock() == Blocks.FIRE || feetBs.getBlock() == Blocks.SOUL_FIRE) return KIND_FIRE;
@@ -61,10 +65,25 @@ public final class WalkabilityBuilder {
         // the very leaf it's told to mine). don't count these as support: the cell falls through to "no floor" so
         // the unit routes around and stands on the real ground below. BlockTags.LEAVES is allocation-free, unlike
         // BlockUtils.isLeafBlock whose List.of fallback would allocate on this hot path for every solid floor.
-        if (MiscUtil.isSolidBlocking(level, floor) && !isFenceLike(floorBs) && !floorBs.is(BlockTags.LEAVES)) return KIND_LAND;
+        if (MiscUtil.isSolidBlocking(level, floor) &&
+                !isFenceLike(floorBs) &&
+                !floorBs.is(BlockTags.LEAVES) &&
+                !(floorBs.getBlock() instanceof LanternBlock))
+            return KIND_LAND;
+
         if (floorBs.getFluidState().is(FluidTags.LAVA)) return KIND_LAVA;
         if (!floorBs.getFluidState().isEmpty()) return KIND_WATER;
         return KIND_BLOCKED; // no floor support
+    }
+
+    // true if the fluid in a cell puts the cell below it underwater. flowing water counts too, or a current on top
+    // of a lake leaves a walkable layer under it. falling water doesn't, so waterfalls stay passable.
+    public static boolean coversFluid(FluidState above) {
+        return !above.isEmpty() && !isFalling(above);
+    }
+
+    private static boolean isFalling(FluidState fluid) {
+        return fluid.hasProperty(FlowingFluid.FALLING) && fluid.getValue(FlowingFluid.FALLING);
     }
 
     // fences, walls and closed fence gates are 1.5-block barriers units can't pass or stand on (open gates are

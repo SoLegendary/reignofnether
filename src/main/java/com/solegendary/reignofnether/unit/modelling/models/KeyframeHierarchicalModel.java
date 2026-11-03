@@ -59,8 +59,4 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
             KeyframeAnimations.animate(this, animDef, time.getAccumulatedTime(), scale, ANIMATION_VECTOR_CACHE);
         });
     }
-
-    protected void applyStatic(AnimationDefinition animDef) {
-        KeyframeAnimations.animate(this, animDef, 0L, 1.0F, ANIMATION_VECTOR_CACHE);
-    }
 }

@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
@@ -27,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -108,9 +111,19 @@ public class FogOfWarServerEvents {
         isRtsPlayerCache.clear();
     }
 
+    // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
+    // without this the later ones still count as non-RTS and get sent the earlier players' capitols unfiltered
+    private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
+
+    public static void setStartingPlayers(Collection<String> names) {
+        startingPlayers.clear();
+        startingPlayers.addAll(names);
+    }
+
     // match by name; entity ids change on reconnect
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
+        if (startingPlayers.contains(player.getName().getString())) return true;
         Boolean cached = isRtsPlayerCache.get(player.getUUID());
         if (cached != null) return cached;
         boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
@@ -209,18 +222,6 @@ public class FogOfWarServerEvents {
         pendingResends.computeIfAbsent(playerId, k -> ConcurrentHashMap.newKeySet()).add(pos);
     }
 
-    public static Set<ChunkPos> getBuildingChunks(BuildingPlacement b) {
-        int minCx = b.minCorner.getX() >> 4;
-        int maxCx = b.maxCorner.getX() >> 4;
-        int minCz = b.minCorner.getZ() >> 4;
-        int maxCz = b.maxCorner.getZ() >> 4;
-        Set<ChunkPos> chunks = new HashSet<>();
-        for (int cx = minCx; cx <= maxCx; cx++)
-            for (int cz = minCz; cz <= maxCz; cz++)
-                chunks.add(new ChunkPos(cx, cz));
-        return chunks;
-    }
-
     public static boolean canPlayerSeeBuilding(ServerPlayer sp, BuildingPlacement b) {
         if (!isFogActiveFor(sp)) return true;
         return isBlockVisibleFor(sp, b.maxCorner.getX(), b.maxCorner.getZ()) ||
@@ -267,6 +268,21 @@ public class FogOfWarServerEvents {
             FogChunkSnapshot.rebuildIndex(level);
     }
 
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        FogChunkSnapshot.forget();
+        enabled = false;
+        playerLiveChunks.clear();
+        playerEdgeChunks.clear();
+        playerEdgeMasks.clear();
+        pendingResends.clear();
+        revealedPlayerNames.clear();
+        revealedUnitExpiryTick.clear();
+        neutralFogUnits.clear();
+        startingPlayers.clear();
+    }
+
     public static void setEnabled(boolean value) {
         if (!value && isForceFog()) {
             ReignOfNether.LOGGER.info("[FogOfWar] Disable refused: gamerule reignofnetherForceFog is true");
@@ -296,6 +312,13 @@ public class FogOfWarServerEvents {
         pendingResends.clear();
 
         syncClientFog();
+
+        // fog means a competitive match: enemy picks hidden (the host can turn it back off)
+        if (!wasEnabled && enabled && serverLevel != null) {
+            serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
+            GameruleClientboundPacket.setHideEnemyPicks(true);
+            StartPosServerEvents.syncAll(true);
+        }
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
         if (wasEnabled && !enabled && serverLevel != null)
@@ -622,12 +645,12 @@ public class FogOfWarServerEvents {
     // register here too for command blocks
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("enable")
                 .executes((command) -> {
                     setEnabled(true);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("disable")
                 .executes((command) -> {
                     setEnabled(false);
                     return 1;

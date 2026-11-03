@@ -12,7 +12,7 @@ public class ArmouredHoglinUnitRenderer extends MobRenderer<Hoglin, ArmouredHogl
     private static final ResourceLocation ARMOURED_HOGLIN_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/entities/armoured_hoglin.png");
 
     public ArmouredHoglinUnitRenderer(EntityRendererProvider.Context p_174165_) {
-        super(p_174165_, new ArmouredHoglinUnitModel(p_174165_.bakeLayer(ArmouredHoglinUnitModel.LAYER_LOCATION)), 0.7F);
+        super(p_174165_, new ArmouredHoglinUnitModel<>(p_174165_.bakeLayer(ArmouredHoglinUnitModel.LAYER_LOCATION)), 0.7F);
     }
 
     @Override

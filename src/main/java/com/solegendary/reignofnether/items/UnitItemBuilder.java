@@ -7,14 +7,14 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -45,28 +45,41 @@ import java.util.function.Predicate;
 public class UnitItemBuilder {
 
     final Item item;
-    UUID uuid = UUID.randomUUID();
+    int defaultStackCount = 1;
+    String descId;
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
     int buyCost = 0;
-    String desc = "";
+    Rarity rarity = Rarity.COMMON;
+    LocalizedText desc = null;
     Keybinding hotkey = null;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> pointDescs = new ArrayList<>();
-    final List<AttributeModifier> attributeModifiers = new ArrayList<>();
+    final List<LocalizedText> pointDescs = new ArrayList<>();
+    final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
-    String onUseGroundError = "item.reignofnether.error.use_on_ground";
-    String onUseEntityError = "item.reignofnether.error.use_on_entity";
-    String onUseBuildingError = "item.reignofnether.error.use_on_building";
-    String onUseError = "item.reignofnether.error.use";
+    boolean toggleActiveOnUse = false;
+    boolean suppressDefaultError = false;
     boolean consumeOnUse = false;
-    int cooldownTicks = 0;
+    int cooldownTicksMax = 0;
+    int channelTicks = 0;
     int manaCost = 0;
+    float range = 0;
+    float radius = 0;
+    boolean showRangeCircle = true;
+    boolean showRangeLine = false;
+    boolean showRadiusCircle = false;
+    boolean showRadiusAtCursor = false;
+    boolean doCastAnimation = false;
+    boolean resetBehaviours = true;
+    boolean forceAutocast = false;
+    boolean canRandomDrop = true;
+    boolean nonHeroUseable = false;
+    int maxStackSize = 1;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -78,8 +91,16 @@ public class UnitItemBuilder {
         return new UnitItemBuilder(item);
     }
 
-    public UnitItemBuilder uuid(String uuid) {
-        this.uuid = UUID.fromString(uuid);
+    public UnitItemBuilder descId(String descId) {
+        this.descId = descId;
+        return this;
+    }
+
+    /** Emerald cost returned when the item is sold; 0 means unsellable. */
+    public UnitItemBuilder defaultStackCount(int defaultStackCount) {
+        if (defaultStackCount < 1)
+            throw new IllegalArgumentException("sellValue must be >= 1, was " + defaultStackCount);
+        this.defaultStackCount = defaultStackCount;
         return this;
     }
 
@@ -91,6 +112,11 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder type(UnitItemType type) {
         this.type = type;
+        return this;
+    }
+
+    public UnitItemBuilder maxStackSize(int maxStackSize) {
+        this.maxStackSize = maxStackSize;
         return this;
     }
 
@@ -110,10 +136,24 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder rarity(Rarity rarity) {
+        this.rarity = rarity;
+        this.buyCost = UnitItem.RARITY_VALUES.get(rarity);
+        this.sellValue = UnitItem.RARITY_VALUES.get(rarity) / 2;
+        return this;
+    }
+
     public UnitItemBuilder cooldownTicks(int cooldownTicks) {
         if (cooldownTicks < 0)
             throw new IllegalArgumentException("cooldownTicks must be >= 0, was " + cooldownTicks);
-        this.cooldownTicks = cooldownTicks;
+        this.cooldownTicksMax = cooldownTicks;
+        return this;
+    }
+
+    public UnitItemBuilder channelTicks(int channelTicks) {
+        if (channelTicks < 0)
+            throw new IllegalArgumentException("channelTicks must be >= 0, was " + channelTicks);
+        this.channelTicks = channelTicks;
         return this;
     }
 
@@ -124,42 +164,41 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder range(float range) {
+        if (range < 0)
+            throw new IllegalArgumentException("range must be >= 0, was " + range);
+        this.range = range;
+        return this;
+    }
+
+    public UnitItemBuilder radius(int radius) {
+        if (radius < 0)
+            throw new IllegalArgumentException("radius must be >= 0, was " + radius);
+        this.radius = radius;
+        return this;
+    }
+
     /** I18n key for the short description line(s) in the tooltip's middle band. */
-    public UnitItemBuilder desc(String desc) {
-        this.desc = desc == null ? "" : desc;
+    public UnitItemBuilder desc(String i18nKey, Object... args) {
+        if (i18nKey != null && !i18nKey.isBlank())
+            this.desc = new LocalizedText(i18nKey, args);
         return this;
     }
 
-    public UnitItemBuilder onUseError(String onUseError) {
-        this.onUseError = onUseError == null ? "" : onUseError;
+    public UnitItemBuilder toggleActiveOnUse() {
+        this.toggleActiveOnUse = true;
         return this;
     }
 
-    public UnitItemBuilder onUseEntityError(String onUseEntityError) {
-        this.onUseEntityError = onUseEntityError == null ? "" : onUseEntityError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseBuildingError(String onUseBuildingError) {
-        this.onUseBuildingError = onUseBuildingError == null ? "" : onUseBuildingError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseGroundError(String onUseGroundError) {
-        this.onUseGroundError = onUseGroundError == null ? "" : onUseGroundError;
+    public UnitItemBuilder suppressDefaultError() {
+        this.suppressDefaultError = true;
         return this;
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder pointDesc(String i18nKey) {
+    public UnitItemBuilder pointDesc(String i18nKey, Object... args) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.pointDescs.add(i18nKey);
-        return this;
-    }
-
-    public UnitItemBuilder pointDescs(String... descs) {
-        for (String desc : descs)
-            pointDesc(desc);
+            this.pointDescs.add(new LocalizedText(i18nKey, args));
         return this;
     }
 
@@ -180,15 +219,13 @@ public class UnitItemBuilder {
     }
 
     /** Adds one attribute modifier applied while the item is held; call once per modifier. */
-    public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
-        if (modifier != null)
-            this.attributeModifiers.add(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount, AttributeModifier.Operation operation) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, operation));
         return this;
     }
 
-    public UnitItemBuilder attributeModifiers(AttributeModifier... modifiers) {
-        for (AttributeModifier modifier : modifiers)
-            attributeModifier(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, AttributeModifier.Operation.ADDITION));
         return this;
     }
 
@@ -214,6 +251,56 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder consumeOnUse() {
         this.consumeOnUse = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeLine() {
+        this.showRangeLine = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusCircle() {
+        this.showRadiusCircle = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle() {
+        this.showRangeCircle = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle(boolean show) {
+        this.showRangeCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusAtCursor() {
+        this.showRadiusAtCursor = true;
+        return this;
+    }
+
+    public UnitItemBuilder doCastAnimation() {
+        this.doCastAnimation = true;
+        return this;
+    }
+
+    public UnitItemBuilder noBehaviourReset() {
+        this.resetBehaviours = false;
+        return this;
+    }
+
+    public UnitItemBuilder forceAutocast() {
+        this.forceAutocast = true;
+        return this;
+    }
+
+    public UnitItemBuilder noRandomDrop() {
+        this.canRandomDrop = false;
+        return this;
+    }
+
+    public UnitItemBuilder nonHeroUseable() {
+        this.nonHeroUseable = true;
         return this;
     }
 

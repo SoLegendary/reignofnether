@@ -25,6 +25,7 @@ public class Buildings {
     public static final SculkCatalyst SCULK_CATALYST = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sculk_catalyst"), new SculkCatalyst());
     public static final CentralPortal CENTRAL_PORTAL = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "central_portal"), new CentralPortal());
     public static final PortalBasic PORTAL_BASIC = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_basic"), new PortalBasic());
+    public static final PortalPocket PORTAL_POCKET = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_pocket"), new PortalPocket());
     public static final PortalCivilian PORTAL_CIVILIAN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_civilian"), new PortalCivilian());
     public static final PortalMilitary PORTAL_MILITARY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_military"), new PortalMilitary());
     public static final PortalTransport PORTAL_TRANSPORT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "portal_transport"), new PortalTransport());

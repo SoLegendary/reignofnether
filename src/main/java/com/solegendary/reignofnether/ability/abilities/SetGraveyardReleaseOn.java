@@ -10,11 +10,10 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SetGraveyardReleaseOn extends Ability {
 
@@ -47,8 +46,8 @@ public class SetGraveyardReleaseOn extends Ability {
             },
             null,
             List.of(
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.graveyard_release_off"), Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.graveyard_release.tooltip1"), Style.EMPTY)
+                    fcs(I18n.get("abilities.reignofnether.graveyard_release_off"), true),
+                    fcs(I18n.get("abilities.reignofnether.graveyard_release.tooltip1"))
             ),
             this,
             placement

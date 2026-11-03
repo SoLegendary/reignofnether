@@ -89,6 +89,8 @@ public class MyRenderer {
     );
 
 
+    public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("forge:textures/white.png");
+
     public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
 
     // matches any of the custom bitmap-font icon chars from font/default.json's private-use range
@@ -286,7 +288,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, null, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, null, r, g, b, a, WHITE_TEXTURE);
     }
 
     public static void drawBlockFace(
@@ -301,7 +303,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, r, g, b, a, WHITE_TEXTURE);
     }
 
     public static void drawBlockFace(
@@ -317,7 +319,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, yOffset, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, yOffset, r, g, b, a, WHITE_TEXTURE);
     }
 
     // might be null RL for black.png as of 1.19?
@@ -577,7 +579,11 @@ public class MyRenderer {
         int spaceWidth = MC.font.width(" ");
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
-        Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
+        String qty = itemStack.getCount() > 1 ? " (" + itemStack.getCount() + ")" : "";
+        MutableComponent name = unitItem.iconRl != null ?
+                Component.literal(pad + unitItem.getName().getString() + qty) :
+                Component.literal(unitItem.getName().getString() + qty);
+
         List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();
@@ -593,7 +599,7 @@ public class MyRenderer {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 3000);
         if (unitItem.iconRl != null)
-            guiGraphics.blit(unitItem.iconRl, mouseX + 18, textY - 16, 0, 0, iconSize, iconSize, iconSize, iconSize);
+            guiGraphics.blit(unitItem.iconRl, mouseX + 19, textY - 15, 0, 0, iconSize-2, iconSize-2, iconSize-2, iconSize-2);
         guiGraphics.pose().translate(0, 0, -1500);
         guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
         guiGraphics.pose().translate(0, 0, -1500);
@@ -654,7 +660,7 @@ public class MyRenderer {
         if (!pStack.isEmpty()) {
             BakedModel bakedmodel = MC.getItemRenderer().getModel(pStack, null, null, 0);
             guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), (float)(150));
+            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), 0);
             try {
                 guiGraphics.pose().mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
                 guiGraphics.pose().scale(16.0F * scale, 16.0F * scale, 16.0F * scale);

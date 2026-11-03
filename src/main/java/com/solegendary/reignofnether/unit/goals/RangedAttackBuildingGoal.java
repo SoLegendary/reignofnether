@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -52,21 +53,24 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
+    // picks randomly from only this closest fraction of placed blocks to the building's centre
+    private static final float CENTRE_PRIORITY_FRACTION = 0.25f;
+
     public void setNextBlockTarget() {
         if (this.buildingTarget != null && !buildingTarget.getBlocks().isEmpty()) {
             Random rand = new Random();
-            List<BuildingBlock> nonAirBlocks = new ArrayList<>();
+            List<BlockPos> placedBps = new ArrayList<>();
             for (BuildingBlock b : buildingTarget.getBlocks()) {
                 if (b.isPlaced(this.mob.level())) {
-                    nonAirBlocks.add(b);
+                    placedBps.add(b.getBlockPos());
                 }
             }
 
-            int bound = nonAirBlocks.size();
+            int bound = placedBps.size();
             if (bound > 0) {
-                int randIndex = rand.nextInt(bound);
-                BuildingBlock block = nonAirBlocks.get(randIndex);
-                this.blockTarget = block.getBlockPos();
+                placedBps.sort(Comparator.comparingDouble(bp -> bp.distSqr(buildingTarget.centrePos)));
+                int pool = Math.max(1, (int) (bound * CENTRE_PRIORITY_FRACTION));
+                this.blockTarget = placedBps.get(rand.nextInt(pool));
             } else {
                 this.blockTarget = null;
             }
@@ -104,6 +108,10 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
 
     public BuildingPlacement getBuildingTarget() {
         return buildingTarget;
+    }
+
+    public BlockPos getBlockTarget() {
+        return blockTarget;
     }
 
     public boolean canUse() {

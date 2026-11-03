@@ -29,10 +29,7 @@ import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.unit.FormationDragMove;
-import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitActionItem;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.util.ArrayUtil;
@@ -47,9 +44,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,13 +63,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -130,11 +124,11 @@ public class MinimapClientEvents {
     private static int zc_world = 0; // world pos zcentre, maps to yc
     private static float xl, xc, xr, yt, yc, yb;
 
-    public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
+    public static final ArrayList<VirtualUnit> virtualUnits = new ArrayList<>();
     public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
 
     // last known position of neutral units in fog
-    public static ArrayList<MinimapUnit> neutralFogUnits = new ArrayList<>();
+    public static final ArrayList<VirtualUnit> neutralFogUnits = new ArrayList<>();
 
     private static final float DARK = 0.40f;
     private static final float EXTRA_DARK = 0.10f;
@@ -154,19 +148,19 @@ public class MinimapClientEvents {
     public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
         Vec3 vec3Min = new Vec3(vec3fMin.x, vec3fMin.y, vec3fMin.z);
         Vec3 vec3Max = new Vec3(vec3fMax.x, vec3fMax.y, vec3fMax.z);
-        minimapUnits.removeIf(mu -> mu.id == id);
+        virtualUnits.removeIf(mu -> mu.id == id);
         neutralFogUnits.removeIf(mu -> mu.id == id);
-        neutralFogUnits.add(new MinimapUnit(id, new AABB(vec3Min, vec3Max)));
+        neutralFogUnits.add(new VirtualUnit(id, new AABB(vec3Min, vec3Max)));
     }
 
     public static void removeNeutralFogUnit(int id) {
-        neutralFogUnits.removeIf(minimapUnit -> minimapUnit.id == id);
+        neutralFogUnits.removeIf(virtualUnit -> virtualUnit.id == id);
     }
 
     public static void highlightNeutralFogUnits(PoseStack pose, VertexConsumer vertexConsumer) {
         if (!FogOfWarClientEvents.isEnabled())
             return;
-        for (MinimapUnit mu : neutralFogUnits) {
+        for (VirtualUnit mu : neutralFogUnits) {
             if (MC.level != null) {
                 Entity entity = MC.level.getEntity(mu.id);
                 if (!FogOfWarClientEvents.isBlockVisible(mu.pos) && (entity == null || !FogOfWarClientEvents.isBlockVisible(entity.getOnPos()))) {
@@ -180,31 +174,9 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void clearMinimapUnits() {
-        minimapUnits.clear();
+    public static void clearVirtualUnits() {
+        virtualUnits.clear();
         neutralFogUnits.clear();
-    }
-
-    // for tracking serverside Units that don't yet exist on clientside
-    private static class MinimapUnit {
-        public BlockPos pos;
-        public final int id;
-        public final String ownerName;
-        public final AABB aabb;
-
-        public MinimapUnit(BlockPos pos, int id, String ownerName) {
-            this.pos = pos;
-            this.id = id;
-            this.ownerName = ownerName;
-            this.aabb = null;
-        }
-
-        public MinimapUnit(int id, AABB aabb) { // neutral unit
-            this.pos = new BlockPos((int) aabb.getCenter().x, (int) aabb.minY, (int) aabb.getCenter().z);
-            this.id = id;
-            this.ownerName = "";
-            this.aabb = aabb;
-        }
     }
 
     private static class MapMarker {
@@ -247,18 +219,18 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void removeMinimapUnit(int id) {
-        minimapUnits.removeIf(u -> u.id == id);
+    public static void removeVirtualUnit(int id) {
+        virtualUnits.removeIf(u -> u.id == id);
     }
 
-    public static void syncMinimapUnits(BlockPos pos, int id, String ownerName) {
-        for (MinimapUnit unit : minimapUnits) {
+    public static void syncVirtualUnits(BlockPos pos, int id, String ownerName, int population) {
+        for (VirtualUnit unit : virtualUnits) {
             if (unit.id == id) {
                 unit.pos = pos;
                 return;
             }
         }
-        minimapUnits.add(new MinimapUnit(pos, id, ownerName));
+        virtualUnits.add(new VirtualUnit(pos, id, ownerName, population));
     }
 
     public static void setMapCentre(double x, double z) {
@@ -349,6 +321,8 @@ public class MinimapClientEvents {
             worldRadius = 120;
             mapGuiRadius = 60;
         }
+        if (mapTexLoc != null)
+            Minecraft.getInstance().textureManager.release(mapTexLoc); // also closes the old DynamicTexture
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
         mapTexLoc = Minecraft.getInstance().textureManager.register(
             ReignOfNether.MOD_ID + "_" + "minimap",
@@ -373,9 +347,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> shouldToggleSize = true,
                 null,
-                List.of(FormattedCharSequence.forward(largeMap
+                List.of(fcs(largeMap
                         ? I18n.get("hud.map.reignofnether.close")
-                        : I18n.get("hud.map.reignofnether.open"), Style.EMPTY))
+                        : I18n.get("hud.map.reignofnether.open")))
         );
     }
 
@@ -408,9 +382,9 @@ public class MinimapClientEvents {
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(true),
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(false),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
-                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10)), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"), Style.EMPTY)
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
+                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10))),
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"))
                 )
         );
     }
@@ -464,9 +438,9 @@ public class MinimapClientEvents {
                         setMapCentre(MC.player.getX(), MC.player.getZ());
                 },
                 null,
-                List.of(FormattedCharSequence.forward(lockedMap
+                List.of(fcs(lockedMap
                         ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
-                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"))
                 )
         );
     }
@@ -486,9 +460,9 @@ public class MinimapClientEvents {
                     highlightAnimals = !highlightAnimals;
                 },
                 null,
-                List.of(FormattedCharSequence.forward(highlightAnimals
+                List.of(fcs(highlightAnimals
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
-                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"))
                 )
         );
     }
@@ -506,9 +480,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
                 null,
-                List.of(FormattedCharSequence.forward(underlineUnitsAndBuildings
+                List.of(fcs(underlineUnitsAndBuildings
                         ? I18n.get("hud.map.reignofnether.underlines.enabled")
-                        : I18n.get("hud.map.reignofnether.underlines.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.underlines.disabled"))
                 )
         );
     }
@@ -608,6 +582,7 @@ public class MinimapClientEvents {
         // from producing a half-shaded map
         final boolean fogEnabled = FogOfWarClientEvents.isEnabled();
         final BlockPos.MutableBlockPos borderPos = new BlockPos.MutableBlockPos();
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         // fog state for the chunk the scan is currently inside; refreshed only on chunk boundaries
         long cachedChunkKey = ChunkPos.INVALID_CHUNK_POS;
@@ -664,10 +639,10 @@ public class MinimapClientEvents {
                     }
                 }
 
-                int y = MC.level.getChunkAt(new BlockPos(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+                int y = MC.level.getChunkAt(pos.set(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
-                    bs = MC.level.getBlockState(new BlockPos(x, y, z));
+                    bs = MC.level.getBlockState(pos.set(x, y, z));
                     if (bs.getBlock() instanceof SnowLayerBlock) {
                         int layers = bs.getValue(SnowLayerBlock.LAYERS);
                         y += (int) (layers * (1.0F / 8.0F));
@@ -680,11 +655,11 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                int yNorth = MC.level.getChunkAt(new BlockPos(x, 0, z - 1))
+                int yNorth = MC.level.getChunkAt(pos.set(x, 0, z - 1))
                         .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
                 BlockState bsNorth;
                 do {
-                    bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1));
+                    bsNorth = MC.level.getBlockState(pos.set(x, yNorth, z - 1));
                     if (bsNorth.getBlock() instanceof SnowLayerBlock) {
                         int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
                         yNorth += (int) (layersNorth * (1.0F / 8.0F));
@@ -697,14 +672,15 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                MapColor mat = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getMapColor(MC.level, new BlockPos(x, yNorth, z - 1));
+                pos.set(x, yNorth, z - 1);
+                MapColor mat = MC.level.getBlockState(pos).getMapColor(MC.level, pos);
                 int rgb = mat.col;
                 if (bs.getBlock() instanceof SnowLayerBlock) {
                     rgb = 0xFFFFFF;
                 }
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
-                if (MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getFluidState().isEmpty()) {
+                if (MC.level.getBlockState(pos).getFluidState().isEmpty()) {
                     if (yNorth > y) {
                         rgb = MiscUtil.shadeHexRGB(rgb, 0.82F);
                     } else if (yNorth < y) {
@@ -716,7 +692,7 @@ public class MinimapClientEvents {
                     BlockState matBelow;
                     do {
                         depth += 1;
-                        matBelow = MC.level.getBlockState(new BlockPos(x, y - depth, z));
+                        matBelow = MC.level.getBlockState(pos.set(x, y - depth, z));
                     } while (!matBelow.getFluidState().isEmpty() && depth < depthMax);
 
                     // only reduce shade every nth step to have the map look sharper
@@ -857,18 +833,18 @@ public class MinimapClientEvents {
                     colorHex
             );
         }
-        for (MinimapUnit minimapUnit : minimapUnits) {
-            if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
+        for (VirtualUnit virtualUnit : virtualUnits) {
+            if (!FogOfWarClientEvents.isInBrightChunk(virtualUnit.pos) || MC.player == null)
                 continue;
-            String unitOwnerName = minimapUnit.ownerName;
+            String unitOwnerName = virtualUnit.ownerName;
             var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
             drawUnitOnMap(
-                    minimapUnit.pos.getX(),
-                    minimapUnit.pos.getZ(),
+                    virtualUnit.pos.getX(),
+                    virtualUnit.pos.getZ(),
                     colorHex
             );
         }
-        for (MinimapUnit neutralFogUnit : neutralFogUnits) {
+        for (VirtualUnit neutralFogUnit : neutralFogUnits) {
             Entity entity = MC.level.getEntity(neutralFogUnit.id);
             if (FogOfWarClientEvents.isInBrightChunk(neutralFogUnit.pos) || MC.player == null ||
                 (entity != null && FogOfWarClientEvents.isInBrightChunk(entity)))
@@ -988,7 +964,7 @@ public class MinimapClientEvents {
                                 z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
                             //rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
-                            //if (startPos.faction == Faction.NONE)
+                            //if (startPos.faction == Factions.NONE)
                             //    rgb = 0xFFFF00;
                             rgb = startPos.getHexColor();
                         }
@@ -1403,7 +1379,11 @@ public class MinimapClientEvents {
         long t0 = System.nanoTime();
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
-        mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        if (mapColoursOverlays.length != worldRadius * 2)
+            mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        else
+            for (int[] row : mapColoursOverlays)
+                Arrays.fill(row, 0);
         if (BlockClientEvents.nightCircleMode != NightCircleMode.OFF)
             updateNightCircles();
         

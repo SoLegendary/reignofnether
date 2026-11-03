@@ -9,9 +9,8 @@ import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaC
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.entities.NecromancerProjectile;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -32,17 +31,13 @@ import com.solegendary.reignofnether.unit.modelling.animations.NecromancerAnimat
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -95,10 +90,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
     @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
     Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
@@ -125,8 +120,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
-    public Abilities getAbilities() {return abilities;};
+	public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -170,7 +164,18 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
+        super.onSyncedDataUpdated(accessor);
+    }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.STRING);
@@ -350,7 +355,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, NecromancerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, NecromancerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, NecromancerUnit.maxHealth)
@@ -362,7 +367,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
@@ -387,7 +391,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -395,19 +399,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -541,6 +533,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
         NecromancerProjectile proj = new NecromancerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 
@@ -608,6 +601,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
                 zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
+
+                AttributeInstance ai2 = zombieUnit.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+                if (ai2 != null) {
+                    ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
+                }
             }
         }
     }
@@ -642,7 +640,12 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
             if (ai != null) {
                 ai.setBaseValue(InsomniaCurse.PHANTOM_DAMAGE + (soulRank * InsomniaCurse.PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK));
             }
+            AttributeInstance ai2 = phantom.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+            if (ai2 != null) {
+                ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
+            }
             this.level().addFreshEntity(phantom);
+            phantom.getPersistentData().putString("ownerName", getOwnerName());
             return phantom;
         }
         return null;

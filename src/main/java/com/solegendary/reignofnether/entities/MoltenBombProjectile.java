@@ -2,14 +2,19 @@ package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -26,7 +31,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.util.MiscUtil.isSolidBlocking;
 
@@ -34,6 +41,7 @@ public class MoltenBombProjectile extends Fireball {
 
     private int maxTicks = 200;
     private int explosionRadius = MoltenBomb.RADIUS_RANK_1;
+    private static final int BUILDING_DAMAGE = 20;
 
     public MoltenBombProjectile(EntityType<? extends Fireball> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -74,7 +82,7 @@ public class MoltenBombProjectile extends Fireball {
     }
 
     protected void detonate() {
-        level().explode(null, null, null, this.getX(), this.getEyeY(), this.getZ(),
+        level().explode(this, null, null, this.getX(), this.getEyeY(), this.getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
 
         HashMap<BlockPos, Double> bpAndDists = new HashMap<>();
@@ -88,12 +96,19 @@ public class MoltenBombProjectile extends Fireball {
                     if (distSqr <= radiusSqr && level().getBlockState(bp).isSolid())
                         bpAndDists.put(bp, distSqr / radiusSqr);
                 }
+        Set<BuildingPlacement> affectedBuildings = new HashSet<>();
 
         for (BlockPos bp : bpAndDists.keySet()) {
             if (random.nextFloat() > bpAndDists.get(bp)) {
                 BlockState fireState = Blocks.FIRE.defaultBlockState();
                 if (getOwner() instanceof Blaze blaze && blaze.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
                     fireState = BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState();
+                }
+
+                if (BuildingUtils.isPosInsideAnyBuilding(level().isClientSide(), bp)) {
+                    BuildingPlacement building = BuildingUtils.findBuilding(false, bp);
+                    if (building != null)
+                        affectedBuildings.add(building);
                 }
                 BlockServerEvents.addTempBlock(
                         (ServerLevel) level(),
@@ -111,11 +126,18 @@ public class MoltenBombProjectile extends Fireball {
             mob.hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), 0.5f);
             if (random.nextBoolean())
                 mob.setSecondsOnFire(5);
-            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && !(mob instanceof Blaze)) {
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
         }
-        MiscUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
+        for (BuildingPlacement bpl : affectedBuildings) {
+            float mult = 1.0f;
+            if (getOwner() instanceof AttackerUnit unit)
+                mult = unit.getBuildingDamageMultiplier();
+            bpl.damage(BUILDING_DAMAGE * mult);
+        }
+
+        ParticleUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
         discard();
     }
 

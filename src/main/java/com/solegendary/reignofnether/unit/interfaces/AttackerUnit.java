@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.TooltipColours;
@@ -14,6 +15,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -44,17 +46,23 @@ public interface AttackerUnit {
     public static final float ATTACK_DAMAGE_REDUCTION_PER_WEAK = 0.2f;
     public static final float ATTACK_DAMAGE_INCREASE_PER_STRENGTH = 0.2f;
 
+    public static final float MAX_RETALIATE_RANGE = 24f;
+
     public boolean getWillRetaliate();
     public default float getAttacksPerSecond() {
         return 20f / getAttackCooldown();
     }
     public default float getAttackCooldown() {
-        return ((20 / getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());
+        return ((20 / getNonBaseAttacksPerSecond()) * getAttackCooldownMultiplier());
     }
     public boolean getAggressiveWhenIdle();
-    public default float getBaseAttacksPerSecond() {
+    public default float getNonBaseAttacksPerSecond() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
+    }
+    public default float getBaseAttacksPerSecond() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
     }
     public default float getAggroRange() {
         float attackRange = getAttackRange();
@@ -66,16 +74,34 @@ public interface AttackerUnit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
+    // targets closer than this can't be attacked (eg. sieging pillagers), so they are also ignored by auto-aggro and retaliation
+    public default float getMinAttackRange() {
+        return 0f;
+    }
+    public default boolean isBelowMinAttackRange(Entity target) {
+        float minRange = getMinAttackRange();
+        return minRange > 0 && ((Entity) this).distanceTo(target) < minRange;
+    }
+    public default float getBaseAttackRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
+    }
     public default float getBaseUnitAttackDamage() {
         float bonus = 0;
         if (this instanceof HeroUnit heroUnit) {
             bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
         }
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
-        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
     }
     public default float getUnitAttackDamage() {
-        float value = getBaseUnitAttackDamage();
+        float bonus = 0;
+        if (this instanceof HeroUnit heroUnit) {
+            bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
+        }
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        float value = (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+
         MobEffectInstance weakMei = ((LivingEntity) this).getEffect(MobEffects.WEAKNESS);
         float weak = 0;
         if (weakMei != null && weakMei.getDuration() > 0) {
@@ -88,6 +114,36 @@ public interface AttackerUnit {
         }
         return Math.max(0, value * (1 - weak + str));
     }
+
+    // used to scale explosion damage based on attack bonuses
+    public default float getEffectiveDamageMultiplier() {
+        return getUnitAttackDamage() / getBaseUnitAttackDamage();
+    }
+
+    public default float getCriticalChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.CRITICAL_HIT_CHANCE.get().getDefaultValue());
+    }
+    public default float getExplosiveChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get().getDefaultValue());
+    }
+    public default float getBuildingDamageBonus() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+        return (float) (attr != null ? (attr.getValue()) : (AttributeRegistrar.BUILDING_DAMAGE_BONUS.get().getDefaultValue()));
+    }
+    public default float getBuildingDamageMultiplier() {
+        return getBuildingDamageBonus() + 1.0f;
+    }
+    public default float getLifeStealPercent() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.LIFESTEAL.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.LIFESTEAL.get().getDefaultValue());
+    }
+    public default float getManaOnHitPercent() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MANA_ON_HIT.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.MANA_ON_HIT.get().getDefaultValue());
+    }
+
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
 
@@ -193,7 +249,6 @@ public interface AttackerUnit {
     static void tick(AttackerUnit attackerUnit) {
         Mob unitMob = (Mob) attackerUnit;
         Unit unit = (Unit) attackerUnit;
-
         if (!unitMob.level().isClientSide && !unit.isEatingFood()) {
             if (attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal meleeAttackUnitGoal) {
                 meleeAttackUnitGoal.tickAttackCooldown();
@@ -203,9 +258,9 @@ public interface AttackerUnit {
                 if (meleeAttackUnitGoal instanceof MeleeWindupAttackUnitGoal goal)
                     goal.checkAndPerformAttackWithWindup();
             }
-            else if (attackerUnit.getAttackGoal() instanceof UnitRangedAttackGoal rangedAttackGoal)
+            else if (attackerUnit.getAttackGoal() instanceof UnitRangedAttackGoal<?> rangedAttackGoal)
                 rangedAttackGoal.tickAttackCooldown();
-            else if (attackerUnit.getAttackGoal() instanceof UnitBowAttackGoal rangedAttackGoal)
+            else if (attackerUnit.getAttackGoal() instanceof UnitBowAttackGoal<?> rangedAttackGoal)
                 rangedAttackGoal.tickAttackCooldown();
 
             if (attackerUnit.getAttackBuildingGoal() != null && attackerUnit.canAttackBuildings())
@@ -218,6 +273,10 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 4 == 0) {
+            float targetLockRange = attackerUnit.getTargetLockRange();
+            LivingEntity closestTarget = null;
+            boolean searchedForTarget = false;
+            var level = (ServerLevel) unitMob.level();
             if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
                 ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
                 Unit.fullResetBehaviours(unit);
@@ -229,7 +288,9 @@ public interface AttackerUnit {
             // enact attack moving
             // prioritises units and will chase them, resuming attack move once dead or out of range/sight
             if (attackerUnit.getAttackMoveTarget() != null && !unit.hasLivingTarget() && !isAttackingBuilding) {
-                attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
+                closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                searchedForTarget = true;
+                attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
 
                 if (unit.getTargetGoal().getTarget() == null &&
                     unit.getMoveGoal().getMoveTarget() == null &&
@@ -263,8 +324,13 @@ public interface AttackerUnit {
                 }
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (!isMeleeAttackedByFlyingOrGarrisoned &&
+                boolean beyondMaxRetaliateRange = lastDSEntity instanceof LivingEntity le &&
+                        le.distanceToSqr(unitMob.position()) > (MAX_RETALIATE_RANGE * MAX_RETALIATE_RANGE);
+
+                if (!beyondMaxRetaliateRange &&
+                    !isMeleeAttackedByFlyingOrGarrisoned &&
                     lastDSEntity instanceof LivingEntity &&
+                    !attackerUnit.isBelowMinAttackRange(lastDSEntity) &&
                     !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
 
@@ -272,12 +338,24 @@ public interface AttackerUnit {
                 }
             }
             // idle auto-aggression
-            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
-                attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
+            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle()) {
+                if (!searchedForTarget) {
+                    closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
+                }
+                attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
+            }
 
-            // if attacking another unit as melee, retarget the closest unit periodically unless forced on a target
-            if (!forced) {
-                attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
+            boolean isSiegedPillager = attackerUnit instanceof PillagerUnit pUnit && pUnit.isSieging();
+
+            // if attacking another unit, retarget the closest unit periodically unless forced on a target
+            if (!forced && !isSiegedPillager &&
+                    (unitMob.getTarget() != null || isAttackingBuilding(attackerUnit))) {
+                if (!searchedForTarget) {
+                    closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
+                }
+                attackerUnit.retargetToClosestUnit(closestTarget, targetLockRange);
             }
         }
 
@@ -301,21 +379,31 @@ public interface AttackerUnit {
         }
     }
 
-    // if the nearest target is closer than the current target, retarget to the nearest
-    default void retargetToClosestUnit(ServerLevel level) {
-        float aggroRange = this.getAggroRange();
+    default float getTargetLockRange() {
+        float targetLockRange = this.getAggroRange();
         BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
         GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
         if (garr != null) {
-            aggroRange = garr.getAttackRange();
+            targetLockRange = garr.getAttackRange();
         }
+        return targetLockRange;
+    }
+
+    default LivingEntity findClosestTarget(float targetLockRange, ServerLevel level) {
+        return MiscUtil.findClosestAttackableEntity((Mob) this, targetLockRange, level);
+    }
+
+    // if the nearest target is closer than the current target, retarget to the nearest
+    default void retargetToClosestUnit(
+            LivingEntity closestTarget,
+            float targetLockRange
+    ) {
         boolean isAttackingBuilding = isAttackingBuilding(this);
         LivingEntity currentTarget = ((Mob) this).getTarget();
         if (currentTarget == null && !isAttackingBuilding) return;
-        LivingEntity closestTarget = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (closestTarget == null) return;
         double distClosestTarget =  ((Mob) this).distanceToSqr(closestTarget.position());
-        double distCurrentTarget = isAttackingBuilding ? (aggroRange / 2) : ((Mob) this).distanceToSqr(currentTarget.position());
+        double distCurrentTarget = isAttackingBuilding ? (targetLockRange / 2) : ((Mob) this).distanceToSqr(currentTarget.position());
 
         if (distClosestTarget < distCurrentTarget) {
             if (!((LivingEntity) this).isPassenger())
@@ -324,24 +412,21 @@ public interface AttackerUnit {
         }
     }
 
-    default void attackClosestEnemy(ServerLevel level) {
-        float aggroRange = this.getAggroRange();
-        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
-        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
-        if (garr != null) {
-            aggroRange = garr.getAttackRange();
-        }
-        LivingEntity entity = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
-        if (entity != null) {
+    default void attackClosestEnemy(
+            ServerLevel level,
+            LivingEntity closestTarget,
+            float targetLockRange
+    ) {
+        if (closestTarget != null) {
             if (!((LivingEntity) this).isPassenger())
                 ((Unit) this).getMoveGoal().stopMoving();
-            setUnitAttackTarget(entity);
+            setUnitAttackTarget(closestTarget);
             return;
         }
         if (canAttackBuildings() && !(this instanceof RavagerUnit && ((LivingEntity) this).isVehicle()) &&
                 (!(((Unit) this).getOwnerName()).isEmpty() || level.getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get()))
         {
-            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, aggroRange);
+            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, targetLockRange);
             if (closestBuilding != null) {
                 if (!((LivingEntity) this).isPassenger())
                     ((Unit) this).getMoveGoal().stopMoving();
@@ -371,7 +456,7 @@ public interface AttackerUnit {
     }
 
     public default boolean hasBonusRange() {
-        return false;
+        return getAttackRange() > getBaseAttackRange();
     }
 
     public default float getAttackCooldownMultiplier() {
@@ -387,18 +472,10 @@ public interface AttackerUnit {
         return (1 + (attackSlowdownAmp * 0.05f)) / (bloodlust != null ? 1.6f : 1.0f);
     }
 
-    public default float getBuildingDamageMultiplier() {
-        return 1.0f;
-    }
-
     public default void attackMoveNearestEnemyBuilding() {
         Mob mob = (Mob) this;
         Unit unit = (Unit) this;
-        List<BuildingPlacement> buildings;
-        if (mob.level().isClientSide())
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(mob.level().isClientSide());
 
         ArrayList<BuildingPlacement> eligibleTargets = new ArrayList<>();
         List<BuildingPlacement> buildingsCopy = new ArrayList<>(buildings); // defensive copy

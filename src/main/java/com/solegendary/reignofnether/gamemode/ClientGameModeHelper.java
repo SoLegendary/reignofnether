@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.gamemode;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -10,10 +11,9 @@ import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.WaveDifficulty;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -34,7 +34,7 @@ public class ClientGameModeHelper {
             return;
 
         if (StartPosClientEvents.hasReservedPos()) {
-            StartPosClientEvents.selectedFaction = Faction.NONE;
+            StartPosClientEvents.selectedFaction = Factions.NONE;
             StartPosServerboundPacket.unreservePos(StartPosClientEvents.getPos().pos);
         }
         switch (gameMode) {
@@ -145,17 +145,17 @@ public class ClientGameModeHelper {
                     ClientGameModeHelper::cycleWaveDifficulty,
                     ClientGameModeHelper::cycleGameMode,
                     List.of(
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival1") +
-                                    getLockedString(), Style.EMPTY.withBold(true)),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival5",
-                                    SurvivalClientEvents.difficulty, SurvivalClientEvents.getMinutesPerDay()), Style.EMPTY),
-                            FormattedCharSequence.forward("", Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival2"), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival3"), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival4"), Style.EMPTY),
-                            FormattedCharSequence.forward("", Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival6"), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.changemode"), Style.EMPTY)
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival1") +
+                                    getLockedString(), true),
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival5",
+                                    SurvivalClientEvents.difficulty, SurvivalClientEvents.getMinutesPerDay())),
+                            fcs(""),
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival2")),
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival3")),
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival4")),
+                            fcs(""),
+                            fcs(I18n.get("hud.gamemode.reignofnether.survival6")),
+                            fcs(I18n.get("hud.gamemode.reignofnether.changemode"))
                     )
             );
             case SANDBOX -> new Button(
@@ -169,14 +169,14 @@ public class ClientGameModeHelper {
                     null,
                     ClientGameModeHelper::cycleGameMode,
                     List.of(
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.sandbox1") +
-                                    getLockedString(), Style.EMPTY.withBold(true)),
-                            FormattedCharSequence.forward("", Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.sandbox2"), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.sandbox3"), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.sandbox4"), Style.EMPTY),
-                            FormattedCharSequence.forward("", Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.changemode"), Style.EMPTY)
+                            fcs(I18n.get("hud.gamemode.reignofnether.sandbox1") +
+                                    getLockedString(), true),
+                            fcs(""),
+                            fcs(I18n.get("hud.gamemode.reignofnether.sandbox2")),
+                            fcs(I18n.get("hud.gamemode.reignofnether.sandbox3")),
+                            fcs(I18n.get("hud.gamemode.reignofnether.sandbox4")),
+                            fcs(""),
+                            fcs(I18n.get("hud.gamemode.reignofnether.changemode"))
                     )
             );
             default -> null;

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -35,6 +36,9 @@ public class WindcallerProjectile extends AbstractMagicProjectile {
     @Override
     protected void onHitEntity(EntityHitResult pResult) {
         if (!this.level().isClientSide && this.getOwner() instanceof AttackerUnit aUnit) {
+            // stop homing once we've reached the target so we don't circle back around it
+            if (pResult.getEntity() == getTarget())
+                setTarget(null);
             boolean isHurt = false;
             if (!damageDealt)
                 isHurt = pResult.getEntity().hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), aUnit.getUnitAttackDamage());
@@ -54,7 +58,7 @@ public class WindcallerProjectile extends AbstractMagicProjectile {
                 levitationDealt = true;
             }
             if (levitationDealt && damageDealt) {
-                MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position());
+                ParticleUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position());
                 discard();
             }
         }

@@ -40,9 +40,8 @@ import javax.annotation.Nullable;
 
 public class WraithSnowLayerBlock extends BaseEntityBlock {
 
-    private static final int MOVEMENT_SLOWDOWN_AMP_PER_LAYER = 2;
+    private static final int COLD_AMP_PER_LAYER = 1;
     private static final int DMG_TAKEN_INCREASE_AMP_PER_LAYER = 2;
-    private static final int ATTACK_SLOWDOWN_AMP_PER_LAYER = 2;
 
     public WraithSnowLayerBlock(BlockBehaviour.Properties pProperties) {
         super(pProperties);
@@ -90,9 +89,8 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
     @Override
     public void entityInside(@NotNull BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
         BlockEntity be = pLevel.getBlockEntity(pPos);
-        int movementSlowdownAmp = (pState.getValue(LAYERS) * MOVEMENT_SLOWDOWN_AMP_PER_LAYER) - 1;
+        int coldAmp = (pState.getValue(LAYERS) * COLD_AMP_PER_LAYER) - 1;
         int dmgIncreaseAmp = (pState.getValue(LAYERS) * DMG_TAKEN_INCREASE_AMP_PER_LAYER) - 1;
-        int attackSlowdownAmp = (pState.getValue(LAYERS) * ATTACK_SLOWDOWN_AMP_PER_LAYER) - 1;
         if (pEntity instanceof LivingEntity livingEntity && pEntity.tickCount % 5 == 0 &&
                 !(pEntity instanceof WretchedWraithUnit) && !pLevel.isClientSide() &&
                 be instanceof WraithSnowBlockEntity snowBe) {
@@ -102,17 +100,13 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
                 rs = UnitServerEvents.getUnitToEntityRelationship(unit, pLevel, snowBe.getOwnerId());
             }
             if (rs != Relationship.FRIENDLY && rs != Relationship.OWNED) {
-                MobEffectInstance existingMovementSlowdown = livingEntity.getEffect(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get());
-                if (existingMovementSlowdown == null || existingMovementSlowdown.getAmplifier() < movementSlowdownAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 10, movementSlowdownAmp, true, false));
+                MobEffectInstance existingCold = livingEntity.getEffect(MobEffectRegistrar.COLD.get());
+                if (existingCold == null || existingCold.getAmplifier() < coldAmp) {
+                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.COLD.get(), 10, coldAmp, true, false));
                 }
                 MobEffectInstance existingDamageIncrease = livingEntity.getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
                 if (existingDamageIncrease == null || existingDamageIncrease.getAmplifier() < dmgIncreaseAmp) {
                     livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), 10, dmgIncreaseAmp, true, false));
-                }
-                MobEffectInstance existingAttackSlowdown = livingEntity.getEffect(MobEffectRegistrar.ATTACK_SLOWDOWN.get());
-                if (existingAttackSlowdown == null || existingAttackSlowdown.getAmplifier() < attackSlowdownAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.ATTACK_SLOWDOWN.get(), 10, attackSlowdownAmp, true, false));
                 }
             }
         }
@@ -164,7 +158,7 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
         } else if ($$3.is(BlockTags.SNOW_LAYER_CAN_SURVIVE_ON)) {
             return true;
         } else {
-            return Block.isFaceFull($$3.getCollisionShape(pLevel, pPos.below()), Direction.UP) || $$3.is(this) && (Integer)$$3.getValue(LAYERS) == 8;
+            return Block.isFaceFull($$3.getCollisionShape(pLevel, pPos.below()), Direction.UP) || $$3.is(this) && $$3.getValue(LAYERS) == 8;
         }
     }
 
@@ -197,7 +191,7 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(new Property[]{LAYERS});
+        pBuilder.add(new Property<?>[]{LAYERS});
     }
 
     static {

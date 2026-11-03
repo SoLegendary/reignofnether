@@ -1,18 +1,25 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.items.ItemClientEvents;
-import com.solegendary.reignofnether.items.ItemServerboundPacket;
-import com.solegendary.reignofnether.items.ItemUtil;
-import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.mixin.UnitInventoryMobMixin;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -20,7 +27,9 @@ import java.util.List;
 // or arms a targeted use action (entity/building/ground).
 public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
-    private static final float GHOST_ALPHA = 0.45f;
+    private static final float GHOST_ALPHA = 0.5f;
+
+    private Unit unit;
 
     public UnitItemInventoryButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit, Keybinding hotkey) {
         super(
@@ -28,16 +37,23 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
-                () -> ItemClientEvents.actionableUnitItemDrag == unitItem &&
+                () -> (ItemClientEvents.actionableUnitItemDrag == unitItem &&
                         ItemClientEvents.actionableInvIndex == invIndex &&
-                        ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack)),
+                        ItemClientEvents.actionableInvUUID != null &&
+                        ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack))) ||
+                        ItemUtil.isActive(itemStack),
                 () -> false,
-                () -> true,
                 () -> {
+                    Player player = Minecraft.getInstance().player;
+                    boolean ownsUnit = player != null && player.getName().getString().equals(unit.getOwnerName());
+                    return ownsUnit || AlliancesClient.canControlAlly(unit) || SandboxClientEvents.isSandboxPlayer();
+                },
+                () -> { // onLeftClick
                     ItemClientEvents.actionableUnitItem = unitItem;
-                    ItemClientEvents.actionableUnitItemDrag = unitItem;
-                    ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableUnitItemDrag = unitItem;
                 },
                 null,
                 List.of(),
@@ -46,15 +62,19 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
         );
         this.iconItem = itemStack;
         this.invIndex = invIndex;
+        this.unit = unit;
 
         this.onLeftClickRelease = () -> { // actual item use actions
-            if (!ItemClientEvents.hasDragActionItem()) {
+            if (!ItemClientEvents.hasDragActionItem() && this.unit instanceof UnitInventory) {
+
                 if (unitItem.onUse != null) {
                     ItemServerboundPacket.use(((Entity) unit).getId(), invUUID);
-                } else if (unitItem.onUseEntity != null ||
+                }
+                else if (unitItem.onUseEntity != null ||
                         unitItem.onUseBuilding != null ||
                         unitItem.onUseGround != null) {
                     ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                     ItemClientEvents.leftClickUseItem = true;
@@ -66,7 +86,22 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
             this.hotkey = hotkey;
     }
 
-    // TODO: remove alpha, hide original button and render to move the actual button away when dragging
+    @Override
+    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+        if (MC.level != null && unitItem.cooldownTicksMax > 0) {
+            Long cooldownTicksLeft = ItemUtil.getCooldownTicksLeft(itemStack, ((Entity) unit).level());
+            this.greyPercent = 1 - Math.min(1f, (float) cooldownTicksLeft / unitItem.cooldownTicksMax);
+        } else {
+            this.greyPercent = 0;
+        }
+        this.bottomLeftText = () -> {
+            if (this.itemStack.getCount() > 1)
+                return String.valueOf(this.itemStack.getCount());
+            return "";
+        };
+        super.render(guiGraphics, x, y, mouseX, mouseY);
+    }
+
     // render a translucent version of this button
     public void renderGhost(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int x = mouseX - (DEFAULT_ICON_SIZE / 2);
@@ -93,13 +128,13 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
             guiGraphics.pose().translate(0, 0, 1);
             MyRenderer.renderIcon(guiGraphics, bgIconResource,
                     ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    stretchIconToBorders ? imageSize + 2 : imageSize);
+                    imageSize + (innerIconSizeModifier * 2));
         }
         if (iconResource != null) {
             guiGraphics.pose().translate(0, 0, 1);
             MyRenderer.renderIcon(guiGraphics, iconResource,
                     ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    stretchIconToBorders ? imageSize + 2 : imageSize);
+                    imageSize + (innerIconSizeModifier * 2));
         }
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -126,13 +161,13 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
     private int ghostIconX(int x, int xyDiff) {
         int iconX = x + 4 + (7 - xyDiff - iconSize / 2);
-        if (stretchIconToBorders) iconX -= 1;
+        iconX -= innerIconSizeModifier;
         return iconX + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 
     private int ghostIconY(int y, int xyDiff) {
         int iconY = y + 4 + (7 - xyDiff - iconSize / 2);
-        if (stretchIconToBorders) iconY -= 1;
+        iconY -= innerIconSizeModifier;
         return iconY + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 }
