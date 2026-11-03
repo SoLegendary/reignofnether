@@ -427,7 +427,7 @@
     "abilities.reignofnether.raise_dead.stats": "\uE004  %ds   \uE008  %d",
     "abilities.reignofnether.raise_dead.tooltip1": "Summons a pair of temporary elite Zombies.",
     "abilities.reignofnether.raise_dead.tooltip2": "Each rank of Soul Siphon adds Thorns to an armour piece.",
-    "abilities.reignofnether.raise_dead.tooltip3": "Zombies start decaying after %ss",
+    "abilities.reignofnether.raise_dead.tooltip3": "Zombies die after %ss",
     "abilities.reignofnether.raise_dead.rank1": "Rank 1: Leather armour & Wooden sword",
     "abilities.reignofnether.raise_dead.rank2": "Rank 2: Chainmail armour & Stone sword",
     "abilities.reignofnether.raise_dead.rank3": "Rank 3: Iron armour & Iron Sword",

@@ -244,7 +244,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                     hurt(this.damageSources().starve(), 1.33f);
                 }
                 else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummoned()) {
-                    hurt(this.damageSources().starve(), 1.33f);
+                    kill();
                 }
             }
         }

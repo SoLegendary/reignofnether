@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
@@ -67,6 +68,10 @@ public class HeroServerEvents {
                                 (heroUnit.getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL || !deadOwner.isBlank())) {
 
                             int expValue = (popCost + 1) * 5;
+
+                            if (evt.getEntity() instanceof ZombieUnit zombieUnit && zombieUnit.isSummoned())
+                                expValue = 10;
+
                             if (evt.getEntity() instanceof HeroUnit killedHero)
                                 expValue += killedHero.getHeroLevel() * 5;
 
