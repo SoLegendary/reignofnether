@@ -574,33 +574,35 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 ItemStack chestPlate = new ItemStack(Items.LEATHER_CHESTPLATE);
                 ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
                 ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-                ItemStack sword = new ItemStack(Items.WOODEN_SWORD);
+                ItemStack sword = null;
                 if (raiseDeadRank == 2) {
                     helmet = new ItemStack(Items.CHAINMAIL_HELMET);
                     chestPlate = new ItemStack(Items.CHAINMAIL_CHESTPLATE);
                     leggings = new ItemStack(Items.CHAINMAIL_LEGGINGS);
                     boots = new ItemStack(Items.CHAINMAIL_BOOTS);
-                    sword = new ItemStack(Items.STONE_SWORD);
                 } else if (raiseDeadRank >= 3) {
                     helmet = new ItemStack(Items.IRON_HELMET);
                     chestPlate = new ItemStack(Items.IRON_CHESTPLATE);
                     leggings = new ItemStack(Items.IRON_LEGGINGS);
                     boots = new ItemStack(Items.IRON_BOOTS);
-                    sword = new ItemStack(Items.IRON_SWORD);
                 }
-                if (soulRank >= 1)
+                if (soulRank >= 1) {
                     chestPlate.enchant(Enchantments.THORNS, 3);
-                if (soulRank >= 2)
+                    sword = new ItemStack(Items.WOODEN_SWORD);
+                } if (soulRank >= 2) {
                     leggings.enchant(Enchantments.THORNS, 3);
-                if (soulRank >= 3) {
+                    sword = new ItemStack(Items.STONE_SWORD);
+                } if (soulRank >= 3) {
                     boots.enchant(Enchantments.THORNS, 2);
                     helmet.enchant(Enchantments.THORNS, 2);
+                    sword = new ItemStack(Items.IRON_SWORD);
                 }
                 zombieUnit.setItemSlot(EquipmentSlot.HEAD, helmet);
                 zombieUnit.setItemSlot(EquipmentSlot.CHEST, chestPlate);
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
-                zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
+                if (sword != null)
+                    zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
 
                 AttributeInstance ai2 = zombieUnit.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
                 if (ai2 != null) {

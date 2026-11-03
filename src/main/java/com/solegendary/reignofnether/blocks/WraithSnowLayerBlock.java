@@ -12,6 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -95,6 +96,11 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
                 !(pEntity instanceof WretchedWraithUnit) && !pLevel.isClientSide() &&
                 be instanceof WraithSnowBlockEntity snowBe) {
 
+            if (livingEntity.hasEffect(MobEffectRegistrar.FROST_DAMAGE.get())) {
+                coldAmp += 2;
+                dmgIncreaseAmp += 2;
+            }
+
             Relationship rs = Relationship.NEUTRAL;
             if (pEntity instanceof Unit unit) {
                 rs = UnitServerEvents.getUnitToEntityRelationship(unit, pLevel, snowBe.getOwnerId());
@@ -102,11 +108,11 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
             if (rs != Relationship.FRIENDLY && rs != Relationship.OWNED) {
                 MobEffectInstance existingCold = livingEntity.getEffect(MobEffectRegistrar.COLD.get());
                 if (existingCold == null || existingCold.getAmplifier() < coldAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.COLD.get(), 10, coldAmp, true, false));
+                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.COLD.get(), 15, coldAmp, true, false));
                 }
                 MobEffectInstance existingDamageIncrease = livingEntity.getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
                 if (existingDamageIncrease == null || existingDamageIncrease.getAmplifier() < dmgIncreaseAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), 10, dmgIncreaseAmp, true, false));
+                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), 15, dmgIncreaseAmp, true, false));
                 }
             }
         }

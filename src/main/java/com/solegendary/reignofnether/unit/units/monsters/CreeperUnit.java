@@ -86,7 +86,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
-    public Goal getAttackBuildingGoal() {return attackBuildingGoal;}
+    public Goal getAttackBuildingGoal() {return null;}
     public Goal getAttackGoal() {return attackGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
@@ -290,10 +290,6 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public void startToExplode() {
         forceSwelling = true;
     }
-
-
-
-
 
     @Override
     public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
