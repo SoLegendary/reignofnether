@@ -403,34 +403,32 @@ public class UnitItems {
             .onUseEntity((unit, entity) -> {
                 LivingEntity le = entity;
                 if (!le.level().isClientSide()) {
-                    if (!le.level().isClientSide()) {
-                        if (le.onGround() && !(le instanceof WretchedWraithUnit) &&
-                                !le.hasEffect(MobEffectRegistrar.FREEZE.get())) {
+                    if (le.onGround() && !(le instanceof WretchedWraithUnit) &&
+                            !le.hasEffect(MobEffectRegistrar.FREEZE.get())) {
 
-                            SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
-                            int duration = ICE_WAND_DURATION_SECONDS * 20;
-                            if (le instanceof HeroUnit) duration /= 2;
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
-                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),
-                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above().above(),
-                                    BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            ServerLevel serverLevel = (ServerLevel) le.level();
-                            int entityId = le.getId();
-                            BlockServerEvents.getSnowPositions(le.level(), le.getOnPos().above(), 2)
-                                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
-                                        BlockServerEvents.placeWraithSnow(serverLevel, pos, entityId);
-                                    }));
-                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
-                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
-                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 15, le.level(), le.position());
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
+                        int duration = ICE_WAND_DURATION_SECONDS * 20;
+                        if (le instanceof HeroUnit) duration /= 2;
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
+                                BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),
+                                BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above().above(),
+                                BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        ServerLevel serverLevel = (ServerLevel) le.level();
+                        int entityId = le.getId();
+                        BlockServerEvents.getSnowPositions(le.level(), le.getOnPos().above(), 2)
+                                .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                                    BlockServerEvents.placeWraithSnow(serverLevel, pos, entityId);
+                                }));
+                        le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
+                        le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
+                        ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 15, le.level(), le.position());
 
-                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), ((LivingEntity) unit).getEyePosition());
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), ((LivingEntity) unit).getEyePosition());
+                        return true;
+                    } else {
+                        return false;
                     }
                 }
                 return true;

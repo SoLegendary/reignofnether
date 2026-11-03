@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
@@ -7,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.NetherZone;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
+import com.solegendary.reignofnether.building.buildings.placements.CentralPortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -46,9 +49,15 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
         this.productions.add(ProductionItems.GRUNT, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.BABY_HOGLIN, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.STRIDER, Keybindings.abilitySlot2);
 
         setActiveAddon(NetherConvertingAddon.class, this, true);
+    }
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        return new CentralPortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
     }
 
 

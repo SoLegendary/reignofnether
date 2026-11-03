@@ -13,11 +13,12 @@ Balance
 [🟡] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
 [🟡] Raise Dead zombies now need to be empowered by soul siphon to have swords
 [🟡] Chilling Screech duration raised by 1s and increases the effect of snow by +20%
-[❌] Arrows can now pass through ice blocks created by Blizzard and Ice Wand
+[🟡] Projectiles can now pass through ice blocks created by Blizzard and Ice Wand
 [✅] Creeper movement speed reduced from 28 to 27
 [✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
 
-[❌] Scout Baby Hoglin
+[🟡] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
+    - You can still switch to training Striders at any time
 
 Quality of Life
 ---------------
@@ -40,6 +41,7 @@ Quality of Life
 Bugfixes
 --------
 [✅] Fixed the enchanter tether being rendred in fog
+[❌] Fixed neutral and enemy buildings not building at fast speeds in sandbox
 
 Languages
 ---------

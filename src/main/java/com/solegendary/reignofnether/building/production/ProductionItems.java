@@ -45,6 +45,7 @@ public class ProductionItems {
 
     public static final GruntProd GRUNT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "grunt"), new GruntProd());
     public static final StriderProd STRIDER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "strider"), new StriderProd());
+    public static final BabyHoglinProd BABY_HOGLIN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "baby_hoglin"), new BabyHoglinProd());
     public static final BruteProd BRUTE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "brute"), new BruteProd());
     public static final HeadhunterProd HEADHUNTER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "headhunter"), new HeadhunterProd());
     public static final MarauderProd MARAUDER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "marauder"), new MarauderProd());
@@ -163,6 +164,7 @@ public class ProductionItems {
         RAVAGER,
         GRUNT,
         STRIDER,
+        BABY_HOGLIN,
         BRUTE,
         HEADHUNTER,
         MARAUDER,

@@ -68,6 +68,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishUnit.createAttributes().build());
         evt.put(EntityRegistrar.GRUNT_UNIT.get(), GruntUnit.createAttributes().build());
         evt.put(EntityRegistrar.STRIDER_UNIT.get(), StriderUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BABY_HOGLIN_UNIT.get(), BabyHoglinUnit.createAttributes().build());
         evt.put(EntityRegistrar.HEADHUNTER_UNIT.get(), HeadhunterUnit.createAttributes().build());
         evt.put(EntityRegistrar.MARAUDER_UNIT.get(), MarauderUnit.createAttributes().build());
         evt.put(EntityRegistrar.BRUTE_UNIT.get(), BruteUnit.createAttributes().build());
@@ -151,6 +152,7 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.SCOUT_DOG_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SCOUT_CAT_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.BABY_HOGLIN_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }
         if (BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){

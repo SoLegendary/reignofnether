@@ -694,9 +694,9 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 !mob.hasEffect(MobEffectRegistrar.FREEZE.get())) {
                 int duration = Blizzard.FREEZE_DURATION;
                 BlockServerEvents.addTempBlock((ServerLevel) level(), mob.getOnPos().above(),
-                        Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
                 BlockServerEvents.addTempBlock((ServerLevel) level(), mob.getOnPos().above().above(),
-                        Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
                 BlockServerEvents.addTempBlock((ServerLevel) level(), mob.getOnPos().above().above().above(),
                         BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
                 snowToPlace.putAll(BlockServerEvents.getSnowPositions(level(), mob.getOnPos().above(), 2));

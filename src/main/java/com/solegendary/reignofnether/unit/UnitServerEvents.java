@@ -437,7 +437,11 @@ public class UnitServerEvents {
             addUnitPoofs(evt.getLevel(), le);
 
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
-            mob.setBaby(false);
+            if (mob instanceof BabyHoglinUnit)
+                mob.setBaby(true);
+            else
+                mob.setBaby(false);
+
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);

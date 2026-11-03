@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.mixin;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.blocks.ProjectilePassableIceBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
@@ -343,7 +344,8 @@ public abstract class AbstractArrowMixin extends Projectile {
                     target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;")
     )
     private VoxelShape reignofnether$noStickInGarrison(BlockState state, BlockGetter getter, BlockPos pos) {
-        return reignofnether$ignoresBlockPos(pos) ? Shapes.empty() : state.getCollisionShape(getter, pos);
+        return reignofnether$ignoresBlockPos(pos) || state.getBlock() instanceof ProjectilePassableIceBlock ?
+                Shapes.empty() : state.getCollisionShape(getter, pos);
     }
 }
 

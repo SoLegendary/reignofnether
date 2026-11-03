@@ -135,7 +135,11 @@ public class BlockRegistrar {
                     .pushReaction(PushReaction.DESTROY)),
             CreativeModeTabs.BUILDING_BLOCKS);
 
-    public static final RegistryObject<Block> RTS_START_BLOCK_BLUE = registerBlock("rts_start_block_blue", () ->
+    public static final RegistryObject<Block> PROJECTILE_PASSABLE_ICE = registerBlock("projectile_passable_ice",
+            () -> new ProjectilePassableIceBlock(BlockBehaviour.Properties.copy(Blocks.PACKED_ICE)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> RTS_START_BLOCK_BLUE =registerBlock("rts_start_block_blue", () ->
             new RTSStartBlock(BlockBehaviour.Properties.copy(Blocks.STONE).mapColor(MapColor.COLOR_BLUE)
                     .strength(-1.0F, 3600000.0F).noLootTable()), CreativeModeTabs.FUNCTIONAL_BLOCKS);
 

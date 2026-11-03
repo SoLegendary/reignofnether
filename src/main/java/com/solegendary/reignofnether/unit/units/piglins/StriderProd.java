@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CentralPortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
@@ -56,11 +57,12 @@ public class StriderProd extends ProductionItem implements IUnitProductionItem {
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new StartProductionButton(
+        StartProductionButton button = new StartProductionButton(
             StriderProd.itemName,
             TEXTURE_LOCATION,
             hotkey,
-            () -> !FogOfWarClientEvents.isEnabled(),
+            () -> !FogOfWarClientEvents.isEnabled() ||
+                    prodBuilding instanceof CentralPortalPlacement cpp && !cpp.trainsStriders,
             () -> true,
             List.of(
                 Component.translatable("entity.reignofnether.strider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
@@ -69,10 +71,19 @@ public class StriderProd extends ProductionItem implements IUnitProductionItem {
                 fcs(""),
                 Component.translatable("entity.reignofnether.strider_unit.tooltip1").getVisualOrderText(),
                 Component.translatable("entity.reignofnether.strider_unit.tooltip2").getVisualOrderText(),
-                Component.translatable("entity.reignofnether.strider_unit.tooltip3").getVisualOrderText()
+                Component.translatable("entity.reignofnether.strider_unit.tooltip3").getVisualOrderText(),
+                fcs(""),
+                Component.translatable("entity.reignofnether.strider_unit.tooltip4").getVisualOrderText()
             ),
             this
         );
+        button.onRightClick = () -> {
+            if (prodBuilding instanceof CentralPortalPlacement cpp) {
+                cpp.trainsStriders = !cpp.trainsStriders;
+                cpp.updateButtons();
+            }
+        };
+        return button;
     }
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {

@@ -45,6 +45,7 @@ import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BabyHoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
@@ -1049,7 +1050,7 @@ public interface Unit {
     }
 
     public default boolean isScout() {
-        return this instanceof ScoutDogUnit || this instanceof ScoutCatUnit || this instanceof BatUnit || this instanceof StriderUnit;
+        return this instanceof ScoutDogUnit || this instanceof ScoutCatUnit || this instanceof BatUnit || this instanceof StriderUnit || this instanceof BabyHoglinUnit;
     }
 
     public default boolean isGarrisoned() {

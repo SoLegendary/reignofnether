@@ -54,6 +54,7 @@ public class ReignOfNetherCommonConfigs {
         BUILDER.comment("Piglins");
         UnitCosts.GRUNT.define(BUILDER);
         UnitCosts.STRIDER.define(BUILDER);
+        UnitCosts.BABY_HOGLIN.define(BUILDER);
         UnitCosts.BRUTE.define(BUILDER);
         UnitCosts.HEADHUNTER.define(BUILDER);
         UnitCosts.MARAUDER.define(BUILDER);
@@ -237,6 +238,7 @@ public class ReignOfNetherCommonConfigs {
         // Piglins
         public static final ResourceCostConfigEntry GRUNT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.GRUNT, "Grunt Config");
         public static final ResourceCostConfigEntry STRIDER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.STRIDER, "Strider Config");
+        public static final ResourceCostConfigEntry BABY_HOGLIN = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.BABY_HOGLIN, "Baby Hoglin Config");
         public static final ResourceCostConfigEntry BRUTE = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.BRUTE, "Brute Config");
         public static final ResourceCostConfigEntry HEADHUNTER = ResourceCostConfigEntry.Unit(90,60,0,25,2, ResourceCosts.HEADHUNTER, "Headhunter Config");
         public static final ResourceCostConfigEntry MARAUDER = ResourceCostConfigEntry.Unit(175,75,75,40,4, ResourceCosts.MARAUDER, "Marauder Config");
