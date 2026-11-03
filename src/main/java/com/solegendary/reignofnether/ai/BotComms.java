@@ -130,6 +130,7 @@ public class BotComms {
                     case NO_ENEMY -> { if (human) say("no_enemy", Scope.TEAM); }
                     case TOO_STRONG -> say("too_strong_help", Scope.TEAM);
                     case DEFENDING -> say("under_attack_too", Scope.TEAM);
+                    case CONSIDERING -> {} // the supervisor's net decides, and answers if it comes (answered)
                     default -> say("cant_help", Scope.TEAM);
                 }
             }
@@ -143,6 +144,7 @@ public class BotComms {
                     case NOTHING_THERE -> { if (human) say("nothing_to_attack", Scope.TEAM); }
                     case TOO_STRONG -> say("too_strong_attack", Scope.TEAM, String.valueOf(r.seconds()));
                     case DEFENDING -> say("under_attack_too", Scope.TEAM);
+                    case CONSIDERING -> {} // the supervisor's net decides, and answers if it comes (answered)
                     default -> say("cant_help", Scope.TEAM);
                 }
             }
@@ -152,6 +154,12 @@ public class BotComms {
             }
             default -> {}
         }
+    }
+
+    // the supervisor sends the army to an ally's ping: tell them, as answerHelp / answerAttack would have
+    void answered(boolean help, BlockPos pos) {
+        ping(PingType.ON_MY_WAY, pos);
+        say(help ? "on_my_way" : "joining", Scope.TEAM);
     }
 
     // ---------------------------------------------------------------- what the army is doing

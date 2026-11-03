@@ -124,6 +124,8 @@ public class BuildingProductionServerboundPacket {
                         productionItem = ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName));
                     }
                     if (productionItem != null) {
+                        com.solegendary.reignofnether.ai.BotRecorder.command(pBuilding.ownerName, "production", this.action.name(),
+                                this.itemName, buildingPos, null, null);
                         switch (this.action) {
                             case START_PRODUCTION -> {
                                 boolean prodSuccess = pBuilding.startProductionItem(productionItem);

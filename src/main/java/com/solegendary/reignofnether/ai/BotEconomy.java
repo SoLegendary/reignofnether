@@ -106,8 +106,15 @@ public class BotEconomy {
             if (active.item == bot.plan.worker())
                 queued++;
         // villagers called to arms come back: counted, or the bot trains replacements and ends up with 40+ workers
-        if (bot.workers.size() + bot.militia.size() + queued < workerTarget() && queued < BotProduction.MAX_QUEUE && workersAllowed())
+        boolean wanted = bot.supervisor.controls() ? bot.supervisor.trainWorkers : bot.workers.size() + bot.militia.size() + queued < workerTarget();
+        if (wanted && queued < BotProduction.MAX_QUEUE && workersAllowed())
             bot.startProduction(pp, bot.plan.worker());
+    }
+
+    // the script would train another worker now (BotSupervisor's label)
+    boolean wantsWorkers() {
+        int queued = bot.getCapitol() instanceof ProductionPlacement pp ? (int) pp.productionQueue.stream().filter(a -> a.item == bot.plan.worker()).count() : 0;
+        return bot.workers.size() + bot.militia.size() + queued < workerTarget();
     }
 
     // the plan's target for this minute (more per outpost), and never more than the army needs: past the
@@ -399,7 +406,7 @@ public class BotEconomy {
             }
         }
         // the plan's opening split until the first military building is up (the guide: wood first), then its normal one
-        BotPlan.Shares shares = bot.production.hasMilitaryProducer() ? bot.plan.gather() : bot.plan.openingGather();
+        BotPlan.Shares shares = bot.supervisor.controls() ? bot.supervisor.shares() : scriptShares();
         int[] count = {food, wood, ore};
         // specialists go to what they're good at first, unless we're swimming in it; workers without a job then fill
         // whatever is short; the other specialists (an idle mason or hunter, a gatherer whose own resource piles up)
@@ -423,6 +430,10 @@ public class BotEconomy {
     }
 
     // the resource we're shortest of, falling back to wood, then ore
+    BotPlan.Shares scriptShares() {
+        return bot.production.hasMilitaryProducer() ? bot.plan.gather() : bot.plan.openingGather();
+    }
+
     private void gatherShort(WorkerUnit w, int[] count, BotPlan.Shares shares) {
         ResourceName wanted = pickResource(count[0], count[1], count[2], shares);
         if (wanted == ResourceName.FOOD && sendToFarm(w))
@@ -717,7 +728,7 @@ public class BotEconomy {
         // 10 farms for 60 pop was a third of the workers on food and the wood to build them gone; 4 at 20 workers left
         // food at 0 with 800 wood. More only when that happens: out of food with wood to spare
         int extra = bot.resources.food < LOW && bot.resources.wood >= FLOAT ? STARVING_EXTRA_FARMS : 0;
-        if (bot.countOwned(plan.farm()) < farmsWanted(bot.workers.size(), FARMS_SHARE) + extra &&
+        if (bot.countOwned(plan.farm()) < farmsWanted(bot.workers.size(), bot.supervisor.controls() ? bot.supervisor.shares().food() * FARMS_SHARE / bot.plan.gather().food() : FARMS_SHARE) + extra &&
                 bot.canAfford(plan.farm().cost, bot.resources.food >= 150))
             bot.builder.placeAtHome(plan.farm());
     }

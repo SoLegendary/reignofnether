@@ -50,10 +50,18 @@ public class BotScout {
             bot.scouts.stream().filter(s -> !bot.unit(s).fleeing)
                     .min(Comparator.comparingDouble(s -> s.blockPosition().distSqr(p))).ifPresent(s -> send(s, bot.unit(s), p));
         }
+        LivingEntity steered = bot.supervisor.controls() ? bot.supervisor.netScout() : null;
         for (LivingEntity s : bot.scouts) {
             BotUnit state = bot.unit(s);
             if (flee(s, state))
                 continue;
+            if (s == steered) { // the net's scout: where it says, else home
+                BotSupervisor.Group g = bot.supervisor.scout;
+                BlockPos to = g.order() == BotSupervisor.OUT && g.at() != null ? g.at() : bot.home;
+                if ((state.scoutTarget == null || !state.scoutTarget.equals(to)) && s.blockPosition().distSqr(to) > 8 * 8)
+                    send(s, state, to);
+                continue;
+            }
             BlockPos target = state.scoutTarget;
             boolean arrived = target != null && s.blockPosition().distSqr(target) < 8 * 8;
             boolean stale = target != null && bot.tick - state.scoutTargetTick > RETARGET_TICKS;

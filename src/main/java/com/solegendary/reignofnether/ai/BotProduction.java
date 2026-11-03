@@ -44,7 +44,7 @@ public class BotProduction {
         for (BuildingPlacement b : bot.buildings) {
             if (!(b instanceof ProductionPlacement pp) || !b.isBuilt || b.isCapitol || pp.productionQueue.size() >= MAX_QUEUE)
                 continue;
-            BotPlan.ArmyUnit best = scriptPick(b, have);
+            BotPlan.ArmyUnit best = bot.supervisor.controls() ? netPick(b, have) : scriptPick(b, have);
             if (best != null && bot.startProduction(pp, best.item())) // re-reads resources for the next building
                 have.merge(best.item(), 1, Integer::sum);
         }
@@ -67,15 +67,38 @@ public class BotProduction {
         return best;
     }
 
+    // the supervisor's most wanted unit that this building trains and we can pay for
+    @Nullable
+    private BotPlan.ArmyUnit netPick(BuildingPlacement b, Map<ProductionItem, Integer> have) {
+        for (ProductionItem item : bot.supervisor.units())
+            for (BotPlan.ArmyUnit a : bot.matchup.army())
+                if (a.item() == item && canTrain(b, a, have))
+                    return a;
+        return null;
+    }
+
     private boolean canTrain(BuildingPlacement b, BotPlan.ArmyUnit a, Map<ProductionItem, Integer> have) {
         return BotBrain.makes(b, a.item()) && unlocked(a, have) && affordable(a.item().getCost(false, bot.name)) && !spendsLastWood(a.item());
     }
 
-    // trained somewhere we have, its building or research done, below its cap
-    private boolean unlocked(BotPlan.ArmyUnit a, Map<ProductionItem, Integer> have) {
+    // trained somewhere we have, its building or research done, below its cap: what the supervisor may ask for
+    boolean unlocked(BotPlan.ArmyUnit a, Map<ProductionItem, Integer> have) {
         Building producer = producerOf(a.item());
         return producer != null && bot.hasFinished(producer) && have.getOrDefault(a.item(), 0) < cap(a) &&
                 (a.needs() == null || bot.hasFinished(a.needs()));
+    }
+
+    // what the script would train next at the first free military building, for the supervisor to learn from
+    @Nullable
+    ProductionItem scriptChoice() {
+        Map<ProductionItem, Integer> have = counts();
+        for (BuildingPlacement b : bot.buildings)
+            if (b instanceof ProductionPlacement pp && b.isBuilt && !b.isCapitol && pp.productionQueue.size() < MAX_QUEUE) {
+                BotPlan.ArmyUnit a = scriptPick(b, have);
+                if (a != null)
+                    return a.item();
+            }
+        return null;
     }
 
     // past a small army the build order's wood and ore savings hold back troops that need them; its food never does:

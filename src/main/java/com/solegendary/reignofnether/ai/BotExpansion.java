@@ -51,7 +51,7 @@ public class BotExpansion {
 
     void think() {
         abandonUnsafeOutposts();
-        if (bot.growing || woodRunningLow()) // new outposts come in the growth phase, or as soon as wood runs out
+        if (!bot.supervisor.controls() && (bot.growing || woodRunningLow())) // new outposts come in the growth phase, or as soon as wood runs out; a net places its own
             expand();
         removeDepletedDropOffs();
     }
@@ -124,7 +124,7 @@ public class BotExpansion {
     // a stockpile next to resources far from every drop-off (or a long walk round a ravine from the nearest)
     void maybeExpandDropOff(BlockPos resourcePos, ResourceName type) {
         // the opening too: a worker only gets here when nothing nearer was left, so waiting for the growth phase starves it
-        if (isBad(resourcePos) || !bot.memory.isSeen(resourcePos) || (!farFromDropOffs(resourcePos) && !longWalkFromDropOff(resourcePos)))
+        if (bot.supervisor.controls() || isBad(resourcePos) || !bot.memory.isSeen(resourcePos) || (!farFromDropOffs(resourcePos) && !longWalkFromDropOff(resourcePos)))
             return; // unseen: a camp could be standing there, wait until a worker gets eyes on it
         // gatherers are already walking there, so a smaller patch than a planned expansion is worth a stockpile
         if (richness(resourcePos) >= MIN_PATCH / 3.0)
@@ -141,6 +141,8 @@ public class BotExpansion {
     // better. The main army holds it between waves (BotArmy) and the outpost follows. Rechecked every 10 s
     @Nullable
     BlockPos nextExpansion() {
+        if (bot.supervisor.controls())
+            return null; // a net picks its stockpiles' cells itself (BotBuilder.netBuild)
         if (expansionSpot != null && isBad(expansionSpot))
             expansionSpot = null;
         if (bot.tick - expansionCheckTick < 10 * 20)
@@ -178,6 +180,8 @@ public class BotExpansion {
     // count: the next stockpile is up before the last trees fall, not minutes after
     boolean wantsExpansion() {
         // out of wood near every drop-off: always, or the bot locks itself with nothing to build anything with
+        if (bot.supervisor.controls())
+            return false;
         return bot.tick - bot.economy.noWoodTick < 60 * 20 || woodRunningLow() ||
                 (bot.production.hasMilitaryProducer() && bot.workers.size() >= 8 + WORKERS_PER_OUTPOST * outposts());
     }
@@ -207,6 +211,32 @@ public class BotExpansion {
     }
 
     private static final long SEEN_TICKS = 5 * 60 * 20; // a patch our units saw this recently counts as known
+
+    // a patch the supervisor can pick: what's there and how nextExpansion would rate it
+    record Patch(BlockPos pos, int wood, int ore, int food, double score) {}
+
+    private List<Patch> patches = List.of();
+    private long patchesTick = -1_000_000;
+
+    // the patches nextExpansion weighs, best first, at most `max`. Rechecked every 10 s
+    List<Patch> patches(int max) {
+        if (bot.tick - patchesTick >= 10 * 20) {
+            patchesTick = bot.tick;
+            List<Patch> found = new ArrayList<>();
+            for (ResourceName type : PATCH_TYPES)
+                for (BlockPos c : patchCandidates(type, bot.home, 96 + 24 * outposts())) {
+                    if (!bot.army.canClear(c) || found.stream().anyMatch(p -> p.pos().distSqr(c) < 16 * 16))
+                        continue;
+                    int wood = patchSize(c, ResourceName.WOOD), ore = patchSize(c, ResourceName.ORE), food = patchSize(c, ResourceName.FOOD);
+                    double rich = richness(wood, ore, food);
+                    if (rich >= MIN_PATCH)
+                        found.add(new Patch(c, wood, ore, food, patchScore(rich, c)));
+                }
+            found.sort(Comparator.comparingDouble(p -> -p.score()));
+            patches = found;
+        }
+        return patches.subList(0, Math.min(max, patches.size()));
+    }
 
     // up to 12 seen resources of a type nearest `from` that could take a drop-off, at least 16 blocks apart
     private List<BlockPos> patchCandidates(ResourceName type, BlockPos from, int range) {

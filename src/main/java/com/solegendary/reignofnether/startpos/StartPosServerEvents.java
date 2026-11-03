@@ -99,8 +99,8 @@ public class StartPosServerEvents {
             if (!join.ready && !join.pending)
                 shouldStartGame = false;
         }
-        // seats can all be bots, but someone has to be here to watch
-        if (PlayerServerEvents.players.isEmpty())
+        // seats can all be bots, but someone has to be here to watch (arena matches run unwatched)
+        if (PlayerServerEvents.players.isEmpty() && !com.solegendary.reignofnether.ai.ArenaServerEvents.ACTIVE)
             shouldStartGame = false;
         if (shouldStartGame) {
             startGameCountdown();

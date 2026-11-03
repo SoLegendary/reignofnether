@@ -99,6 +99,10 @@ public final class PathfinderWorkerPool {
     // Outstanding pathfinding work for the F7 "Queue" stat: requests parked for chunk warming plus those
     // running A* on the pool. This is the backlog that drives the "Path e2e" latency under load.
     // BUILD_QUEUE is main-thread-only, so call this from the main thread (the debug tick does).
+    public static int inFlight() {
+        return INFLIGHT.get();
+    }
+
     public static int queueDepth() {
         return BUILD_QUEUE.size() + INFLIGHT.get();
     }

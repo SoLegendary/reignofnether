@@ -63,6 +63,7 @@ public class BotBrain {
     final BotMicro micro = new BotMicro(this);
     final BotScout scout = new BotScout(this);
     final BotHeroes heroes = new BotHeroes(this);
+    final BotSupervisor supervisor = new BotSupervisor(this);
     final BotComms comms = new BotComms(this);
     final BotDiplomacy diplomacy = new BotDiplomacy(this);
 
@@ -125,14 +126,16 @@ public class BotBrain {
 
         // two phases: the plan's opening first (only its own buildings, plus workers, troops and a house when
         // capped), then growth for good (farms, houses ahead of production, more barracks, outposts, the matchup's
-        // tech). Each step runs on its own, so a bug in one logs and is skipped instead of freezing the whole bot
-        if (!growing && (builder.openingDone() || minutesPlayed() >= plan.openingMaxMinutes())) {
+        // tech). Each step runs on its own, so a bug in one logs and is skipped instead of freezing the whole bot.
+        // A net has no opening: the plan's own houses and farms never come, so the growth upkeep does them from the start
+        if (!growing && (supervisor.controls() || builder.openingDone() || minutesPlayed() >= plan.openingMaxMinutes())) {
             growing = true;
             log("growth phase{}", builder.openingDone() ? "" : " (the opening ran out of time)");
         }
         step("defence", defence::think);
         step("supply", builder::buildSupply);
         step("heroRevive", heroes::trainAndRevive); // a dead hero first: its money is held back from everything below
+        step("supervisor", supervisor::think); // the big decisions first: the steps below carry them out
         step("production", production::think); // army first: troops get the food before new workers
         step("workers", economy::trainWorkers);
         step("economy", economy::think);
@@ -145,7 +148,7 @@ public class BotBrain {
         step("expansion", expansion::think);
         step("scout", scout::think);
         step("comms", comms::think);
-        if (!takeover) // a disconnected human's alliances are theirs to make
+        if (!takeover && !ArenaServerEvents.ACTIVE) // a disconnected human's alliances are theirs to make; arena teams are fixed
             step("diplomacy", diplomacy::think);
         logStatus();
         long took = System.nanoTime() - started;

@@ -188,6 +188,8 @@ public class BuildingServerboundPacket {
                         .filter(id -> player.serverLevel().getEntity(id) instanceof Unit unit && unit.getOwnerName().equals(this.ownerName))
                         .toArray();
             }
+            com.solegendary.reignofnether.ai.BotRecorder.command(this.ownerName, "building", this.action.name(), this.itemName,
+                    this.buildingPos, null, this.builderUnitIds);
             switch (this.action) {
                 case PLACE -> {
                     BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);

@@ -49,6 +49,13 @@ public class BotDefence {
         return defending;
     }
 
+    // whoever was sent to the fight: a net's orders leave them to it (BotPuppet)
+    boolean isFighting(LivingEntity e) {
+        return defending && fighting.contains(e);
+    }
+
+    private List<LivingEntity> fighting = List.of();
+
     void think() {
         releaseResponders();
         Map<LivingEntity, LivingEntity> attackers = workerAttackers();
@@ -80,6 +87,7 @@ public class BotDefence {
         }
         defending = true;
         defendPos = pos;
+        fighting = defenders;
         bot.army.orderSoldiers(PingType.DEFEND, pos);
         callToArms(defenders);
         defenders = defenders.stream().filter(e -> canHitAny(e, threats)).toList(); // the rest would only stand under them

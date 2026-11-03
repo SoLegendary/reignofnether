@@ -95,12 +95,19 @@ public class BotArmy {
     private long gatherUntil = -1, lastGather = -1_000_000;
     private final Set<Integer> waveIds = new HashSet<>(); // who set off with this wave; units trained since aren't in it
 
+    private final BotPuppet puppet;
+
     BotArmy(BotBrain bot) {
         this.bot = bot;
         this.raid = new BotRaid(bot, this);
+        this.puppet = new BotPuppet(bot, this);
     }
 
     void think() {
+        if (bot.supervisor.controls()) {
+            puppet.think();
+            return;
+        }
         if (bot.tick - lastAssign >= ASSIGN_EVERY) {
             lastAssign = bot.tick;
             assignSquads();
@@ -176,6 +183,43 @@ public class BotArmy {
 
     boolean weak() {
         return mainWeak;
+    }
+
+    boolean isCrushing() {
+        return crushing;
+    }
+
+    int wavesSent() {
+        return wavesSent;
+    }
+
+    // what the script is doing with the main army, as the net's order and place, for it to learn from
+    BotSupervisor.Group scriptMain() {
+        return switch (state) {
+            case RETREAT -> new BotSupervisor.Group(BotSupervisor.RETREAT, null);
+            case ATTACK, SUPPORT -> new BotSupervisor.Group(BotSupervisor.ATTACK, heading());
+            case DEFEND -> new BotSupervisor.Group(BotSupervisor.HOLD, bot.home);
+            case RALLY -> new BotSupervisor.Group(BotSupervisor.HOLD, lastHold != null ? lastHold : rallyPoint());
+        };
+    }
+
+    // and the home army as the second army; null when there's none
+    @org.jetbrains.annotations.Nullable
+    BotSupervisor.Group scriptSecond() {
+        if (home().isEmpty())
+            return null;
+        BlockPos fight = homeHelping ? mainFight() : null;
+        return fight != null ? new BotSupervisor.Group(BotSupervisor.ATTACK, fight) : new BotSupervisor.Group(BotSupervisor.HOLD, homePost());
+    }
+
+    // where the main army is going or about to go
+    @org.jetbrains.annotations.Nullable
+    BlockPos heading() {
+        if (bot.supervisor.controls()) { // the net's attack: allies (a net too in 2v2) see it as a call to join
+            BotSupervisor.Group m = bot.supervisor.main;
+            return m.order() == BotSupervisor.ATTACK || m.order() == BotSupervisor.MOVE ? m.at() : null;
+        }
+        return state == State.SUPPORT ? supportPos : planned != null ? planned : mainAway() ? target : null;
     }
 
     private BotUnit.Squad neediestSquad() {
@@ -272,6 +316,12 @@ public class BotArmy {
 
     // who meets an attack on our base: the home army, and the main army when it's home or the home army can't hold
     List<LivingEntity> defenders(List<LivingEntity> threats) {
+        if (bot.supervisor.controls()) { // the net sends the armies: whoever isn't out on its orders fights what comes
+            int order = bot.supervisor.main.order();
+            boolean out = order == BotSupervisor.ATTACK || order == BotSupervisor.MOVE;
+            return bot.fighters.stream().filter(e -> bot.unit(e).squad != BotUnit.Squad.RAID &&
+                    (!out || e.blockPosition().distSqr(bot.home) < CORE_RANGE * CORE_RANGE * 2)).toList();
+        }
         assignNewUnits();
         List<LivingEntity> home = home();
         if (!mainAway()) {
@@ -895,13 +945,16 @@ public class BotArmy {
     // ---------------------------------------------------------------- allies' pings
 
     // how the army answers an ally's ping (BotComms says it)
-    enum Answer { COMING, JOINING, NO_ENEMY, NOTHING_THERE, TOO_STRONG, BUSY, DEFENDING }
+    enum Answer { COMING, JOINING, NO_ENEMY, NOTHING_THERE, TOO_STRONG, BUSY, DEFENDING, CONSIDERING }
 
     record Reply(Answer answer, int seconds) {}
 
     // an ally asks for help at pos: only if there's an enemy there (we see what our allies see), and only as many
     // units as the combat sim says beat it, nearest first. All of them makes it the main army's job for a while
     Reply answerHelp(BlockPos pos) {
+        bot.supervisor.allyAsked(pos, true);
+        if (bot.supervisor.controls())
+            return new Reply(Answer.CONSIDERING, 0);
         if (bot.defence.isDefending())
             return new Reply(Answer.DEFENDING, 0);
         List<LivingEntity> enemies = bot.memory.enemiesNear(Vec3.atCenterOf(pos), FIGHT_RANGE);
@@ -974,6 +1027,9 @@ public class BotArmy {
     }
 
     Reply answerAttack(BlockPos pos, String sender) {
+        bot.supervisor.allyAsked(pos, false);
+        if (bot.supervisor.controls())
+            return new Reply(Answer.CONSIDERING, 0);
         if (bot.defence.isDefending())
             return new Reply(Answer.DEFENDING, 0);
         Vec3 at = Vec3.atCenterOf(pos);

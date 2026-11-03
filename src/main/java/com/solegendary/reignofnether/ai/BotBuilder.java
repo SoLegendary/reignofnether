@@ -56,10 +56,42 @@ public class BotBuilder {
                 bot.reserve = bot.plan.capitol().cost;
             return;
         }
-        if (bot.growing)
-            keepProducers();
-        followBuildOrder();
+        if (bot.supervisor.controls())
+            netBuild();
+        else {
+            if (bot.growing)
+                keepProducers();
+            followBuildOrder();
+        }
         cancelStuckFoundations();
+    }
+
+    // the net's building at its cell and its research; saving for whichever it can't pay for yet
+    private void netBuild() {
+        bot.reserve = null;
+        BotSupervisor s = bot.supervisor;
+        BotPlan.Step r = s.research;
+        if (r != null && !isDone(r)) {
+            ResourceCost cost = r.item().getCost(false, bot.name);
+            ProductionPlacement at = bot.findProducer(r.building(), r.item());
+            if (!bot.canAfford(cost, false))
+                bot.reserve = cost;
+            else if (at != null && bot.startProduction(at, r.item()))
+                bot.log("research: {} (net)", describe(r));
+        }
+        Building b = s.build;
+        if (b == null || s.buildAt == null || bot.hasUnbuilt(b))
+            return;
+        if (!bot.canAfford(b.cost, false)) {
+            if (bot.reserve == null)
+                bot.reserve = b.cost;
+            return;
+        }
+        int cell = (int) s.grid.cellBlocks();
+        if (b == bot.plan.dropOff())
+            bot.expansion.placeDropOff(s.buildAt);
+        else if (place(b, s.buildAt, 0, cell) == null && !bot.placer.waiting)
+            place(b, s.buildAt, cell, 3 * cell); // a hilly or full cell: the flat ground round it, still the net's side of the map
     }
 
     // ---------------------------------------------------------------- build order
@@ -87,7 +119,10 @@ public class BotBuilder {
                 case BUILD -> step.building() == bot.plan.dropOff() ? bot.expansion.placePlannedDropOff() : placeAtHome(step.building()) != null;
                 case RESEARCH -> {
                     ProductionPlacement at = bot.findProducer(step.building(), step.item());
-                    yield at != null && bot.startProduction(at, step.item());
+                    boolean started = at != null && bot.startProduction(at, step.item());
+                    if (started)
+                        bot.supervisor.researched(step.item());
+                    yield started;
                 }
             };
             if (ok) {
@@ -311,6 +346,7 @@ public class BotBuilder {
             return null;
         }
         bot.log("place: {} at {} from home", building.name, bot.fromHome(placed.centrePos));
+        bot.supervisor.built(building, placed.centrePos);
         bot.buildings.add(placed); // so the rest of this think counts it
         bot.refreshResources();
         return placed;

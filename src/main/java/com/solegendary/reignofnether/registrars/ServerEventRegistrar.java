@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.chat.TeamChatServerEvents;
+import com.solegendary.reignofnether.ai.ArenaServerEvents;
 import com.solegendary.reignofnether.ai.BotServerEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
@@ -66,6 +67,8 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(RTSMapInfoServerEvents.class);
         vanillaEventBus.register(StartPosServerEvents.class);
         vanillaEventBus.register(BotServerEvents.class);
+        vanillaEventBus.register(ArenaServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.ai.BotRecorder.class);
         vanillaEventBus.register(AlliancesServerEvents.class);
         vanillaEventBus.register(HeroServerEvents.class);
         vanillaEventBus.register(NonUnitServerEvents.class);

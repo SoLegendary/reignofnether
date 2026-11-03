@@ -342,6 +342,8 @@ public class UnitServerEvents {
         boolean shiftQueue,
         boolean groupMove
     ) {
+        com.solegendary.reignofnether.ai.BotRecorder.command(ownerName, "unit", action.name(), shiftQueue ? "queued" : null,
+                preselectedBlockPos, selectedBuildingPos, unitIds);
         if (shiftQueue) {
             synchronized(unitActionSlowQueue) {
                 long queued = unitActionSlowQueue.stream().filter(uai -> Objects.equals(ownerName, uai.getOwnerName())).count();

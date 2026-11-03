@@ -206,4 +206,97 @@ class BotLogicTest {
         assertFalse(BotBrain.noEconomy(0, true)); // can still train one
         assertFalse(BotBrain.noEconomy(3, false)); // still has workers
     }
+
+    // ---------------------------------------------------------------- supervisor net
+
+    // two inputs passed straight through; each head reads them in a way that's easy to check by hand
+    private static BotNet tinyNet() {
+        String json = """
+                {"inputs": 2, "layers": {
+                  "trunk1": {"w": [[1, 0], [0, 1]], "b": [0, 0]},
+                  "trunk2": {"w": [[1, 0], [0, 1]], "b": [0, 0]},
+                  "army": {"w": [[0, 0], [1, 0], [0, 1]], "b": [0, 0, 0]},
+                  "unit": {"w": [[1, 0], [0, 1]], "b": [0, 0]},
+                  "gather": {"w": [[0, 1]], "b": [0]},
+                  "value": {"w": [[1, 0]], "b": [0]},
+                  "target1": {"w": [[1, 0, 0]], "b": [0]},
+                  "target2": {"w": [[1]], "b": [0]},
+                  "expand1": {"w": [[1, 0, 0]], "b": [0]},
+                  "expand2": {"w": [[1]], "b": [0]},
+                  "expandNone": {"w": [[0, 0]], "b": [0.5]}}}""";
+        return BotNet.parse(JsonParser.parseString(json).getAsJsonObject());
+    }
+
+    @Test
+    void netPicksWhatItsWeightsSay() {
+        BotNet.Output out = tinyNet().run(new double[] {2, 0}, List.of(new double[] {0.1}, new double[] {0.9}), List.of(new double[] {0.2}));
+        java.util.Random random = new java.util.Random(1);
+        assertEquals(1, BotNet.pick(out.army(), null, false, random).index()); // ATTACK reads the first input
+        assertEquals(1, BotNet.pick(out.targets(), null, false, random).index()); // the higher-scored place
+        assertEquals(1, BotNet.pick(out.expands(), null, false, random).index()); // 0.5 for "not now" beats 0.2
+        assertEquals(Math.tanh(2), out.value(), 1e-9);
+    }
+
+    @Test
+    void maskedChoicesAreNeverPicked() {
+        java.util.Random random = new java.util.Random(1);
+        boolean[] mask = {false, true};
+        for (int i = 0; i < 50; i++)
+            assertEquals(1, BotNet.pick(new double[] {5, -5}, mask, true, random).index());
+        assertEquals(-1, BotNet.pick(new double[] {1, 2}, new boolean[] {false, false}, true, random).index());
+        assertEquals(List.of(1, 0), BotNet.ranked(new double[] {1, 2}, null));
+    }
+
+    @Test
+    void sampledLogProbsMatchTheOdds() {
+        BotNet.Pick p = BotNet.pick(new double[] {0, Math.log(3)}, null, false, new java.util.Random(1));
+        assertEquals(1, p.index());
+        assertEquals(Math.log(0.75), p.logProb(), 1e-9);
+    }
+
+    @Test
+    void netInputsAreUniquelyNamed() {
+        assertEquals(BotSupervisor.INPUTS.size(), Set.copyOf(BotSupervisor.INPUTS).size());
+    }
+
+    @Test
+    void gridNetMatchesPyTorch() throws Exception {
+        // written by RoN-Bots tools/grid_fixture.py
+        JsonObject json;
+        try (var in = new InputStreamReader(BotLogicTest.class.getResourceAsStream("/ai/grid_net_fixture.json"))) {
+            json = JsonParser.parseReader(in).getAsJsonObject();
+        }
+        BotGridNet net = BotGridNet.parse(json);
+        assertEquals(List.of("oak_stockpile", "barracks", "farm"), net.buildings);
+        JsonObject input = json.getAsJsonObject("input");
+        com.google.gson.JsonArray gridJson = input.getAsJsonArray("grid"), globalsJson = input.getAsJsonArray("globals");
+        float[] grid = new float[gridJson.size()];
+        for (int i = 0; i < grid.length; i++)
+            grid[i] = gridJson.get(i).getAsInt() / 255f;
+        double[] globals = new double[globalsJson.size()];
+        for (int i = 0; i < globals.length; i++)
+            globals[i] = globalsJson.get(i).getAsDouble();
+
+        BotGridNet.Output out = net.run(grid, globals);
+        JsonObject expected = json.getAsJsonObject("expected");
+        for (String head : expected.keySet()) {
+            if (head.equals("value")) {
+                assertEquals(expected.get(head).getAsDouble(), out.value(), 1e-4);
+                continue;
+            }
+            com.google.gson.JsonArray want = expected.getAsJsonArray(head);
+            double[] got = out.logits(head);
+            assertEquals(want.size(), got.length, head);
+            for (int i = 0; i < got.length; i++)
+                assertEquals(want.get(i).getAsDouble(), got[i], 1e-4, head + "[" + i + "]");
+        }
+        assertEquals(20, expected.size()); // 7 cell heads, 12 others, value
+
+        for (int i = 0; i < 50; i++) // warm-up
+            net.run(grid, globals);
+        long start = System.nanoTime();
+        for (int i = 0; i < 50; i++)
+            net.run(grid, globals);
+        System.out.printf("grid net forward: %.3f ms%n", (System.nanoTime() - start) / 50 / 1e6);
+    }
 }

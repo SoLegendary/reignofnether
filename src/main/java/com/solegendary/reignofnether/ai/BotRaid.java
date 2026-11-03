@@ -38,6 +38,11 @@ public class BotRaid {
         this.army = army;
     }
 
+    @Nullable
+    BlockPos target() {
+        return target;
+    }
+
     boolean isOut() {
         return state == State.OUT;
     }
