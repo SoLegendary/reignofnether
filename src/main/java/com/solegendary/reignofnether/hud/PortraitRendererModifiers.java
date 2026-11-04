@@ -82,6 +82,9 @@ public class PortraitRendererModifiers {
             yOffset = 5;
         }  else if (entity instanceof Phantom) {
             yOffset = 20;
+        } else if (entity instanceof BabyHoglinUnit) {
+            yOffset = 11;
+            scale = -11;
         } else if (entity instanceof Hoglin || entity instanceof Zoglin) {
             yOffset = -18;
             scale = -18;
@@ -94,7 +97,7 @@ public class PortraitRendererModifiers {
             yOffset = 26;
         } else if (entity instanceof EnderMan) {
             yOffset = -15;
-        } else if (entity instanceof Ravager ravager) {
+        } else if (entity instanceof Ravager) {
             yOffset = -54;
             scale = -25;
         } else if (entity instanceof Dolphin) {

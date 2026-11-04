@@ -79,6 +79,7 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
@@ -452,7 +453,9 @@ public class BuildingServerEvents {
                     if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
                         placeScaffoldingUnder(block, newBuilding);
 
-            boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+            boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten") ||
+                    SandboxServer.soleSandboxPlayerHasCheat("warpten");
+
             if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
                 newBuilding.maxBlocksPerTick = 4;
                 newBuilding.queueAllBlocks(serverLevel);
@@ -746,6 +749,18 @@ public class BuildingServerEvents {
             placeBuildingsClientside();
         }
         //ReignOfNether.LOGGER.info("Synced " + buildings.size() + " buildings with player logged in");
+    }
+
+    // prevent players from breaking blocks of invulnerable buildings
+    // runs before onPlayerBlockBreak so that cancelled breaks don't trigger building damage
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onPlayerBlockBreakInvulnerable(BlockEvent.BreakEvent evt) {
+        if (evt.getLevel().isClientSide())
+            return;
+
+        BuildingPlacement bpl = BuildingUtils.findBuilding(evt.getLevel().isClientSide(), evt.getPos());
+        if (bpl != null && bpl.getBuilding().invulnerable && bpl.isPosPartOfBuilding(evt.getPos(), true))
+            evt.setCanceled(true);
     }
 
     // if blocks are destroyed manually by a player then help it along by causing periodic explosions

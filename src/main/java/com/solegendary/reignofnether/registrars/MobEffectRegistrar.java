@@ -28,6 +28,7 @@ public class MobEffectRegistrar {
 
     // Similar to STUN but also prevents the mob from being knocked back or pushed
     public static final RegistryObject<MobEffect> FREEZE = MOB_EFFECTS.register("freeze",  () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000)
+            .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "90108d6a-9e8a-4287-b5e5-5e0f1c77a8ef", 1.0f, AttributeModifier.Operation.ADDITION)
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, "aa19485b-837c-4cd5-91f3-440e05d60ba0", -1.0f, AttributeModifier.Operation.MULTIPLY_TOTAL)
             .addAttributeModifier(Attributes.ATTACK_SPEED, "de7be626-0f4e-4954-9c11-ec5539d40dd7", -1.0f, AttributeModifier.Operation.MULTIPLY_TOTAL));
 

@@ -183,7 +183,7 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public int LIFETIME_TICKS = 20 * 20; // 20s
+    final static public int LIFETIME_TICKS = 30 * 20; // 20s
 
     public BeeUnit(EntityType<? extends Bee> entityType, Level level) {
         super(entityType, level);

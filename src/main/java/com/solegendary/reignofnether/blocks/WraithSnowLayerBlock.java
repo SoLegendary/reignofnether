@@ -96,11 +96,6 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
                 !(pEntity instanceof WretchedWraithUnit) && !pLevel.isClientSide() &&
                 be instanceof WraithSnowBlockEntity snowBe) {
 
-            if (livingEntity.hasEffect(MobEffectRegistrar.FROST_DAMAGE.get())) {
-                coldAmp += 2;
-                dmgIncreaseAmp += 2;
-            }
-
             Relationship rs = Relationship.NEUTRAL;
             if (pEntity instanceof Unit unit) {
                 rs = UnitServerEvents.getUnitToEntityRelationship(unit, pLevel, snowBe.getOwnerId());

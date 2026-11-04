@@ -732,8 +732,8 @@ public class UnitItems {
             .attribute(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), EVOCATION_ROBES_MANA_REGEN)
             .build();
 
-    public static final int HEROS_ARMOUR_MAX_TARGETS = 10;
-    public static final float HEROS_ARMOUR_HEAL = 12f;
+    public static final int HEROS_ARMOUR_MAX_TARGETS = 8;
+    public static final float HEROS_ARMOUR_HEAL = 15f;
     public static final float HEROS_ARMOUR_RANGE = 20f;
     public static final UnitItem HEROS_ARMOUR = UnitItemBuilder.of(ItemRegistrar.HEROS_ARMOUR.get())
             .descId("heros_armour")

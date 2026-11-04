@@ -63,6 +63,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.piglins.BabyHoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
@@ -201,7 +202,7 @@ public class HudClientEvents {
 
         String name = MiscUtil.getSimpleEntityName(entity);
 
-        if (entity.isBaby())
+        if (entity.isBaby() && !(entity instanceof BabyHoglinUnit)) // its name already includes "Baby"
             name = I18n.get("entity.reignofnether.reignofnether.baby") + " " + name;
 
         if (!(entity instanceof Unit))
@@ -1026,9 +1027,11 @@ public class HudClientEvents {
                 int i = 0;
                 for (Button button : unitAbilities) {
 
+                    boolean rankUpMenuOpen = ((HeroUnit)unit).isRankUpMenuOpen();
+
                     if (button instanceof AbilityButton abilityButton && abilityButton.ability instanceof HeroAbility heroAbility &&
-                            ((HeroUnit)unit).isRankUpMenuOpen() && !HeroAbility.allSkillsLearnt((HeroUnit) unit)) {
-                        Button rankUpButton = heroAbility.getRankUpButton((HeroUnit)unit);
+                            rankUpMenuOpen && !HeroAbility.allSkillsLearnt((HeroUnit) unit)) {
+                        Button rankUpButton = heroAbility.getRankUpButton(abilityButton.hotkey, (HeroUnit)unit);
                         if (!rankUpButton.isHidden.get()) {
                             i += 1;
                             rankUpButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);

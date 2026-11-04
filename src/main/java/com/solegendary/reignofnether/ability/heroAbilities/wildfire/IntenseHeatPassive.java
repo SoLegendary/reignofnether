@@ -70,8 +70,9 @@ public class IntenseHeatPassive extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Intense Heat",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/intense_heat.png"),
                 hero

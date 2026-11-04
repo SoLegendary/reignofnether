@@ -28,7 +28,7 @@ public class BabyHoglinProd extends ProductionItem implements IUnitProductionIte
     public final static String itemName = "Baby Hoglin";
     public final static ResourceCost cost = ResourceCosts.BABY_HOGLIN;
 
-    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png");
+    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/baby_hoglin.png");
 
     public BabyHoglinProd() {
         super(cost);

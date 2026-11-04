@@ -96,8 +96,9 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         Button button = super.getRankUpButtonProtected(
+                hotkey,
                 "Protective Enchantment",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/protective_enchantment.png"),
                 hero

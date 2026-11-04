@@ -79,8 +79,9 @@ public class InsomniaCurse extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Curse of Insomnia",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/curse_of_insomnia.png"),
                 hero

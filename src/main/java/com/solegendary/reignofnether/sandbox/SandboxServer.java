@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
@@ -45,6 +46,23 @@ public class SandboxServer {
                 return true;
         return false;
     }
+
+    // neutral/enemy buildings have no owner to hold the cheat, so defer to the only human player if they're in sandbox
+    public static boolean soleSandboxPlayerHasCheat(String cheatItemName) {
+        RTSPlayer soleHuman = null;
+        synchronized (PlayerServerEvents.rtsPlayers) {
+            for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
+                if (rtsPlayer.id < 0) // bots and NPCs
+                    continue;
+                if (soleHuman != null)
+                    return false;
+                soleHuman = rtsPlayer;
+            }
+        }
+        return soleHuman != null && soleHuman.faction == Factions.NONE &&
+                ResearchServerEvents.playerHasCheat(soleHuman.name, cheatItemName);
+    }
+
 
     public static void spawnUnit(String playerName, String unitName, BlockPos blockPos) {
         if (serverLevel == null)

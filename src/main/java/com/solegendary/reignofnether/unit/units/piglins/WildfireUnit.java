@@ -222,7 +222,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     private boolean rankUpMenuOpen = false;
     @Override public int getSkillPoints() { return skillPoints; }
     @Override public void setSkillPoints(int points) { skillPoints = points; }
-    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen; }
+    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen || (Keybindings.shiftMod.isDown() && getSkillPoints() > 0); }
     @Override public void showRankUpMenu(boolean show) { rankUpMenuOpen = show; }
     @Override public int getExperience() { return experience; }
     @Override public void setExperience(int amount) {

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -104,7 +105,7 @@ public class UnitRangedAttackGoal<T extends net.minecraft.world.entity.Mob> exte
             boolean isTargetGarrisoned = targetGarr != null;
 
             if (losCheckCooldown <= 0) {
-                lastLineOfSight = this.mob.getSensing().hasLineOfSight(target);
+                lastLineOfSight = MiscUtil.hasLineOfSight(this.mob, target);
                 losCheckCooldown = LOS_CHECK_INTERVAL;
             } else {
                 losCheckCooldown -= 1;

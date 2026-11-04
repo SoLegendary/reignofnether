@@ -281,6 +281,11 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
         super.aiStep();
         if (isWearingPumpkin)
             this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.CARVED_PUMPKIN));
+
+        // vanilla damages helmets worn in sunlight until they break, so keep them fully repaired
+        ItemStack helmet = getItemBySlot(EquipmentSlot.HEAD);
+        if (helmet.isDamageableItem() && helmet.getDamageValue() > 0)
+            helmet.setDamageValue(0);
     }
 
     @Override

@@ -9,15 +9,14 @@
 Balance
 -------
 [✅] Pumpkin farm cost increased from 175 wood to 200 wood
-[🟡] Raise Dead zombies now give experience on death
-[🟡] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
-[🟡] Raise Dead zombies now need to be empowered by soul siphon to have swords
-[🟡] Chilling Screech duration raised by 1s and increases the effect of snow by +20%
-[🟡] Projectiles can now pass through ice blocks created by Blizzard and Ice Wand
+[✅] Raise Dead zombies now give experience on death
+[✅] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
+[✅] Ice blocks created by Blizzard and Ice Wand no longer block line of sight or projectiles
 [✅] Creeper movement speed reduced from 28 to 27
 [✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
-
-[🟡] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
+[✅] Bee lifespan increased from 20s to 30s
+[✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+[✅] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
     - You can still switch to training Striders at any time
 
 Quality of Life
@@ -34,14 +33,16 @@ Quality of Life
     [❌] Commands to modify it in memory
     [❌] Save as .dat file separately so we can retain modifications
 
-[❌] Allow spectators to see fog, but with vision of all players
-
 [🟡] Stopped sending a lot of unnecessary data about entities in fog
+[✅] You can now use shift+QWER to level up a skill
+[❌] Allow spectators to see fog, but with vision of all players
+    - Include defeated players
 
 Bugfixes
 --------
-[✅] Fixed the enchanter tether being rendred in fog
-[❌] Fixed neutral and enemy buildings not building at fast speeds in sandbox
+[✅] Fixed the enchanter tether being rendered in fog
+[✅] Fixed neutral and enemy buildings not building at fast speeds in sandbox
+[✅] FPV players can no longer break blocks of invulnerable buildings
 
 Languages
 ---------

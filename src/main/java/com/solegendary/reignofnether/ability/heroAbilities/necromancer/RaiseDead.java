@@ -68,8 +68,9 @@ public class RaiseDead extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Raise Dead",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/raise_dead.png"),
                 hero

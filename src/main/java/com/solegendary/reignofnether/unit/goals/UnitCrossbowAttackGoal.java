@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -163,7 +164,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
 
             boolean canSeeTarget = true;
             if (target != null)
-                canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned || isTargetGarrisoned;
+                canSeeTarget = MiscUtil.hasLineOfSight(this.mob, target) || isGarrisoned || isTargetGarrisoned;
             boolean flag = this.seeTime > 0;
 
             if (canSeeTarget != flag) {

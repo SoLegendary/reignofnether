@@ -217,7 +217,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     private boolean rankUpMenuOpen = false;
     @Override public int getSkillPoints() { return skillPoints; }
     @Override public void setSkillPoints(int points) { skillPoints = points; }
-    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen; }
+    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen || (Keybindings.shiftMod.isDown() && getSkillPoints() > 0); }
     @Override public void showRankUpMenu(boolean show) { rankUpMenuOpen = show; }
     @Override public int getExperience() { return experience; }
     @Override public void setExperience(int amount) {
@@ -574,35 +574,33 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 ItemStack chestPlate = new ItemStack(Items.LEATHER_CHESTPLATE);
                 ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
                 ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
-                ItemStack sword = null;
+                ItemStack sword = new ItemStack(Items.WOODEN_SWORD);
                 if (raiseDeadRank == 2) {
                     helmet = new ItemStack(Items.CHAINMAIL_HELMET);
                     chestPlate = new ItemStack(Items.CHAINMAIL_CHESTPLATE);
                     leggings = new ItemStack(Items.CHAINMAIL_LEGGINGS);
                     boots = new ItemStack(Items.CHAINMAIL_BOOTS);
+                    sword = new ItemStack(Items.STONE_SWORD);
                 } else if (raiseDeadRank >= 3) {
                     helmet = new ItemStack(Items.IRON_HELMET);
                     chestPlate = new ItemStack(Items.IRON_CHESTPLATE);
                     leggings = new ItemStack(Items.IRON_LEGGINGS);
                     boots = new ItemStack(Items.IRON_BOOTS);
+                    sword = new ItemStack(Items.IRON_SWORD);
                 }
-                if (soulRank >= 1) {
+                if (soulRank >= 1)
                     chestPlate.enchant(Enchantments.THORNS, 3);
-                    sword = new ItemStack(Items.WOODEN_SWORD);
-                } if (soulRank >= 2) {
+                if (soulRank >= 2)
                     leggings.enchant(Enchantments.THORNS, 3);
-                    sword = new ItemStack(Items.STONE_SWORD);
-                } if (soulRank >= 3) {
+                if (soulRank >= 3) {
                     boots.enchant(Enchantments.THORNS, 2);
                     helmet.enchant(Enchantments.THORNS, 2);
-                    sword = new ItemStack(Items.IRON_SWORD);
                 }
                 zombieUnit.setItemSlot(EquipmentSlot.HEAD, helmet);
                 zombieUnit.setItemSlot(EquipmentSlot.CHEST, chestPlate);
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
-                if (sword != null)
-                    zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
+                zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
 
                 AttributeInstance ai2 = zombieUnit.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
                 if (ai2 != null) {

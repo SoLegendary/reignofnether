@@ -66,8 +66,9 @@ public class SoulsAflame extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Souls Aflame",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/souls_aflame.png"),
                 hero

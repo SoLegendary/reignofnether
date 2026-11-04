@@ -30,9 +30,9 @@ public class ChillingScreech extends HeroAbility {
 
     private static final int CD_MAX = 20 * ResourceCost.TICKS_PER_SECOND;
 
-    public static final int DURATION_RANK_1 = 8 * 20;
-    public static final int DURATION_RANK_2 = 10 * 20;
-    public static final int DURATION_RANK_3 = 12 * 20;
+    public static final int DURATION_RANK_1 = 7 * 20;
+    public static final int DURATION_RANK_2 = 9 * 20;
+    public static final int DURATION_RANK_3 = 11 * 20;
 
     public static final int RADIUS_RANK_1 = 4;
     public static final int RADIUS_RANK_2 = 6;
@@ -100,8 +100,9 @@ public class ChillingScreech extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Chilling Screech",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/chilling_screech.png"),
                 hero

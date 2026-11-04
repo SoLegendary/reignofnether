@@ -136,7 +136,8 @@ public class BlockRegistrar {
             CreativeModeTabs.BUILDING_BLOCKS);
 
     public static final RegistryObject<Block> PROJECTILE_PASSABLE_ICE = registerBlock("projectile_passable_ice",
-            () -> new ProjectilePassableIceBlock(BlockBehaviour.Properties.copy(Blocks.PACKED_ICE)),
+            () -> new ProjectilePassableIceBlock(BlockBehaviour.Properties.copy(Blocks.PACKED_ICE)
+                    .isViewBlocking((bs, blockGetter, bp) -> false)),
             CreativeModeTabs.BUILDING_BLOCKS);
 
     public static final RegistryObject<Block> RTS_START_BLOCK_BLUE =registerBlock("rts_start_block_blue", () ->

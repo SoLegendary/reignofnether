@@ -56,6 +56,9 @@ public class HeroServerEvents {
         Level level = evt.getEntity().level();
         if (evt.getEntity() instanceof Unit deadUnit) {
             int popCost = deadUnit.getCost().population;
+            if (evt.getEntity() instanceof ZombieUnit zombieUnit && zombieUnit.isSummoned())
+                popCost = 1;
+
             if (popCost > 0) {
                 for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
                     boolean inRange = unit.distanceToSqr((LivingEntity) deadUnit) < HeroExperienceOrb.RANGE * HeroExperienceOrb.RANGE;
@@ -68,9 +71,6 @@ public class HeroServerEvents {
                                 (heroUnit.getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL || !deadOwner.isBlank())) {
 
                             int expValue = (popCost + 1) * 5;
-
-                            if (evt.getEntity() instanceof ZombieUnit zombieUnit && zombieUnit.isSummoned())
-                                expValue = 10;
 
                             if (evt.getEntity() instanceof HeroUnit killedHero)
                                 expValue += killedHero.getHeroLevel() * 5;

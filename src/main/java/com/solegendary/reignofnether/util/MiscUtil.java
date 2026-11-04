@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
+import com.solegendary.reignofnether.blocks.ProjectilePassableIceBlock;
 import com.solegendary.reignofnether.blocks.WraithSnowLayerBlock;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -79,6 +80,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -88,8 +91,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
@@ -434,10 +440,28 @@ public class MiscUtil {
         return relationship == Relationship.HOSTILE;
     }
 
-
     private static boolean hasLineOfSightForAttacks(Mob mob, LivingEntity targetEntity) {
-        return mob.hasLineOfSight(targetEntity) || mob instanceof GhastUnit ||
+        return hasLineOfSight(mob, targetEntity) || mob instanceof GhastUnit ||
                 (mob instanceof Unit unit && GarrisonableBuildingAddon.getGarrison((Unit) mob) != null);
+    }
+
+    // same as LivingEntity.hasLineOfSight(Entity), but sight rays pass through ProjectilePassableIceBlock
+    public static boolean hasLineOfSight(LivingEntity looker, Entity target) {
+        if (target.level() != looker.level())
+            return false;
+        Vec3 from = new Vec3(looker.getX(), looker.getEyeY(), looker.getZ());
+        Vec3 to = new Vec3(target.getX(), target.getEyeY(), target.getZ());
+        if (to.distanceTo(from) > 128.0D)
+            return false;
+
+        ClipContext context = new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, looker) {
+            @Override
+            public VoxelShape getBlockShape(BlockState state, BlockGetter level, BlockPos pos) {
+                return state.getBlock() instanceof ProjectilePassableIceBlock ?
+                        Shapes.empty() : super.getBlockShape(state, level, pos);
+            }
+        };
+        return looker.level().clip(context).getType() == HitResult.Type.MISS;
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vec3 pos, float range, Class<T> entityType, Level level) {
