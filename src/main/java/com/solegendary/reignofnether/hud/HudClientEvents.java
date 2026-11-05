@@ -1027,10 +1027,8 @@ public class HudClientEvents {
                 int i = 0;
                 for (Button button : unitAbilities) {
 
-                    boolean rankUpMenuOpen = ((HeroUnit)unit).isRankUpMenuOpen();
-
                     if (button instanceof AbilityButton abilityButton && abilityButton.ability instanceof HeroAbility heroAbility &&
-                            rankUpMenuOpen && !HeroAbility.allSkillsLearnt((HeroUnit) unit)) {
+                            ((HeroUnit)unit).isRankUpMenuOpen() && !HeroAbility.allSkillsLearnt((HeroUnit) unit)) {
                         Button rankUpButton = heroAbility.getRankUpButton(abilityButton.hotkey, (HeroUnit)unit);
                         if (!rankUpButton.isHidden.get()) {
                             i += 1;

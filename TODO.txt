@@ -34,9 +34,9 @@ Quality of Life
     [❌] Save as .dat file separately so we can retain modifications
 
 [🟡] Stopped sending a lot of unnecessary data about entities in fog
-[✅] You can now use shift+QWER to level up a skill
-[❌] Allow spectators to see fog, but with vision of all players
-    - Include defeated players
+[✅] You can now use Ctrl+QWER to level up a skill
+[✅] Fixed bats not being able to use portals
+[❌] Spectators and defeated players can now see fog of war from the perspective of all match players
 
 Bugfixes
 --------

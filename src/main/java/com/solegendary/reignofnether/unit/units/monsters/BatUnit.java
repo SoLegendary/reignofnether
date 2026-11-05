@@ -67,8 +67,8 @@ public class BatUnit extends Mob implements Unit {
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
-    UsePortalGoal usePortalGoal;
-    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    MoveToTargetBlockGoal usePortalGoal;
+    public MoveToTargetBlockGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
 	public Abilities getAbilities() {return abilities;}
@@ -276,7 +276,7 @@ public class BatUnit extends Mob implements Unit {
     }
 
     public void initialiseGoals() {
-        this.usePortalGoal = new UsePortalGoal(this);
+        this.usePortalGoal = new FlyingUsePortalGoal(this);
         this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
