@@ -110,14 +110,8 @@ public class FogOfWarServerEvents {
     private static final int UPDATE_TICKS = 10;
     private static int ticksUntilUpdate = UPDATE_TICKS;
 
-    private static final Map<UUID, Boolean> isRtsPlayerCache = new ConcurrentHashMap<>();
-
-    public static void invalidateRtsCache() {
-        isRtsPlayerCache.clear();
-    }
-
     // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
-    // without this the later ones still count as non-RTS and get sent the earlier players' capitols unfiltered
+    // without this the first ones to start would leave the rest unfogged until they've been added too
     private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
 
     public static void setStartingPlayers(Collection<String> names) {
@@ -125,15 +119,11 @@ public class FogOfWarServerEvents {
         startingPlayers.addAll(names);
     }
 
-    // match by name; entity ids change on reconnect
+    // Fog applies to everyone once any RTS player exists: RTS players see through their own/allied vision,
+    // non-RTS players (spectators etc.) see through the combined vision of all RTS players.
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
-        if (startingPlayers.contains(player.getName().getString())) return true;
-        Boolean cached = isRtsPlayerCache.get(player.getUUID());
-        if (cached != null) return cached;
-        boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
-        isRtsPlayerCache.put(player.getUUID(), v);
-        return v;
+        return PlayerServerEvents.isGameActive() || startingPlayers.contains(player.getName().getString());
     }
 
     // A chunk is "live" (receives all updates unfiltered) only when fully inside the vision circle.
@@ -258,7 +248,6 @@ public class FogOfWarServerEvents {
 
     public static void onPlayerDisconnect(UUID playerId) {
         clearPlayerVision(playerId);
-        isRtsPlayerCache.remove(playerId);
     }
 
     // drop bookkeeping so re-entering orthoview later resends a full vision set
@@ -478,17 +467,27 @@ public class FogOfWarServerEvents {
         for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
             UUID uuid = sp.getUUID();
             if (!isFogActiveFor(sp)) {
+                // fog just ended for this player (e.g. the last RTS player left): the client still holds
+                // frozen chunks and the server still hides fogged entities, so resync both
+                boolean wasActive = playerEdgeChunks.containsKey(uuid);
                 clearPlayerVision(uuid);
+                if (wasActive) {
+                    resendAllTrackedChunks(sp);
+                    refreshEntityTracking(sp);
+                }
                 continue;
             }
             String ownerName = sp.getName().getString();
+            boolean isRts = PlayerServerEvents.isRTSPlayer(ownerName);
 
             // Union this player's own + allied + revealed owners' covered masks (+ FPS self-bubble).
             Long2ObjectOpenHashMap<long[]> covered = new Long2ObjectOpenHashMap<>();
             if (!orthoviewUuids.contains(uuid) && sp.gameMode.isSurvival())
                 rasterizeCircle(covered, sp.blockPosition().getX(), sp.blockPosition().getZ(), PLAYER_SIGHT_BLOCKS);
             mergeMasks(covered, coveredByOwner.get(ownerName));
-            Set<String> alliedOwners = collectAlliedOwners(ownerName, viewersByOwner.keySet());
+            // non-RTS players are treated as allied with every RTS player
+            Set<String> alliedOwners = isRts ? collectAlliedOwners(ownerName, viewersByOwner.keySet())
+                    : collectRtsOwners(viewersByOwner.keySet());
             for (String ally : alliedOwners)
                 mergeMasks(covered, coveredByOwner.get(ally));
             for (String revealed : revealedOwners)
@@ -670,6 +669,13 @@ public class FogOfWarServerEvents {
         Set<String> out = new HashSet<>();
         for (String o : owners)
             if (!o.equals(me) && AlliancesServerEvents.isAllied(me, o)) out.add(o);
+        return out;
+    }
+
+    private static Set<String> collectRtsOwners(Set<String> owners) {
+        Set<String> out = new HashSet<>();
+        for (String o : owners)
+            if (PlayerServerEvents.isRTSPlayer(o)) out.add(o);
         return out;
     }
 
