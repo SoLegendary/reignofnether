@@ -537,6 +537,7 @@
     "abilities.reignofnether.intense_heat": "Intense Heat (Passive)",
     "abilities.reignofnether.intense_heat.tooltip1": "Enemies within %d blocks tick their fire damage",
     "abilities.reignofnether.intense_heat.tooltip2": "faster the closer they are to the wildfire.",
+    "abilities.reignofnether.intense_heat.tooltip3": "+0.1 health & mana regen for each enemy unit on fire.",
     "abilities.reignofnether.intense_heat.rank1": "Rank 1: Fire ticks up to %dx faster",
     "abilities.reignofnether.intense_heat.rank2": "Rank 2: Fire ticks up to %dx faster",
     "abilities.reignofnether.intense_heat.rank3": "Rank 3: Fire ticks up to %dx faster",

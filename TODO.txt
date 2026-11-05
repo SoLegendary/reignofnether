@@ -16,6 +16,8 @@ Balance
 [✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
 [✅] Bee lifespan increased from 20s to 30s
 [✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+[✅] The Wildfire's passive now grants +0.1 health and mana regen per nearby unit that's on fire
+[✅] Wildfire base mana regen reduced from 0.6 to 0.5
 [✅] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
     - You can still switch to training Striders at any time
 

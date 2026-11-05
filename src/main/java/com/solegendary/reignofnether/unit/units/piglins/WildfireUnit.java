@@ -232,7 +232,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    final static private float manaRegenPerSecond = 0.6f;
+    final static private float manaRegenPerSecond = 0.5f;
     final static private float manaBonusPerLevel = 8;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -249,7 +249,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     final static public float attackDamage = 2.0f;
     final static public float attackBonusPerLevel = 0.25f;
-    final static public float attacksPerSecond = 0.6f;
+    final static public float attacksPerSecond = 0.5f;
     final static public float maxHealth = 120.0f;
     final static public float maxHealthBonusPerLevel = 12.0f;
     final static public float armorValue = 0.0f;
@@ -439,6 +439,9 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                     nearbyEnemies.add(mob);
             int maxAmp = getIntenseHeatPassive().getMaxAmp();
 
+            float healthRegen = 0;
+            float manaRegen = 0;
+
             for (Mob mob : nearbyEnemies) {
                 double distSqr = distanceToSqr(mob);
                 double minSqr = IntenseHeatPassive.MIN_RANGE * IntenseHeatPassive.MIN_RANGE;
@@ -447,7 +450,14 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 t = 1 - Mth.clamp(t, 0.0, 1.0);
                 int amp = (int) Math.round(t * maxAmp);
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.INTENSE_HEAT.get(), 15, amp, true, true));
+
+                if (mob.isOnFire()) {
+                    healthRegen += IntenseHeatPassive.healthRegenPerIgnite;
+                    manaRegen += IntenseHeatPassive.manaRegenPerIgnite;
+                }
             }
+            if (healthRegen > 0) heal(healthRegen);
+            if (manaRegen > 0) setMana(getMana() + manaRegen);
         }
     }
 
