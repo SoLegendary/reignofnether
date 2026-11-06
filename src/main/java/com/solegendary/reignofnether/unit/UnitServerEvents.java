@@ -956,9 +956,13 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
             evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
         }
-        
+
         if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
             evt.setAmount(evt.getAmount() / 2);
+        }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.INVINCIBLE.get())) {
+            evt.setCanceled(true);
         }
     }
 
@@ -985,11 +989,6 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit && (
             evt.getSource() == evt.getEntity().damageSources().sweetBerryBush() || evt.getSource() == evt.getEntity().damageSources().cactus()
         )) {
-            evt.setCanceled(true);
-            return;
-        }
-
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.INVINCIBLE.get())) {
             evt.setCanceled(true);
             return;
         }
