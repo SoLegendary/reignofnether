@@ -48,6 +48,7 @@ Quality of Life
 Bugfixes
 --------
 [✅] Fixed the enchanter tether being rendered in fog
+[✅] Fixed enchanter tether not reducing damage taken
 [✅] Fixed neutral and enemy buildings not building at fast speeds in sandbox
 [✅] FPV players can no longer break blocks of invulnerable buildings
 [✅] Bats can now use transport portals

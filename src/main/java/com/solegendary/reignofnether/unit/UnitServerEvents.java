@@ -952,6 +952,14 @@ public class UnitServerEvents {
                      arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))
                 evt.setAmount(evt.getAmount() / 2);
         }
+
+        if (evt.getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
+            evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
+        }
+        
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
     }
 
     @SubscribeEvent
@@ -1130,19 +1138,11 @@ public class UnitServerEvents {
             }
         }
 
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
-            evt.setAmount(evt.getAmount() / 2);
-        }
-
         if (evt.getSource().getDirectEntity() instanceof AdjustablePrimedTnt tnt) {
             if (tnt.getExplosionPower() == 2.0f) // lvl 1 piglin TNT
                 evt.setAmount(evt.getAmount() * 1.2f);
             else if (tnt.getExplosionPower() >= 4.0f) // lvl 3 piglin TNT or TNT items
                 evt.setAmount(evt.getAmount() * 0.9f);
-        }
-
-        if (evt.getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
-            evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
         }
     }
 
