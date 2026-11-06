@@ -130,6 +130,7 @@ public interface Unit {
                 .add(AttributeRegistrar.CRITICAL_HIT_CHANCE.get(), 0)
                 .add(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0)
                 .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0)
+                .add(AttributeRegistrar.WORKER_DAMAGE_BONUS.get(), 0)
                 .add(AttributeRegistrar.LIFESTEAL.get(), 0)
                 .add(AttributeRegistrar.MANA_ON_HIT.get(), 0)
                 .add(AttributeRegistrar.SCALE.get(), 1.0f)
@@ -934,6 +935,10 @@ public interface Unit {
         );
         if (unitStatType == UnitStatType.ATTACK_DAMAGE && this instanceof AttackerUnit aUnit && aUnit.getBuildingDamageBonus() > 0) {
             String attrStr = MiscUtil.formatSigned(aUnit.getBuildingDamageBonus() * 100) + "%";
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr)));
+        }
+        if (unitStatType == UnitStatType.ATTACK_DAMAGE && this instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
+            String attrStr = MiscUtil.formatSigned(aUnit.getWorkerDamageBonus() * 100) + "%";
             fcsList.add(fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr)));
         }
         return fcsList;

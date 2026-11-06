@@ -8,16 +8,21 @@
 
 Balance
 -------
+[✅] Bee lifespan increased from 20s to 30s
+
+[✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+
 [✅] Pumpkin farm cost increased from 175 wood to 200 wood
 [✅] Raise Dead zombies now give experience on death
 [✅] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
 [✅] Ice blocks created by Blizzard and Ice Wand no longer block line of sight or projectiles
 [✅] Creeper movement speed reduced from 28 to 27
 [✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
-[✅] Bee lifespan increased from 20s to 30s
-[✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+[✅] Spider damage increased from 5 to 6 and added a +50% damage bonus to workers
+[✅] Spider daytime slowness reduced from -36% to -20%
+[✅] Spider daytime sight range reduced from 16 to 14 (night is still 20)
+
 [✅] The Wildfire's passive now grants +0.1 health and mana regen per nearby unit that's on fire
-[✅] Wildfire base mana regen reduced from 0.6 to 0.5
 [✅] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
     - You can still switch to training Striders at any time
 

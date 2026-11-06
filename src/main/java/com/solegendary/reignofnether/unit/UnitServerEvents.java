@@ -1140,6 +1140,10 @@ public class UnitServerEvents {
             else if (tnt.getExplosionPower() >= 4.0f) // lvl 3 piglin TNT or TNT items
                 evt.setAmount(evt.getAmount() * 0.9f);
         }
+
+        if (evt.getEntity() instanceof WorkerUnit && evt.getSource() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
+            evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
+        }
     }
 
     private static final float EXPLOSIVE_HIT_SPLASH_MULT = 0.5f;

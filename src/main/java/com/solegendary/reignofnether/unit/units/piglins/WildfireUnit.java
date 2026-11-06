@@ -232,7 +232,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    final static private float manaRegenPerSecond = 0.5f;
+    final static private float manaRegenPerSecond = 0.6f;
     final static private float manaBonusPerLevel = 8;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
