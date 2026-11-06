@@ -1141,7 +1141,7 @@ public class UnitServerEvents {
                 evt.setAmount(evt.getAmount() * 0.9f);
         }
 
-        if (evt.getEntity() instanceof WorkerUnit && evt.getSource() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
+        if (evt.getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
             evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
         }
     }

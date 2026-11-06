@@ -18,7 +18,7 @@ Balance
 [✅] Ice blocks created by Blizzard and Ice Wand no longer block line of sight or projectiles
 [✅] Creeper movement speed reduced from 28 to 27
 [✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
-[✅] Spider damage increased from 5 to 6 and added a +50% damage bonus to workers
+[✅] Spiders now have +50% bonus damage to workers
 [✅] Spider daytime slowness reduced from -36% to -20%
 [✅] Spider daytime sight range reduced from 16 to 14 (night is still 20)
 

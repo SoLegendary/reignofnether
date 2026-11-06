@@ -939,7 +939,7 @@ public interface Unit {
         }
         if (unitStatType == UnitStatType.ATTACK_DAMAGE && this instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
             String attrStr = MiscUtil.formatSigned(aUnit.getWorkerDamageBonus() * 100) + "%";
-            fcsList.add(fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr)));
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_workers", attrStr)));
         }
         return fcsList;
     }

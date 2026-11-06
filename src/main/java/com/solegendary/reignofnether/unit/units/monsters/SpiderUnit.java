@@ -186,7 +186,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     // endregion
 
-    final static public float attackDamage = 6.0f;
+    final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;

@@ -2186,8 +2186,8 @@
     "disconnect.reignofnether.clear_failed": "Failed to clear, closing connection",
 
     "unitstats.reignofnether.attack_damage": "Attack damage",
-    "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s to buildings",
-    "unitstats.reignofnether.attack_damage_bonus_workers": "+%s to workers",
+    "unitstats.reignofnether.attack_damage_bonus_buildings": "%s to buildings",
+    "unitstats.reignofnether.attack_damage_bonus_workers": "%s to workers",
     "unitstats.reignofnether.attack_damage_bonus_poison_damage": "+%d poison damage over %d seconds",
     "unitstats.reignofnether.attack_damage_bonus_fire_damage": "+%d fire damage over %d seconds",
     "unitstats.reignofnether.attack_damage_bonus_animals": "+%s to animals",
