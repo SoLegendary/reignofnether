@@ -245,7 +245,7 @@ public class PlayerClientEvents {
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L, -1L));
-            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+            FogOfWarClientEvents.refreshLocalSeesFog();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
                 if (faction != Factions.NONE) {
@@ -265,7 +265,7 @@ public class PlayerClientEvents {
             RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true, -1L, -1L);
             rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
             rtsPlayers.add(rtsPlayer);
-            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+            FogOfWarClientEvents.refreshLocalSeesFog();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
                     if (faction != Factions.NONE) {
@@ -278,7 +278,7 @@ public class PlayerClientEvents {
 
     public static void removeRTSPlayer(String playerName) {
         boolean removed = rtsPlayers.removeIf(p -> p.name.equals(playerName));
-        if (removed) FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+        if (removed) FogOfWarClientEvents.refreshLocalSeesFog();
         if (removed && MC.player != null && MC.player.getName().getString().equals(playerName)) {
             SoundClientEvents.stopFadeableMusicInstance();
         }
@@ -345,7 +345,7 @@ public class PlayerClientEvents {
         // LOG IN TO SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer().getId() == MC.player.getId()) {
             // server pushes brightChunks; no client recompute
-            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+            FogOfWarClientEvents.refreshLocalSeesFog();
         }
     }
 
@@ -387,7 +387,7 @@ public class PlayerClientEvents {
     public static void resetRTS(boolean hardReset) {
         boolean isSandboxOrScenario = SandboxClientEvents.isSandboxPlayer() || GameruleClient.scenarioMode;
         rtsPlayers.clear();
-        FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+        FogOfWarClientEvents.refreshLocalSeesFog();
         HelperButtons.updateButtons();
         SoundClientEvents.stopFadeableMusicInstance();
 
@@ -424,7 +424,7 @@ public class PlayerClientEvents {
 
     public static void publishScenarioMap() {
         rtsPlayers.clear();
-        FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+        FogOfWarClientEvents.refreshLocalSeesFog();
         HelperButtons.updateButtons();
         SoundClientEvents.stopFadeableMusicInstance();
         HudClientEvents.controlGroups.clear();

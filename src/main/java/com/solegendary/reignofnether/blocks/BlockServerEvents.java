@@ -222,7 +222,7 @@ public class BlockServerEvents {
                 level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, targetPos, Block.getId(snowBs));
                 level.levelEvent(targetBs.getSoundType().getPlaceSound().hashCode(), targetPos, Block.getId(snowBs));
             }
-            BlockEntity be = level.getBlockEntity(pos);
+            BlockEntity be = level.getBlockEntity(targetPos);
             if (be instanceof WraithSnowBlockEntity snowBe) {
                 snowBe.setOwnerId(ownerId);
                 snowBe.randomiseLifeTicks();

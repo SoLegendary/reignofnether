@@ -54,6 +54,7 @@ public class ReignOfNetherCommonConfigs {
         BUILDER.comment("Piglins");
         UnitCosts.GRUNT.define(BUILDER);
         UnitCosts.STRIDER.define(BUILDER);
+        UnitCosts.BABY_HOGLIN.define(BUILDER);
         UnitCosts.BRUTE.define(BUILDER);
         UnitCosts.HEADHUNTER.define(BUILDER);
         UnitCosts.MARAUDER.define(BUILDER);
@@ -199,7 +200,7 @@ public class ReignOfNetherCommonConfigs {
 
     public static class UnitCosts implements Costs {
         //Monsters
-        public static final ResourceCostConfigEntry CREEPER = ResourceCostConfigEntry.Unit(50, 0, 100, 35, 2, ResourceCosts.CREEPER, "Creeper Config");
+        public static final ResourceCostConfigEntry CREEPER = ResourceCostConfigEntry.Unit(40, 0, 120, 35, 2, ResourceCosts.CREEPER, "Creeper Config");
         public static final ResourceCostConfigEntry BAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.BAT, "Bat Config");
         public static final ResourceCostConfigEntry ZOMBIE = ResourceCostConfigEntry.Unit(75, 0, 0, 18, 1, ResourceCosts.ZOMBIE, "Zombie Config");
         public static final ResourceCostConfigEntry ZOMBIE_VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.ZOMBIE_VILLAGER, "Zombie Villager Config");
@@ -237,6 +238,7 @@ public class ReignOfNetherCommonConfigs {
         // Piglins
         public static final ResourceCostConfigEntry GRUNT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.GRUNT, "Grunt Config");
         public static final ResourceCostConfigEntry STRIDER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.STRIDER, "Strider Config");
+        public static final ResourceCostConfigEntry BABY_HOGLIN = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.BABY_HOGLIN, "Baby Hoglin Config");
         public static final ResourceCostConfigEntry BRUTE = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.BRUTE, "Brute Config");
         public static final ResourceCostConfigEntry HEADHUNTER = ResourceCostConfigEntry.Unit(90,60,0,25,2, ResourceCosts.HEADHUNTER, "Headhunter Config");
         public static final ResourceCostConfigEntry MARAUDER = ResourceCostConfigEntry.Unit(175,75,75,40,4, ResourceCosts.MARAUDER, "Marauder Config");
@@ -273,7 +275,7 @@ public class ReignOfNetherCommonConfigs {
         // Monsters
         public static final ResourceCostConfigEntry MAUSOLEUM = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.MAUSOLEUM, "Mausoleum Config");
         public static final ResourceCostConfigEntry HAUNTED_HOUSE = ResourceCostConfigEntry.Building(0,100,0, 10, ResourceCosts.HAUNTED_HOUSE, "Haunted House Config");
-        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,175,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
+        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,200,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
         public static final ResourceCostConfigEntry SCULK_CATALYST = ResourceCostConfigEntry.Building(0,125,0, 12, ResourceCosts.SCULK_CATALYST, "Sculk Catalyst Config");
         public static final ResourceCostConfigEntry GRAVEYARD = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.GRAVEYARD, "Graveyard Config");
         public static final ResourceCostConfigEntry SPIDER_LAIR = ResourceCostConfigEntry.Building(0,150,75, 0, ResourceCosts.SPIDER_LAIR, "Spider Lair Config");

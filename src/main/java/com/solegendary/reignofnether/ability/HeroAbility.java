@@ -80,15 +80,15 @@ public abstract class HeroAbility extends Ability {
     }
 
     // rank up button for this specific ability
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return null;
     }
 
-    protected Button getRankUpButtonProtected(String name, ResourceLocation resourceLocation, HeroUnit hero) {
+    protected Button getRankUpButtonProtected(Keybinding hotkey, String name, ResourceLocation resourceLocation, HeroUnit hero) {
         Button button = new Button(name,
             14,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
-            (Keybinding) null,
+            hotkey,
             () -> false,
             () -> !hero.isRankUpMenuOpen() || getRank(hero) >= maxRank,
             () -> hero.getSkillPoints() > 0 && hero.getHeroLevel() >= getLevelRequirement(hero),

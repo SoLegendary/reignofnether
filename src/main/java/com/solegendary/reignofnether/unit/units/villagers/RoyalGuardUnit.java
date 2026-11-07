@@ -230,7 +230,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     private boolean rankUpMenuOpen = false;
     @Override public int getSkillPoints() { return skillPoints; }
     @Override public void setSkillPoints(int points) { skillPoints = points; }
-    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen; }
+    @Override public boolean isRankUpMenuOpen() { return rankUpMenuOpen || (Keybindings.ctrlMod.isDown() && getSkillPoints() > 0); }
     @Override public void showRankUpMenu(boolean show) { rankUpMenuOpen = show; }
     @Override public int getExperience() { return experience; }
     @Override public void setExperience(int amount) {
@@ -658,7 +658,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
             }
             for (BuildingPlacement building : buildings) {
-                building.destroyRandomBlocks((maceSlam.damage * getBuildingDamageMultiplier()) / 2);
+                building.damage(maceSlam.damage);
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {

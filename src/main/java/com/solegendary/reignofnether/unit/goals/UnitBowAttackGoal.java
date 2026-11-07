@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -118,7 +119,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 
-            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned || isTargetGarrisoned;
+            boolean canSeeTarget = MiscUtil.hasLineOfSight(this.mob, target) || isGarrisoned || isTargetGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {
                 this.seeTime = 0;

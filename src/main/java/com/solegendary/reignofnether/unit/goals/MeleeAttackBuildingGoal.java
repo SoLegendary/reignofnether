@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -115,7 +116,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
         AttackerUnit unit = (AttackerUnit) mob;
         ticksToNextBlockBreak = (int) unit.getAttackCooldown();
         double dmg = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult() * unit.getBuildingDamageMultiplier();
-        buildingTarget.destroyRandomBlocks(dmg);
+        buildingTarget.damage(dmg);
         buildingTarget.lastAttacker = this.mob;
 
         if (unit instanceof MarauderUnit marauderUnit) {
@@ -160,6 +161,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                     if (this.mob.isVehicle() && this.mob.getFirstPassenger() instanceof AttackerUnit aUnit &&
                             aUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg)
                         rabg.setBuildingTarget(this.buildingTarget);
+                } else if (b != null && !b.isAttackable() && mob instanceof Unit unit) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "hud.actionbuttons.reignofnether.cannot_attack");
                 }
             }
             calcMoveTarget();

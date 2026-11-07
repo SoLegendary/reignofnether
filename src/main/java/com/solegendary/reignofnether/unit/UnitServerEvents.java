@@ -430,12 +430,18 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-        if (evt.getEntity() instanceof LivingEntity le &&
+        // serverside only: the clientside join also fires when an existing entity is merely discovered (fog,
+        // render distance), and the server's particles already reach every player who can see the spawn
+        if (!evt.getLevel().isClientSide() && evt.getEntity() instanceof LivingEntity le &&
                 (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon || le instanceof Unit))
             addUnitPoofs(evt.getLevel(), le);
 
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
-            mob.setBaby(false);
+            if (mob instanceof BabyHoglinUnit)
+                mob.setBaby(true);
+            else
+                mob.setBaby(false);
+
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
@@ -806,7 +812,7 @@ public class UnitServerEvents {
                     UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
                 }
                 if (entity instanceof UnitInventory inv) {
-                    ItemClientboundPacket.syncInventory(entity.getId(), inv.getAllItems());
+                    ItemClientboundPacket.syncInventory(entity, inv.getAllItems());
                 }
             }
         }
@@ -946,6 +952,18 @@ public class UnitServerEvents {
                      arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))
                 evt.setAmount(evt.getAmount() / 2);
         }
+
+        if (evt.getEntity() instanceof WorkerUnit && evt.getSource().getEntity() instanceof AttackerUnit aUnit && aUnit.getWorkerDamageBonus() > 0) {
+            evt.setAmount(evt.getAmount() * aUnit.getWorkerDamageMultiplier());
+        }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.INVINCIBLE.get())) {
+            evt.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
@@ -971,11 +989,6 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit && (
             evt.getSource() == evt.getEntity().damageSources().sweetBerryBush() || evt.getSource() == evt.getEntity().damageSources().cactus()
         )) {
-            evt.setCanceled(true);
-            return;
-        }
-
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.INVINCIBLE.get())) {
             evt.setCanceled(true);
             return;
         }
@@ -1122,10 +1135,6 @@ public class UnitServerEvents {
                     tag.putFloat("damageTaken", dmg);
                 }
             }
-        }
-
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
-            evt.setAmount(evt.getAmount() / 2);
         }
 
         if (evt.getSource().getDirectEntity() instanceof AdjustablePrimedTnt tnt) {

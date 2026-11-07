@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -24,8 +26,8 @@ public class ItemClientboundPacket {
     private final List<ItemStack> items;
     private final BlockPos shopPos;
 
-    public static void syncInventory(int unitId, List<ItemStack> items) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ItemClientboundPacket(unitId, items));
+    public static void syncInventory(Entity unit, List<ItemStack> items) {
+        FogOfWarServerEvents.sendToPlayersWhoCanSee(unit, new ItemClientboundPacket(unit.getId(), items));
     }
 
     public static void setShopServedUnit(int unitId, BlockPos shopPos) {

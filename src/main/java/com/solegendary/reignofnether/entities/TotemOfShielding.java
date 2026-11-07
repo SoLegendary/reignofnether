@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.entity.EntityType;
@@ -26,6 +27,10 @@ public class TotemOfShielding extends AbstractTotem {
         Vec3 totemCentre = position().add(0, getBbHeight() / 2, 0);
 
         for (Projectile proj : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Projectile.class, level())) {
+
+            String projOwnerName = proj.getOwner() instanceof Unit unit ? unit.getOwnerName() : "";
+            if (MiscUtil.isAlliedOrOwned(level(), getOwnerName(), projOwnerName)) continue;
+
             Vec3 motion = proj.getDeltaMovement();
             Vec3 horizDeltaMovement = new Vec3(motion.x, 0, motion.z);
 

@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.packets;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.core.BlockPos;
@@ -9,7 +9,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -25,7 +24,7 @@ public class UnitAnimationClientboundPacket {
 
     // no targets
     public static void sendBasicPacket(UnitAnimationAction animAction, LivingEntity entity) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(),
@@ -35,7 +34,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendEntityPacket(UnitAnimationAction animAction, LivingEntity entity, LivingEntity target) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(), target.getId(),
@@ -44,7 +43,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendBlockPosPacket(UnitAnimationAction animAction, LivingEntity entity, BlockPos bp) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(), 0,
@@ -53,7 +52,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendEatFoodPacket(LivingEntity entity, int itemId) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                 new UnitAnimationClientboundPacket(
                         UnitAnimationAction.EAT_FOOD_ITEM,
                         entity.getId(), itemId,

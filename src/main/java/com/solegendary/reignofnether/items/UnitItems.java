@@ -389,7 +389,7 @@ public class UnitItems {
             })
             .build();
 
-    private static final int ICE_WAND_DURATION_SECONDS = 12;
+    private static final int ICE_WAND_DURATION_SECONDS = 15;
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
@@ -397,40 +397,38 @@ public class UnitItems {
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
             .cooldownTicks(45 * 20)
-            .manaCost(35)
+            .manaCost(25)
             .range(10)
             .showRangeCircle()
             .onUseEntity((unit, entity) -> {
                 LivingEntity le = entity;
                 if (!le.level().isClientSide()) {
-                    if (!le.level().isClientSide()) {
-                        if (le.onGround() && !(le instanceof WretchedWraithUnit) &&
-                                !le.hasEffect(MobEffectRegistrar.FREEZE.get())) {
+                    if (le.onGround() && !(le instanceof WretchedWraithUnit) &&
+                            !le.hasEffect(MobEffectRegistrar.FREEZE.get())) {
 
-                            SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
-                            int duration = ICE_WAND_DURATION_SECONDS * 20;
-                            if (le instanceof HeroUnit) duration /= 2;
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
-                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),
-                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above().above(),
-                                    BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
-                            ServerLevel serverLevel = (ServerLevel) le.level();
-                            int entityId = le.getId();
-                            BlockServerEvents.getSnowPositions(le.level(), le.getOnPos().above(), 2)
-                                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
-                                        BlockServerEvents.placeWraithSnow(serverLevel, pos, entityId);
-                                    }));
-                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
-                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
-                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 15, le.level(), le.position());
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
+                        int duration = ICE_WAND_DURATION_SECONDS * 20;
+                        if (le instanceof HeroUnit) duration /= 2;
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
+                                BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),
+                                BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above().above(),
+                                BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                        ServerLevel serverLevel = (ServerLevel) le.level();
+                        int entityId = le.getId();
+                        BlockServerEvents.getSnowPositions(le.level(), le.getOnPos().above(), 2)
+                                .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                                    BlockServerEvents.placeWraithSnow(serverLevel, pos, entityId);
+                                }));
+                        le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
+                        le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
+                        ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 15, le.level(), le.position());
 
-                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), ((LivingEntity) unit).getEyePosition());
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), ((LivingEntity) unit).getEyePosition());
+                        return true;
+                    } else {
+                        return false;
                     }
                 }
                 return true;
@@ -483,7 +481,7 @@ public class UnitItems {
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
             .descId("tome_of_duplication")
             .type(UnitItemType.CONSUMABLE)
-            .rarity(Rarity.RARE)
+            .rarity(Rarity.EPIC)
             .suppressDefaultError()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
@@ -734,8 +732,8 @@ public class UnitItems {
             .attribute(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), EVOCATION_ROBES_MANA_REGEN)
             .build();
 
-    public static final int HEROS_ARMOUR_MAX_TARGETS = 10;
-    public static final float HEROS_ARMOUR_HEAL = 12f;
+    public static final int HEROS_ARMOUR_MAX_TARGETS = 8;
+    public static final float HEROS_ARMOUR_HEAL = 15f;
     public static final float HEROS_ARMOUR_RANGE = 20f;
     public static final UnitItem HEROS_ARMOUR = UnitItemBuilder.of(ItemRegistrar.HEROS_ARMOUR.get())
             .descId("heros_armour")

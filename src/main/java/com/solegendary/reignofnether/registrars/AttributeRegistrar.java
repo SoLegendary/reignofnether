@@ -113,6 +113,12 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> WORKER_DAMAGE_BONUS =
+            ATTRIBUTES.register("worker_damage_bonus",
+                    () -> new RangedAttribute("attribute.reignofnether.worker_damage_bonus", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
     public static final RegistryObject<Attribute> LIFESTEAL =
             ATTRIBUTES.register("lifesteal",
                     () -> new RangedAttribute("attribute.reignofnether.lifesteal", 0.0, 0.0, 9999.0)

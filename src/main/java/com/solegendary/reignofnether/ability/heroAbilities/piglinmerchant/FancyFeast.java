@@ -96,8 +96,9 @@ public class FancyFeast extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Fancy Feast",
                 getIcon(),
                 hero

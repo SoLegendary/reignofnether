@@ -129,6 +129,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_cat_unit").toString()));
 
+    public static final RegistryObject<EntityType<BabyHoglinUnit>> BABY_HOGLIN_UNIT = ENTITIES.register("baby_hoglin_unit",
+            () -> EntityType.Builder.of(BabyHoglinUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "baby_hoglin_unit").toString()));
+
     public static final RegistryObject<EntityType<MilitiaUnit>> MILITIA_UNIT = ENTITIES.register("militia_unit",
             () -> EntityType.Builder.of(MilitiaUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
@@ -488,6 +494,7 @@ public class EntityRegistrar {
             case RavagerProd.itemName -> EntityRegistrar.RAVAGER_UNIT.get();
             case GruntProd.itemName -> EntityRegistrar.GRUNT_UNIT.get();
             case StriderProd.itemName -> EntityRegistrar.STRIDER_UNIT.get();
+            case BabyHoglinProd.itemName -> EntityRegistrar.BABY_HOGLIN_UNIT.get();
             case BruteProd.itemName -> EntityRegistrar.BRUTE_UNIT.get();
             case HeadhunterProd.itemName -> EntityRegistrar.HEADHUNTER_UNIT.get();
             case MarauderProd.itemName -> EntityRegistrar.MARAUDER_UNIT.get();

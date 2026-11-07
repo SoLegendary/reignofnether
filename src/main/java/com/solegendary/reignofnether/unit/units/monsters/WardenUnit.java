@@ -374,7 +374,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
         }
         else if (!(targetBuilding instanceof SculkCatalystPlacement)) {
             float damage = (SONIC_BOOM_DAMAGE * targetBuilding.getMagicDamageMult());
-            targetBuilding.destroyRandomBlocks(damage);
+            targetBuilding.damage(damage);
         }
     }
 

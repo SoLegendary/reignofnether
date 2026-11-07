@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
@@ -52,10 +53,7 @@ import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -742,6 +740,10 @@ public class UnitClientEvents {
                 getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutCatUnit catUnit &&
                 getPlayerToEntityRelationship(catUnit) == Relationship.OWNED)
                 catUnit.pet();
+            if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof BabyHoglinUnit &&
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof BabyHoglinUnit babyHoglinUnit &&
+                getPlayerToEntityRelationship(babyHoglinUnit) == Relationship.OWNED)
+                babyHoglinUnit.pet();
 
             if (!selectedUnits.isEmpty() && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
@@ -1133,7 +1135,11 @@ public class UnitClientEvents {
                         MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
                     MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
+                    // NO_DEPTH_TEST (GL_ALWAYS) doesn't actually disable depth testing in setup, so do it explicitly
+                    // or the underlines get occluded by terrain depending on whatever depth state was left over
+                    RenderSystem.disableDepthTest();
                     MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
+                    RenderSystem.enableDepthTest();
                 }
             }
 

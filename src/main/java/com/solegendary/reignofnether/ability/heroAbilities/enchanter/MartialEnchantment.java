@@ -104,8 +104,9 @@ public class MartialEnchantment extends AbstractEnchantment {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         Button button = super.getRankUpButtonProtected(
+                hotkey,
                 "Martial Enchantment",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/martial_enchantment.png"),
                 hero

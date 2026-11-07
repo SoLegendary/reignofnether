@@ -55,12 +55,13 @@ public class FogOfWarClientEvents {
     private static boolean enabled = false;
 
     // cached - isEnabled() runs per quad during chunk mesh rebuilds
-    private static volatile boolean localIsRTSPlayer = false;
+    private static volatile boolean localSeesFog = false;
 
-    public static void refreshLocalIsRTSPlayer() {
-        boolean was = localIsRTSPlayer;
-        localIsRTSPlayer = MC.player != null && PlayerClientEvents.isRTSPlayer();
-        if (was != localIsRTSPlayer && enabled) resetFogChunks();
+    // fog shows for everyone once any RTS player exists (non-RTS players see the combined vision of all of them)
+    public static void refreshLocalSeesFog() {
+        boolean was = localSeesFog;
+        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty();
+        if (was != localSeesFog && enabled) resetFogChunks();
     }
 
     public static boolean movedToCapitol = false;
@@ -211,7 +212,7 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isEnabled() {
-        return enabled && localIsRTSPlayer;
+        return enabled && localSeesFog;
     }
 
     // client-side mirror of WorldBorderServerEvents.isRtsOptimisedMap using the client's known border

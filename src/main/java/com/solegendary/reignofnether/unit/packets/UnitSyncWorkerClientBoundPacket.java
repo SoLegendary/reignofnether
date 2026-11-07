@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.packets;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -10,7 +10,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -28,7 +27,7 @@ public class UnitSyncWorkerClientBoundPacket {
         if (entity instanceof WorkerUnit workerUnit) {
             BlockPos bp = workerUnit.getGatherResourceGoal().getGatherTarget();
 
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            FogOfWarServerEvents.sendToPlayersWhoCanSee(entity,
                 new UnitSyncWorkerClientBoundPacket(entity.getId(),
                     workerUnit.getBuildRepairGoal().isBuilding(),
                     workerUnit.getGatherResourceGoal().isGathering(),

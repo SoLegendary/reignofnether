@@ -32,7 +32,7 @@ public class RaiseDead extends HeroAbility {
 
     public static final int CHANNEL_TICKS = 40;
     private static final int CD_MAX_SECONDS = 75 * ResourceCost.TICKS_PER_SECOND;
-    public static final int ZOMBIE_TICKS_BEFORE_DECAY = 60 * ResourceCost.TICKS_PER_SECOND;
+    public static final int ZOMBIE_TICKS_BEFORE_DECAY = 75 * ResourceCost.TICKS_PER_SECOND;
 
     public RaiseDead() {
         super(3, 75, UnitAction.RAISE_DEAD, CD_MAX_SECONDS, 0, 0, false);
@@ -68,8 +68,9 @@ public class RaiseDead extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Raise Dead",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/raise_dead.png"),
                 hero

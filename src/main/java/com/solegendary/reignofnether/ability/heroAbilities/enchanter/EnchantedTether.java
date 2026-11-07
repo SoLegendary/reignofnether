@@ -98,8 +98,9 @@ public class EnchantedTether extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         Button button = super.getRankUpButtonProtected(
+                hotkey,
                 "Enchanted Tether",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/enchanted_tether.png"),
                 hero

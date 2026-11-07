@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1b
+1.20.1-1.5.1c
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -8,24 +8,56 @@
 
 Balance
 -------
+[✅] Bee lifespan increased from 20s to 30s
+[✅] Ice Wand mana cost reduced from 35 to 25 and duration increased from 12s to 15s
+[✅] Totem of Shielding no longer deflects you or allies' projectiles
+
+[✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+[🟡] Mace slam now deals full damage to buildings
+
+[✅] Pumpkin farm cost increased from 175 wood to 200 wood
+[✅] Raise Dead zombies now give experience on death
+[✅] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
+[✅] Ice blocks created by Blizzard and Ice Wand no longer block line of sight or projectiles
+[✅] Creeper movement speed reduced from 28 to 27
+[✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
+[✅] Spiders now have +50% bonus damage to workers
+[✅] Spider daytime slowness reduced from -36% to -20%
+[✅] Spider daytime sight range reduced from 16 to 14 (night is still 20)
+
+[✅] The Wildfire's passive now grants +0.1 health and mana regen per nearby unit that's on fire
+[✅] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
+    - You can still switch to training Striders at any time
 
 Quality of Life
 ---------------
-[✅] Custom item shops now reset to their original starting stock when a match begins
-[✅] Units holding resources are prioritised towards the front of a group selection
-[✅] The Royal Guard's ultimate is no longer cancellable or interruptable
-[✅] The Lilypad sponsorship has ended so its banners have been removed
+[❌] rtsmap.json expansion for scenario whitelisted units/items/research
+    - whitelist
+        - unit<list>
+            - scenarioId: list
+            - whitelist: [ unit1, unit2, unit3, ...]
+        - building
+        - research
+        - item
+
+    [❌] Commands to modify it in memory
+    [❌] Save as .dat file separately so we can retain modifications
+
+[✅] You can now use Ctrl+QWER to level up a skill
+[✅] Fixed bats not being able to use portals
+[🟡] Stopped sending a lot of unnecessary data about entities in fog
+[🟡] Spectators and defeated players can now see fog of war from the perspective of all match players
 
 Bugfixes
 --------
-[✅] Fixed wardens and iron golems not showing picked up items
-[✅] Fixed custom production items not working on server worlds
-[✅] The gamerules menu no longer overlaps with the beacon button in sandbox
-[✅] Pillagers no longer miss low profile enemies (like tiny slimes) at range
-[✅] Fixed units getting stuck on lanterns and rails
-[✅] Fixed pocket portals not working in classic mode
-[✅] Fixed wraith snow not causing attack speed reduction
+[✅] Fixed the enchanter tether being rendered in fog
+[✅] Fixed enchanter tether not reducing damage taken
+[✅] Fixed neutral and enemy buildings not building at fast speeds in sandbox
+[✅] FPV players and explosions can no longer break blocks of invulnerable buildings
+[✅] Bats can now use transport portals
+[✅] Fixed wraith snow from Strays sometimes affecting allies
+[✅] Fixed chickens sometimes spawning inside walls
 
 Languages
 ---------
-
+[✅] fr_fr update by EnderBreaker

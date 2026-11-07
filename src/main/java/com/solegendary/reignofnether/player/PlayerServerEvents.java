@@ -155,7 +155,6 @@ public class PlayerServerEvents {
 
             rtsPlayers.clear();
             rtsPlayers.addAll(data.rtsPlayers);
-            FogOfWarServerEvents.invalidateRtsCache();
 
             for (RTSPlayer rtsPlayer : rtsPlayers) {
                 if (rtsPlayer.faction == Factions.NONE) {
@@ -488,7 +487,6 @@ public class PlayerServerEvents {
                     randomItemDropRule == RandomItemDropRule.ENABLED_SAME_ITEMS ?
                         ItemServerEvents.ITEM_RARITY_SEED : -1L
             ));
-            FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
             PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson, false);
@@ -560,7 +558,7 @@ public class PlayerServerEvents {
                         level.addFreshEntity(startingWorkers.get(i));
                     }
                     if (startingScout != null) {
-                        startingScout.moveTo(bp.offset(0,  isBat ? 10 : 1, 2), 0, 0);
+                        startingScout.moveTo(bp.offset(-2,  isBat ? 10 : 1, 2), 0, 0);
                         level.addFreshEntity(startingScout);
                     }
                     var workerIds = new int[startingWorkers.size()];
@@ -624,7 +622,6 @@ public class PlayerServerEvents {
             EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
             RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
             rtsPlayers.add(bot);
-            FogOfWarServerEvents.invalidateRtsCache();
             ResourcesServerEvents.assignResources(bot.name);
 
             for (int i = -1; i <= 1; i++) {
@@ -695,7 +692,6 @@ public class PlayerServerEvents {
                     roleIndex
             );
             rtsPlayers.add(rtsPlayer);
-            FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignScenarioResources(rtsPlayer);
             PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true, false);
@@ -730,7 +726,6 @@ public class PlayerServerEvents {
                             scenarioRole.index
                     );
                     rtsPlayers.add(npcRtsPlayer);
-                    FogOfWarServerEvents.invalidateRtsCache();
                     ResourcesServerEvents.assignScenarioResources(npcRtsPlayer);
                     PlayerClientboundPacket.addScenarioNPCRTSPlayer(scenarioRole.name, scenarioRole.faction, (long) id, scenarioRole.index);
                     id -= 1;
@@ -1073,7 +1068,6 @@ public class PlayerServerEvents {
 
         synchronized (rtsPlayers) {
             // Remove the defeated player from the list
-            FogOfWarServerEvents.invalidateRtsCache();
 
             TaskSchedulerServerEvents.schedule(60, () -> {
                 ServerPlayer sp = serverLevel.getServer().getPlayerList().getPlayerByName(playerName);
@@ -1254,7 +1248,6 @@ public class PlayerServerEvents {
 
         synchronized (rtsPlayers) {
             rtsPlayers.clear();
-            FogOfWarServerEvents.invalidateRtsCache();
 
             for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits()))
                 if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
@@ -1337,7 +1330,6 @@ public class PlayerServerEvents {
 
         synchronized (rtsPlayers) {
             rtsPlayers.clear();
-            FogOfWarServerEvents.invalidateRtsCache();
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement productionBuilding)

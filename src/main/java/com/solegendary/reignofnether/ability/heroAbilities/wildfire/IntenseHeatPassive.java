@@ -35,6 +35,9 @@ public class IntenseHeatPassive extends HeroAbility {
     public static final int MAX_AMP_RANK_2 = 30;
     public static final int MAX_AMP_RANK_3 = 35;
 
+    public static final float healthRegenPerIgnite = 0.1f;
+    public static final float manaRegenPerIgnite = 0.1f;
+
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
@@ -70,8 +73,9 @@ public class IntenseHeatPassive extends HeroAbility {
     }
 
     @Override
-    public Button getRankUpButton(HeroUnit hero) {
+    public Button getRankUpButton(Keybinding hotkey, HeroUnit hero) {
         return super.getRankUpButtonProtected(
+                hotkey,
                 "Intense Heat",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/intense_heat.png"),
                 hero
@@ -94,6 +98,7 @@ public class IntenseHeatPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.intense_heat.tooltip1", MAX_RANGE)),
                 fcs(I18n.get("abilities.reignofnether.intense_heat.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.intense_heat.tooltip3")),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.intense_heat.rank1", TICK_MULTIPLIER_RANK_1), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.intense_heat.rank2", TICK_MULTIPLIER_RANK_2), getRank(hero) == 1),

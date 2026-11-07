@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -96,6 +97,8 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
                 if (b != null && b.isAttackable()) {
                     this.buildingTarget = b;
                     setNextBlockTarget();
+                } else if (b != null && !b.isAttackable() && mob instanceof Unit unit) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "hud.actionbuttons.reignofnether.cannot_attack");
                 }
             }
             this.start();

@@ -132,8 +132,15 @@ public interface AttackerUnit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
         return (float) (attr != null ? (attr.getValue()) : (AttributeRegistrar.BUILDING_DAMAGE_BONUS.get().getDefaultValue()));
     }
+    public default float getWorkerDamageBonus() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.WORKER_DAMAGE_BONUS.get());
+        return (float) (attr != null ? (attr.getValue()) : (AttributeRegistrar.WORKER_DAMAGE_BONUS.get().getDefaultValue()));
+    }
     public default float getBuildingDamageMultiplier() {
         return getBuildingDamageBonus() + 1.0f;
+    }
+    public default float getWorkerDamageMultiplier() {
+        return getWorkerDamageBonus() + 1.0f;
     }
     public default float getLifeStealPercent() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.LIFESTEAL.get());

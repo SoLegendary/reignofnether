@@ -193,7 +193,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     final static public float movementSpeed = 0.34f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
-    final static public int bonusNightSightRange = 4;
+    final static public int bonusNightSightRange = 6;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
@@ -251,9 +251,10 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE - 2)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.WORKER_DAMAGE_BONUS.get(), 0.5);
     }
 
     @Override
@@ -323,7 +324,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     @Override
     public SunlightEffect getSunlightEffect() {
-        return SunlightEffect.SLOWNESS_II;
+        return SunlightEffect.SLOWNESS_I;
     }
 
     @Override
