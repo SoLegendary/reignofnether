@@ -389,7 +389,7 @@ public class UnitItems {
             })
             .build();
 
-    private static final int ICE_WAND_DURATION_SECONDS = 12;
+    private static final int ICE_WAND_DURATION_SECONDS = 15;
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
@@ -397,7 +397,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
             .cooldownTicks(45 * 20)
-            .manaCost(35)
+            .manaCost(25)
             .range(10)
             .showRangeCircle()
             .onUseEntity((unit, entity) -> {
@@ -481,7 +481,7 @@ public class UnitItems {
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
             .descId("tome_of_duplication")
             .type(UnitItemType.CONSUMABLE)
-            .rarity(Rarity.RARE)
+            .rarity(Rarity.EPIC)
             .suppressDefaultError()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;

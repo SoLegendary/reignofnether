@@ -9,6 +9,8 @@
 Balance
 -------
 [✅] Bee lifespan increased from 20s to 30s
+[✅] Ice Wand mana cost reduced from 35 to 25 and duration increased from 12s to 15s
+[✅] Totem of Shielding no longer deflects you or allies' projectiles
 
 [✅] Hero's Armour healing changed from 10x12hp to 8x15hp
 [🟡] Mace slam now deals full damage to buildings
