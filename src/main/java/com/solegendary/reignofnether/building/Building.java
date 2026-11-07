@@ -88,7 +88,7 @@ public abstract class Building {
     }
 
     public float getMeleeDamageMult() {
-        return 0.25F; // this is 50% visually, as 1 block is 2hp by default
+        return 0.5F; // for HP, not blocks
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

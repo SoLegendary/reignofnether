@@ -37,7 +37,7 @@ public abstract class ArmorStandMixin extends LivingEntity {
             if (pSource.getDirectEntity() instanceof PhantomSummon)
                 pAmount *= PhantomSummon.HERO_BUILDING_DAMAGE_MULT;
             if (building != null) {
-                building.destroyRandomBlocks(pAmount / 2);
+                building.damage(pAmount);
             }
             cir.cancel();
             cir.setReturnValue(true);

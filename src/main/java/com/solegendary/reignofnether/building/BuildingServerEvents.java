@@ -952,8 +952,7 @@ public class BuildingServerEvents {
                         for (LivingEntity le : garr.getOccupants(building))
                             le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
                     }
-
-                    building.destroyRandomBlocks(atkDmg);
+                    building.damage(atkDmg * 2);
                 }
 
             }

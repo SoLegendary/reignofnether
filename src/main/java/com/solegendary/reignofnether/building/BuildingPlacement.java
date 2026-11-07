@@ -620,6 +620,7 @@ public class BuildingPlacement {
     }
 
     public void damage(double amount) {
+        if (building.invulnerable) return;
         destroyRandomBlocks(amount / 2);
     }
 

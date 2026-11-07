@@ -11,6 +11,7 @@ Balance
 [✅] Bee lifespan increased from 20s to 30s
 
 [✅] Hero's Armour healing changed from 10x12hp to 8x15hp
+[🟡] Mace slam now deals full damage to buildings
 
 [✅] Pumpkin farm cost increased from 175 wood to 200 wood
 [✅] Raise Dead zombies now give experience on death
@@ -50,7 +51,7 @@ Bugfixes
 [✅] Fixed the enchanter tether being rendered in fog
 [✅] Fixed enchanter tether not reducing damage taken
 [✅] Fixed neutral and enemy buildings not building at fast speeds in sandbox
-[✅] FPV players can no longer break blocks of invulnerable buildings
+[✅] FPV players and explosions can no longer break blocks of invulnerable buildings
 [✅] Bats can now use transport portals
 [✅] Fixed wraith snow from Strays sometimes affecting allies
 
