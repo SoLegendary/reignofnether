@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
@@ -1134,7 +1135,11 @@ public class UnitClientEvents {
                         MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
                     MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
+                    // NO_DEPTH_TEST (GL_ALWAYS) doesn't actually disable depth testing in setup, so do it explicitly
+                    // or the underlines get occluded by terrain depending on whatever depth state was left over
+                    RenderSystem.disableDepthTest();
                     MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
+                    RenderSystem.enableDepthTest();
                 }
             }
 
