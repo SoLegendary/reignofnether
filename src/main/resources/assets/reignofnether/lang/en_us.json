@@ -1090,6 +1090,7 @@
     "hud.actionbuttons.reignofnether.build_repair": "Build/Repair",
     "hud.actionbuttons.reignofnether.build_repair_autocast": "(Right-click to auto-repair)",
     "hud.actionbuttons.reignofnether.cannot_repair": "That building is not repairable",
+    "hud.actionbuttons.reignofnether.cannot_attack": "You can't attack that building",
     "hud.actionbuttons.reignofnether.gather": "Gather",
     "hud.actionbuttons.reignofnether.attack": "Attack",
     "hud.actionbuttons.reignofnether.stop": "Stop",
