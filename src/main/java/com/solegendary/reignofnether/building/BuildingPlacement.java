@@ -135,6 +135,9 @@ public class BuildingPlacement {
     public boolean isDestroyedServerside = false;
     public boolean isBuiltServerside = false;
 
+    // used to resend data to players who relog
+    protected final Set<String> seenByPlayers = new HashSet<>();
+
     public final boolean isCapitol;
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
@@ -1225,7 +1228,6 @@ public class BuildingPlacement {
 
         EntityType<? extends Animal> animalType = null;
 
-        int spawnQty = 1;
         if (getBuilding() instanceof CentralPortal && lastAnimalType != EntityType.MOOSHROOM) {
             animalType = EntityType.MOOSHROOM;
         } else {
@@ -1233,13 +1235,12 @@ public class BuildingPlacement {
                 case 0 -> animalType = EntityType.COW;
                 case 1 -> animalType = EntityType.PIG;
                 case 2 -> animalType = EntityType.SHEEP;
-                case 3 -> {
-                    animalType = EntityType.CHICKEN;
-                    spawnQty = 2;
-                }
+                case 3 -> animalType = EntityType.CHICKEN;
             }
         }
-        UnitServerEvents.spawnMobs(animalType, (ServerLevel) level, spawnBp.above(), spawnQty, "");
+        UnitServerEvents.spawnMobs(animalType, (ServerLevel) level, spawnBp.above(), 1, "");
+        if (animalType == EntityType.CHICKEN) // prevent second chicken spawning inside walls
+            UnitServerEvents.spawnMobs(animalType, (ServerLevel) level, spawnBp.above().above(), 1, "");
 
         lastAnimalType = animalType;
     }

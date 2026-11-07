@@ -854,6 +854,8 @@ public class BuildingClientEvents {
         }
         if (newBuilding != null && MC.player != null) {
             newBuilding.isBuilt = isBuilt;
+            // the server only sends PLACE to players who can see or have previously seen this building
+            newBuilding.isExploredClientside = true;
 
             if (isBuilt) {
                 newBuilding.highestBlockCountReached = newBuilding.getBlocksTotal();

@@ -20,6 +20,7 @@ import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -51,8 +52,19 @@ public class BuildingClientboundPacket {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
         BuildingPlacement b = findBuilding(false, buildingPos);
+        if (b == null) return;
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-            if (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b)) {
+            boolean placingSeenBuilding = b.seenByPlayers.contains(sp.getName().getString()) &&
+                    List.of(BuildingAction.PLACE, BuildingAction.PLACE_CUSTOM).contains(packet.action);
+            boolean canSeeBuilding = FogOfWarServerEvents.canPlayerSeeBuilding(sp, b);
+            if (placingSeenBuilding && !canSeeBuilding) { // strip unnecessary info so players don't intentionally relog to gain data
+                packet.isBuilt = true;
+                packet.upgradeLevel = 0;
+                packet.portalType = PortalPlacement.PortalType.BASIC;
+                packet.portalDestination = new BlockPos(0,0,0);
+            }
+            if (canSeeBuilding || placingSeenBuilding) {
+                b.seenByPlayers.add(sp.getName().getString());
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
             }
         }

@@ -54,6 +54,7 @@ Bugfixes
 [✅] FPV players and explosions can no longer break blocks of invulnerable buildings
 [✅] Bats can now use transport portals
 [✅] Fixed wraith snow from Strays sometimes affecting allies
+[✅] Fixed chickens sometimes spawning inside walls
 
 Languages
 ---------
