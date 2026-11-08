@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ToggleFlying;
@@ -69,6 +71,16 @@ import java.util.List;
 import java.util.Set;
 
 public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, RangedAttackerUnit, KeyframeAnimated, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.RANGED, UnitRole.ANTI_AIR);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return isFlyingUnit() ? FLYING_ROLES : ROLES;
+    }
+
+    private static final Set<UnitRole> FLYING_ROLES = Set.of(UnitRole.RANGED, UnitRole.ANTI_AIR, UnitRole.FLYER);
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new ToggleFlying(), Keybindings.abilitySlot1);
