@@ -27,6 +27,7 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -44,8 +45,6 @@ import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -180,7 +179,7 @@ public class ProductionPlacement extends BuildingPlacement {
 
         if (rallyEntity != null && rallyEntity.isAlive()) {
             if (isRallyEntityAttackable()) {
-                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                TaskSchedulerServerEvents.schedule(10, () -> {
                     if (!fRallyPoints.isEmpty()) {
                         UnitServerEvents.addActionItem(
                                 this.ownerName,
@@ -193,7 +192,7 @@ public class ProductionPlacement extends BuildingPlacement {
                     }
                 });
             } else {
-                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                TaskSchedulerServerEvents.schedule(10, () -> {
                     if (!fRallyPoints.isEmpty()) {
                         UnitServerEvents.addActionItem(
                                 this.ownerName,
@@ -209,7 +208,7 @@ public class ProductionPlacement extends BuildingPlacement {
         } else {
             for (int i = 0; i < fRallyPoints.size(); i++) {
                 final int fi = i;
-                CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
+                TaskSchedulerServerEvents.schedule(10 * fi, () -> {
                     if (fRallyPoints.size() > fi)
                         UnitServerEvents.addActionItem(
                                 this.ownerName,
@@ -221,7 +220,7 @@ public class ProductionPlacement extends BuildingPlacement {
                                 fi > 0
                         );
                 });
-                CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
+                TaskSchedulerServerEvents.schedule(15, () -> {
                     if (!attackRally && unit instanceof WorkerUnit workerUnit)
                         if (rallyResourceName != ResourceName.NONE)
                             workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);

@@ -40,6 +40,7 @@ public abstract class AbstractPlayerDisplay {
     public final String playerName;
     public final Faction faction;
     public final @Nullable AbstractClientPlayer player;
+    private final boolean isBot;
 
     public AbstractPlayerDisplay(RTSPlayer rtsPlayer) {
         AbstractClientPlayer found = null;
@@ -56,6 +57,7 @@ public abstract class AbstractPlayerDisplay {
         this.player = found;
         this.faction = rtsPlayer.faction;
         this.playerName = rtsPlayer.name;
+        this.isBot = rtsPlayer.isBot();
     }
 
     // survival/adventure player
@@ -63,6 +65,7 @@ public abstract class AbstractPlayerDisplay {
         this.player = clientPlayer;
         this.playerName = clientPlayer.getName().getString();
         this.faction = Factions.NONE;
+        this.isBot = false;
     }
 
     private static final ResourceLocation QUESTION_MARK = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
@@ -106,8 +109,9 @@ public abstract class AbstractPlayerDisplay {
         return ms < 80 ? Theme.OK : ms < 150 ? Theme.YELLOW : Theme.ERROR;
     }
 
+    // bots have no connection entry but are always in the game
     public boolean isPlayerLoggedIn() {
-        return MC.getConnection() != null && MC.getConnection().getPlayerInfo(playerName) != null;
+        return isBot || MC.getConnection() != null && MC.getConnection().getPlayerInfo(playerName) != null;
     }
 
     /** Row background, colour strip, faction icon, head, name and status. Returns the x where the row's content starts. */

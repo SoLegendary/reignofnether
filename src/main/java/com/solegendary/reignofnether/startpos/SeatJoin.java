@@ -27,7 +27,7 @@ public class SeatJoin {
 
     // whoever sits here can answer this request: the shared seat's holder, or for a soldier anyone seated on the team
     public boolean answeredBy(StartPos sp, List<StartPos> seats) {
-        return sp.enabled && !sp.playerName.isBlank() && !sp.playerName.equals(playerName) &&
+        return sp.enabled && !sp.playerName.isBlank() && !sp.isBot() && !sp.playerName.equals(playerName) &&
                 (isSoldier() ? StartPos.teamOf(sp, seats) == colorId : sp.pos.equals(seat));
     }
 }
