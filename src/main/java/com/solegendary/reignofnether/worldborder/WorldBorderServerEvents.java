@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.worldborder;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
 import com.solegendary.reignofnether.loading.LoadProgress;
+import com.solegendary.reignofnether.replay.ReplaySnapshot;
 import com.solegendary.reignofnether.minimap.MapColourServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -41,7 +41,7 @@ public class WorldBorderServerEvents {
 
     // A small world border is the signal that a map was purpose-built for RoN RTS. Fog of war and the
     // improved pathfinding/navmesh precompute both key off this: the whole play area is bounded, so it
-    // fits in caches and can be snapshotted in full (see FogChunkSnapshot).
+    // fits in caches and can be snapshotted in full (see ReplaySnapshot).
     public static boolean isRtsOptimisedMap(ServerLevel level) {
         return level != null && level.getWorldBorder().getSize() <= RTS_OPTIMIZED_BORDER;
     }
@@ -86,7 +86,7 @@ public class WorldBorderServerEvents {
         // Elevate the per-tick warm budget across the prewarm load window, restoring the configured value
         // after. (The synchronous prewarm loop below bypasses this budget; this only affects any runtime
         // warming that occurs during loading.)
-        // the map first: it loads every chunk in the border, which the navmesh and fog snapshot then reuse
+        // the map first: it loads every chunk in the border, which the navmesh and replay snapshot then reuse
         MapColourServerEvents.build(level);
         int configuredBudget = PathfinderConfig.maxChunkBuildsPerTick;
         PathfinderConfig.maxChunkBuildsPerTick = PathfinderConfig.CHUNK_BUILDS_PER_TICK_PREWARM;
@@ -95,11 +95,11 @@ public class WorldBorderServerEvents {
         } finally {
             PathfinderConfig.maxChunkBuildsPerTick = configuredBudget;
         }
-        // taken here rather than at the first RTS join, so it's part of loading; a snapshot left on disk by a match
-        // still in progress is kept, as FogOfWarServerEvents does
-        FogChunkSnapshot.rebuildIndex(level);
-        if (!FogChunkSnapshot.hasAny())
-            FogChunkSnapshot.captureFogChunks(level);
+        // the replay starts here: its picture of the map before the match, which fog serves for dark chunks. It
+        // records from match start; one left on disk by a match still in progress is kept
+        ReplaySnapshot.rebuildIndex(level);
+        if (!ReplaySnapshot.hasAny())
+            ReplaySnapshot.captureFogChunks(level);
         LoadProgress.finished = true;
     }
 

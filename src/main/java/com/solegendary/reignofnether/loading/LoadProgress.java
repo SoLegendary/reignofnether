@@ -5,14 +5,14 @@ import com.solegendary.reignofnether.util.WorldState;
 
 /**
  * What the server is doing while a world loads, after vanilla's spawn chunks: drawing the map, building the navmesh
- * and taking the fog snapshot. Written by the server thread; in singleplayer and for a P2P host the loading screen
+ * and starting the replay (its snapshot of the map). Written by the server thread; in singleplayer and for a P2P host the loading screen
  * reads it from the same game, which is the only time anyone can see it (players joining see the connection instead).
  */
 public final class LoadProgress {
 
     private LoadProgress() { }
 
-    public enum Step { MAP, NAVMESH, FOG }
+    public enum Step { MAP, NAVMESH, REPLAY_SNAPSHOT }
 
     public static volatile Step step = null; // null: not started, or vanilla still preparing the spawn
     public static volatile int done = 0;

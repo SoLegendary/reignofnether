@@ -48,6 +48,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import com.solegendary.reignofnether.replay.ReplayBrowserScreen;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.TitleScreenModUpdateIndicator;
@@ -68,7 +69,7 @@ import java.util.function.BiConsumer;
 
 /**
  * The title screen of the RoN design (Title Screen v2): the RoN logo and splash, then a grid of
- * square | wide | wide | square cells: Singleplayer + map pack, the locked campaign, Tutorial,
+ * square | wide | wide | square cells: Singleplayer + map pack, the locked campaign, Tutorial | Replays,
  * Multiplayer | Mods and Options | Quit, with language/accessibility left and Discord right. "Join a game" (P2P)
  * sits top right, next to the account.
  * Laid out in GUI coordinates, so it follows the GUI scale like the pause menu.
@@ -208,8 +209,8 @@ public class TitleScreenMixin extends Screen {
         campaign.active = false;
         this.addRenderableWidget(campaign);
 
-        // --- Tutorial ---
-        int[] tu = cell(1, 2, 2);
+        // --- Tutorial | Replays ---
+        int[] tu = cell(1, 1, 2);
         String tutorial = plain(Component.translatable("menu.reignofnether.tutorial"));
         this.addRenderableWidget(widget(tu, Component.literal(tutorial), this::openTutorial, (g, hov) -> {
             flat(g, tu, hov ? Theme.BUTTON_HOVER : Theme.SECONDARY);
@@ -217,6 +218,15 @@ public class TitleScreenMixin extends Screen {
             int x = tu[0] + (tu[2] - total) / 2, cy = tu[1] + tu[3] / 2;
             Icon.BOOK_OPEN.draw(g, x, cy - icon / 2, icon, Theme.ORANGE);
             Text.draw(g, tutorial, x + icon + gap, cy - 4, hov ? Theme.GOLD : Theme.BODY);
+        }));
+        int[] rp = cell(2, 1, 2);
+        String replays = plain(Component.translatable("menu.reignofnether.replays"));
+        this.addRenderableWidget(widget(rp, Component.literal(replays), () -> Minecraft.getInstance().setScreen(new ReplayBrowserScreen(this)), (g, hov) -> {
+            flat(g, rp, hov ? Theme.BUTTON_HOVER : Theme.SECONDARY);
+            int icon = 12, gap = 5, total = icon + gap + Text.width(replays);
+            int x = rp[0] + (rp[2] - total) / 2, cy = rp[1] + rp[3] / 2;
+            Icon.EYE.draw(g, x, cy - icon / 2, icon, Theme.ORANGE);
+            Text.draw(g, replays, x + icon + gap, cy - 4, hov ? Theme.GOLD : Theme.BODY);
         }));
 
         // --- "Join our Discord", right of Options | Quit ---

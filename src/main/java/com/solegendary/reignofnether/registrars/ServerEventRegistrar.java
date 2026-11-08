@@ -59,6 +59,7 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(RtsDebugServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.replay.ReplayServerEvents.class);
         vanillaEventBus.register(ResearchServerEvents.class);
         vanillaEventBus.register(SurvivalServerEvents.class);
         vanillaEventBus.register(GameModeServerEvents.class);

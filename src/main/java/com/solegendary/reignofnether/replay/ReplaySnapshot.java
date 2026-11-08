@@ -1,7 +1,7 @@
-package com.solegendary.reignofnether.fogofwar;
+package com.solegendary.reignofnether.replay;
 
-import com.solegendary.reignofnether.loading.LoadProgress;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.loading.LoadProgress;
 import com.solegendary.reignofnether.util.WorldState;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,17 +22,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-// Pre-game chunk packets inside the world border; served to dark players by ChunkMapInitialSendMixin so
-// they can't cheat by reconnecting or leaving/re-entering render range.
+// The replay's picture of the map before the match: the chunk packets inside the world border, taken while the
+// world loads (the replay's first step, before it records anything) and kept until the match is reset. Served to dark players by ChunkMapInitialSendMixin so they can't
+// cheat by reconnecting or leaving/re-entering render range, and FogRestore builds a reconnect's view on top of it.
 //
-// Backed by disk, not memory: each captured chunk is encoded to one file under
-// <world>/reignofnether/fogsnapshot/ (~50-500 KB per chunk). Only a small in-memory index of which chunks
+// One file per chunk under the match's recording, <world>/reignofnether/replay/snapshot/ (~50-500 KB per
+// chunk), since chunks are asked for one at a time as they enter a player's view. Only a small in-memory index of which chunks
 // exist (plus a bounded LRU of recently-decoded packets) is held on the heap, so even a full 80x80-chunk
 // RTS border costs kilobytes of RAM instead of gigabytes. Fog is gated to RTS-optimised maps
 // (WorldBorderServerEvents.isRtsOptimisedMap), so the bounded border always fits.
-public class FogChunkSnapshot {
+public class ReplaySnapshot {
 
-    private static final String DIR_NAME = "reignofnether/fogsnapshot";
+    private static final String DIR_NAME = "reignofnether/replay/snapshot";
     private static final int LRU_CAPACITY = 64; // hot chunks served to multiple players / on relog bursts
 
     // which chunks have a file on disk; cheap membership test so get()/hasAny() never touch disk needlessly
@@ -51,7 +52,7 @@ public class FogChunkSnapshot {
 
     private static Path dir = null;
     static {
-        WorldState.onServerReset(FogChunkSnapshot::forget);
+        WorldState.onServerReset(ReplaySnapshot::forget);
     }
 
     public static void captureFogChunks(ServerLevel level) {
@@ -62,7 +63,7 @@ public class FogChunkSnapshot {
         try {
             Files.createDirectories(dir);
         } catch (IOException e) {
-            ReignOfNether.LOGGER.error("[FogChunkSnapshot] failed to create snapshot dir {}", dir, e);
+            ReignOfNether.LOGGER.error("[ReplaySnapshot] failed to create snapshot dir {}", dir, e);
             dir = null;
             return;
         }
@@ -74,7 +75,7 @@ public class FogChunkSnapshot {
         int maxChunkZ = (int) Math.floor(border.getMaxZ() - 1) >> 4;
 
         int captured = 0;
-        LoadProgress.begin(LoadProgress.Step.FOG, (maxChunkX - minChunkX + 1) * (maxChunkZ - minChunkZ + 1));
+        LoadProgress.begin(LoadProgress.Step.REPLAY_SNAPSHOT, (maxChunkX - minChunkX + 1) * (maxChunkZ - minChunkZ + 1));
         for (int cx = minChunkX; cx <= maxChunkX; cx++) {
             for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
                 LoadProgress.done++;
@@ -86,7 +87,7 @@ public class FogChunkSnapshot {
                     captured++;
             }
         }
-        ReignOfNether.LOGGER.info("[FogChunkSnapshot] captured {} chunks inside world border to {}", captured, dir);
+        ReignOfNether.LOGGER.info("[ReplaySnapshot] captured {} chunks inside world border to {}", captured, dir);
     }
 
     // encode the packet and flush it to its chunk file; register in the index on success
@@ -100,7 +101,7 @@ public class FogChunkSnapshot {
             index.add(pos);
             return true;
         } catch (IOException e) {
-            ReignOfNether.LOGGER.error("[FogChunkSnapshot] failed to write chunk {}", pos, e);
+            ReignOfNether.LOGGER.error("[ReplaySnapshot] failed to write chunk {}", pos, e);
             return false;
         } finally {
             buf.release();
@@ -118,7 +119,7 @@ public class FogChunkSnapshot {
             lru.put(pos, packet);
             return packet;
         } catch (IOException e) {
-            ReignOfNether.LOGGER.error("[FogChunkSnapshot] failed to read chunk {}", pos, e);
+            ReignOfNether.LOGGER.error("[ReplaySnapshot] failed to read chunk {}", pos, e);
             index.remove(pos);
             return null;
         }
@@ -137,7 +138,7 @@ public class FogChunkSnapshot {
                 if (cp != null) found.add(cp);
             });
         } catch (IOException e) {
-            ReignOfNether.LOGGER.error("[FogChunkSnapshot] failed to rebuild index from {}", d, e);
+            ReignOfNether.LOGGER.error("[ReplaySnapshot] failed to rebuild index from {}", d, e);
             return;
         }
         if (found.isEmpty()) return;
@@ -145,7 +146,7 @@ public class FogChunkSnapshot {
         lru.clear();
         index.addAll(found);
         dir = d;
-        ReignOfNether.LOGGER.info("[FogChunkSnapshot] rebuilt index of {} chunks from {}", found.size(), d);
+        ReignOfNether.LOGGER.info("[ReplaySnapshot] rebuilt index of {} chunks from {}", found.size(), d);
     }
 
     // "c.<x>.<z>.dat" -> ChunkPos, or null if the name isn't a snapshot file (x/z may be negative)
@@ -165,7 +166,7 @@ public class FogChunkSnapshot {
 
     public static void clear() {
         if (!index.isEmpty())
-            ReignOfNether.LOGGER.info("[FogChunkSnapshot] clearing {} chunks", index.size());
+            ReignOfNether.LOGGER.info("[ReplaySnapshot] clearing {} chunks", index.size());
         index.clear();
         lru.clear();
         deleteDir();
@@ -196,12 +197,12 @@ public class FogChunkSnapshot {
                 try {
                     Files.deleteIfExists(p);
                 } catch (IOException e) {
-                    ReignOfNether.LOGGER.warn("[FogChunkSnapshot] failed to delete {}", p, e);
+                    ReignOfNether.LOGGER.warn("[ReplaySnapshot] failed to delete {}", p, e);
                 }
             });
             Files.deleteIfExists(dir);
         } catch (IOException e) {
-            ReignOfNether.LOGGER.warn("[FogChunkSnapshot] failed to clear snapshot dir {}", dir, e);
+            ReignOfNether.LOGGER.warn("[ReplaySnapshot] failed to clear snapshot dir {}", dir, e);
         }
     }
 }
