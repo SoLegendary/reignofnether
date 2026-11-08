@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.minimap.MapGrid;
@@ -14,6 +15,8 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
+import com.solegendary.reignofnether.replay.ReplayHeader;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfo;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
@@ -67,7 +70,7 @@ import java.util.Map;
 /**
  * Draws over vanilla's loading, joining and saving screens instead of them, which keep doing the work underneath.
  * Each step plays out in turn, at least as long as its animation: the map paints in chunk by chunk from the top
- * corner, the navmesh and fog snapshot sweep across it the same way. It then glides into the match setup map, opens
+ * corner, the navmesh and replay snapshot sweep across it the same way. It then glides into the match setup map, opens
  * into the satellite view, or dives into the world.
  */
 public final class LoadingScreenClientEvents {
@@ -84,17 +87,17 @@ public final class LoadingScreenClientEvents {
 
     private static final long FADE_IN_MS = 400;
     private static final long SETTLE_MS = 300;  // lets the screen that follows open before the map heads for it
+    private static final long VEIL_FADE_MS = 600;
     private static final long MOVE_MS = 1000;  // the map slides to the middle, or into the match setup map
     private static final long SAVED_FADE_MS = 250;
     private static final long ZOOM_MS = 1100;  // then grows into the satellite view or the world, fading out
-    private static final long VEIL_FADE_MS = 600;
     private static final long RTS_VIEW_WAIT_MS = 4000;
     private static final long AFTER_DONE_MS = 1000;
     private static final int MAX_CELLS = 40;    // cells across the map: one a chunk, grouped on big maps
     // the least time each step is shown, so one animation finishes before the next starts
     private static final Map<String, Long> MIN_MS = Map.of("prepare", 700L, "connect", 700L, "map", 1800L, "receive", 1200L,
-            "navmesh", 1600L, "fog", 1300L, "join", 800L, "save", 900L);
-    private static final List<String> NO_END = List.of("prepare", "connect", "join", "save");
+            "navmesh", 1600L, "replay_snapshot", 1300L, "join", 800L, "save", 900L);
+    private static final List<String> NO_END = List.of("prepare", "connect", "join", "save", "sync");
     private static final int TRACK = 0x1C1B23;
 
     private enum Mode { LOCAL, JOIN, SAVING }
@@ -109,6 +112,7 @@ public final class LoadingScreenClientEvents {
     private static boolean rtsMap = false;
     private static boolean localInfoRead = false;
     private static boolean replay = false; // loading a replay: no map, and it waits for the recording to start
+    private static boolean synced = false; // a reconnect's fog was restored (FogRestore) during this load
     private static String title = "";
     private static String byLine = "";      // the map's authors and version
     private static String description = "";
@@ -119,7 +123,6 @@ public final class LoadingScreenClientEvents {
     private static float[] shown = new float[0];
     private static long[] since = new long[0];
     private static int[] totals = new int[0];
-    private static long veilDoneMs = 0;
     @Nullable
     private static Runnable afterDone = null;
     @Nullable
@@ -131,6 +134,7 @@ public final class LoadingScreenClientEvents {
     private static int textureSize = 0;
     private static int uploadedRows = 0;
     private static long lastFrameMs = 0;
+    private static long veilDoneMs = 0;
 
     // a dirt message counts only when it's saving or connecting: the others ("preparing world data" before create
     // world's options, reading a world) are a blink between menus, which keep their own background
@@ -196,6 +200,7 @@ public final class LoadingScreenClientEvents {
         description = "";
         rtsMap = false;
         replay = false;
+        synced = false;
         localInfoRead = false;
         if (mode == Mode.LOCAL && MC.getSingleplayerServer() != null) {
             readLocalInfo();
@@ -206,7 +211,8 @@ public final class LoadingScreenClientEvents {
     }
 
     private static void sizeRows() {
-        int n = mode == Mode.SAVING ? 1 : mode == Mode.JOIN || replay ? 3 : rtsMap ? 5 : 2;
+        // one more for the fog sync a reconnect may get
+        int n = mode == Mode.SAVING ? 1 : mode == Mode.JOIN || replay ? 4 : rtsMap ? 6 : 3;
         shown = new float[n];
         since = new long[n];
         totals = new int[n];
@@ -215,6 +221,16 @@ public final class LoadingScreenClientEvents {
     // the world's name, its map info and whether it's an RTS map, once the server exists
     private static void readLocalInfo() {
         localInfoRead = true;
+        ReplayHeader h = ReplayClientEvents.header();
+        if (h != null) {
+            // a replay plays in a blank world of its own: its name and size say nothing, the recording does
+            replay = true;
+            title = h.map.isBlank() ? I18n.get("loading.reignofnether.replay_title") : h.map;
+            byLine = I18n.get("loading.reignofnether.replay_by", TimeUtils.getTimeStrFromTicks(h.durationTicks));
+            rtsMap = false;
+            sizeRows();
+            return;
+        }
         var data = MC.getSingleplayerServer().getWorldData();
         title = data.getLevelName();
         try { // read here rather than waiting for the server, so the column never changes once shown
@@ -334,6 +350,7 @@ public final class LoadingScreenClientEvents {
             float got = g == null ? 1 : g.rows / (float) g.size;
             rows.add(new Row("receive", connecting ? State.PENDING : got >= 1 || ended ? State.DONE : State.ACTIVE, got, 0));
             rows.add(new Row("join", ended ? State.DONE : connecting ? State.PENDING : State.ACTIVE, -1, 0));
+            addSyncRow(rows);
             return rows;
         }
         LoadProgress.Step step = LoadProgress.step;
@@ -348,8 +365,24 @@ public final class LoadingScreenClientEvents {
                 rows.add(new Row(st.name().toLowerCase(Locale.ROOT), state, frac, step == st ? LoadProgress.total : 0));
             }
         }
+        if (replay) {
+            // the recorded match only fills the world once we're in it, so the screen stays until it has
+            boolean playing = ReplayClientEvents.isActive();
+            rows.add(new Row("join", ended || playing ? State.DONE : !preparing || joining ? State.ACTIVE : State.PENDING, -1, 0));
+            rows.add(new Row("replay", playing ? State.DONE : ended ? State.ACTIVE : State.PENDING, -1, 0));
+            return rows;
+        }
         rows.add(new Row("join", ended ? State.DONE : serverDone && !preparing || joining ? State.ACTIVE : State.PENDING, -1, 0));
+        addSyncRow(rows);
         return rows;
+    }
+
+    // only when the server is restoring our fog: the screen stays until it's done
+    private static void addSyncRow(List<Row> rows) {
+        boolean syncing = FogOfWarClientEvents.isSyncing();
+        synced |= syncing;
+        if (synced)
+            rows.add(new Row("sync", syncing ? State.ACTIVE : State.DONE, -1, 0));
     }
 
     /** What is shown: each step starts once the one before has finished showing, and fills no faster than its pace. */
@@ -519,7 +552,7 @@ public final class LoadingScreenClientEvents {
         Backdrop.glow(g, r.x(), r.y(), r.w(), r.h(), overlay);
         float paint = shownOf(rows, mode == Mode.JOIN ? "receive" : "map");
         float nav = shownOf(rows, "navmesh");
-        float fog = shownOf(rows, "fog");
+        float fog = shownOf(rows, "replay_snapshot");
         int cells = Mth.clamp(grid.size / 16, 1, MAX_CELLS);
         float texCell = grid.size / (float) cells;
         float cell = r.w() / (float) cells;
@@ -548,10 +581,11 @@ public final class LoadingScreenClientEvents {
         if (overlay < 0.02f)
             return;
 
-        // the fog veil lifts once the snapshot is taken
+        // the fog veil lifts once the replay has its snapshot
         if (fog >= 1 && veilDoneMs == 0)
             veilDoneMs = now;
         float veil = fog >= 1 ? 1 - smooth((now - veilDoneMs) / (float) VEIL_FADE_MS) : 1;
+
         for (int cz = 0; cz < cells; cz++) {
             for (int cx = 0; cx < cells; cx++) {
                 float t = (cx + cz) / (float) diagonals;

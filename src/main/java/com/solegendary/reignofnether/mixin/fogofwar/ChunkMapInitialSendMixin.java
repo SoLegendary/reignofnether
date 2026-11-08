@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
+import com.solegendary.reignofnether.replay.ReplaySnapshot;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ChunkMap;
@@ -42,7 +42,7 @@ public abstract class ChunkMapInitialSendMixin {
         if (pos.getMaxBlockX() + 1 <= border.getMinX() || pos.getMinBlockX() >= border.getMaxX()
                 || pos.getMaxBlockZ() + 1 <= border.getMinZ() || pos.getMinBlockZ() >= border.getMaxZ())
             return;
-        ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
+        ClientboundLevelChunkWithLightPacket snap = ReplaySnapshot.get(pos);
         if (snap != null) {
             sp.connection.send(snap);
         }

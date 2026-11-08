@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlace
 import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -16,7 +17,7 @@ import com.solegendary.reignofnether.building.buildings.placements.CustomBuildin
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
-import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
+import com.solegendary.reignofnether.replay.ReplaySnapshot;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
@@ -236,6 +237,22 @@ public class PlayerServerEvents {
 
     // co-commanders get their lead's entry
     @Nullable
+    // every player's army (non-worker units) right now, for the end screen's chart and peak army
+    private static void sampleArmies() {
+        Map<String, Integer> army = new HashMap<>();
+        for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            if (entity instanceof Unit unit && !(entity instanceof WorkerUnit))
+                army.merge(unit.getOwnerName(), 1, Integer::sum);
+        synchronized (rtsPlayers) {
+            for (RTSPlayer p : rtsPlayers) {
+                int size = army.getOrDefault(p.name, 0);
+                p.armyTimeline.add(size);
+                RTSPlayerScoresEnum peak = RTSPlayerScoresEnum.PEAK_ARMY;
+                p.scores.scoreList.put(peak, Math.max(p.scores.scoreList.get(peak), size));
+            }
+        }
+    }
+
     public static RTSPlayer getRTSPlayer(String playerName) {
         String owner = PlayerRoles.ownerOf(playerName);
         synchronized (rtsPlayers) {
@@ -288,9 +305,9 @@ public class PlayerServerEvents {
 
         // also recapture when a match in progress has lost its snapshot (dark chunks would render as void)
         // ponytail: retries every tick if the snapshot dir can't be created; add a give-up flag if that ever happens
-        if (FogChunkSnapshot.shouldRecapture
-                || (!FogChunkSnapshot.hasAny() && FogOfWarServerEvents.isEnabled() && isGameActive())) {
-            FogChunkSnapshot.captureFogChunks(serverLevel);
+        if (ReplaySnapshot.shouldRecapture
+                || (!ReplaySnapshot.hasAny() && FogOfWarServerEvents.isEnabled() && isGameActive())) {
+            ReplaySnapshot.captureFogChunks(serverLevel);
         }
 
         synchronized (rtsPlayers) {
@@ -308,6 +325,8 @@ public class PlayerServerEvents {
                     rtsGameTicks = 0;
                 } else {
                     rtsGameTicks += 1;
+                    if (rtsGameTicks % MatchStatsClientboundPacket.ARMY_SAMPLE_TICKS == 0)
+                        sampleArmies();
                     if (rtsGameTicks % 200 == 0) {
                         PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
                     }
@@ -331,7 +350,7 @@ public class PlayerServerEvents {
         }
     }
 
-    private static void syncUnits() {
+    public static void syncUnits() {
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof Unit unit) {
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
@@ -481,8 +500,8 @@ public class PlayerServerEvents {
 	        EntityType<?> scoutEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.scoutEntityType);
 			if (faction.equals(Factions.VILLAGERS) && !isDogPerson) scoutEntityType = EntityRegistrar.SCOUT_CAT_UNIT.get();
             // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
-                FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
+            if (rtsPlayers.isEmpty() && !ReplaySnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
+                ReplaySnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
             }
             if (rtsPlayers.isEmpty()) {
                 FogOfWarServerEvents.captureNeutralFogUnits();
@@ -1188,9 +1207,10 @@ public class PlayerServerEvents {
         for (RTSPlayer p : all)
             rows.add(new MatchStatsClientboundPacket.MatchStatRow(
                     p.name, p.faction, winnerNames.contains(p.name), teamId(p, all),
-                    p.scores.getScoreListAsArray()));
+                    p.scores.getScoreListAsArray(), p.armyTimeline.stream().mapToInt(Integer::intValue).toArray()));
         MatchStatsClientboundPacket.broadcast(rtsGameTicks, rows);
         MatchResumeServerEvents.matchEnded = true;
+        ReplayServerEvents.onMatchEnd(winnerNames);
     }
 
     // allies share a team on the end screen, however they teamed up: lobby teams, start block colours or /ally
@@ -1244,7 +1264,9 @@ public class PlayerServerEvents {
     public static int resetRTS(boolean hardReset) {
         ReignOfNether.LOGGER.info("[Player] resetRTS: hardReset={}", hardReset);
         StartPosServerEvents.cancelStartGameCountdown(true);
-        FogChunkSnapshot.clear();
+        ReplaySnapshot.clear();
+        if (serverLevel != null)
+            ReplayServerEvents.onReset(serverLevel.getServer());
 
         boolean isSandboxOrScenario = SandboxServer.isAnyoneASandboxPlayer() || serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
 

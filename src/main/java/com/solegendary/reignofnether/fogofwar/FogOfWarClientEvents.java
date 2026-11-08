@@ -72,6 +72,20 @@ public class FogOfWarClientEvents {
         WorldState.onClientReset(() -> spectatorFog = false);
     }
 
+    // a reconnect's fog is being restored (FogSyncClientboundPacket); buildings placed meanwhile were seen before
+    private static volatile boolean syncing = false;
+    static {
+        WorldState.onClientReset(() -> syncing = false);
+    }
+
+    public static void setSyncing(boolean value) {
+        syncing = value;
+    }
+
+    public static boolean isSyncing() {
+        return syncing;
+    }
+
     public static boolean isViewing(String name) {
         return spectatorViews.contains(name);
     }
