@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -67,7 +68,7 @@ public class BuildingAbilityServerboundPacket {
             }
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
             if (building != null) {
-                if (!player.getName().getString().equals(building.ownerName)) {
+                if (!PlayerRoles.ownerOf(player.getName().getString()).equals(building.ownerName)) {
                     ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;
