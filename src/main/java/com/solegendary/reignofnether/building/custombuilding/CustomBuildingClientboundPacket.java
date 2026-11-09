@@ -34,11 +34,15 @@ public class CustomBuildingClientboundPacket {
     }
 
     public static void registerCustomBuilding(String playerName, CustomBuilding building) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), of(playerName, building));
+    }
+
+    public static CustomBuildingClientboundPacket of(String playerName, CustomBuilding building) {
         CompoundTag commandsTag = new CompoundTag();
         commandsTag.put("commands", building.commandsNbt);
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomBuildingClientboundPacket(
+        return new CustomBuildingClientboundPacket(
                 playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt, commandsTag
-        ));
+        );
     }
 
     public CustomBuildingClientboundPacket(

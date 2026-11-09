@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -64,6 +65,9 @@ public interface ConvertableUnit {
 
         // discard with a reflected packet so the client has a chance to sync goals, command groups and selections
         //oldEntity.discard();
+        // no client owns this unit to reflect it (a bot's unit, or nobody connected): it would stay as a live duplicate
+        if (level.getServer().getPlayerCount() == 0 || PlayerServerEvents.isBot(oldUnit.getOwnerName()))
+            oldEntity.discard();
         return newEntity;
     }
 }

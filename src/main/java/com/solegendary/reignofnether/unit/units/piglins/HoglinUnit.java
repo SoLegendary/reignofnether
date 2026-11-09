@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Bloodlust;
@@ -62,6 +65,14 @@ import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, ConvertableUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE, UnitRole.SIEGE, UnitRole.FAST);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new Eject(), Keybindings.abilitySlot1);

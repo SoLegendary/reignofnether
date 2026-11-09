@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerPlayerConnection;
@@ -15,13 +18,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
-// gate entity packets behind fog; target by name since TrackedEntity is package-private
+// gate entity packets behind fog; target by name since TrackedEntity is package-private. A replay also records
+// every entity as if fog were off (ReplayServerEvents.recordOmni): nothing else sees all of them, fog or no fog
 @Mixin(targets = "net.minecraft.server.level.ChunkMap$TrackedEntity")
 public abstract class TrackedEntityMixin {
 
     @Shadow @Final Entity entity;
     @Shadow @Final private ServerEntity serverEntity;
     @Shadow @Final private Set<ServerPlayerConnection> seenBy;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void reignofnether$recordSpawn(CallbackInfo ci) {
+        if (ReplayServerEvents.isRecording())
+            serverEntity.sendPairingData(null, ReplayServerEvents::recordOmni);
+    }
+
+    @Inject(method = "broadcast", at = @At("HEAD"))
+    private void reignofnether$recordBroadcast(Packet<?> packet, CallbackInfo ci) {
+        ReplayServerEvents.recordOmni(packet);
+    }
+
+    @Inject(method = "broadcastRemoved", at = @At("HEAD"))
+    private void reignofnether$recordRemoved(CallbackInfo ci) {
+        if (ReplayServerEvents.isRecording())
+            ReplayServerEvents.recordOmni(new ClientboundRemoveEntitiesPacket(entity.getId()));
+    }
 
     @Inject(method = "updatePlayer", at = @At("HEAD"), cancellable = true)
     private void reignofnether$gateEntityVisibility(ServerPlayer player, CallbackInfo ci) {

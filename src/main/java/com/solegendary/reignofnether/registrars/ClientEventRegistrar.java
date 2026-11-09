@@ -1,5 +1,10 @@
 package com.solegendary.reignofnether.registrars;
 
+import com.solegendary.reignofnether.voice.VoiceChannels;
+import com.solegendary.reignofnether.voice.VoiceClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
+import com.solegendary.reignofnether.util.WorldToScreen;
+import com.solegendary.reignofnether.soldier.SoldierServerEvents;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningServerEvents;
@@ -33,8 +38,12 @@ import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
+import com.solegendary.reignofnether.chat.ChatLog;
+import com.solegendary.reignofnether.hud.panels.SettingsMenu;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
+import com.solegendary.reignofnether.p2p.P2PHost;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.loading.LoadingScreenClientEvents;
 import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -44,8 +53,10 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.chat.TeamChatServerEvents;
+import com.solegendary.reignofnether.ai.BotServerEvents;
+import com.solegendary.reignofnether.ping.PingClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
@@ -63,6 +74,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderClientEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
+import com.solegendary.reignofnether.minimap.MapColourServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -88,6 +100,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(AttackWarningClientEvents.class);
         vanillaEventBus.register(CursorClientEvents.class);
         vanillaEventBus.register(MinimapClientEvents.class);
+        vanillaEventBus.register(LoadingScreenClientEvents.class);
         vanillaEventBus.register(TimeClientEvents.class);
         vanillaEventBus.register(BlockClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
@@ -99,13 +112,16 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(SurvivalClientEvents.class);
         vanillaEventBus.register(StartPosClientEvents.class);
         vanillaEventBus.register(MatchStartClientEvents.class);
+        vanillaEventBus.register(P2PHost.class);
+        vanillaEventBus.register(SettingsMenu.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.matchstart.ResultBanner.class);
+        vanillaEventBus.register(ChatLog.class);
         vanillaEventBus.register(MatchEndClientEvents.class);
         vanillaEventBus.register(NonUnitClientEvents.class);
         vanillaEventBus.register(HeroClientEvents.class);
         vanillaEventBus.register(CustomBuildingClientEvents.class);
         vanillaEventBus.register(SoundClientEvents.class);
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
-        vanillaEventBus.register(ScenarioClientEvents.class);
         vanillaEventBus.register(TextInputClientEvents.class);
         vanillaEventBus.register(RtsDebugClientEvents.class);
         vanillaEventBus.register(RtsDebugNavmesh.class);
@@ -126,11 +142,14 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(ResourcesServerEvents.class);
         vanillaEventBus.register(RtsDebugServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.replay.ReplayServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.replay.ReplayClientEvents.class);
         vanillaEventBus.register(ResearchServerEvents.class);
         vanillaEventBus.register(SurvivalServerEvents.class);
         vanillaEventBus.register(GameModeServerEvents.class);
         vanillaEventBus.register(RTSMapInfoServerEvents.class);
         vanillaEventBus.register(StartPosServerEvents.class);
+        vanillaEventBus.register(BotServerEvents.class);
         vanillaEventBus.register(AlliancesServerEvents.class);
         vanillaEventBus.register(HeroServerEvents.class);
         vanillaEventBus.register(NonUnitServerEvents.class);
@@ -138,9 +157,18 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
+        vanillaEventBus.register(TeamChatServerEvents.class);
+        vanillaEventBus.register(PingClientEvents.class);
+        vanillaEventBus.register(WorldToScreen.class);
+        vanillaEventBus.register(SoldierHudClientEvents.class);
+        vanillaEventBus.register(VoiceClientEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
+        vanillaEventBus.register(MapColourServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
         vanillaEventBus.register(TaskSchedulerServerEvents.class);
+        vanillaEventBus.register(SoldierServerEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.util.WorldState.class);
+        vanillaEventBus.register(VoiceChannels.class); // integrated (singleplayer/LAN) host
     }
 }

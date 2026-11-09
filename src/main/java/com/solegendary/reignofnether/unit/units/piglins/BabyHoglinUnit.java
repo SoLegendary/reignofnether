@@ -34,10 +34,19 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import com.solegendary.reignofnether.unit.UnitRole;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class BabyHoglinUnit extends Hoglin implements Unit {
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.SCOUT, UnitRole.FAST);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
 
     //region
