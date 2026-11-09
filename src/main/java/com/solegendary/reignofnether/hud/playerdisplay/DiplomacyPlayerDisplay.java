@@ -1,329 +1,263 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
-import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.RectZone;
-import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.panels.ButtonCell;
+import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
+import com.solegendary.reignofnether.ui.Rect;
+import com.solegendary.reignofnether.ui.Text;
+import com.solegendary.reignofnether.ui.Theme;
+import com.solegendary.reignofnether.ui.Tooltip;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-// Dashboard for RTS players to make/break alliances and send resources to each other
+/** A diplomacy row: alliance status and actions, and resource sending for RTS players. */
 public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private Resources resourcesToSend = new Resources("", 0,0,0);
+
+    private static final ResourceLocation[] TRADE_ICONS = { ButtonCell.ICON_FOOD, ButtonCell.ICON_WOOD, ButtonCell.ICON_ORE, ButtonCell.ICON_EMERALD };
+    private static final String[] TRADE_TOOLTIPS = { "alliances.reignofnether.tooltip.send_food",
+            "alliances.reignofnether.tooltip.send_wood", "alliances.reignofnether.tooltip.send_ore",
+            "alliances.reignofnether.tooltip.send_emerald" };
+    private static final int FIELD_W = 51;
+    private static final int FIELD_H = 17;
+    private static final int MAX_AMOUNT = 99999;
+
+    // the amount field being typed in, if any
+    @Nullable private static DiplomacyPlayerDisplay focused = null;
+    private static int focusedSlot = 0;
+
+    private final int[] amounts = new int[4]; // food, wood, ore, emerald
 
     public DiplomacyPlayerDisplay(RTSPlayer rtsPlayer) {
         super(rtsPlayer);
-        resourcesToSend = new Resources(rtsPlayer.name,0,0,0);
     }
 
     public DiplomacyPlayerDisplay(AbstractClientPlayer player) {
         super(player);
     }
 
-    private static final int RESOURCE_FRAME_WIDTH = Button.DEFAULT_ICON_FRAME_SIZE * 2; // frame containing a resource value + icon
-    private static final int ALLIANCE_FRAME_WIDTH = (Button.DEFAULT_ICON_FRAME_SIZE * 5); // frame containing a resource value + icon
-    public static final int DISPLAY_WIDTH = // total width of a player display
-            PLAYER_FRAME_WIDTH +
-                    RESOURCE_FRAME_WIDTH * 4 +
-                    (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
-                    ALLIANCE_FRAME_WIDTH;
+    private enum Relation {
+        ALLY("ally", Theme.OK), ENEMY("enemy", Theme.ERROR), SENT("request_sent", Theme.ORANGE), INCOMING("wants_alliance", Theme.GOLD);
 
+        final String key;
+        final int colour;
 
-    private boolean isAllied() {
-        return MC.player != null && AlliancesClient.isAllied(MC.player.getName().getString(), playerName);
+        Relation(String key, int colour) {
+            this.key = key;
+            this.colour = colour;
+        }
+    }
+
+    private Relation relation() {
+        if (MC.player != null && AlliancesClient.isAllied(MC.player.getName().getString(), playerName))
+            return Relation.ALLY;
+        if (AlliancesClient.outboundPendingAlliances.contains(playerName))
+            return Relation.SENT;
+        if (AlliancesClient.inboundPendingAlliances.contains(playerName))
+            return Relation.INCOMING;
+        return Relation.ENEMY;
     }
 
     protected boolean isRTSPlayer() {
         return PlayerClientEvents.isRTSPlayer(playerName);
     }
 
-    private boolean allianceRequested() {
-        return AlliancesClient.outboundPendingAlliances.contains(playerName);
-    }
+    public void render(HudFrame f, int x, int y, int w) {
+        Relation rel = relation();
+        boolean online = isPlayerLoggedIn();
+        boolean rts = isRTSPlayer();
 
-    private boolean allianceReceived() {
-        return AlliancesClient.inboundPendingAlliances.contains(playerName);
-    }
+        StringBuilder status = new StringBuilder();
+        if (!rts)
+            status.append(I18n.get("hud.reignofnether.diplomacy.first_person")).append(" · ");
+        if (!online)
+            status.append(I18n.get("hud.reignofnether.diplomacy.offline")).append(" · ");
+        status.append(I18n.get("hud.reignofnether.diplomacy." + rel.key));
+        if (rel == Relation.ALLY && AlliancesClient.canControlAlly(playerName))
+            status.append(" · ").append(I18n.get("hud.reignofnether.diplomacy.shares_control"));
 
-    private Button renderTradeResources(GuiGraphics guiGraphics, ResourceName resourceName,
-                                        int x, int y, int mouseX, int mouseY) {
-        String iconPath;
-        String value;
-        int color;
-        switch (resourceName) {
-            case FOOD -> {
-                iconPath = "textures/icons/items/wheat.png";
-                value = String.valueOf(resourcesToSend.food);
-                color = 0xE8BC5F;
+        int cx = renderIdentity(f, x, y, w, status.toString(), online ? rel.colour : Theme.LABEL);
+        int by = y + (ROW_H - BTN_H) / 2;
+        int actionsX = renderActions(f, rel, x + w - 7, by);
+
+        if (rts) {
+            for (int i = 0; i < amounts.length; i++) {
+                renderField(f, i, cx, y + (ROW_H - FIELD_H) / 2, online);
+                cx += FIELD_W + 5;
             }
-            case WOOD -> {
-                iconPath = "textures/icons/items/wood.png";
-                value = String.valueOf(resourcesToSend.wood);
-                color = 0xA3753B;
-            }
-            default -> {
-                iconPath = "textures/icons/items/iron_ore.png";
-                value = String.valueOf(resourcesToSend.ore);
-                color = 0xFFF4ED;
-            }
-        }
-        MyRenderer.renderFrameWithBg(guiGraphics,
-                x, y,
-                RESOURCE_FRAME_WIDTH,
-                Button.DEFAULT_ICON_FRAME_SIZE,
-                0xA0000000
-        );
-        guiGraphics.drawString(
-                MC.font,
-                value,
-                x + (Button.DEFAULT_ICON_SIZE / 2) + 1,
-                y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
-                color
-        );
-
-        Button changeResourceButton = new Button(
-                "Change resources",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                this::isPlayerLoggedIn,
-                () -> {
-                    switch (resourceName) {
-                        case FOOD -> resourcesToSend.food += Keybindings.shiftMod.isDown() ? 1000 : 100;
-                        case WOOD -> resourcesToSend.wood += Keybindings.shiftMod.isDown() ? 1000 : 100;
-                        default -> resourcesToSend.ore += Keybindings.shiftMod.isDown() ? 1000 : 100;
-                    }
-                    Resources res = ResourcesClientEvents.getOwnResources();
-                    if (res != null) {
-                        resourcesToSend.food = Math.min(resourcesToSend.food, res.food);
-                        resourcesToSend.wood = Math.min(resourcesToSend.wood, res.wood);
-                        resourcesToSend.ore = Math.min(resourcesToSend.ore, res.ore);
-                    }
-                },
-                () -> {
-                    switch (resourceName) {
-                        case FOOD -> resourcesToSend.food -= Keybindings.shiftMod.isDown() ? 1000 : 100;
-                        case WOOD -> resourcesToSend.wood -= Keybindings.shiftMod.isDown() ? 1000 : 100;
-                        default -> resourcesToSend.ore -= Keybindings.shiftMod.isDown() ? 1000 : 100;
-                    }
-                    resourcesToSend.food = Math.max(resourcesToSend.food, 0);
-                    resourcesToSend.wood = Math.max(resourcesToSend.wood, 0);
-                    resourcesToSend.ore = Math.max(resourcesToSend.ore, 0);
-                },
-                switch (resourceName) {
-                    case FOOD -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_food")));
-                    case WOOD -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_wood")));
-                    case ORE -> List.of(fcs(I18n.get("alliances.reignofnether.tooltip.send_ore")));
-                    default -> null;
-                }
-        );
-        changeResourceButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, iconPath);
-        changeResourceButton.render(guiGraphics, x + RESOURCE_FRAME_WIDTH, y, mouseX, mouseY);
-
-        if (!isPlayerLoggedIn()) {
-            guiGraphics.fill(
-                    x, y,
-                    x + RESOURCE_FRAME_WIDTH,
-                    y + Button.DEFAULT_ICON_FRAME_SIZE,
-                    0x99000000
-            );
-        }
-        return changeResourceButton;
-    }
-
-    private List<Button> renderTradeConfirms(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        Button confirmButton = new Button(
-                "Confirm trade",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> resourcesToSend.getTotalValue() > 0 && isPlayerLoggedIn(),
-                this::sendResources,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.confirm_send_resources")))
-        );
-        confirmButton.render(guiGraphics, x, y, mouseX, mouseY);
-
-        Button cancelButton = new Button(
-                "Cancel trade",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> resourcesToSend.getTotalValue() > 0,
-                this::resetResources,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.cancel_send_resources")))
-        );
-        cancelButton.render(guiGraphics, x + Button.DEFAULT_ICON_FRAME_SIZE, y, mouseX, mouseY);
-
-        return List.of(confirmButton, cancelButton);
-    }
-
-    private Button renderAllianceButton(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        Button allyRequestButton = new Button(
-                "Request Alliance",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                this::isPlayerLoggedIn,
-                this::requestAlliance,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.request_alliance")))
-        );
-        Button allyCancelRequestButton = new Button(
-                "Cancel Request Alliance",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                this::cancelAllianceRequest,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.cancel_request_alliance")))
-        );
-        allyCancelRequestButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sweet_berries.png");
-        Button allyConfirmButton = new Button(
-                "Accept Alliance",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                this::acceptAllianceRequest,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.accept_alliance")))
-        );
-        Button disbandButton = new Button(
-                "Disband Alliance",
-                Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/crossed_swords.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                this::isAllied,
-                this::disbandAlliance,
-                null,
-                List.of(fcs(I18n.get("alliances.reignofnether.tooltip.disband_alliance")))
-        );
-
-        Button renderedButton;
-        String allianceStatusStr;
-        int frameBgColour = 0xA0000000 | PlayerColors.getPlayerAllianceColorHex(playerName);
-
-        if (!isAllied() && !allianceRequested() && !allianceReceived()) {
-            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.enemy");
-            allyRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
-            renderedButton = allyRequestButton;
-        } else if (!isAllied() && allianceRequested()) {
-            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.requested");
-            allyCancelRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
-            renderedButton = allyCancelRequestButton;
-        } else if (!isAllied() && allianceReceived()) {
-            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.accept");
-            allyConfirmButton.render(guiGraphics, x, y, mouseX, mouseY);
-            renderedButton = allyConfirmButton;
+            textButton(f, I18n.get("hud.reignofnether.diplomacy.send"), cx, by, Style.SECONDARY,
+                    online && total() > 0, this::sendResources,
+                    Tooltip.of(I18n.get("alliances.reignofnether.tooltip.confirm_send_resources")));
         } else {
-            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.allied");
-            disbandButton.render(guiGraphics, x, y, mouseX, mouseY);
-            renderedButton = disbandButton;
-            if (AlliancesClient.canControlAlly(playerName)) {
-                allianceStatusStr += I18n.get("alliances.reignofnether.tooltip.status.allied.plural");
-            }
+            String go = I18n.get("hud.reignofnether.diplomacy.go_to_player");
+            int goW = buttonWidth(go);
+            int hintW = actionsX - 7 - goW - 6 - cx;
+            Text.draw(f.g, Text.fit(I18n.get("hud.reignofnether.diplomacy.first_person_hint"), hintW), cx, y + ROW_H / 2 - 4, Theme.LABEL);
+            textButton(f, go, actionsX - 7 - goW, by, Style.SECONDARY, rel == Relation.ALLY, this::goToPlayer,
+                    Tooltip.of(I18n.get("alliances.reignofnether.tooltip.goto_player")));
         }
-
-        int drawStringStartOffset = Button.DEFAULT_ICON_FRAME_SIZE + (Button.DEFAULT_ICON_SIZE / 2) + 1;
-        int frameWidth = drawStringStartOffset + MC.font.width(allianceStatusStr);
-        MyRenderer.renderFrameWithBg(
-                guiGraphics,
-                x + Button.DEFAULT_ICON_FRAME_SIZE,
-                y,
-                frameWidth,
-                Button.DEFAULT_ICON_FRAME_SIZE,
-                frameBgColour
-        );
-        guiGraphics.drawString(
-                MC.font,
-                allianceStatusStr,
-                x + drawStringStartOffset,
-                y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
-                0xFFFFFF
-        );
-        if (!isPlayerLoggedIn()) {
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.fill(
-                    x + Button.DEFAULT_ICON_FRAME_SIZE,
-                    y,
-                    x + (Button.DEFAULT_ICON_FRAME_SIZE * 2) + 4 + MC.font.width(allianceStatusStr),
-                    y + Button.DEFAULT_ICON_FRAME_SIZE,
-                    0x99000000
-            );
-        }
-        return renderedButton;
+        fadeIfOffline(f, x, y, w);
     }
+
+    /** Alliance buttons, right-aligned at right. Returns their left edge. */
+    private int renderActions(HudFrame f, Relation rel, int right, int y) {
+        record Action(String key, Style style, Runnable run, String tooltipKey) { }
+        List<Action> actions = new ArrayList<>();
+        switch (rel) {
+            case ALLY -> actions.add(new Action("disband", Style.DANGER, this::disbandAlliance, "disband_alliance"));
+            case ENEMY -> actions.add(new Action("request", Style.SECONDARY, this::requestAlliance, "request_alliance"));
+            case SENT -> actions.add(new Action("cancel_request", Style.SECONDARY, this::cancelAllianceRequest, "cancel_request_alliance"));
+            case INCOMING -> actions.add(new Action("accept", Style.PRIMARY, this::acceptAllianceRequest, "accept_alliance"));
+        }
+        // only asking for an alliance needs the player online
+        boolean enabled = rel != Relation.ENEMY || isPlayerLoggedIn();
+        int x = right;
+        for (int i = actions.size() - 1; i >= 0; i--) {
+            Action a = actions.get(i);
+            String label = I18n.get("hud.reignofnether.diplomacy." + a.key);
+            x -= buttonWidth(label);
+            textButton(f, label, x, y, a.style, enabled, a.run,
+                    Tooltip.of(I18n.get("alliances.reignofnether.tooltip." + a.tooltipKey)));
+            x -= 5;
+        }
+        return x;
+    }
+
+    private void renderField(HudFrame f, int slot, int x, int y, boolean online) {
+        Rect r = new Rect(x, y, FIELD_W, FIELD_H);
+        Theme.outline(f.g, x, y, FIELD_W, FIELD_H, 1, Theme.INK);
+        f.g.fill(x, y, x + FIELD_W, y + FIELD_H, Theme.EMPTY);
+        MyRenderer.renderIcon(f.g, TRADE_ICONS[slot], x + 4, y + 4, 9);
+
+        int ix = x + 16;
+        int iw = FIELD_W - 18;
+        boolean isFocused = focused == this && focusedSlot == slot;
+        f.g.fill(ix, y + 2, ix + iw, y + FIELD_H - 2, Theme.INK);
+        if (isFocused)
+            Theme.ring(f.g, ix, y + 2, iw, FIELD_H - 4, 1, Theme.ORANGE);
+        else if (f.hovered(r) && online)
+            Theme.ring(f.g, ix, y + 2, iw, FIELD_H - 4, 1, Theme.FAINT);
+
+        String value = amounts[slot] > 0 ? String.valueOf(amounts[slot]) : "0";
+        int textRight = ix + iw - 3;
+        Text.bigRight(f.g, value, textRight, y + 5, amounts[slot] > 0 ? Theme.GOLD : Theme.FAINT, 1f);
+        if (isFocused && (Util.getMillis() / 500) % 2 == 0)
+            f.g.fill(textRight + 1, y + 4, textRight + 2, y + FIELD_H - 4, Theme.GOLD);
+
+        f.register(new ButtonBuilder("Trade amount").isEnabled(() -> online).onLeftClick(() -> {
+            focused = this;
+            focusedSlot = slot;
+        }).build(), r, null, () -> Tooltip.of(I18n.get(TRADE_TOOLTIPS[slot])));
+    }
+
+    private int total() {
+        return amounts[0] + amounts[1] + amounts[2] + amounts[3];
+    }
+
+    // ------------------------------------------------------------------ typing
+
+    public static boolean isTyping() {
+        return focused != null;
+    }
+
+    public static void stopTyping() {
+        focused = null;
+    }
+
+    /** @return true if the key was used by the focused amount field */
+    public static boolean keyPressed(int keyCode) {
+        if (focused == null)
+            return false;
+        int[] a = focused.amounts;
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_BACKSPACE -> a[focusedSlot] /= 10;
+            case GLFW.GLFW_KEY_DELETE -> a[focusedSlot] = 0;
+            case GLFW.GLFW_KEY_TAB -> focusedSlot = (focusedSlot + 1) % a.length;
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_ESCAPE -> focused = null;
+            default -> { }
+        }
+        return true;
+    }
+
+    public static void charTyped(char c) {
+        if (focused == null || c < '0' || c > '9')
+            return;
+        int[] a = focused.amounts;
+        long next = a[focusedSlot] * 10L + (c - '0');
+        a[focusedSlot] = (int) Math.min(next, Math.min(MAX_AMOUNT, owned(focusedSlot)));
+    }
+
+    private static int owned(int slot) {
+        Resources res = ResourcesClientEvents.getOwnResources();
+        if (res == null)
+            return MAX_AMOUNT;
+        return slot == 0 ? res.food : slot == 1 ? res.wood : slot == 2 ? res.ore : res.emerald;
+    }
+
+    // ------------------------------------------------------------------ actions
 
     private void sendResources() {
-        if (MC.player != null) {
-            ResourcesServerboundPacket.sendResources(resourcesToSend, MC.player.getName().getString());
-            resetResources();
-        }
+        if (MC.player == null)
+            return;
+        ResourcesServerboundPacket.sendResources(new Resources(playerName, amounts[0], amounts[1], amounts[2], amounts[3]),
+                MC.player.getName().getString());
+        java.util.Arrays.fill(amounts, 0);
+        if (focused == this)
+            focused = null;
     }
 
-    private void resetResources() {
-        this.resourcesToSend.food = 0;
-        this.resourcesToSend.wood = 0;
-        this.resourcesToSend.ore = 0;
+    private void goToPlayer() {
+        if (player != null)
+            OrthoviewClientEvents.centreCameraOnPos(player.position());
+    }
+
+    private static boolean alliancesLocked() {
+        if (MC.player == null)
+            return true;
+        if (GameruleClient.lockAlliances) {
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock")));
+            return true;
+        }
+        if (GameruleClient.coopMode) {
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock_coop")));
+            return true;
+        }
+        return false;
     }
 
     private void requestAlliance() {
-        if (GameruleClient.lockAlliances && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+        if (alliancesLocked())
             return;
-        }
-        if (GameruleClient.coopMode && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
-            return;
-        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.REQUEST, playerName);
         AlliancesClient.outboundPendingAlliances.add(playerName);
     }
 
     private void cancelAllianceRequest() {
         AllianceServerboundPacket.doAllianceAction(AllianceAction.CANCEL_REQUEST, playerName);
-        AlliancesClient.outboundPendingAlliances.removeIf(p -> p.equals(playerName));
+        AlliancesClient.outboundPendingAlliances.remove(playerName);
     }
 
     private void acceptAllianceRequest() {
@@ -331,63 +265,8 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private void disbandAlliance() {
-        if (GameruleClient.lockAlliances && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+        if (alliancesLocked())
             return;
-        }
-        if (GameruleClient.coopMode && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
-            return;
-        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.DISBAND, playerName);
-    }
-
-    private final Button gotoFpvPlayerButton = new Button(
-            "Go to player",
-            Button.DEFAULT_ICON_SIZE,
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
-            (Keybinding) null,
-            () -> false,
-            () -> false,
-            this::isAllied,
-            () -> {
-                if (this.player != null)
-                    OrthoviewClientEvents.centreCameraOnPos(this.player.position());
-            },
-            null,
-            List.of(fcs(I18n.get("alliances.reignofnether.tooltip.goto_player")))
-    );
-
-    // render and return all relevant buttons
-    public ArrayList<Button> render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        super.render(guiGraphics, x, y);
-        ArrayList<Button> renderedButtons = new ArrayList<>();
-        x += PLAYER_FRAME_WIDTH;
-
-        if (isRTSPlayer()) {
-            renderedButtons.add(this.renderTradeResources(guiGraphics, ResourceName.FOOD, x, y, mouseX, mouseY));
-            x += RESOURCE_FRAME_WIDTH + Button.DEFAULT_ICON_FRAME_SIZE;
-            renderedButtons.add(this.renderTradeResources(guiGraphics, ResourceName.WOOD, x, y, mouseX, mouseY));
-            x += RESOURCE_FRAME_WIDTH + Button.DEFAULT_ICON_FRAME_SIZE;
-            renderedButtons.add(this.renderTradeResources(guiGraphics, ResourceName.ORE, x, y, mouseX, mouseY));
-            x += RESOURCE_FRAME_WIDTH + (Button.DEFAULT_ICON_FRAME_SIZE * 1.25f);
-            renderedButtons.addAll(this.renderTradeConfirms(guiGraphics, x, y, mouseX, mouseY));
-            x += (Button.DEFAULT_ICON_FRAME_SIZE * 2.25f);
-        } else {
-            gotoFpvPlayerButton.render(guiGraphics, x, y, mouseX, mouseY);
-            renderedButtons.add(gotoFpvPlayerButton);
-            x += (Button.DEFAULT_ICON_FRAME_SIZE * 1.25f);
-        }
-        renderedButtons.add(this.renderAllianceButton(guiGraphics, x, y, mouseX, mouseY));
-        return renderedButtons;
-    }
-
-    @Override
-    public RectZone getRectZone(int blitX, int blitY, int borderWidth) {
-        return new RectZone(
-                blitX - borderWidth, blitY - borderWidth,
-                blitX + DISPLAY_WIDTH + borderWidth,
-                blitY + Button.DEFAULT_ICON_FRAME_SIZE + borderWidth
-        );
     }
 }

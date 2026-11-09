@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -33,6 +33,12 @@ import java.util.function.ToDoubleFunction;
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID)
 public final class EntityTargetIndex {
     private static final Map<ServerLevel, EntityTargetIndex> LEVELS = new IdentityHashMap<>();
+    static {
+        WorldState.onServerReset(() -> {
+            for (EntityTargetIndex index : LEVELS.values()) index.clear();
+            LEVELS.clear();
+        });
+    }
     private final Map<Entity, Entry> entities = new IdentityHashMap<>();
     private final Map<TargetGroup, DynamicTargetTree<Entry>> trees = new HashMap<>();
     private final ServerLevel level;
@@ -120,11 +126,6 @@ public final class EntityTargetIndex {
         }
     }
 
-    @SubscribeEvent
-    public static void onServerStop(ServerStoppedEvent event) {
-        for (EntityTargetIndex index : LEVELS.values()) index.clear();
-        LEVELS.clear();
-    }
 
     private void clear() {
         entities.clear();

@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether.worldborder;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
+import com.solegendary.reignofnether.loading.LoadProgress;
+import com.solegendary.reignofnether.minimap.MapColourServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -8,13 +11,16 @@ import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class WorldBorderServerEvents {
@@ -27,6 +33,9 @@ public class WorldBorderServerEvents {
     public static final int RTS_OPTIMIZED_BORDER = 1280;
 
     public static boolean prewarmedNavmesh = false;
+    static {
+        WorldState.onServerReset(() -> prewarmedNavmesh = false);
+    }
 
     // A small world border is the signal that a map was purpose-built for RoN RTS. Fog of war and the
     // improved pathfinding/navmesh precompute both key off this: the whole play area is bounded, so it
@@ -35,11 +44,17 @@ public class WorldBorderServerEvents {
         return level != null && level.getWorldBorder().getSize() <= RTS_OPTIMIZED_BORDER;
     }
 
-    // statics outlive the world: clear them so the next world opened in this game starts clean
+    // an RTS map is played from the RTS view, which needs spectator; the loading screen then turns that view on
     @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        prewarmedNavmesh = false;
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
+        if (!(evt.getEntity() instanceof ServerPlayer sp) || !isRtsOptimisedMap(sp.serverLevel()))
+            return;
+        GameType mode = sp.gameMode.getGameModeForPlayer();
+        if (mode == GameType.SURVIVAL || mode == GameType.ADVENTURE)
+            sp.setGameMode(GameType.SPECTATOR);
     }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent evt) {
@@ -67,6 +82,8 @@ public class WorldBorderServerEvents {
         // Elevate the per-tick warm budget across the prewarm load window, restoring the configured value
         // after. (The synchronous prewarm loop below bypasses this budget; this only affects any runtime
         // warming that occurs during loading.)
+        // the map first: it loads every chunk in the border, which the navmesh and fog snapshot then reuse
+        MapColourServerEvents.build(level);
         int configuredBudget = PathfinderConfig.maxChunkBuildsPerTick;
         PathfinderConfig.maxChunkBuildsPerTick = PathfinderConfig.CHUNK_BUILDS_PER_TICK_PREWARM;
         try {
@@ -74,6 +91,12 @@ public class WorldBorderServerEvents {
         } finally {
             PathfinderConfig.maxChunkBuildsPerTick = configuredBudget;
         }
+        // taken here rather than at the first RTS join, so it's part of loading; a snapshot left on disk by a match
+        // still in progress is kept, as FogOfWarServerEvents does
+        FogChunkSnapshot.rebuildIndex(level);
+        if (!FogChunkSnapshot.hasAny())
+            FogChunkSnapshot.captureFogChunks(level);
+        LoadProgress.finished = true;
     }
 
     // Force-load and classify every chunk inside the world border so the navmesh is fully warm before play.
@@ -91,6 +114,7 @@ public class WorldBorderServerEvents {
         ReignOfNether.LOGGER.info("Prewarming RTS navmesh: {} chunks within world border ({}..{}, {}..{})...",
                 total, cxMin, cxMax, czMin, czMax);
 
+        LoadProgress.begin(LoadProgress.Step.NAVMESH, total);
         long startMs = System.currentTimeMillis();
         int done = 0;
         int nextProgress = 10; // log at ~every 10%
@@ -107,6 +131,7 @@ public class WorldBorderServerEvents {
                     ReignOfNether.LOGGER.error("Navmesh prewarm failed for chunk ({}, {})", cx, cz, t);
                 }
                 done++;
+                LoadProgress.done = done;
                 int pct = (int) (100L * done / total);
                 if (pct >= nextProgress) {
                     ReignOfNether.LOGGER.info("Prewarming RTS navmesh: {}% ({}/{} chunks)", pct, done, total);
