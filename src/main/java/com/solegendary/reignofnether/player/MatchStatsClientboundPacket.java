@@ -25,7 +25,7 @@ public class MatchStatsClientboundPacket {
         public final String name;
         public final Faction faction;
         public final boolean winner;
-        public final int teamId; // startPosColorId - players sharing it are on the same team
+        public final int teamId; // players sharing it are allies (PlayerServerEvents.teamId)
         public final int[] scores; // ordered as RTSPlayerScoresEnum.values()
 
         public MatchStatRow(String name, Faction faction, boolean winner, int teamId, int[] scores) {

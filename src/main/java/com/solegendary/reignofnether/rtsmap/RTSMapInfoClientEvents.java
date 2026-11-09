@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.rtsmap;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -14,8 +15,13 @@ import java.util.Set;
 
 public class RTSMapInfoClientEvents {
 
+    static {
+        WorldState.onClientReset(RTSMapInfoClientEvents::reset);
+    }
+
     public static ArrayList<String> modeNames = new ArrayList<>();
     public static String selectedMode = "";
+    public static boolean teamMode = false;
     public static String mapName = "";
     public static String description = "";
     public static Set<String> authors = new HashSet<>();
@@ -54,6 +60,7 @@ public class RTSMapInfoClientEvents {
     public static void reset() {
         modeNames = new ArrayList<>();
         selectedMode = "";
+        teamMode = false;
         mapName = "";
         description = "";
         authors = new HashSet<>();
