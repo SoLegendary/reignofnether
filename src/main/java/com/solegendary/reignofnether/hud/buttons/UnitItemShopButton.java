@@ -3,11 +3,8 @@ package com.solegendary.reignofnether.hud.buttons;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
-import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -17,7 +14,7 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
 
     private StockedShopItem stockedShopItem;
 
-    public UnitItemShopButton(StockedShopItem stockedShopItem) {
+    public UnitItemShopButton(StockedShopItem stockedShopItem, ItemShopPlacement bpl) {
         super(
                 "button_" + stockedShopItem.item.getItem().getDescriptionId(),
                 Button.DEFAULT_ICON_SIZE,
@@ -27,8 +24,7 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
                 () -> false,
                 () -> true,
                 () -> {
-                    if (ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside) {
-                        ItemShopPlacement bpl = ItemClientEvents.openItemShop;
+                    if (!bpl.isDestroyedServerside) {
                         ItemShopAddon itemShop = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
                         if (itemShop != null && bpl.getServedUnit() instanceof LivingEntity le) {
                             ItemServerboundPacket.buy(le.getId(), stockedShopItem.item.descId, bpl.originPos);
@@ -47,24 +43,18 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
         this.emeraldValue = stockedShopItem.buyCost;
     }
 
+    // buying is a plain click, not the inventory's press-then-release, so the hotkey runs the click
     @Override
-    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        if (stockedShopItem.stock == 0) {
-            this.greyPercent = 1 - ((float) stockedShopItem.getTicksToNextRestock() / stockedShopItem.maxRestockTicks);
-        } else {
-            this.greyPercent = 0;
-        }
-        super.render(guiGraphics, x, y, mouseX, mouseY);
+    public void pressHotkey() {
+        onLeftClick.run();
+    }
 
-        if (stockedShopItem.maxStock >= 0) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.drawScaledString(guiGraphics,
-                    MC.font,
-                    String.valueOf(stockedShopItem.stock),
-                    x + 3,
-                    y + 3,
-                    0xFFFFFF,
-                    0.75f);
-        }
+    @Override
+    public void refresh() {
+        if (stockedShopItem.stock == 0)
+            this.greyPercent = 1 - ((float) stockedShopItem.getTicksToNextRestock() / stockedShopItem.maxRestockTicks);
+        else
+            this.greyPercent = 0;
+        this.bottomLeftText = () -> stockedShopItem.maxStock >= 0 ? String.valueOf(stockedShopItem.stock) : "";
     }
 }

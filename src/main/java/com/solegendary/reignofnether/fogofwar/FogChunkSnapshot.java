@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.solegendary.reignofnether.loading.LoadProgress;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.util.WorldState;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -48,6 +50,9 @@ public class FogChunkSnapshot {
             });
 
     private static Path dir = null;
+    static {
+        WorldState.onServerReset(FogChunkSnapshot::forget);
+    }
 
     public static void captureFogChunks(ServerLevel level) {
         shouldRecapture = false;
@@ -69,8 +74,10 @@ public class FogChunkSnapshot {
         int maxChunkZ = (int) Math.floor(border.getMaxZ() - 1) >> 4;
 
         int captured = 0;
+        LoadProgress.begin(LoadProgress.Step.FOG, (maxChunkX - minChunkX + 1) * (maxChunkZ - minChunkZ + 1));
         for (int cx = minChunkX; cx <= maxChunkX; cx++) {
             for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
+                LoadProgress.done++;
                 LevelChunk chunk = level.getChunkSource().getChunk(cx, cz, true);
                 if (chunk == null) continue;
                 ChunkPos pos = new ChunkPos(cx, cz);
