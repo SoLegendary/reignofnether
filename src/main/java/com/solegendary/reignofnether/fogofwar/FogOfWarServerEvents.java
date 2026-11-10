@@ -27,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -68,6 +69,10 @@ public class FogOfWarServerEvents {
     // straddled the vision circle in an edge chunk, so the packet was dropped for that player but part of
     // the change IS visible to them. Drained by updatePlayerBrightChunks.
     private static final Map<UUID, Set<ChunkPos>> pendingResends = new ConcurrentHashMap<>();
+
+    // game time of each player's last accepted FogChunkRequestServerboundPacket, to throttle request spam
+    private static final Map<UUID, Long> lastChunkRequestTick = new ConcurrentHashMap<>();
+    private static final int CHUNK_REQUEST_MIN_TICKS = 10;
 
     // players whose units/buildings ignore fog and are visible to everyone
     private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
@@ -217,6 +222,52 @@ public class FogOfWarServerEvents {
         pendingResends.computeIfAbsent(playerId, k -> ConcurrentHashMap.newKeySet()).add(pos);
     }
 
+    // Serve a chunk to a player for whom it isn't live (dark or edge): the pre-match snapshot instead of the
+    // live data, plus a queued live resend for edge chunks so their visible columns catch up. Returns false
+    // if the chunk should be sent as normal instead (fog off for them, live for them, or outside the border).
+    public static boolean sendFoggedChunk(ServerPlayer sp, LevelChunk chunk) {
+        if (!enabled || !isFogActiveFor(sp)) return false;
+
+        ChunkPos pos = chunk.getPos();
+        if (isChunkLiveFor(sp, pos)) return false;
+        // fully outside the border: never snapshotted and nothing there can change, so send it live; without
+        // it the client never draws the border chunks (vanilla skips meshing a chunk with an unloaded neighbour)
+        WorldBorder border = chunk.getLevel().getWorldBorder();
+        if (pos.getMaxBlockX() + 1 <= border.getMinX() || pos.getMinBlockX() >= border.getMaxX()
+                || pos.getMaxBlockZ() + 1 <= border.getMinZ() || pos.getMinBlockZ() >= border.getMaxZ())
+            return false;
+
+        ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
+        if (snap != null)
+            sp.connection.send(snap);
+        if (isChunkSentFor(sp, pos))
+            queueResend(sp.getUUID(), pos);
+        return true;
+    }
+
+    // A client asked for fogged chunks that are entirely missing from its chunk cache. Only dark/edge chunks
+    // are served - live chunks are delivered by vanilla chunk tracking - and requests are throttled per player.
+    public static void handleChunkRequest(ServerPlayer sp, List<ChunkPos> requested) {
+        if (serverLevel == null || sp.serverLevel() != serverLevel || !isFogActiveFor(sp)) return;
+
+        long now = serverLevel.getGameTime();
+        Long last = lastChunkRequestTick.get(sp.getUUID());
+        if (last != null && now - last < CHUNK_REQUEST_MIN_TICKS) return;
+        lastChunkRequestTick.put(sp.getUUID(), now);
+
+        int range = serverLevel.getServer().getPlayerList().getViewDistance() + 1; // +1: player may have just moved
+        ChunkPos center = sp.chunkPosition();
+        for (ChunkPos cp : requested) {
+            if (Math.abs(cp.x - center.x) > range || Math.abs(cp.z - center.z) > range) continue;
+            if (isChunkLiveFor(sp, cp)) continue;
+            LevelChunk chunk = serverLevel.getChunkSource().getChunk(cp.x, cp.z, false);
+            if (chunk == null) continue;
+            if (!sendFoggedChunk(sp, chunk))
+                sp.connection.send(new ClientboundLevelChunkWithLightPacket(
+                        chunk, serverLevel.getLightEngine(), null, null));
+        }
+    }
+
     public static boolean canPlayerSeeBuilding(ServerPlayer sp, BuildingPlacement b) {
         if (!isFogActiveFor(sp)) return true;
         return isBlockVisibleFor(sp, b.maxCorner.getX(), b.maxCorner.getZ()) ||
@@ -248,6 +299,7 @@ public class FogOfWarServerEvents {
 
     public static void onPlayerDisconnect(UUID playerId) {
         clearPlayerVision(playerId);
+        lastChunkRequestTick.remove(playerId);
     }
 
     // drop bookkeeping so re-entering orthoview later resends a full vision set
@@ -285,6 +337,7 @@ public class FogOfWarServerEvents {
         playerEdgeChunks.clear();
         playerEdgeMasks.clear();
         pendingResends.clear();
+        lastChunkRequestTick.clear();
         revealedPlayerNames.clear();
         revealedUnitExpiryTick.clear();
         neutralFogUnits.clear();

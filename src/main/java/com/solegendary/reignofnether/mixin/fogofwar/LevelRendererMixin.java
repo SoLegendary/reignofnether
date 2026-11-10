@@ -16,9 +16,11 @@ import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.phys.Vec3;
@@ -29,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -65,6 +68,23 @@ public abstract class LevelRendererMixin {
             return;
 
         needsFrustumUpdate.set(true);
+    }
+
+    // Occlusion culling walks outward from the camera section, only passing through a section if its compiled
+    // visibility says its faces connect. An uncompiled section (eg. in a chunk the client is missing) connects
+    // nothing, so everything behind it is culled and vanishes. Fogged chunks can be absent or late, so treat
+    // uncompiled sections as see-through: the walk continues and sections behind a gap still render.
+    @Redirect(
+            method = "updateRenderChunks",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$CompiledChunk;facesCanSeeEachother(Lnet/minecraft/core/Direction;Lnet/minecraft/core/Direction;)Z"
+            )
+    )
+    private boolean ron_traverseUncompiledSections(ChunkRenderDispatcher.CompiledChunk compiled, Direction from, Direction to) {
+        if (isEnabled() && compiled == ChunkRenderDispatcher.CompiledChunk.UNCOMPILED)
+            return true;
+        return compiled.facesCanSeeEachother(from, to);
     }
 
     // rerun blockDestroyProgress overlays but with range extended to between 32-256 blocks

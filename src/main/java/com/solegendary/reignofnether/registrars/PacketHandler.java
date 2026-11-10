@@ -158,6 +158,10 @@ public final class PacketHandler {
                 .encoder(FogOfWarServerboundPacket::encode).decoder(FogOfWarServerboundPacket::new)
                 .consumerMainThread(FogOfWarServerboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(FogChunkRequestServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(FogChunkRequestServerboundPacket::encode).decoder(FogChunkRequestServerboundPacket::new)
+                .consumerMainThread(FogChunkRequestServerboundPacket::handle).add();
+
         INSTANCE.messageBuilder(FrozenChunkClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FrozenChunkClientboundPacket::encode).decoder(FrozenChunkClientboundPacket::new)
                 .consumerMainThread(FrozenChunkClientboundPacket::handle).add();

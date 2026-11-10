@@ -22,10 +22,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -173,6 +175,61 @@ public class FogOfWarClientEvents {
         for (ChunkPos cp : oldM.keySet())
             if (!newM.containsKey(cp)) changed.add(cp); // removed -> reverts to full-bright fallback
         return changed;
+    }
+
+    // Chunks that are entirely missing from the client's chunk cache are re-requested from the server (see
+    // FogChunkRequestServerboundPacket). Fully bright chunks are never requested - vanilla chunk tracking
+    // delivers those - only dark and edge ones.
+    private static final int CHUNK_SCAN_TICKS = 20;
+    private static final int MAX_CHUNK_REQUESTS_PER_SCAN = 8; // per CHUNK_SCAN_TICKS, ie. per second
+    private static final int CHUNK_REQUEST_GRACE_TICKS = 60; // a chunk must stay missing this long before asking, as it may just be in transit
+    private static final int CHUNK_REQUEST_COOLDOWN_TICKS = 100; // before asking again for a chunk the server didn't deliver
+
+    // missing chunk -> client tick at which it may next be requested
+    private static final Map<ChunkPos, Long> nextChunkRequestTick = new HashMap<>();
+    private static long clientTicks = 0;
+
+    public static void resetChunkRequests() {
+        nextChunkRequestTick.clear();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END) return;
+        if (MC.level == null || MC.player == null || !isEnabled()) {
+            resetChunkRequests();
+            return;
+        }
+        clientTicks++;
+        if (clientTicks % CHUNK_SCAN_TICKS != 0) return;
+
+        ChunkPos center = MC.player.chunkPosition();
+        int r = MC.options.getEffectiveRenderDistance();
+        Map<ChunkPos, long[]> masks = edgeMasks;
+        Set<ChunkPos> missing = new HashSet<>();
+        List<ChunkPos> due = new ArrayList<>();
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                ChunkPos cp = new ChunkPos(center.x + dx, center.z + dz);
+                if (MC.level.getChunkSource().getChunk(cp.x, cp.z, ChunkStatus.FULL, false) != null) continue;
+                if (brightChunks.contains(cp) && !masks.containsKey(cp)) continue; // fully bright
+                missing.add(cp);
+                Long next = nextChunkRequestTick.get(cp);
+                if (next == null)
+                    nextChunkRequestTick.put(cp, clientTicks + CHUNK_REQUEST_GRACE_TICKS);
+                else if (clientTicks >= next)
+                    due.add(cp);
+            }
+        }
+        nextChunkRequestTick.keySet().retainAll(missing); // forget chunks that have arrived or left range
+
+        // nearest first
+        due.sort(Comparator.comparingInt(cp -> Math.max(Math.abs(cp.x - center.x), Math.abs(cp.z - center.z))));
+        if (due.size() > MAX_CHUNK_REQUESTS_PER_SCAN)
+            due = due.subList(0, MAX_CHUNK_REQUESTS_PER_SCAN);
+        for (ChunkPos cp : due)
+            nextChunkRequestTick.put(cp, clientTicks + CHUNK_REQUEST_COOLDOWN_TICKS);
+        FogChunkRequestServerboundPacket.requestChunks(due);
     }
 
     @SubscribeEvent

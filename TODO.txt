@@ -26,7 +26,7 @@ Quality of Life
     [❌] Save as .dat file separately so we can retain modifications
 
 [🟡] You can now set a rally point on iron golem buildings
-[🟡] Button for idle farm: assign nearest idle worker
+[❌] Button for idle farm: assign nearest idle worker
 [❌] Make food able to be sold at custom buildings
 [❌] Update map pack link
 
