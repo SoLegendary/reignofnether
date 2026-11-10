@@ -8,26 +8,8 @@
 
 Balance
 -------
-[✅] Bee lifespan increased from 20s to 30s
-[✅] Ice Wand mana cost reduced from 35 to 25 and duration increased from 12s to 15s
-[✅] Totem of Shielding no longer deflects you or allies' projectiles
 
-[✅] Hero's Armour healing changed from 10x12hp to 8x15hp
-[🟡] Mace slam now deals full damage to buildings
 
-[✅] Pumpkin farm cost increased from 175 wood to 200 wood
-[✅] Raise Dead zombies now give experience on death
-[✅] Raise Dead zombie lifespan increased from 60s to 75s, but now die instantly instead of decaying
-[✅] Ice blocks created by Blizzard and Ice Wand no longer block line of sight or projectiles
-[✅] Creeper movement speed reduced from 28 to 27
-[✅] Creeper cost changed from (50 food, 100 ore) to (40 food, 120 ore)
-[✅] Spiders now have +50% bonus damage to workers
-[✅] Spider daytime slowness reduced from -36% to -20%
-[✅] Spider daytime sight range reduced from 16 to 14 (night is still 20)
-
-[✅] The Wildfire's passive now grants +0.1 health and mana regen per nearby unit that's on fire
-[✅] The default piglin scout is now a Baby Hoglin, and is equivalent to Scout Cats & Dogs
-    - You can still switch to training Striders at any time
 
 Quality of Life
 ---------------
@@ -43,21 +25,17 @@ Quality of Life
     [❌] Commands to modify it in memory
     [❌] Save as .dat file separately so we can retain modifications
 
-[✅] You can now use Ctrl+QWER to level up a skill
-[✅] Fixed bats not being able to use portals
-[🟡] Stopped sending a lot of unnecessary data about entities in fog
-[🟡] Spectators and defeated players can now see fog of war from the perspective of all match players
+[🟡] You can now set a rally point on iron golem buildings
+[🟡] Button for idle farm: assign nearest idle worker
+[❌] Make food able to be sold at custom buildings
+[❌] Update map pack link
 
 Bugfixes
 --------
-[✅] Fixed the enchanter tether being rendered in fog
-[✅] Fixed enchanter tether not reducing damage taken
-[✅] Fixed neutral and enemy buildings not building at fast speeds in sandbox
-[✅] FPV players and explosions can no longer break blocks of invulnerable buildings
-[✅] Bats can now use transport portals
-[✅] Fixed wraith snow from Strays sometimes affecting allies
-[✅] Fixed chickens sometimes spawning inside walls
+[🟡] The Wretched Wraith's snow no longer breaks portal blocks
+[🟡] The diplomacy menu no longer reveals your opponent's faction when `hideEnemyPicks` is on
+[❌] Sparta and Tophu's crashes
+[❌] Fog chunks unreliable now?
 
 Languages
 ---------
-[✅] fr_fr update by EnderBreaker

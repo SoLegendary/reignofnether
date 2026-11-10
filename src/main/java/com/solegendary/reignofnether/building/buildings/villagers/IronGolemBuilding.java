@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -13,9 +15,12 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -26,9 +31,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class IronGolemBuilding extends Building {
+public class IronGolemBuilding extends ProductionBuilding {
 
     public final static String buildingName = "Iron Golem";
     public final static String structureName = "iron_golem";
@@ -44,8 +52,6 @@ public class IronGolemBuilding extends Building {
 
         this.startingBlockTypes.add(Blocks.JUNGLE_FENCE);
     }
-
-    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
@@ -85,6 +91,8 @@ public class IronGolemBuilding extends Building {
             );
             if (entity instanceof Unit unit) {
                 unit.setOwnerName(placement.ownerName);
+                if (placement instanceof ProductionPlacement pp)
+                    pp.setDelayedRally(unit);
             }
         }
     }
