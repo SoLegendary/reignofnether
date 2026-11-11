@@ -153,6 +153,7 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 		else {
 			restartThenAnimate(enchanter, enchanter.idleAnimState, EnchanterAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

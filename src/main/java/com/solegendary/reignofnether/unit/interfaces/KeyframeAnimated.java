@@ -13,6 +13,10 @@ public interface KeyframeAnimated {
     public default float getAnimationSpeed() {
         return 1.0f;
     }
+    // how many ticks to crossfade from the previous pose when the playing animation changes
+    public default int getAnimationBlendTicks() {
+        return 5;
+    }
     public default int getAttackWindupTicks() {
         return 0;
     }

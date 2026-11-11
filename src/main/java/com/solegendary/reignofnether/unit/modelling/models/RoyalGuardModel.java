@@ -151,6 +151,7 @@ public class RoyalGuardModel<T extends Entity> extends KeyframeHierarchicalModel
 		else {
 			restartThenAnimate(royalGuard, royalGuard.idleAnimState, RoyalGuardAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

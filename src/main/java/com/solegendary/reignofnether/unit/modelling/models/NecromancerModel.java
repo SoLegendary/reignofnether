@@ -131,6 +131,7 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 		else {
 			restartThenAnimate(necromancer, necromancer.idleAnimState, NecromancerAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

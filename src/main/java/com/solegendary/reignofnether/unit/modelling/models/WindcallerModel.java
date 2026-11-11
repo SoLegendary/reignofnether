@@ -145,6 +145,7 @@ public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel
 			else
 				restartThenAnimate(windcaller, windcaller.idleAnimState, WindcallerAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override
