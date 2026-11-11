@@ -25,21 +25,30 @@ Quality of Life
     [❌] Commands to modify it in memory
     [❌] Save as .dat file separately so we can retain modifications
 
-[✅] You can now set a rally point on iron golem buildings
-[✅] Button for idle farm: assign nearest idle worker
-[❌] Spectators can now toggle fog of war for themselves
+Map Pack 2.2a
 
-[❌] Make food able to be sold at custom buildings
-[❌] Update map pack link?
+Download: https://drive.google.com/file/d/1nST78mPb42F8TWFcDB_pcBLeeOM9Uyn6/view
+
+- Summoner's Rift is now credited to Shrinkiroo
+- Fixed sandbox mode being set for some maps
+- Fixed the rtsmap.json version numbers and incorrect labels
+- Throne's Path:
+	- Neutral armies no longer spawn until 10mins after match start
+	- Player units no longer get removed at the corners of the map
+
+[✅] You can now set a rally point on iron golem buildings
+[✅] Farms now have a button to assign the nearest idle worker to them
+[✅] Spectators can now toggle fog of war for themselves
 
 Bugfixes
 --------
 [✅] The Wretched Wraith's snow no longer breaks portal blocks
-[🟡] The diplomacy menu no longer reveals your opponent's faction when `hideEnemyPicks` is on
+[✅] Spiders no longer get stuck on overhangs like on the spider cave structure
+[✅] Reduced the occurrence of missing chunks in fog of war when render distance is low
+[✅] Bees can now be produced in custom buildings
+[✅] Food can now be sold at custom item shops
+
 [❌] Sparta and Tophu's crashes
-[🟡] Reduced the occurrence of missing chunks in fog of war when render distance is low
-[❌] Spider pathfinding still bad
-[❌]
 
 Languages
 ---------

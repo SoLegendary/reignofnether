@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -191,10 +192,15 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                     Item item = ForgeRegistries.ITEMS.getValue(itemId);
 
                     UnitItem unitItem = ItemUtil.getUnitItem(item);
-                    if (stockedItems.stream().map(si -> si.item).toList().contains(unitItem))
-                        continue;
+                    // getUnitItem(Item) excludes edible food, which is constructed on demand rather than registered in UnitItems
+                    if (unitItem == null && ItemUtil.isEdibleFood(item))
+                        unitItem = new EdibleFoodItem(item);
 
                     if (unitItem == null)
+                        continue;
+
+                    String descId = unitItem.descId;
+                    if (stockedItems.stream().anyMatch(si -> si.item.descId.equals(descId)))
                         continue;
 
                     int buyCost = unitItem.buyCost;
