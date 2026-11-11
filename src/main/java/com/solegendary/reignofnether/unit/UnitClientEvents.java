@@ -556,13 +556,13 @@ public class UnitClientEvents {
         }
     }
 
-    public static void syncWorkerUnit(int entityId, boolean isBuilding, boolean isGathering, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
+    public static void syncWorkerUnit(int entityId, boolean isBuilding, boolean isGathering, ResourceName gatherName, BlockPos gatherPos, int gatherTicks, @Nullable BlockPos farmPos) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof WorkerUnit workerUnit) {
                     workerUnit.getBuildRepairGoal().setIsBuildingServerside(isBuilding);
                     workerUnit.getGatherResourceGoal().setIsGatheringServerside(isGathering);
-                    workerUnit.getGatherResourceGoal().syncFromServer(gatherName, gatherPos, gatherTicks);
+                    workerUnit.getGatherResourceGoal().syncFromServer(gatherName, gatherPos, gatherTicks, farmPos);
                 }
             }
         }

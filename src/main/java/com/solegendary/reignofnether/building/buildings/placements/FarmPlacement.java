@@ -5,7 +5,11 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 
 import net.minecraft.core.BlockPos;
@@ -61,12 +65,45 @@ public class FarmPlacement extends BuildingPlacement {
 
     @Nullable
     private WorkerUnit getWorker() {
-        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+        List<LivingEntity> units = level.isClientSide() ?
+                new ArrayList<>(UnitClientEvents.getAllUnits()) : UnitServerEvents.getAllUnits();
+        for (LivingEntity le : units) {
             if (le instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal().getTargetFarm() == this) {
                 return workerUnit;
             }
         }
         return null;
+    }
+
+    public boolean hasWorker() {
+        return getWorker() != null;
+    }
+
+    public void assignNearestIdleWorker() {
+        if (level.isClientSide() || !isBuilt || hasWorker())
+            return;
+
+        WorkerUnit nearest = null;
+        double nearestDist = Double.MAX_VALUE;
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof WorkerUnit worker && le instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                le.level() == level && WorkerUnit.isIdle(worker)) {
+                double dist = le.distanceToSqr(centrePos.getCenter());
+                if (dist < nearestDist) {
+                    nearest = worker;
+                    nearestDist = dist;
+                }
+            }
+        }
+        if (nearest == null)
+            return;
+
+        GatherResourcesGoal goal = nearest.getGatherResourceGoal();
+        goal.setTargetResourceName(ResourceName.FOOD);
+        goal.setMoveTarget(centrePos);
+        goal.setTargetFarm(this);
+        if (Unit.atMaxResources((Unit) nearest))
+            goal.saveAndReturnResources();
     }
 
     // tick crop growth here to have precise control over growth speed with no RNG

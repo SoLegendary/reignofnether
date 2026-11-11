@@ -71,6 +71,10 @@ public final class GridAStar {
         int footprintRadius = view.footprintRadius();
         float fireCost = view.fireCost();
 
+        // a climber already hanging under an overhang must not keep the start as its best-effort result, or an
+        // unreachable goal yields an empty path and it stays stuck; let any non-overhang node replace it
+        if (hangsUnderOverhang(view, mob, fireCost, startRec)) bestH = Float.MAX_VALUE;
+
         while (!open.isEmpty() && expanded < maxNodes) {
             NodeRec cur = open.poll();
             if (cur.closed) continue;
@@ -81,7 +85,9 @@ public final class GridAStar {
             if (dxg * dxg + dzg * dzg <= reachSq && Math.abs(dyg) <= 1) {
                 return new Result(reconstruct(cur), true, expanded);
             }
-            if (cur.h < bestH) { bestH = cur.h; best = cur; }
+            // best-effort fallback for an unreachable goal: never end the path hanging under an overhang, since
+            // the unit would sit there pressed into the wall and every repath would pick the same dead end
+            if (cur.h < bestH && !hangsUnderOverhang(view, mob, fireCost, cur)) { bestH = cur.h; best = cur; }
 
             for (int d = 0; d < GridNeighbors.COUNT; d++) {
                 int nx = cur.x + DX[d];
@@ -170,6 +176,8 @@ public final class GridAStar {
 
                     if (!GridNeighbors.climbColumnClear(view, nx, ny, nz)) continue;
                     if (!GridNeighbors.adjacentToClimbWall(view, nx, ny, nz)) continue;
+                    // the real body is wider than the 1-wide column: don't climb into an overhang it would bump
+                    if (CLIMB_DY[c] == 1 && !GridNeighbors.climbRiseClear(view, cur.x, cur.y, cur.z)) continue;
 
                     relax(all, open, nx, ny, nz, cur.g + GridNeighbors.CLIMB_COST, gx, gy, gz, cur);
                 }
@@ -194,6 +202,13 @@ public final class GridAStar {
             nb.parent = cur;
             open.add(nb);
         }
+    }
+
+    // A wall-cling cell (no ground under it) that sits below an overhang the climber can't get past.
+    private static boolean hangsUnderOverhang(WalkabilityView view, MobilityClass mob, float fireCost, NodeRec n) {
+        if (!view.canClimb()) return false;
+        if (!Float.isInfinite(mob.costFor(mob, view.kindAt(n.x, n.y, n.z), fireCost))) return false; // has ground
+        return GridNeighbors.underOverhang(view, n.x, n.y, n.z);
     }
 
     // Can a unit rest with its feet in this cell? Walkable terrain plus the footprint/headroom gate the main

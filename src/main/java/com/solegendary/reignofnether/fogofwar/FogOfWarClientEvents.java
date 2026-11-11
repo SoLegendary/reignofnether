@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -19,6 +21,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -35,6 +38,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class FogOfWarClientEvents {
 
@@ -59,11 +63,55 @@ public class FogOfWarClientEvents {
     // cached - isEnabled() runs per quad during chunk mesh rebuilds
     private static volatile boolean localSeesFog = false;
 
+    // Mirror of the server's per-spectator fog opt-out (FogViewClientboundPacket). Never applies to RTS players.
+    private static boolean spectatorFogHidden = false;
+
     // fog shows for everyone once any RTS player exists (non-RTS players see the combined vision of all of them)
+    // unless a spectator has hidden it for themselves
     public static void refreshLocalSeesFog() {
         boolean was = localSeesFog;
-        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty();
+        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty()
+                && !(spectatorFogHidden && !PlayerClientEvents.isRTSPlayer());
         if (was != localSeesFog && enabled) resetFogChunks();
+    }
+
+    public static void setSpectatorFogHidden(boolean hidden) {
+        spectatorFogHidden = hidden;
+        if (hidden) { // the server stops sending vision updates, so don't keep stale ones around
+            brightChunks.clear();
+            edgeMasks = Map.of();
+        }
+        refreshLocalSeesFog();
+    }
+
+    public static void resetSpectatorFogHidden() {
+        spectatorFogHidden = false;
+    }
+
+    public static boolean isSpectatorFogHidden() {
+        return spectatorFogHidden && !PlayerClientEvents.isRTSPlayer();
+    }
+
+    // fog is on server-side and there is something to see through (the toggle button is pointless otherwise)
+    public static boolean canToggleSpectatorFog() {
+        return enabled && !PlayerClientEvents.rtsPlayers.isEmpty() && !PlayerClientEvents.isRTSPlayer();
+    }
+
+    public static Button getSpectatorFogButton() {
+        boolean hidden = isSpectatorFogHidden();
+        return new Button("Toggle Fog (spectator)",
+                Button.DEFAULT_ICON_SIZE,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/glass.png"),
+                null,
+                () -> hidden,
+                () -> !canToggleSpectatorFog(),
+                () -> true,
+                () -> FogViewServerboundPacket.setFogHidden(!hidden),
+                null,
+                List.of(fcs(I18n.get(hidden
+                        ? "fogofwar.reignofnether.spectator_fog_hidden"
+                        : "fogofwar.reignofnether.spectator_fog_shown")))
+        );
     }
 
     public static boolean movedToCapitol = false;

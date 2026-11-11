@@ -25,17 +25,21 @@ Quality of Life
     [❌] Commands to modify it in memory
     [❌] Save as .dat file separately so we can retain modifications
 
-[🟡] You can now set a rally point on iron golem buildings
-[❌] Button for idle farm: assign nearest idle worker
+[✅] You can now set a rally point on iron golem buildings
+[✅] Button for idle farm: assign nearest idle worker
+[❌] Spectators can now toggle fog of war for themselves
+
 [❌] Make food able to be sold at custom buildings
-[❌] Update map pack link
+[❌] Update map pack link?
 
 Bugfixes
 --------
-[🟡] The Wretched Wraith's snow no longer breaks portal blocks
+[✅] The Wretched Wraith's snow no longer breaks portal blocks
 [🟡] The diplomacy menu no longer reveals your opponent's faction when `hideEnemyPicks` is on
 [❌] Sparta and Tophu's crashes
-[❌] Fog chunks unreliable now?
+[🟡] Reduced the occurrence of missing chunks in fog of war when render distance is low
+[❌] Spider pathfinding still bad
+[❌]
 
 Languages
 ---------

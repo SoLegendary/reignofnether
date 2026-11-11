@@ -168,7 +168,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         return Math.max(super.getMinDistToRecalculateSqr(), REACH_RANGE * REACH_RANGE);
     }
 
-    public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
+    public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks, @Nullable BlockPos farmPos) {
+        this.data.targetFarm = farmPos == null ? null : BuildingUtils.findBuilding(true, farmPos);
         this.data.targetResourceName = gatherName;
         this.data.gatherTarget = gatherPos;
         this.gatherTicksLeft = gatherTicks;

@@ -87,6 +87,7 @@ public enum UnitAction {
     TOGGLE_SPIDER_CLIMBING,
     MILITIA_USE_SWORD,
     MILITIA_USE_BOW,
+    ASSIGN_WORKER,
 
     // hero abilities
     BLOOD_MOON,

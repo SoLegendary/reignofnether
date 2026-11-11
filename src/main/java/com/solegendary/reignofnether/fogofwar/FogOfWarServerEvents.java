@@ -124,11 +124,67 @@ public class FogOfWarServerEvents {
         startingPlayers.addAll(names);
     }
 
+    // Spectators (non-RTS players) who have chosen to see no fog. Purely per-player: every fog check goes
+    // through isFogActiveFor(player), so nothing about any other player's vision changes.
+    private static final Set<UUID> fogHiddenPlayers = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Long> lastFogViewToggleTick = new ConcurrentHashMap<>();
+    private static final int FOG_VIEW_TOGGLE_MIN_TICKS = 20;
+
     // Fog applies to everyone once any RTS player exists: RTS players see through their own/allied vision,
-    // non-RTS players (spectators etc.) see through the combined vision of all RTS players.
+    // non-RTS players (spectators etc.) see through the combined vision of all RTS players, unless they hid it.
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
-        return PlayerServerEvents.isGameActive() || startingPlayers.contains(player.getName().getString());
+        String name = player.getName().getString();
+        if (isFogHiddenFor(player, name)) return false;
+        return PlayerServerEvents.isGameActive() || startingPlayers.contains(name);
+    }
+
+    // RTS players (and those about to become one) can never opt out, even if they were in the set earlier
+    private static boolean isFogHiddenFor(ServerPlayer player, String name) {
+        return !fogHiddenPlayers.isEmpty() && fogHiddenPlayers.contains(player.getUUID())
+                && !PlayerServerEvents.isRTSPlayer(name) && !startingPlayers.contains(name);
+    }
+
+    public static boolean isFogHiddenFor(ServerPlayer player) {
+        return isFogHiddenFor(player, player.getName().getString());
+    }
+
+    // Called by FogViewServerboundPacket after it has checked the sender is a non-RTS player.
+    public static void setFogHiddenFor(ServerPlayer sp, boolean hidden) {
+        if (serverLevel == null || PlayerServerEvents.isRTSPlayer(sp.getName().getString())) return;
+
+        UUID uuid = sp.getUUID();
+        long now = serverLevel.getGameTime();
+        Long last = lastFogViewToggleTick.get(uuid);
+        if (last != null && now - last < FOG_VIEW_TOGGLE_MIN_TICKS) {
+            // still tell the client the real state so its button doesn't drift
+            FogViewClientboundPacket.send(sp, fogHiddenPlayers.contains(uuid));
+            return;
+        }
+        boolean changed = hidden ? fogHiddenPlayers.add(uuid) : fogHiddenPlayers.remove(uuid);
+        if (!changed) {
+            FogViewClientboundPacket.send(sp, hidden);
+            return;
+        }
+        lastFogViewToggleTick.put(uuid, now);
+        ReignOfNether.LOGGER.info("[FogOfWar] {} {} fog for themselves", sp.getName().getString(),
+                hidden ? "hid" : "unhid");
+
+        // Hiding: the next fog tick sees the player is no longer fog-active, drops their vision and resends
+        // live chunks/entity tracking (see updatePlayerBrightChunks).
+        // Unhiding: the client holds live data for every chunk, so serve the snapshot for the fogged ones now;
+        // the next fog tick then computes their vision and resends the live chunks they can see.
+        if (!hidden && enabled && sp.serverLevel() == serverLevel) {
+            int viewDist = serverLevel.getServer().getPlayerList().getViewDistance();
+            ChunkPos center = sp.chunkPosition();
+            for (int dx = -viewDist; dx <= viewDist; dx++) {
+                for (int dz = -viewDist; dz <= viewDist; dz++) {
+                    LevelChunk chunk = serverLevel.getChunkSource().getChunk(center.x + dx, center.z + dz, false);
+                    if (chunk != null) sendFoggedChunk(sp, chunk);
+                }
+            }
+        }
+        FogViewClientboundPacket.send(sp, hidden);
     }
 
     // A chunk is "live" (receives all updates unfiltered) only when fully inside the vision circle.
@@ -300,6 +356,8 @@ public class FogOfWarServerEvents {
     public static void onPlayerDisconnect(UUID playerId) {
         clearPlayerVision(playerId);
         lastChunkRequestTick.remove(playerId);
+        fogHiddenPlayers.remove(playerId); // the client's mirror also resets on logout
+        lastFogViewToggleTick.remove(playerId);
     }
 
     // drop bookkeeping so re-entering orthoview later resends a full vision set
@@ -338,6 +396,8 @@ public class FogOfWarServerEvents {
         playerEdgeMasks.clear();
         pendingResends.clear();
         lastChunkRequestTick.clear();
+        fogHiddenPlayers.clear();
+        lastFogViewToggleTick.clear();
         revealedPlayerNames.clear();
         revealedUnitExpiryTick.clear();
         neutralFogUnits.clear();

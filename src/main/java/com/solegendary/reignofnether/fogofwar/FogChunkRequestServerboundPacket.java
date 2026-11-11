@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 // cache. The server answers with the same data it would have sent when the chunk was first loaded.
 public class FogChunkRequestServerboundPacket {
 
-    public static final int MAX_CHUNKS_PER_REQUEST = 32;
+    public static final int MAX_CHUNKS_PER_REQUEST = 64;
 
     private final List<ChunkPos> chunks;
 

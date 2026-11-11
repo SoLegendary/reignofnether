@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -1846,10 +1847,18 @@ public class HudClientEvents {
             chatButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
             renderedButtons.add(chatButton);
         }
+        // ----------------------------------------------
+        // Spectator fog toggle (same slot as army button, which spectators never have)
+        // ----------------------------------------------
+        Button spectatorFogButton = FogOfWarClientEvents.getSpectatorFogButton();
+        if (!spectatorFogButton.isHidden.get()) {
+            spectatorFogButton.render(evt.getGuiGraphics(), screenWidth - (spectatorFogButton.iconSize * 2), 100, mouseX, mouseY);
+            renderedButtons.add(spectatorFogButton);
+        }
         // -------------------------
         // Select all military units
         // -------------------------
-        if (!armyButton.isHidden.get()) {
+        else if (!armyButton.isHidden.get()) {
             int xi = screenWidth - (armyButton.iconSize * 2);
             int yi = 100;
             armyButton.render(evt.getGuiGraphics(), xi, yi, mouseX, mouseY);
