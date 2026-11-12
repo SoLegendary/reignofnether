@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1c
+1.20.1-1.5.1d
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -39,6 +39,7 @@ Download: https://drive.google.com/file/d/1nST78mPb42F8TWFcDB_pcBLeeOM9Uyn6/view
 [✅] You can now set a rally point on iron golem buildings
 [✅] Farms now have a button to assign the nearest idle worker to them
 [✅] Spectators can now toggle fog of war for themselves
+[✅] Dead coral blocks now convert to basalt
 
 Bugfixes
 --------
@@ -47,8 +48,9 @@ Bugfixes
 [✅] Reduced the occurrence of missing chunks in fog of war when render distance is low
 [✅] Bees can now be produced in custom buildings
 [✅] Food can now be sold at custom item shops
+[✅] Chickens now render at much further distances while in RTS camera
+[✅] Animals no longer path into water, swim much faster and will try to go back to land if they are in water
 
-[❌] Sparta and Tophu's crashes
 
 Languages
 ---------

@@ -101,7 +101,9 @@ public class FogOfWarClientEvents {
         boolean hidden = isSpectatorFogHidden();
         return new Button("Toggle Fog (spectator)",
                 Button.DEFAULT_ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/glass.png"),
+                hidden
+                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png")
+                        : ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_eye.png"),
                 null,
                 () -> hidden,
                 () -> !canToggleSpectatorFog(),
