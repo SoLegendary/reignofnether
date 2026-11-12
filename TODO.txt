@@ -38,8 +38,10 @@ Download: https://drive.google.com/file/d/1nST78mPb42F8TWFcDB_pcBLeeOM9Uyn6/view
 
 [✅] You can now set a rally point on iron golem buildings
 [✅] Farms now have a button to assign the nearest idle worker to them
+    - Wheat farms prioritise farmers and non-profession villagers
 [✅] Spectators can now toggle fog of war for themselves
 [✅] Dead coral blocks now convert to basalt
+
 
 Bugfixes
 --------
