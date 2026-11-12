@@ -167,6 +167,30 @@ public final class GridNeighbors {
         return false;
     }
 
+    // Climbers are pathed 1-wide (see RtsPathfinder.footprintRadiusFor) but the spider body is ~1.4 wide, so it
+    // also overlaps the 8 cells around its column. Rising from y to y+1 is blocked if any of those cells is solid
+    // at the new level but wasn't at the old one: a block jutting out over the climb column's neighbours that the
+    // single-column check (climbColumnClear) can't see. A neighbour solid at BOTH levels is just the wall we're
+    // clinging to, or a pillar, and doesn't stop the rise.
+    public static boolean climbRiseClear(WalkabilityView view, int x, int y, int z) {
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dz == 0) continue;
+                if (view.solidAt(x + dx, y + 1, z + dz) && !view.solidAt(x + dx, y, z + dz)) return false;
+            }
+        return true;
+    }
+
+    // A cell hangs under an overhang if the wall carries on above it (a cardinal neighbour is solid at the next
+    // level, so this isn't just the top of the wall) yet the climber can't rise any further. Such a cell is a
+    // dead end: the unit can only hang there pressed against the wall with nothing left to climb.
+    public static boolean underOverhang(WalkabilityView view, int x, int y, int z) {
+        boolean wallContinues = view.solidAt(x + 1, y + 1, z) || view.solidAt(x - 1, y + 1, z)
+                             || view.solidAt(x, y + 1, z + 1) || view.solidAt(x, y + 1, z - 1);
+        if (!wallContinues) return false;
+        return !climbColumnClear(view, x, y + 1, z) || !climbRiseClear(view, x, y, z);
+    }
+
     // A diagonal XZ move is legal only if both flanking orthogonal cells are passable (no corner cutting).
     public static boolean diagonalBlocked(WalkabilityView view, MobilityClass mob, int fromX, int toY, int fromZ, int dx, int dz) {
         if (dx == 0 || dz == 0) return false;

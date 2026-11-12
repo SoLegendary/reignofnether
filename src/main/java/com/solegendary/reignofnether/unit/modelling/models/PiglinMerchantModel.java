@@ -158,6 +158,7 @@ public class PiglinMerchantModel<T extends Entity> extends KeyframeHierarchicalM
 		else {
 			restartThenAnimate(merchant, merchant.idleAnimState, PiglinMerchantAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

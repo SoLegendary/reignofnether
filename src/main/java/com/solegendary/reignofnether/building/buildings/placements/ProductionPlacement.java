@@ -172,7 +172,7 @@ public class ProductionPlacement extends BuildingPlacement {
         return entity;
     }
 
-    protected void setDelayedRally(Unit unit) {
+    public void setDelayedRally(Unit unit) {
         Entity entity = (Entity) unit;
         LivingEntity rallyEntity = getRallyPointEntity();
         BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();

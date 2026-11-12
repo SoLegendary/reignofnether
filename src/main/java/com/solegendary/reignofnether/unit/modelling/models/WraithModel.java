@@ -96,6 +96,7 @@ public class WraithModel<T extends Entity> extends KeyframeHierarchicalModel<T> 
 		else {
 			restartThenAnimate(wraith, wraith.idleAnimState, WraithAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

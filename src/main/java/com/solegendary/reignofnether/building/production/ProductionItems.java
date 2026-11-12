@@ -192,7 +192,8 @@ public class ProductionItems {
         GRIZZLY_BEAR,
         PANDA,
         WOLF,
-        LLAMA
+        LLAMA,
+        BEE
     );
 
     @Nullable

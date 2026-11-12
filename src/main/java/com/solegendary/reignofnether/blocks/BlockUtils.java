@@ -106,6 +106,7 @@ public class BlockUtils {
                 !(bsBelow.getBlock() instanceof TrapDoorBlock) &&
                 !(bsBelow.getBlock() instanceof SculkSensorBlock) &&
                 !(bs.getBlock() instanceof SkullBlock) &&
+                !(bs.getBlock() instanceof NetherPortalBlock) &&
                 (!BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), pos.below()) || !(bs.getBlock() instanceof BushBlock)) &&
                 (!BuildingUtils.isPosInsideFarm(level.isClientSide(), pos.below()) || bsBelow.getBlock().getDescriptionId().contains("_log"));
     }

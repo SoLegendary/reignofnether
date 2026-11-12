@@ -132,7 +132,7 @@ public class GameRuleRegistrar {
         );
         // Difference in level that animals can spawn around capitols at
         RANDOM_ITEM_DROPS = GameRules.register("randomItemDrops", GameRules.Category.DROPS,
-                boundedInt(1, 0, 3)
+                boundedInt(2, 0, 3)
         );
     }
 

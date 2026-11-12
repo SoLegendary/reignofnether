@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.player.PlayerColors;
@@ -63,6 +65,8 @@ public abstract class AbstractPlayerDisplay {
     public static final ResourceLocation defaultIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
 
     private void renderPlayer(GuiGraphics guiGraphics, int x, int y) {
+        if (MC.player == null) return;
+
         // render colored background
         MyRenderer.renderFrameWithBg(guiGraphics,
                 x, y,
@@ -72,6 +76,12 @@ public abstract class AbstractPlayerDisplay {
         );
         // render faction icon
         ResourceLocation factionIcon = faction.icon;
+
+        String localPlayerName = MC.player.getName().getString();
+        if (GameruleClient.hideEnemyPicks && !AlliancesClient.isAlliedOrOwned(localPlayerName, this.playerName)) {
+            factionIcon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
+        }
+
         if(factionIcon != null) {
             MyRenderer.renderIcon(guiGraphics,
                     factionIcon,

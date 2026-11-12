@@ -186,6 +186,7 @@ public class MarauderModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		else {
 			restartThenAnimate(marauder, marauder.idleAnimState, MarauderAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

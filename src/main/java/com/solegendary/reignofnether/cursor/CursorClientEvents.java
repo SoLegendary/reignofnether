@@ -13,6 +13,8 @@ import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.unit.NonUnitClientEvents;
@@ -37,6 +39,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -258,6 +262,8 @@ public class CursorClientEvents {
                     ResourceSources.getFromBlockPos(preselectedBlockPos, MC.level) == null)
                 preselectedBlockPos = preselectedBlockPos.above();
             else if (ResourceSources.GATHERABLE_PLANTS.contains(MC.level.getBlockState(preselectedBlockPos.above()).getBlock()))
+                preselectedBlockPos = preselectedBlockPos.above();
+            else if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit && isHarvestableCropAbove(preselectedBlockPos))
                 preselectedBlockPos = preselectedBlockPos.above();
         }
 
@@ -525,6 +531,18 @@ public class CursorClientEvents {
                 }
             }
         }
+    }
+
+    // is bp loose farmland/soul sand (not part of any building) with a fully grown food crop on top of it?
+    private static boolean isHarvestableCropAbove(BlockPos bp) {
+        if (MC.level == null || BuildingUtils.isPosInsideAnyBuilding(true, bp))
+            return false;
+        Block block = MC.level.getBlockState(bp).getBlock();
+        if (block != Blocks.FARMLAND && block != Blocks.SOUL_SAND)
+            return false;
+        BlockState bsAbove = MC.level.getBlockState(bp.above());
+        ResourceSource crop = ResourceSources.getFromBlockState(bsAbove);
+        return crop != null && crop.resourceName == ResourceName.FOOD && crop.resourceValue > 0 && crop.blockStateTest.test(bsAbove);
     }
 
     // returns the exact spot that the cursorWorldPos ray meets a solid block

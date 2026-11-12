@@ -151,6 +151,7 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 		else {
 			restartThenAnimate(wretchedWraith, wretchedWraith.idleAnimState, WretchedWraithAnimations.IDLE, ageInTicks);
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

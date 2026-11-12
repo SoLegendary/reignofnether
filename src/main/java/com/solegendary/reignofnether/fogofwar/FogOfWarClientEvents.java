@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -19,13 +21,16 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,6 +38,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class FogOfWarClientEvents {
 
@@ -57,11 +63,57 @@ public class FogOfWarClientEvents {
     // cached - isEnabled() runs per quad during chunk mesh rebuilds
     private static volatile boolean localSeesFog = false;
 
+    // Mirror of the server's per-spectator fog opt-out (FogViewClientboundPacket). Never applies to RTS players.
+    private static boolean spectatorFogHidden = false;
+
     // fog shows for everyone once any RTS player exists (non-RTS players see the combined vision of all of them)
+    // unless a spectator has hidden it for themselves
     public static void refreshLocalSeesFog() {
         boolean was = localSeesFog;
-        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty();
+        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty()
+                && !(spectatorFogHidden && !PlayerClientEvents.isRTSPlayer());
         if (was != localSeesFog && enabled) resetFogChunks();
+    }
+
+    public static void setSpectatorFogHidden(boolean hidden) {
+        spectatorFogHidden = hidden;
+        if (hidden) { // the server stops sending vision updates, so don't keep stale ones around
+            brightChunks.clear();
+            edgeMasks = Map.of();
+        }
+        refreshLocalSeesFog();
+    }
+
+    public static void resetSpectatorFogHidden() {
+        spectatorFogHidden = false;
+    }
+
+    public static boolean isSpectatorFogHidden() {
+        return spectatorFogHidden && !PlayerClientEvents.isRTSPlayer();
+    }
+
+    // fog is on server-side and there is something to see through (the toggle button is pointless otherwise)
+    public static boolean canToggleSpectatorFog() {
+        return enabled && !PlayerClientEvents.rtsPlayers.isEmpty() && !PlayerClientEvents.isRTSPlayer();
+    }
+
+    public static Button getSpectatorFogButton() {
+        boolean hidden = isSpectatorFogHidden();
+        return new Button("Toggle Fog (spectator)",
+                Button.DEFAULT_ICON_SIZE,
+                hidden
+                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png")
+                        : ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_eye.png"),
+                null,
+                () -> hidden,
+                () -> !canToggleSpectatorFog(),
+                () -> true,
+                () -> FogViewServerboundPacket.setFogHidden(!hidden),
+                null,
+                List.of(fcs(I18n.get(hidden
+                        ? "fogofwar.reignofnether.spectator_fog_hidden"
+                        : "fogofwar.reignofnether.spectator_fog_shown")))
+        );
     }
 
     public static boolean movedToCapitol = false;
@@ -173,6 +225,61 @@ public class FogOfWarClientEvents {
         for (ChunkPos cp : oldM.keySet())
             if (!newM.containsKey(cp)) changed.add(cp); // removed -> reverts to full-bright fallback
         return changed;
+    }
+
+    // Chunks that are entirely missing from the client's chunk cache are re-requested from the server (see
+    // FogChunkRequestServerboundPacket). Fully bright chunks are never requested - vanilla chunk tracking
+    // delivers those - only dark and edge ones.
+    private static final int CHUNK_SCAN_TICKS = 20;
+    private static final int MAX_CHUNK_REQUESTS_PER_SCAN = 8; // per CHUNK_SCAN_TICKS, ie. per second
+    private static final int CHUNK_REQUEST_GRACE_TICKS = 60; // a chunk must stay missing this long before asking, as it may just be in transit
+    private static final int CHUNK_REQUEST_COOLDOWN_TICKS = 100; // before asking again for a chunk the server didn't deliver
+
+    // missing chunk -> client tick at which it may next be requested
+    private static final Map<ChunkPos, Long> nextChunkRequestTick = new HashMap<>();
+    private static long clientTicks = 0;
+
+    public static void resetChunkRequests() {
+        nextChunkRequestTick.clear();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END) return;
+        if (MC.level == null || MC.player == null || !isEnabled()) {
+            resetChunkRequests();
+            return;
+        }
+        clientTicks++;
+        if (clientTicks % CHUNK_SCAN_TICKS != 0) return;
+
+        ChunkPos center = MC.player.chunkPosition();
+        int r = MC.options.getEffectiveRenderDistance();
+        Map<ChunkPos, long[]> masks = edgeMasks;
+        Set<ChunkPos> missing = new HashSet<>();
+        List<ChunkPos> due = new ArrayList<>();
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                ChunkPos cp = new ChunkPos(center.x + dx, center.z + dz);
+                if (MC.level.getChunkSource().getChunk(cp.x, cp.z, ChunkStatus.FULL, false) != null) continue;
+                if (brightChunks.contains(cp) && !masks.containsKey(cp)) continue; // fully bright
+                missing.add(cp);
+                Long next = nextChunkRequestTick.get(cp);
+                if (next == null)
+                    nextChunkRequestTick.put(cp, clientTicks + CHUNK_REQUEST_GRACE_TICKS);
+                else if (clientTicks >= next)
+                    due.add(cp);
+            }
+        }
+        nextChunkRequestTick.keySet().retainAll(missing); // forget chunks that have arrived or left range
+
+        // nearest first
+        due.sort(Comparator.comparingInt(cp -> Math.max(Math.abs(cp.x - center.x), Math.abs(cp.z - center.z))));
+        if (due.size() > MAX_CHUNK_REQUESTS_PER_SCAN)
+            due = due.subList(0, MAX_CHUNK_REQUESTS_PER_SCAN);
+        for (ChunkPos cp : due)
+            nextChunkRequestTick.put(cp, clientTicks + CHUNK_REQUEST_COOLDOWN_TICKS);
+        FogChunkRequestServerboundPacket.requestChunks(due);
     }
 
     @SubscribeEvent

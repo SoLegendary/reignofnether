@@ -306,6 +306,8 @@ public class PlayerClientEvents {
         BuildingClientEvents.getBuildings().clear();
         FogOfWarClientEvents.movedToCapitol = false;
         FogOfWarClientEvents.brightChunks.clear();
+        FogOfWarClientEvents.resetSpectatorFogHidden();
+        FogOfWarClientEvents.resetChunkRequests();
         OrthoviewClientEvents.unlockCam();
         HeroClientEvents.fallenHeroes.clear();
         PlayerDisplayClientEvents.resetDisplay();

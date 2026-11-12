@@ -4,9 +4,20 @@ import com.solegendary.reignofnether.ability.heroAbilities.enchanter.CivilEnchan
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.monsters.PumpkinFarm;
+import com.solegendary.reignofnether.building.buildings.piglins.NetherwartFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.WheatFarm;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
+import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -61,12 +72,70 @@ public class FarmPlacement extends BuildingPlacement {
 
     @Nullable
     private WorkerUnit getWorker() {
-        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+        List<LivingEntity> units = level.isClientSide() ?
+                new ArrayList<>(UnitClientEvents.getAllUnits()) : UnitServerEvents.getAllUnits();
+        for (LivingEntity le : units) {
             if (le instanceof WorkerUnit workerUnit && workerUnit.getGatherResourceGoal().getTargetFarm() == this) {
                 return workerUnit;
             }
         }
         return null;
+    }
+
+    public boolean hasWorker() {
+        return getWorker() != null;
+    }
+
+    // each farm type can only call for workers of its own faction
+    private boolean isWorkerOfFarmFaction(WorkerUnit worker) {
+        if (getBuilding() instanceof WheatFarm)
+            return worker instanceof VillagerUnit;
+        if (getBuilding() instanceof PumpkinFarm)
+            return worker instanceof ZombieVillagerUnit;
+        if (getBuilding() instanceof NetherwartFarm)
+            return worker instanceof GruntUnit;
+        return true;
+    }
+
+    // lower is better; wheat farms prefer veteran farmers, then farmers, then no profession, then any other profession
+    private int getWorkerPriority(WorkerUnit worker) {
+        if (!(worker instanceof VillagerUnit villager) || !(getBuilding() instanceof WheatFarm))
+            return 0;
+        VillagerUnitProfession profession = villager.getUnitProfession();
+        if (profession == VillagerUnitProfession.FARMER)
+            return villager.isVeteran() ? 0 : 1;
+        return profession == VillagerUnitProfession.NONE ? 2 : 3;
+    }
+
+    // serverside only: picks the best idle worker by priority, then by distance
+    public void assignNearestIdleWorker() {
+        if (level.isClientSide() || !isBuilt || hasWorker())
+            return;
+
+        WorkerUnit nearest = null;
+        int nearestPriority = Integer.MAX_VALUE;
+        double nearestDist = Double.MAX_VALUE;
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof WorkerUnit worker && le instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+                le.level() == level && isWorkerOfFarmFaction(worker) && WorkerUnit.isIdle(worker)) {
+                int priority = getWorkerPriority(worker);
+                double dist = le.distanceToSqr(centrePos.getCenter());
+                if (priority < nearestPriority || (priority == nearestPriority && dist < nearestDist)) {
+                    nearest = worker;
+                    nearestPriority = priority;
+                    nearestDist = dist;
+                }
+            }
+        }
+        if (nearest == null)
+            return;
+
+        GatherResourcesGoal goal = nearest.getGatherResourceGoal();
+        goal.setTargetResourceName(ResourceName.FOOD);
+        goal.setMoveTarget(centrePos);
+        goal.setTargetFarm(this);
+        if (Unit.atMaxResources((Unit) nearest))
+            goal.saveAndReturnResources();
     }
 
     // tick crop growth here to have precise control over growth speed with no RNG

@@ -37,6 +37,8 @@ public class NetherBlocks {
                 return Blocks.NETHERRACK.defaultBlockState();
             else if (descId.contains("terracotta") && !descId.contains("glazed_terracotta"))
                 return Blocks.NETHERRACK.defaultBlockState();
+            else if (descId.contains("dead") && descId.contains("coral_block"))
+                return Blocks.BASALT.defaultBlockState();
         }
         return null;
     }

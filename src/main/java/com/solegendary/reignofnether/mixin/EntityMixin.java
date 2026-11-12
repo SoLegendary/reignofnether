@@ -54,14 +54,16 @@ public abstract class EntityMixin {
     private void shouldRenderAtSqrDistance(
             double pDistance, CallbackInfoReturnable<Boolean> cir
     ) {
-        if (!OrthoviewClientEvents.isEnabled() || this.getType() != EntityType.ITEM)
+        boolean isItem = this.getType() == EntityType.ITEM;
+        boolean isChicken = this.getType() == EntityType.CHICKEN;
+        if (!OrthoviewClientEvents.isEnabled() || (!isItem && !isChicken))
             return;
 
         double d0 = this.bb.getSize();
         if (Double.isNaN(d0)) {
             d0 = 1.0D;
         }
-        // make item entities render at 4x normal distance
+        // make items and chicken entities render at 4x normal distance
         d0 *= 64.0D * viewScale * 4;
         cir.setReturnValue(pDistance < d0 * d0);
     }

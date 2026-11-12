@@ -2,9 +2,11 @@ package com.solegendary.reignofnether.building.buildings.shared;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
+import com.solegendary.reignofnether.ability.abilities.AssignWorker;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 
 import net.minecraft.core.BlockPos;
@@ -15,6 +17,8 @@ public abstract class AbstractFarm extends Building {
     public AbstractFarm(String structureName, ResourceCost cost, boolean isCapitol) {
         super(structureName, cost, isCapitol);
         this.maxHealth = 65d;
+
+        this.abilities.add(new AssignWorker(), Keybindings.abilitySlot1);
     }
 
     @Override

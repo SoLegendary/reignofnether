@@ -216,6 +216,7 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 				restartThenAnimate(wildfire, wildfire.idleAnimState, WildfireAnimations.IDLE, ageInTicks);
 			}
 		}
+		finishPose(entity, ageInTicks);
 	}
 
 	@Override

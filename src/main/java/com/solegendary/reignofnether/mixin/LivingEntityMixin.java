@@ -74,6 +74,17 @@ public abstract class LivingEntityMixin extends Entity {
                 ParticleUtil.spawnFlyingCloudParticles(this);
     }
 
+    // huntable animals are vanilla entities so can't override this like our own Unit subclasses do
+    @Inject(
+            method = "getWaterSlowDown",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    protected void getWaterSlowDown(CallbackInfoReturnable<Float> cir) {
+        if (ResourceSources.isHuntableAnimal((LivingEntity) (Object) this))
+            cir.setReturnValue(0.90F);
+    }
+
     @Inject(
             method = "onChangedBlock",
             at = @At("TAIL")
