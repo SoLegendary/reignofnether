@@ -19,6 +19,7 @@ public class ResourceCosts {
     public static final ResourceCost SKELETON = new ResourceCost(ID, "SKELETON");
     public static final ResourceCost STRAY = new ResourceCost(ID, "STRAY");
     public static final ResourceCost BOGGED = new ResourceCost(ID, "BOGGED");
+    public static final ResourceCost SKELETON_VANGUARD = new ResourceCost(ID, "SKELETON_VANGUARD");
     public static final ResourceCost HUSK = new ResourceCost(ID, "HUSK");
     public static final ResourceCost DROWNED = new ResourceCost(ID, "DROWNED");
     public static final ResourceCost SPIDER = new ResourceCost(ID, "SPIDER");
@@ -231,6 +232,7 @@ public class ResourceCosts {
         SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON);
         STRAY.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRAY);
         BOGGED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BOGGED);
+        SKELETON_VANGUARD.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON_VANGUARD);
         HUSK.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HUSK);
         DROWNED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.DROWNED);
         SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SPIDER);

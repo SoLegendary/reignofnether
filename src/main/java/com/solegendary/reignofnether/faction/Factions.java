@@ -112,6 +112,7 @@ public class Factions {
 		registerEntity(MONSTERS, EntityRegistrar.SKELETON_UNIT.get(), ProductionItems.SKELETON);
 		registerEntity(MONSTERS, EntityRegistrar.BOGGED_UNIT.get(), ProductionItems.BOGGED);
 		registerEntity(MONSTERS, EntityRegistrar.STRAY_UNIT.get(), ProductionItems.STRAY);
+		registerEntity(MONSTERS, EntityRegistrar.SKELETON_VANGUARD_UNIT.get(), ProductionItems.SKELETON_VANGUARD);
 		registerEntity(MONSTERS, EntityRegistrar.SPIDER_UNIT.get(), ProductionItems.SPIDER);
 		registerEntity(MONSTERS, EntityRegistrar.POISON_SPIDER_UNIT.get(), ProductionItems.POISON_SPIDER);
 		registerEntity(MONSTERS, EntityRegistrar.CREEPER_UNIT.get(), ProductionItems.CREEPER);

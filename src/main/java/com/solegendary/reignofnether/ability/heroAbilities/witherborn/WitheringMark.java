@@ -82,7 +82,7 @@ public class WitheringMark extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.withering_mark") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.withering_mark.stats", cooldownMax / 20, DURATION_SECONDS, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.withering_mark.stats", (int) (cooldownMax / 20), DURATION_SECONDS, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.withering_mark.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.withering_mark.tooltip2", DURATION_SECONDS)),

@@ -27,9 +27,9 @@ public class Castigation extends HeroAbility {
     public static final int HEALTH_CONVERSION_PERCENT_RANK_1 = 20;
     public static final int HEALTH_CONVERSION_PERCENT_RANK_2 = 30;
     public static final int HEALTH_CONVERSION_PERCENT_RANK_3 = 40;
-    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_1 = 10;
-    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_2 = 20;
-    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_3 = 30;
+    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_1 = 20;
+    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_2 = 30;
+    public static final int COOLDOWN_REDUCTION_PERCENT_RANK_3 = 40;
 
     public Castigation() {
         super(3, 0, UnitAction.CASTIGATION_TOGGLE, 0, 0, 0, false);

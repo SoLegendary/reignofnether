@@ -35,6 +35,8 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
 
     // the animation applied during the current setupAnim; set by animateWalk/restartThenAnimate and consumed by finishPose
     private AnimationDefinition currentPoseSource = null;
+    // set by restart() when any animation restarts during the current setupAnim; consumed by finishPose
+    private boolean poseRestarted = false;
 
     private static class PoseBlend {
         AnimationDefinition lastSource = null;
@@ -42,6 +44,8 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
         float[] blendFromPose = null;
         float blendStartTicks = 0;
         boolean blending = false;
+        float walkWeight = 0; // how much of the walk layer is applied over idle, 0-1
+        float lastTicks = 0; // ageInTicks of the previous setupAnim
     }
 
     public KeyframeHierarchicalModel() { this(RenderType::entityCutoutNoCull); }
@@ -50,17 +54,86 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
         super(p_170623_);
     }
 
+    private static final float WALK_LIMB_SWING_THRESHOLD = 0.001f;
+
+    // scratch poses for the idle base layer, only valid within a single setupAnim
+    private float[] preIdlePose = null;
+    private float[] idlePose = null;
+    private Entity walkLayerEntity = null;
+    private float walkLayerAgeInTicks = 0;
+    private boolean walkLayerPending = false; // beginWalkOverIdle was called, so the next animateWalk blends over idle
+    private boolean walkLayerUsed = false;
+
+    // true while the unit is moving, or while the walk layer is still fading out after it stopped
+    protected boolean isWalking(Entity entity, float limbSwingAmount) {
+        if (entity.isInWaterOrBubble()) {
+            return false;
+        }
+        if (limbSwingAmount > WALK_LIMB_SWING_THRESHOLD) {
+            return true;
+        }
+        PoseBlend blend = poseBlends.get(entity);
+        return blend != null && blend.walkWeight > 0;
+    }
+
+    /**
+     * Call in place of restart(walkAnimState) in the walk branch, immediately before animateWalk. Idle keeps playing as a base
+     * layer (so it is never restarted from frame 0) and animateWalk fades the walk in over it by a weight that follows
+     * limbSwingAmount. Unlike scaling the walk towards the rest pose, this works when idle and walk start from different poses.
+     */
+    protected void beginWalkOverIdle(KeyframeAnimated kfa, AnimationState idleState, AnimationDefinition idleDef, float ageInTicks) {
+        List<ModelPart> parts = this.root().getAllParts().toList();
+        int size = parts.size() * FLOATS_PER_PART;
+        if (preIdlePose == null || preIdlePose.length != size) {
+            preIdlePose = new float[size];
+            idlePose = new float[size];
+        }
+        capturePose(parts, preIdlePose);
+        restartThenAnimate(kfa, idleState, idleDef, ageInTicks);
+        capturePose(parts, idlePose);
+        walkLayerEntity = (Entity) kfa;
+        walkLayerAgeInTicks = ageInTicks;
+        walkLayerPending = true;
+    }
+
     // from 1.20 HierarchicalModel
     protected void animateWalk(AnimationDefinition animDef, float limbSwing, float limbSwingAmount, float limbSwingSpeed, float limbSwingAmountSpeed) {
-        currentPoseSource = animDef;
         long i = (long)(limbSwing * 50.0F * limbSwingSpeed);
         float f = Math.min(limbSwingAmount * limbSwingAmountSpeed, 1.0f);
-        KeyframeAnimations.animate(this, animDef, i, f, ANIMATION_VECTOR_CACHE);
+
+        if (!walkLayerPending) {
+            currentPoseSource = animDef;
+            KeyframeAnimations.animate(this, animDef, i, f, ANIMATION_VECTOR_CACHE);
+            return;
+        }
+        walkLayerPending = false;
+        walkLayerUsed = true;
+
+        // move the walk weight towards the target at a limited rate so starting/stopping always takes about blendTicks
+        PoseBlend blend = poseBlends.computeIfAbsent(walkLayerEntity, e -> new PoseBlend());
+        int blendTicks = walkLayerEntity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : 8;
+        float maxStep = blendTicks > 0 ? Mth.clamp(walkLayerAgeInTicksDelta(blend), 0, 2) / blendTicks : 1;
+        blend.walkWeight += Mth.clamp(f - blend.walkWeight, -maxStep, maxStep);
+        float weight = blend.walkWeight * blend.walkWeight * (3 - 2 * blend.walkWeight);
+
+        // pose = lerp(idle, walk, weight), where walk is applied on top of the same starting pose idle was
+        List<ModelPart> parts = this.root().getAllParts().toList();
+        setPose(parts, preIdlePose);
+        KeyframeAnimations.animate(this, animDef, i, 1.0f, ANIMATION_VECTOR_CACHE);
+        applyBlend(parts, idlePose, weight);
+        // currentPoseSource stays as idle, so idle <-> walk never triggers a crossfade in finishPose
+    }
+
+    private float walkLayerAgeInTicksDelta(PoseBlend blend) {
+        return walkLayerAgeInTicks - blend.lastTicks;
     }
 
     // original method
     protected void restart(KeyframeAnimated kfa, AnimationState animState, float ageInTicks) {
         if (!animState.isStarted()) {
+            // an animation (re)starting from time 0 is a pose discontinuity even if it's the same animation as before,
+            // e.g. resetBehaviours() on a new order stops idle and it restarts the next frame
+            poseRestarted = true;
             kfa.setAgeInTicksOffset(ageInTicks);
             kfa.stopAllAnimations();
             animState.start(0);
@@ -92,10 +165,20 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
     protected void finishPose(Entity entity, float ageInTicks) {
         AnimationDefinition source = currentPoseSource;
         currentPoseSource = null;
+        boolean restarted = poseRestarted;
+        poseRestarted = false;
 
         List<ModelPart> parts = this.root().getAllParts().toList();
         int size = parts.size() * FLOATS_PER_PART;
         PoseBlend blend = poseBlends.computeIfAbsent(entity, e -> new PoseBlend());
+
+        // walk layer is only carried over frames where beginWalkOverIdle/animateWalk actually ran
+        if (!walkLayerUsed) {
+            blend.walkWeight = 0;
+        }
+        walkLayerUsed = false;
+        walkLayerPending = false;
+        blend.lastTicks = ageInTicks;
 
         if (blend.lastPose == null || blend.lastPose.length != size) {
             blend.lastPose = new float[size];
@@ -105,14 +188,18 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
             capturePose(parts, blend.lastPose);
             return;
         }
-        if (source != blend.lastSource) {
+        if (source != blend.lastSource || restarted) {
             System.arraycopy(blend.lastPose, 0, blend.blendFromPose, 0, size);
             blend.blendStartTicks = ageInTicks;
             blend.blending = true;
             blend.lastSource = source;
         }
         if (blend.blending) {
-            int blendTicks = entity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : 5;
+            int blendTicks = entity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : 8;
+            // blend quickly into once-off animations (attacks) so they aren't visually delayed, slowly into loops
+            if (source != null && !source.looping()) {
+                blendTicks = Math.max(1, blendTicks / 3);
+            }
             float t = blendTicks > 0 ? (ageInTicks - blend.blendStartTicks) / blendTicks : 1;
             if (t >= 1 || t < 0) {
                 blend.blending = false;
@@ -136,6 +223,22 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
             out[o + 6] = p.xScale;
             out[o + 7] = p.yScale;
             out[o + 8] = p.zScale;
+        }
+    }
+
+    private static void setPose(List<ModelPart> parts, float[] pose) {
+        for (int i = 0; i < parts.size(); i++) {
+            ModelPart p = parts.get(i);
+            int o = i * FLOATS_PER_PART;
+            p.x = pose[o];
+            p.y = pose[o + 1];
+            p.z = pose[o + 2];
+            p.xRot = pose[o + 3];
+            p.yRot = pose[o + 4];
+            p.zRot = pose[o + 5];
+            p.xScale = pose[o + 6];
+            p.yScale = pose[o + 7];
+            p.zScale = pose[o + 8];
         }
     }
 

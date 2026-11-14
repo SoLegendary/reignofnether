@@ -184,7 +184,7 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		WildfireUnit wildfire = ((WildfireUnit) entity);
 
 		if (wildfire.animateScale > 0 && wildfire.animateScaleReducing) {
-			wildfire.animateScale -= 0.02f;
+			wildfire.animateScale = 0;
 		}
 		if (wildfire.animateScale <= 0) {
 			wildfire.animateScale = 1.0f;
@@ -207,7 +207,7 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 				desyncShieldRotations(wildfire);
 			}
 			// walk animation
-			if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+			if (isWalking(entity, limbSwingAmount)) {
 				restart(wildfire, wildfire.walkAnimState, ageInTicks);
 				animateWalk(WildfireAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 			}

@@ -68,7 +68,7 @@ public class WraithModel<T extends Entity> extends KeyframeHierarchicalModel<T> 
 		WraithUnit wraith = ((WraithUnit) entity);
 
 		if (wraith.animateScale > 0 && wraith.animateScaleReducing) {
-			wraith.animateScale -= 0.02f;
+			wraith.animateScale = 0;
 		}
 		if (wraith.animateScale <= 0) {
 			wraith.animateScale = 1.0f;
@@ -88,7 +88,7 @@ public class WraithModel<T extends Entity> extends KeyframeHierarchicalModel<T> 
 			restartThenAnimate(wraith, wraith.activeAnimState, wraith.activeAnimDef, ageInTicks, wraith.animateScale, wraith.getAnimationSpeed());
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(wraith, wraith.walkAnimState, ageInTicks);
 			animateWalk(WraithAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

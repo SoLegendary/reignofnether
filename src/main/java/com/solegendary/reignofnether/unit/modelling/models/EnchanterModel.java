@@ -123,7 +123,7 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 		this.lArm.visible = false;
 
 		if (enchanter.animateScale > 0 && enchanter.animateScaleReducing) {
-			enchanter.animateScale -= 0.02f;
+			enchanter.animateScale = 0;
 		}
 		if (enchanter.animateScale <= 0) {
 			enchanter.animateScale = 1.0f;
@@ -145,7 +145,7 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 			this.lArm.visible = true;
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(enchanter, enchanter.walkAnimState, ageInTicks);
 			animateWalk(EnchanterAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

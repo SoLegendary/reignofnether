@@ -13,9 +13,9 @@ public interface KeyframeAnimated {
     public default float getAnimationSpeed() {
         return 1.0f;
     }
-    // how many ticks to crossfade from the previous pose when the playing animation changes
+    // how many ticks to crossfade from the previous pose into a looping animation (idle/walk); once-off animations use a third of this
     public default int getAnimationBlendTicks() {
-        return 5;
+        return 8;
     }
     public default int getAttackWindupTicks() {
         return 0;

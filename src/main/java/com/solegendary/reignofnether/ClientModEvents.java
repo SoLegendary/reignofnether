@@ -113,6 +113,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.DROWNED_UNIT.get(), DrownedRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.STRAY_UNIT.get(), StrayRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BOGGED_UNIT.get(), BoggedUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.SKELETON_VANGUARD_UNIT.get(), SkeletonVanguardRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SPIDER_UNIT.get(), SpiderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnitRenderer::new);
@@ -258,6 +259,7 @@ public class ClientModEvents {
         event.registerLayerDefinition(NecromancerModel.LAYER_LOCATION, NecromancerModel::createBodyLayer);
         event.registerLayerDefinition(PiglinMerchantModel.LAYER_LOCATION, PiglinMerchantModel::createBodyLayer);
         event.registerLayerDefinition(WitherbornModel.LAYER_LOCATION, WitherbornModel::createBodyLayer);
+        event.registerLayerDefinition(SkeletonVanguardModel.LAYER_LOCATION, SkeletonVanguardModel::createBodyLayer);
         event.registerLayerDefinition(MarauderModel.LAYER_LOCATION, MarauderModel::createBodyLayer);
         event.registerLayerDefinition(ArmouredHoglinUnitModel.LAYER_LOCATION, ArmouredHoglinUnitModel::createBodyLayer);
         event.registerLayerDefinition(MagicProjectileModel.LAYER_LOCATION, MagicProjectileModel::createBodyLayer);

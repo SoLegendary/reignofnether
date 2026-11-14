@@ -32,7 +32,7 @@ public class WorldOfRot extends HeroAbility {
     public static final int MAX_DURATION_SECONDS = 60;
 
     public WorldOfRot() {
-        super(1, 125, UnitAction.WORLD_OF_ROT, 120 * ResourceCost.TICKS_PER_SECOND, 0, 0, false);
+        super(1, 150, UnitAction.WORLD_OF_ROT, 360 * ResourceCost.TICKS_PER_SECOND, 0, 0, false);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class WorldOfRot extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.world_of_rot") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.world_of_rot.stats", cooldownMax / 20, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.world_of_rot.stats", (int) (cooldownMax / 20), manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.world_of_rot.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.world_of_rot.tooltip2", DEBUFF_PERCENT, DURATION_SECONDS)),

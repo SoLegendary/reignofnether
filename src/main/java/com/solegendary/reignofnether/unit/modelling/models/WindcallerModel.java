@@ -111,7 +111,7 @@ public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel
 		this.bone.xRot += currentTilt;
 
 		if (windcaller.animateScale > 0 && windcaller.animateScaleReducing) {
-			windcaller.animateScale -= 0.02f;
+			windcaller.animateScale = 0;
 		}
 		if (windcaller.animateScale <= 0) {
 			windcaller.animateScale = 1.0f;
@@ -131,7 +131,7 @@ public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel
 			restartThenAnimate(windcaller, windcaller.activeAnimState, windcaller.activeAnimDef, ageInTicks, windcaller.animateScale, windcaller.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(windcaller, windcaller.walkAnimState, ageInTicks);
 			if (windcaller.isFlying())
 				animateWalk(WindcallerAnimations.WALK_FLY, limbSwing, limbSwingAmount, speed * 1.5f, speed * 1.5f);

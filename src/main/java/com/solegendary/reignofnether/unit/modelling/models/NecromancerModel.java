@@ -103,7 +103,7 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 		NecromancerUnit necromancer = ((NecromancerUnit) entity);
 
 		if (necromancer.animateScale > 0 && necromancer.animateScaleReducing) {
-			necromancer.animateScale -= 0.02f;
+			necromancer.animateScale = 0;
 		}
 		if (necromancer.animateScale <= 0) {
 			necromancer.animateScale = 1.0f;
@@ -123,7 +123,7 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 			restartThenAnimate(necromancer, necromancer.activeAnimState, necromancer.activeAnimDef, ageInTicks, necromancer.animateScale, necromancer.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(necromancer, necromancer.walkAnimState, ageInTicks);
 			animateWalk(NecromancerAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

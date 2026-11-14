@@ -130,7 +130,7 @@ public class PiglinMerchantModel<T extends Entity> extends KeyframeHierarchicalM
 		PiglinMerchantUnit merchant = ((PiglinMerchantUnit) entity);
 
 		if (merchant.animateScale > 0 && merchant.animateScaleReducing) {
-			merchant.animateScale -= 0.02f;
+			merchant.animateScale = 0;
 		}
 		if (merchant.animateScale <= 0) {
 			merchant.animateScale = 1.0f;
@@ -150,7 +150,7 @@ public class PiglinMerchantModel<T extends Entity> extends KeyframeHierarchicalM
 			restartThenAnimate(merchant, merchant.activeAnimState, merchant.activeAnimDef, ageInTicks, merchant.animateScale, merchant.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(merchant, merchant.walkAnimState, ageInTicks);
 			animateWalk(PiglinMerchantAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

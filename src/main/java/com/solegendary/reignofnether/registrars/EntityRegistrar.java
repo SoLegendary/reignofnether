@@ -87,6 +87,13 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bogged_unit").toString()));
 
+    // matches the hitbox in the Blockbench model (14x37 px)
+    public static final RegistryObject<EntityType<SkeletonVanguardUnit>> SKELETON_VANGUARD_UNIT = ENTITIES.register("skeleton_vanguard_unit",
+            () -> EntityType.Builder.of(SkeletonVanguardUnit::new, MobCategory.CREATURE)
+                    .sized(0.875f, 2.3f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton_vanguard_unit").toString()));
+
     public static final RegistryObject<EntityType<CreeperUnit>> CREEPER_UNIT = ENTITIES.register("creeper_unit",
             () -> EntityType.Builder.of(CreeperUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight())
@@ -478,6 +485,7 @@ public class EntityRegistrar {
             case SkeletonProd.itemName -> EntityRegistrar.SKELETON_UNIT.get();
             case ZombieProd.itemName -> EntityRegistrar.ZOMBIE_UNIT.get();
             case StrayProd.itemName -> EntityRegistrar.STRAY_UNIT.get();
+            case SkeletonVanguardProd.itemName -> EntityRegistrar.SKELETON_VANGUARD_UNIT.get();
             case BoggedProd.itemName -> EntityRegistrar.BOGGED_UNIT.get();
             case HuskProd.itemName -> EntityRegistrar.HUSK_UNIT.get();
             case DrownedProd.itemName -> EntityRegistrar.DROWNED_UNIT.get();

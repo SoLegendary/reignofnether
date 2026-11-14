@@ -123,7 +123,7 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 		WretchedWraithUnit wretchedWraith = ((WretchedWraithUnit) entity);
 
 		if (wretchedWraith.animateScale > 0 && wretchedWraith.animateScaleReducing) {
-			wretchedWraith.animateScale -= 0.02f;
+			wretchedWraith.animateScale = 0;
 		}
 		if (wretchedWraith.animateScale <= 0) {
 			wretchedWraith.animateScale = 1.0f;
@@ -143,7 +143,7 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 			restartThenAnimate(wretchedWraith, wretchedWraith.activeAnimState, wretchedWraith.activeAnimDef, ageInTicks, wretchedWraith.animateScale, wretchedWraith.getAnimationSpeed());
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(wretchedWraith, wretchedWraith.walkAnimState, ageInTicks);
 			animateWalk(WretchedWraithAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

@@ -48,6 +48,10 @@ public class ItemRegistrar {
             ITEMS.register("bogged_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BOGGED_UNIT,
                     0xa1a387, 0x3e4d12, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> SKELETON_VANGUARD_UNIT_SPAWN_EGG =
+            ITEMS.register("skeleton_vanguard_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SKELETON_VANGUARD_UNIT,
+                    0xa7a7a7, 0xc99a2e, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> CREEPER_UNIT_SPAWN_EGG =
             ITEMS.register("creeper_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.CREEPER_UNIT,
                     0x0c990a, 0x000000, new Item.Properties()));

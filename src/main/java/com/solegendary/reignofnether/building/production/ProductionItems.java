@@ -20,6 +20,7 @@ public class ProductionItems {
     public static final CreeperProd CREEPER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper"), new CreeperProd());
     public static final WraithProd WRAITH = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith"), new WraithProd());
     public static final SkeletonProd SKELETON = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton"), new SkeletonProd());
+    public static final SkeletonVanguardProd SKELETON_VANGUARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton_vanguard"), new SkeletonVanguardProd());
     public static final BoggedProd BOGGED = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bogged"), new BoggedProd());
     public static final ZombieProd ZOMBIE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie"), new ZombieProd());
     public static final StrayProd STRAY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stray"), new StrayProd());
@@ -141,6 +142,7 @@ public class ProductionItems {
         CREEPER,
         WRAITH,
         SKELETON,
+        SKELETON_VANGUARD,
         BOGGED,
         ZOMBIE,
         STRAY,

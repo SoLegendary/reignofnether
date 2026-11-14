@@ -34,7 +34,7 @@ public class EssenceDrain extends HeroAbility {
     public static final int DAMAGE_PER_SECOND_RANK_3 = 7;
 
     public EssenceDrain() {
-        super(3, 50, UnitAction.ESSENCE_DRAIN, 25 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 60, UnitAction.ESSENCE_DRAIN, 25 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class EssenceDrain extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.essence_drain") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.essence_drain.stats", cooldownMax / 20, CHANNEL_SECONDS, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.essence_drain.stats", (int) (cooldownMax / 20), CHANNEL_SECONDS, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.essence_drain.tooltip1", CHANNEL_SECONDS)),
                 fcs(I18n.get("abilities.reignofnether.essence_drain.tooltip2")),

@@ -45,6 +45,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.DROWNED_UNIT.get(), DrownedUnit.createAttributes().build());
         evt.put(EntityRegistrar.STRAY_UNIT.get(), StrayUnit.createAttributes().build());
         evt.put(EntityRegistrar.BOGGED_UNIT.get(), BoggedUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SKELETON_VANGUARD_UNIT.get(), SkeletonVanguardUnit.createAttributes().build());
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
@@ -114,6 +115,7 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.SKELETON_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.STRAY_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BOGGED_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SKELETON_VANGUARD_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.CREEPER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SPIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POISON_SPIDER_UNIT_SPAWN_EGG);

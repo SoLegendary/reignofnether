@@ -129,7 +129,7 @@ public class WitherbornModel<T extends Entity> extends KeyframeHierarchicalModel
 		WitherbornUnit witherborn = ((WitherbornUnit) entity);
 
 		if (witherborn.animateScale > 0 && witherborn.animateScaleReducing) {
-			witherborn.animateScale -= 0.02f;
+			witherborn.animateScale = 0;
 		}
 		if (witherborn.animateScale <= 0) {
 			witherborn.animateScale = 1.0f;
@@ -149,7 +149,7 @@ public class WitherbornModel<T extends Entity> extends KeyframeHierarchicalModel
 			restartThenAnimate(witherborn, witherborn.activeAnimState, witherborn.activeAnimDef, ageInTicks, witherborn.animateScale, witherborn.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(witherborn, witherborn.walkAnimState, ageInTicks);
 			animateWalk(WitherbornAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}
