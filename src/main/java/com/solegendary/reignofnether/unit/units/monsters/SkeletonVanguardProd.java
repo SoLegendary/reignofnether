@@ -26,8 +26,7 @@ public class SkeletonVanguardProd extends ProductionItem implements IUnitProduct
     public final static String itemName = "Skeleton Vanguard";
     public final static ResourceCost cost = ResourceCosts.SKELETON_VANGUARD;
 
-    // TODO: replace with a dedicated mobhead icon
-    private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png");
+    private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton_vanguard.png");
 
     public SkeletonVanguardProd() {
         super(cost);

@@ -77,9 +77,20 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
     }
 
     /**
-     * Call in place of restart(walkAnimState) in the walk branch, immediately before animateWalk. Idle keeps playing as a base
-     * layer (so it is never restarted from frame 0) and animateWalk fades the walk in over it by a weight that follows
-     * limbSwingAmount. Unlike scaling the walk towards the rest pose, this works when idle and walk start from different poses.
+     * Only needed for models whose animations are not synced in the bbmodel with the default pose, i.e. the first frame of
+     * every animation does not match the default pose (such as the skeleton vanguard). Models that follow that rule should
+     * keep using restart(walkAnimState) and the default animateWalk.
+     * <p>
+     * Why: the default animateWalk fades the walk in and out by shrinking it towards the default pose. That is fine when
+     * idle also starts from the default pose, because stopping just settles into idle. But if idle does NOT start from the
+     * default pose, a stopping unit would slide back to the default pose first and then jump to idle's first frame, and a
+     * starting unit would do the reverse.
+     * <p>
+     * What this does instead: idle keeps playing underneath the whole time (so it is never restarted from its first frame),
+     * and the walk is faded in and out on top of it by a weight that follows limbSwingAmount. The unit always moves between
+     * the idle and walk poses directly and never passes through the default pose.
+     * <p>
+     * Call in place of restart(walkAnimState) in the walk branch, immediately before animateWalk.
      */
     protected void beginWalkOverIdle(KeyframeAnimated kfa, AnimationState idleState, AnimationDefinition idleDef, float ageInTicks) {
         List<ModelPart> parts = this.root().getAllParts().toList();

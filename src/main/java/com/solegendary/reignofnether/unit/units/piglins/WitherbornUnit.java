@@ -537,7 +537,6 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castEssenceDrainGoal.stop();
         this.castWitheringMarkGoal.stop();
         this.castCastigationGoal.stop();

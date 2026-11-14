@@ -345,7 +345,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castRaiseDeadGoal.stop();
         this.castPhantomGoal.stop();
         this.castBloodMoonGoal.stop();

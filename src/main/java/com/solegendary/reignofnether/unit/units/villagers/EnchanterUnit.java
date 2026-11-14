@@ -772,7 +772,6 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castEnchantMilitaryGoal.stop();
         this.castEnchantProtectiveGoal.stop();
         this.castAuraGoal.stop();

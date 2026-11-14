@@ -501,7 +501,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castTNTGoal.stop();
         this.castFancyFeastGoal.stop();
         this.castLootExplosionGoal.stop();

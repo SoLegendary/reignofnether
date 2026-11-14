@@ -402,7 +402,6 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castChillingScreechGoal.stop();
         this.castFrostblinkGoal.stop();
         this.castBlizzardGoal.stop();

@@ -368,7 +368,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castMoltenBombGoal.stop();
         this.castScorchingGazeGoal.stop();
         this.castSoulsAflameGoal.stop();

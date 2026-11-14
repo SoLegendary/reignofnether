@@ -406,7 +406,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         pendingGroundMoveTarget = null;
     }
 
