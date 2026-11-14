@@ -306,34 +306,30 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = RoyalGuardAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CHARGE_SPELL -> {
                 activeAnimDef = RoyalGuardAnimations.SPELL_CHARGE;
                 activeAnimState = spellChargeAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = RoyalGuardAnimations.SPELL_ACTIVATE;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default -> stopActiveAnimation = true;
         }
     }
 
@@ -742,7 +738,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         if (getAvatarScalingStarted() && getAvatarScaleTicks() < AVATAR_SCALE_TICKS_MAX) {
             setAvatarScaleTicks(getAvatarScaleTicks() + 1);
             if (getAvatarScaleTicks() == AVATAR_SCALE_TICKS_MAX * 0.75f) {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
             }
             this.reapplyPosition();
             this.refreshDimensions();

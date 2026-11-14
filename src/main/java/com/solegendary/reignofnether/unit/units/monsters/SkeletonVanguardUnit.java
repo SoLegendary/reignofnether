@@ -200,21 +200,19 @@ public class SkeletonVanguardUnit extends Skeleton implements Unit, AttackerUnit
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = SkeletonVanguardAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default -> stopActiveAnimation = true;
         }
     }
 

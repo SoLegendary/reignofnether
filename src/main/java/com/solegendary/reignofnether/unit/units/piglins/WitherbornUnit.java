@@ -298,45 +298,40 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         worldOfRotAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = WitherbornAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = WitherbornAnimations.ESSENCE_DRAIN;
                 activeAnimState = essenceDrainAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL_ALT -> {
                 activeAnimDef = WitherbornAnimations.WITHERING_MARK;
                 activeAnimState = witheringMarkAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case ULTIMATE -> {
                 activeAnimDef = WitherbornAnimations.WORLD_OF_ROT;
                 activeAnimState = worldOfRotAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
             default ->  {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
                 animateSpeed = 1.0f;
             }
         }

@@ -293,34 +293,30 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = NecromancerAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CHARGE_SPELL -> {
                 activeAnimDef = NecromancerAnimations.SPELL_CHARGE;
                 activeAnimState = spellChargeAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = NecromancerAnimations.SPELL_ACTIVATE;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default -> stopActiveAnimation = true;
         }
     }
 

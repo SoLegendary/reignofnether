@@ -122,14 +122,10 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		WretchedWraithUnit wretchedWraith = ((WretchedWraithUnit) entity);
 
-		if (wretchedWraith.animateScale > 0 && wretchedWraith.animateScaleReducing) {
-			wretchedWraith.animateScale = 0;
-		}
-		if (wretchedWraith.animateScale <= 0) {
-			wretchedWraith.animateScale = 1.0f;
+		if (wretchedWraith.stopActiveAnimation) {
+			wretchedWraith.stopActiveAnimation = false;
 			wretchedWraith.activeAnimDef = null;
 			wretchedWraith.activeAnimState = null;
-			wretchedWraith.animateScaleReducing = false;
 			wretchedWraith.stopAllAnimations();
 		}
 
@@ -140,7 +136,7 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 
 		// any once-off animation like attack or cast spell
 		if (wretchedWraith.activeAnimDef != null && wretchedWraith.activeAnimState != null && wretchedWraith.animateTicks > 0) {
-			restartThenAnimate(wretchedWraith, wretchedWraith.activeAnimState, wretchedWraith.activeAnimDef, ageInTicks, wretchedWraith.animateScale, wretchedWraith.getAnimationSpeed());
+			restartThenAnimate(wretchedWraith, wretchedWraith.activeAnimState, wretchedWraith.activeAnimDef, ageInTicks, wretchedWraith.getAnimationSpeed());
 		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {

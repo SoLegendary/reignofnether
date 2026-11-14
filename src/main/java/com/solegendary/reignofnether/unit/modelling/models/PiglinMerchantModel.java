@@ -129,14 +129,10 @@ public class PiglinMerchantModel<T extends Entity> extends KeyframeHierarchicalM
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		PiglinMerchantUnit merchant = ((PiglinMerchantUnit) entity);
 
-		if (merchant.animateScale > 0 && merchant.animateScaleReducing) {
-			merchant.animateScale = 0;
-		}
-		if (merchant.animateScale <= 0) {
-			merchant.animateScale = 1.0f;
+		if (merchant.stopActiveAnimation) {
+			merchant.stopActiveAnimation = false;
 			merchant.activeAnimDef = null;
 			merchant.activeAnimState = null;
-			merchant.animateScaleReducing = false;
 			merchant.stopAllAnimations();
 		}
 
@@ -147,7 +143,7 @@ public class PiglinMerchantModel<T extends Entity> extends KeyframeHierarchicalM
 
 		// any once-off animation like attack or cast spell
 		if (merchant.activeAnimDef != null && merchant.activeAnimState != null && merchant.animateTicks > 0) {
-			restartThenAnimate(merchant, merchant.activeAnimState, merchant.activeAnimDef, ageInTicks, merchant.animateScale, merchant.animateSpeed);
+			restartThenAnimate(merchant, merchant.activeAnimState, merchant.activeAnimDef, ageInTicks, merchant.animateSpeed);
 		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {

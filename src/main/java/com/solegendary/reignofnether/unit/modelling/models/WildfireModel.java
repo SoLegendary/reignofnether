@@ -183,14 +183,10 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		WildfireUnit wildfire = ((WildfireUnit) entity);
 
-		if (wildfire.animateScale > 0 && wildfire.animateScaleReducing) {
-			wildfire.animateScale = 0;
-		}
-		if (wildfire.animateScale <= 0) {
-			wildfire.animateScale = 1.0f;
+		if (wildfire.stopActiveAnimation) {
+			wildfire.stopActiveAnimation = false;
 			wildfire.activeAnimDef = null;
 			wildfire.activeAnimState = null;
-			wildfire.animateScaleReducing = false;
 			wildfire.stopAllAnimations();
 		}
 
@@ -201,7 +197,7 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 
 		// any once-off animation like attack or cast spell
 		if (wildfire.activeAnimDef != null && wildfire.activeAnimState != null && wildfire.animateTicks > 0) {
-			restartThenAnimate(wildfire, wildfire.activeAnimState, wildfire.activeAnimDef, ageInTicks, wildfire.animateScale, wildfire.animateSpeed);
+			restartThenAnimate(wildfire, wildfire.activeAnimState, wildfire.activeAnimDef, ageInTicks, wildfire.animateSpeed);
 		} else {
 			if (wildfire.getTarget() == null) {
 				desyncShieldRotations(wildfire);

@@ -2,7 +2,6 @@
 package com.solegendary.reignofnether.unit.modelling.models;
 
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
-import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.HierarchicalModel;
@@ -12,7 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
@@ -56,6 +54,14 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
 
     private static final float WALK_LIMB_SWING_THRESHOLD = 0.001f;
 
+    private List<ModelPart> parts() {
+        return this.root().getAllParts().toList();
+    }
+
+    private static int blendTicksFor(Entity entity) {
+        return entity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : KeyframeAnimated.DEFAULT_BLEND_TICKS;
+    }
+
     // scratch poses for the idle base layer, only valid within a single setupAnim
     private float[] preIdlePose = null;
     private float[] idlePose = null;
@@ -93,7 +99,7 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
      * Call in place of restart(walkAnimState) in the walk branch, immediately before animateWalk.
      */
     protected void beginWalkOverIdle(KeyframeAnimated kfa, AnimationState idleState, AnimationDefinition idleDef, float ageInTicks) {
-        List<ModelPart> parts = this.root().getAllParts().toList();
+        List<ModelPart> parts = parts();
         int size = parts.size() * FLOATS_PER_PART;
         if (preIdlePose == null || preIdlePose.length != size) {
             preIdlePose = new float[size];
@@ -122,21 +128,17 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
 
         // move the walk weight towards the target at a limited rate so starting/stopping always takes about blendTicks
         PoseBlend blend = poseBlends.computeIfAbsent(walkLayerEntity, e -> new PoseBlend());
-        int blendTicks = walkLayerEntity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : 8;
-        float maxStep = blendTicks > 0 ? Mth.clamp(walkLayerAgeInTicksDelta(blend), 0, 2) / blendTicks : 1;
+        int blendTicks = blendTicksFor(walkLayerEntity);
+        float maxStep = blendTicks > 0 ? Mth.clamp(walkLayerAgeInTicks - blend.lastTicks, 0, 2) / blendTicks : 1;
         blend.walkWeight += Mth.clamp(f - blend.walkWeight, -maxStep, maxStep);
         float weight = blend.walkWeight * blend.walkWeight * (3 - 2 * blend.walkWeight);
 
         // pose = lerp(idle, walk, weight), where walk is applied on top of the same starting pose idle was
-        List<ModelPart> parts = this.root().getAllParts().toList();
+        List<ModelPart> parts = parts();
         setPose(parts, preIdlePose);
         KeyframeAnimations.animate(this, animDef, i, 1.0f, ANIMATION_VECTOR_CACHE);
         applyBlend(parts, idlePose, weight);
         // currentPoseSource stays as idle, so idle <-> walk never triggers a crossfade in finishPose
-    }
-
-    private float walkLayerAgeInTicksDelta(PoseBlend blend) {
-        return walkLayerAgeInTicks - blend.lastTicks;
     }
 
     // original method
@@ -152,26 +154,22 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
     }
 
     protected void restartThenAnimate(KeyframeAnimated kfa, AnimationState animState, AnimationDefinition animDef, float ageInTicks) {
-        restartThenAnimate(kfa, animState, animDef, ageInTicks, 1.0f, 1.0f);
+        restartThenAnimate(kfa, animState, animDef, ageInTicks, 1.0f);
     }
 
-    protected void restartThenAnimate(KeyframeAnimated kfa, AnimationState animState, AnimationDefinition animDef, float ageInTicks, float scale) {
-        restartThenAnimate(kfa, animState, animDef, ageInTicks, scale, 1.0f);
-    }
-
-    protected void restartThenAnimate(KeyframeAnimated kfa, AnimationState animState, AnimationDefinition animDef, float ageInTicks, float scale, float speed) {
+    protected void restartThenAnimate(KeyframeAnimated kfa, AnimationState animState, AnimationDefinition animDef, float ageInTicks, float speed) {
         currentPoseSource = animDef;
         restart(kfa, animState, ageInTicks);
         animState.updateTime(ageInTicks - kfa.getAgeInTicksOffset(), speed);
         animState.ifStarted((time) -> {
-            KeyframeAnimations.animate(this, animDef, time.getAccumulatedTime(), scale, ANIMATION_VECTOR_CACHE);
+            KeyframeAnimations.animate(this, animDef, time.getAccumulatedTime(), 1.0f, ANIMATION_VECTOR_CACHE);
         });
     }
 
     /**
-     * Call at the end of setupAnim, after the animation has been applied. Animations are offsets on top of the rest pose,
+     * Call at the end of setupAnim, after the animation has been applied. Animations are offsets on top of the default pose,
      * so switching between them (idle/walk/attack etc.) would otherwise snap from one pose to the other unless both
-     * start and end at the rest pose. Instead, when the animation changes, crossfade from the last rendered pose.
+     * start and end at the default pose. Instead, when the animation changes, crossfade from the last rendered pose.
      */
     protected void finishPose(Entity entity, float ageInTicks) {
         AnimationDefinition source = currentPoseSource;
@@ -179,7 +177,7 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
         boolean restarted = poseRestarted;
         poseRestarted = false;
 
-        List<ModelPart> parts = this.root().getAllParts().toList();
+        List<ModelPart> parts = parts();
         int size = parts.size() * FLOATS_PER_PART;
         PoseBlend blend = poseBlends.computeIfAbsent(entity, e -> new PoseBlend());
 
@@ -206,7 +204,7 @@ public abstract class KeyframeHierarchicalModel<E extends Entity> extends Hierar
             blend.lastSource = source;
         }
         if (blend.blending) {
-            int blendTicks = entity instanceof KeyframeAnimated kfa ? kfa.getAnimationBlendTicks() : 8;
+            int blendTicks = blendTicksFor(entity);
             // blend quickly into once-off animations (attacks) so they aren't visually delayed, slowly into loops
             if (source != null && !source.looping()) {
                 blendTicks = Math.max(1, blendTicks / 3);

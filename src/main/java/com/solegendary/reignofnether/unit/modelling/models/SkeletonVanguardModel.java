@@ -119,14 +119,10 @@ public class SkeletonVanguardModel<T extends Entity> extends KeyframeHierarchica
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		SkeletonVanguardUnit vanguard = ((SkeletonVanguardUnit) entity);
 
-		if (vanguard.animateScale > 0 && vanguard.animateScaleReducing) {
-			vanguard.animateScale = 0;
-		}
-		if (vanguard.animateScale <= 0) {
-			vanguard.animateScale = 1.0f;
+		if (vanguard.stopActiveAnimation) {
+			vanguard.stopActiveAnimation = false;
 			vanguard.activeAnimDef = null;
 			vanguard.activeAnimState = null;
-			vanguard.animateScaleReducing = false;
 			vanguard.stopAllAnimations();
 		}
 
@@ -137,7 +133,7 @@ public class SkeletonVanguardModel<T extends Entity> extends KeyframeHierarchica
 
 		// any once-off animation like attack
 		if (vanguard.activeAnimDef != null && vanguard.activeAnimState != null && vanguard.animateTicks > 0) {
-			restartThenAnimate(vanguard, vanguard.activeAnimState, vanguard.activeAnimDef, ageInTicks, vanguard.animateScale, vanguard.getAnimationSpeed());
+			restartThenAnimate(vanguard, vanguard.activeAnimState, vanguard.activeAnimDef, ageInTicks, vanguard.getAnimationSpeed());
 		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {

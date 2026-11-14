@@ -128,14 +128,10 @@ public class WitherbornModel<T extends Entity> extends KeyframeHierarchicalModel
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		WitherbornUnit witherborn = ((WitherbornUnit) entity);
 
-		if (witherborn.animateScale > 0 && witherborn.animateScaleReducing) {
-			witherborn.animateScale = 0;
-		}
-		if (witherborn.animateScale <= 0) {
-			witherborn.animateScale = 1.0f;
+		if (witherborn.stopActiveAnimation) {
+			witherborn.stopActiveAnimation = false;
 			witherborn.activeAnimDef = null;
 			witherborn.activeAnimState = null;
-			witherborn.animateScaleReducing = false;
 			witherborn.stopAllAnimations();
 		}
 
@@ -146,7 +142,7 @@ public class WitherbornModel<T extends Entity> extends KeyframeHierarchicalModel
 
 		// any once-off animation like attack or cast spell
 		if (witherborn.activeAnimDef != null && witherborn.activeAnimState != null && witherborn.animateTicks > 0) {
-			restartThenAnimate(witherborn, witherborn.activeAnimState, witherborn.activeAnimDef, ageInTicks, witherborn.animateScale, witherborn.animateSpeed);
+			restartThenAnimate(witherborn, witherborn.activeAnimState, witherborn.activeAnimDef, ageInTicks, witherborn.animateSpeed);
 		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {

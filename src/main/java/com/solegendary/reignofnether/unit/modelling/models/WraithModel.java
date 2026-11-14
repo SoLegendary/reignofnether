@@ -67,14 +67,10 @@ public class WraithModel<T extends Entity> extends KeyframeHierarchicalModel<T> 
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		WraithUnit wraith = ((WraithUnit) entity);
 
-		if (wraith.animateScale > 0 && wraith.animateScaleReducing) {
-			wraith.animateScale = 0;
-		}
-		if (wraith.animateScale <= 0) {
-			wraith.animateScale = 1.0f;
+		if (wraith.stopActiveAnimation) {
+			wraith.stopActiveAnimation = false;
 			wraith.activeAnimDef = null;
 			wraith.activeAnimState = null;
-			wraith.animateScaleReducing = false;
 			wraith.stopAllAnimations();
 		}
 
@@ -85,7 +81,7 @@ public class WraithModel<T extends Entity> extends KeyframeHierarchicalModel<T> 
 
 		// any once-off animation like attack or cast spell
 		if (wraith.activeAnimDef != null && wraith.activeAnimState != null && wraith.animateTicks > 0) {
-			restartThenAnimate(wraith, wraith.activeAnimState, wraith.activeAnimDef, ageInTicks, wraith.animateScale, wraith.getAnimationSpeed());
+			restartThenAnimate(wraith, wraith.activeAnimState, wraith.activeAnimDef, ageInTicks, wraith.getAnimationSpeed());
 		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {

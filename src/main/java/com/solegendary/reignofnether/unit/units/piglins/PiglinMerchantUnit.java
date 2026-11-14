@@ -284,31 +284,28 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = PiglinMerchantAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.333f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = PiglinMerchantAnimations.SPELL_FULL;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
             default ->  {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
                 animateSpeed = 1.0f;
             }
         }
