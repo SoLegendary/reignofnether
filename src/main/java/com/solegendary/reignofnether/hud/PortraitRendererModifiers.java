@@ -106,7 +106,10 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Bee) {
             yOffset = 20;
             scale = -5;
-        } else if (entity instanceof WitherSkeleton) {
+        } else if (entity instanceof WitherbornUnit) {
+            yOffset = -21;
+            scale = -18;
+        }  else if (entity instanceof WitherSkeleton) {
             yOffset = -15;
             scale = -4;
         } else if (entity instanceof Ghast) {

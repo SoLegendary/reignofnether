@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
 import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherbornUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
@@ -358,7 +359,7 @@ public class MiscUtil {
             preferred = entity -> !entity.hasEffect(MobEffects.POISON);
         } else if (unitMob instanceof WraithUnit) {
             preferred = entity -> !entity.hasEffect(MobEffectRegistrar.FEARFUL.get());
-        } else if (unitMob instanceof WitherSkeletonUnit) {
+        } else if (unitMob instanceof WitherSkeletonUnit || unitMob instanceof WitherbornUnit) {
             preferred = entity -> entity.hasEffect(MobEffects.WITHER);
         } else if (unitMob instanceof WindcallerUnit) {
             preferred = entity -> !entity.hasEffect(MobEffects.LEVITATION);

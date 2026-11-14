@@ -323,6 +323,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wildfire_unit").toString()));
 
+    public static final RegistryObject<EntityType<WitherbornUnit>> WITHERBORN_UNIT = ENTITIES.register("witherborn_unit",
+            () -> EntityType.Builder.of(WitherbornUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight() + 0.5f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_unit").toString()));
+
     public static final RegistryObject<EntityType<PolarBearUnit>> POLAR_BEAR_UNIT = ENTITIES.register("polar_bear_unit",
             () -> EntityType.Builder.of(PolarBearUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.POLAR_BEAR.getWidth(), EntityType.POLAR_BEAR.getHeight())
@@ -501,6 +507,7 @@ public class EntityRegistrar {
             case HoglinProd.itemName -> EntityRegistrar.HOGLIN_UNIT.get();
             case BlazeProd.itemName -> EntityRegistrar.BLAZE_UNIT.get();
             case WitherSkeletonProd.itemName -> EntityRegistrar.WITHER_SKELETON_UNIT.get();
+            case WitherbornProd.itemName -> EntityRegistrar.WITHERBORN_UNIT.get();
             case MagmaCubeProd.itemName -> EntityRegistrar.MAGMA_CUBE_UNIT.get();
             case GhastProd.itemName -> EntityRegistrar.GHAST_UNIT.get();
             case NecromancerProd.itemName -> EntityRegistrar.NECROMANCER_UNIT.get();

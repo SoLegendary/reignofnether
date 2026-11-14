@@ -144,6 +144,10 @@ public class ItemRegistrar {
             ITEMS.register("wither_skeleton_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITHER_SKELETON_UNIT,
                     1315860, 4672845, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> WITHERBORN_UNIT_SPAWN_EGG =
+            ITEMS.register("witherborn_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITHERBORN_UNIT,
+                    1315860, 4672845, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> GHAST_UNIT_SPAWN_EGG =
             ITEMS.register("ghast_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.GHAST_UNIT,
                     16382457, 12369084, new Item.Properties()));

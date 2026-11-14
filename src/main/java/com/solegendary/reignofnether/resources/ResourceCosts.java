@@ -48,6 +48,7 @@ public class ResourceCosts {
     public static final ResourceCost HOGLIN = new ResourceCost(ID, "HOGLIN");
     public static final ResourceCost BLAZE = new ResourceCost(ID, "BLAZE");
     public static final ResourceCost WITHER_SKELETON = new ResourceCost(ID, "WITHER_SKELETON");
+    public static final ResourceCost WITHERBORN = new ResourceCost(ID, "WITHERBORN");
     public static final ResourceCost GHAST = new ResourceCost(ID, "GHAST");
     public static final ResourceCost MAGMA_CUBE = new ResourceCost(ID, "MAGMA_CUBE");
 
@@ -265,6 +266,7 @@ public class ResourceCosts {
         HOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HOGLIN);
         BLAZE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BLAZE);
         WITHER_SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITHER_SKELETON);
+        WITHERBORN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITHERBORN);
         GHAST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GHAST);
         MAGMA_CUBE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MAGMA_CUBE);
         PIGLIN_MERCHANT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PIGLIN_MERCHANT);

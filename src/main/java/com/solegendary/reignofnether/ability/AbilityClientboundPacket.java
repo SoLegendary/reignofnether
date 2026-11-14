@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherbornUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.core.BlockPos;
@@ -138,6 +139,9 @@ public class AbilityClientboundPacket {
                                 enchanterUnit.playSingleAnimation(UnitAnimationAction.ULTIMATE);
                             }
                         }
+                    } else if (this.unitAction == UnitAction.CASTIGATION_SET) {
+                        if (unit instanceof WitherbornUnit witherbornUnit)
+                            witherbornUnit.setCastigationEnabled(value == 1f);
                     } else if (this.unitAction == UnitAction.BLIZZARD) {
                         if (unit instanceof WretchedWraithUnit wraithUnit)
                             wraithUnit.blizzard();

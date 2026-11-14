@@ -61,6 +61,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.HOGLIN.define(BUILDER);
         UnitCosts.BLAZE.define(BUILDER);
         UnitCosts.WITHER_SKELETON.define(BUILDER);
+        UnitCosts.WITHERBORN.define(BUILDER);
         UnitCosts.GHAST.define(BUILDER);
         UnitCosts.MAGMA_CUBE.define(BUILDER);
         UnitCosts.PIGLIN_MERCHANT.define(BUILDER);
@@ -249,6 +250,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry MAGMA_CUBE = ResourceCostConfigEntry.Unit(40,40,40,25,2, ResourceCosts.MAGMA_CUBE, "Magma Cube Config");
         public static final ResourceCostConfigEntry PIGLIN_MERCHANT = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.PIGLIN_MERCHANT, "Piglin Merchant Config");
         public static final ResourceCostConfigEntry WILDFIRE = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.WILDFIRE, "Wildfire Config");
+        public static final ResourceCostConfigEntry WITHERBORN = ResourceCostConfigEntry.Unit(0,0,0,30,5, ResourceCosts.WITHERBORN, "Witherborn Config");
 
         public static final ResourceCostConfigEntry ENDERMAN = ResourceCostConfigEntry.Unit(75,75,75,35,3, ResourceCosts.ENDERMAN, "Enderman Config");
         public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.POLAR_BEAR, "Polar Bear Config");

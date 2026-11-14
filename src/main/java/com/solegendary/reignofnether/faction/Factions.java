@@ -138,6 +138,7 @@ public class Factions {
 		registerEntity(PIGLINS, EntityRegistrar.GHAST_UNIT.get(), ProductionItems.GHAST);
 		registerEntity(PIGLINS, EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), ProductionItems.PIGLIN_MERCHANT);
 		registerEntity(PIGLINS, EntityRegistrar.WILDFIRE_UNIT.get(), ProductionItems.WILDFIRE);
+		registerEntity(PIGLINS, EntityRegistrar.WITHERBORN_UNIT.get(), ProductionItems.WITHERBORN);
 		registerEntity(PIGLINS, EntityRegistrar.ARMOURED_HOGLIN_UNIT.get());
 		
 		// Neutral
