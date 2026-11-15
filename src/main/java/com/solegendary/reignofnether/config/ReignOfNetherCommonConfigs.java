@@ -222,7 +222,7 @@ public class ReignOfNetherCommonConfigs {
 
         public static final ResourceCostConfigEntry ZOMBIE_PIGLIN = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.ZOMBIE_PIGLIN, "Zombie Piglin Config");
         public static final ResourceCostConfigEntry ZOGLIN = ResourceCostConfigEntry.Unit(100,0,40,25,2, ResourceCosts.ZOGLIN, "Zoglin Config");
-
+        
         // VillagersFaction
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
         public static final ResourceCostConfigEntry SCOUT_DOG = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_DOG, "Scout Dog Config");

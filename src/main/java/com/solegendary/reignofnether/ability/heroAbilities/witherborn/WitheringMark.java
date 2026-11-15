@@ -7,6 +7,8 @@ import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -28,7 +30,8 @@ public class WitheringMark extends HeroAbility {
 
     public static final int RANGE = 12;
     public static final int CAST_TICKS = 20;
-    public static final int DURATION_SECONDS = 10;
+    public static final int DURATION_SECONDS = 7;
+    public static final int DURATION_TICKS = DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND;
     public static final int ATTACK_SPEED_BONUS_RANK_1 = 20;
     public static final int ATTACK_SPEED_BONUS_RANK_2 = 30;
     public static final int ATTACK_SPEED_BONUS_RANK_3 = 40;
@@ -37,7 +40,7 @@ public class WitheringMark extends HeroAbility {
     public static final int LIFESTEAL_RANK_3 = 20;
 
     public WitheringMark() {
-        super(3, 40, UnitAction.WITHERING_MARK, 15 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 40, UnitAction.WITHERING_MARK, 7 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
     }
 
     @Override
@@ -106,16 +109,13 @@ public class WitheringMark extends HeroAbility {
     }
 
     @Override
-    public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setAbility(this);
-        ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setTarget(targetBp);
-    }
-
-    @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (targetEntity == unitUsing)
             return;
         ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setAbility(this);
         ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setTarget(targetEntity);
+        if (!level.isClientSide()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WITHERBORN_WITHERING_MARK, targetEntity.blockPosition());
+        }
     }
 }

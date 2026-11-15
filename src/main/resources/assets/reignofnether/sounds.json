@@ -43,6 +43,10 @@
         "subtitle": "sounds.reignofnether.blood_moon",
         "sounds": [{ "name": "reignofnether:blood_moon", "stream": true }]
     },
+    "world_of_rot": {
+        "subtitle": "sounds.reignofnether.world_of_rot",
+        "sounds": [{ "name": "reignofnether:world_of_rot", "stream": true }]
+    },
     "bloodlust": {
         "subtitle": "sounds.reignofnether.bloodlust",
         "sounds": [ { "name": "reignofnether:bloodlust", "attenuation_distance": 256 } ]
@@ -334,6 +338,39 @@
             { "name": "reignofnether:enchanters_tome_01", "attenuation_distance": 256 },
             { "name": "reignofnether:enchanters_tome_02", "attenuation_distance": 256 }
         ]
+    },
+    "witherborn_idle": {
+        "subtitle": "sounds.reignofnether.witherborn_idle",
+        "sounds": [
+            { "name": "reignofnether:witherborn_idle_01", "attenuation_distance": 40 },
+            { "name": "reignofnether:witherborn_idle_02", "attenuation_distance": 40 },
+            { "name": "reignofnether:witherborn_idle_03", "attenuation_distance": 40 },
+            { "name": "reignofnether:witherborn_idle_04", "attenuation_distance": 40 }
+        ]
+    },
+    "witherborn_attack": {
+        "subtitle": "sounds.reignofnether.witherborn_attack",
+        "sounds": [ { "name": "reignofnether:witherborn_attack", "attenuation_distance": 256 } ]
+    },
+    "witherborn_withering_mark": {
+        "subtitle": "sounds.reignofnether.witherborn_withering_mark",
+        "sounds": [ { "name": "reignofnether:witherborn_withering_mark", "attenuation_distance": 256 } ]
+    },
+    "witherborn_singing": {
+        "subtitle": "sounds.reignofnether.witherborn_singing",
+        "sounds": [ { "name": "reignofnether:witherborn_singing", "attenuation_distance": 256 } ]
+    },
+    "witherborn_essence_drain_start": {
+        "subtitle": "sounds.reignofnether.witherborn_essence_drain_start",
+        "sounds": [ { "name": "reignofnether:witherborn_essence_drain_start", "attenuation_distance": 256 } ]
+    },
+    "witherborn_essence_drain_loop": {
+        "subtitle": "sounds.reignofnether.witherborn_essence_drain_loop",
+        "sounds": [{
+            "name": "reignofnether:witherborn_essence_drain_loop",
+            "attenuation_distance": 256,
+            "stream": true
+        }]
     }
 }
 

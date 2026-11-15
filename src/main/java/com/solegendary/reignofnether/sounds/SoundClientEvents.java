@@ -258,6 +258,12 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.WINDCALLER_LIFT, SoundRegistrar.WINDCALLER_LIFT.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_YELL, SoundRegistrar.WINDCALLER_YELL.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_WIND_ATTACK, SoundRegistrar.WINDCALLER_WIND_ATTACK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_IDLE, SoundRegistrar.WITHERBORN_IDLE.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ATTACK, SoundRegistrar.WITHERBORN_ATTACK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_WITHERING_MARK, SoundRegistrar.WITHERBORN_WITHERING_MARK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_SINGING, SoundRegistrar.WITHERBORN_SINGING.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ESSENCE_DRAIN_START, SoundRegistrar.WITHERBORN_ESSENCE_DRAIN_START.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ESSENCE_DRAIN_LOOP, SoundRegistrar.WITHERBORN_ESSENCE_DRAIN_LOOP.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_COMMON, SoundRegistrar.ITEM_DROP_COMMON.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_RARE, SoundRegistrar.ITEM_DROP_RARE.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_LEGENDARY, SoundRegistrar.ITEM_DROP_LEGENDARY.get());

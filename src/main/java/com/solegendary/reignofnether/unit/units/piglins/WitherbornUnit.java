@@ -16,6 +16,8 @@ import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -40,9 +42,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -272,7 +276,9 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
     public final AnimationState idleAnimState = new AnimationState();
     public final AnimationState walkAnimState = new AnimationState();
     public final AnimationState attackAnimState = new AnimationState();
-    public final AnimationState essenceDrainAnimState = new AnimationState();
+    public final AnimationState essenceDrainStartAnimState = new AnimationState();
+    public final AnimationState essenceDrainLoopAnimState = new AnimationState();
+    public final AnimationState essenceDrainEndAnimState = new AnimationState();
     public final AnimationState witheringMarkAnimState = new AnimationState();
     public final AnimationState worldOfRotAnimState = new AnimationState();
 
@@ -293,7 +299,9 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         idleAnimState.stop();
         walkAnimState.stop();
         attackAnimState.stop();
-        essenceDrainAnimState.stop();
+        essenceDrainStartAnimState.stop();
+        essenceDrainLoopAnimState.stop();
+        essenceDrainEndAnimState.stop();
         witheringMarkAnimState.stop();
         worldOfRotAnimState.stop();
     }
@@ -312,9 +320,21 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
+            case CHARGE_SPELL -> {
+                activeAnimDef = WitherbornAnimations.ESSENCE_DRAIN_START;
+                activeAnimState = essenceDrainStartAnimState;
+                animateSpeed = 1.0f;
+                startAnimation(activeAnimDef);
+            }
             case CAST_SPELL -> {
-                activeAnimDef = WitherbornAnimations.ESSENCE_DRAIN;
-                activeAnimState = essenceDrainAnimState;
+                activeAnimDef = WitherbornAnimations.ESSENCE_DRAIN_LOOP;
+                activeAnimState = essenceDrainLoopAnimState;
+                animateSpeed = 1.0f;
+                startAnimation(activeAnimDef);
+            }
+            case END_SPELL -> {
+                activeAnimDef = WitherbornAnimations.ESSENCE_DRAIN_END;
+                activeAnimState = essenceDrainEndAnimState;
                 animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
@@ -389,6 +409,13 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
     @Override
     public LivingEntity getTarget() {
         return this.targetGoal.getTarget();
+    }
+
+    @Override protected SoundEvent getAmbientSound() {
+        return SoundRegistrar.WITHERBORN_IDLE.get();
+    }
+    @Override public SoundAction getAttackSound() {
+        return SoundAction.WITHERBORN_ATTACK;
     }
 
     public void tick() {
@@ -477,9 +504,9 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
                 this,
                 EssenceDrain.CHANNEL_TICKS,
                 EssenceDrain.RANGE,
-                UnitAnimationAction.CAST_SPELL,
-                null,
+                UnitAnimationAction.CHARGE_SPELL,
                 this::essenceDrain,
+                null,
                 null
         );
         this.castWitheringMarkGoal = new GenericTargetedSpellGoal(
@@ -487,8 +514,8 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
                 WitheringMark.CAST_TICKS,
                 WitheringMark.RANGE,
                 UnitAnimationAction.CAST_SPELL_ALT,
+                this::witheringMark,
                 null,
-                (BlockPos bp) -> this.witheringMark(),
                 null
         );
         this.castCastigationGoal = new GenericUntargetedSpellGoal(
@@ -566,12 +593,15 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         return null;
     }
 
-    public void essenceDrain(BlockPos targetBp) {
+    public void essenceDrain(LivingEntity target) {
 
     }
 
-    public void witheringMark() {
-
+    // currently only applies the visual effect; the attack speed and lifesteal bonuses aren't implemented yet
+    public void witheringMark(LivingEntity target) {
+        if (!level().isClientSide()) {
+            target.addEffect(new MobEffectInstance(MobEffectRegistrar.WITHERING_MARK.get(), WitheringMark.DURATION_TICKS, 0, true, false));
+        }
     }
 
     public void toggleCastigation() {
@@ -582,7 +612,7 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
     }
 
     public void worldOfRot() {
-
+        SoundClientboundPacket.playSoundAtPos(SoundAction.WITHERBORN_ATTACK, blockPosition());
     }
 
     @Override

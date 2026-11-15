@@ -124,6 +124,9 @@ public class MobEffectRegistrar {
     public static final RegistryObject<MobEffect> LIFESTEAL = MOB_EFFECTS.register("lifesteal", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
             .addAttributeModifier(AttributeRegistrar.LIFESTEAL.get(), "c159f105-f0cd-464d-86fe-82213a34dac7", UnitItems.HUNGRY_HORROR_ARMOUR_LIFESTEAL, AttributeModifier.Operation.ADDITION));
 
+    // visual only: draws a withering eye above the marked unit (see WitheringMarkRenderer)
+    public static final RegistryObject<MobEffect> WITHERING_MARK = MOB_EFFECTS.register("withering_mark", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x1A001A));
+
     public static final RegistryObject<MobEffect> PIGLIN_FERVOR = MOB_EFFECTS.register("piglin_fervor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
             .addAttributeModifier(AttributeRegistrar.ATTACK_DAMAGE.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_DAMAGE, AttributeModifier.Operation.MULTIPLY_BASE));
 
