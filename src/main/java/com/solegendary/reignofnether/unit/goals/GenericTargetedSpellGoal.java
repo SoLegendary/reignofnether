@@ -37,6 +37,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
     public boolean hasKeyframeAnimations = false;
     protected float bonusChannelingRange = 0; // extra range added while channeling
     protected final UnitAnimationAction animationStart;
+    protected final UnitAnimationAction animationEnd;
     private Consumer<BlockPos> onStartChanneling = null;
     public boolean instantLook = false;
 
@@ -51,6 +52,25 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         this.animationStart = animationStart;
         if (this.animationStart != null)
             this.hasKeyframeAnimations = true;
+        this.animationEnd = null;
+        this.onEntityCast = onEntityCast;
+        this.onGroundCast = onGroundCast;
+        this.onBuildingCast = onBuildingCast;
+    }
+
+    public GenericTargetedSpellGoal(Mob mob, int channelTicksMax, float range,
+                                    UnitAnimationAction animationStart,
+                                    UnitAnimationAction animationEnd,
+                                    @Nullable Consumer<LivingEntity> onEntityCast,
+                                    @Nullable Consumer<BlockPos> onGroundCast,
+                                    @Nullable Consumer<BuildingPlacement> onBuildingCast) {
+        super(mob, false, 0);
+        this.channelTicksMax = channelTicksMax;
+        this.range = range;
+        this.animationStart = animationStart;
+        if (this.animationStart != null)
+            this.hasKeyframeAnimations = true;
+        this.animationEnd = animationEnd;
         this.onEntityCast = onEntityCast;
         this.onGroundCast = onGroundCast;
         this.onBuildingCast = onBuildingCast;
@@ -64,6 +84,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         this.channelTicksMax = channelTicksMax;
         this.range = range;
         this.animationStart = null;
+        this.animationEnd = null;
         this.onEntityCast = onEntityCast;
         this.onGroundCast = onGroundCast;
         this.onBuildingCast = onBuildingCast;
@@ -237,6 +258,8 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         if (!this.mob.level().isClientSide() && channelTicks < getChannelTicksMax()) {
             if (!hasKeyframeAnimations) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_STOP, this.mob);
+            } else if (animationEnd != null) {
+                UnitAnimationClientboundPacket.sendBasicPacket(animationEnd, this.mob);
             } else {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.STOP, this.mob);
             }

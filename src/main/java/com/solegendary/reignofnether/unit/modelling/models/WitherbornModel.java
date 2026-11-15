@@ -144,6 +144,10 @@ public class WitherbornModel<T extends Entity> extends KeyframeHierarchicalModel
 		if (witherborn.activeAnimDef != null && witherborn.activeAnimState != null && witherborn.animateTicks > 0) {
 			restartThenAnimate(witherborn, witherborn.activeAnimState, witherborn.activeAnimDef, ageInTicks, witherborn.animateSpeed);
 		}
+		else if (witherborn.essenceDrainTicksLeft > 0) {
+			restart(witherborn, witherborn.walkAnimState, ageInTicks);
+			animateWalk(WitherbornAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
+		}
 		// walk animation
 		else if (isWalking(entity, limbSwingAmount)) {
 			restart(witherborn, witherborn.walkAnimState, ageInTicks);

@@ -8,12 +8,10 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherbornUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
-import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -145,6 +143,12 @@ public class AbilityClientboundPacket {
                     } else if (this.unitAction == UnitAction.BLIZZARD) {
                         if (unit instanceof WretchedWraithUnit wraithUnit)
                             wraithUnit.blizzard();
+                    } else if (this.unitAction == UnitAction.ESSENCE_DRAIN_SET_TARGET) {
+                        if (unit instanceof WitherbornUnit witherbornUnit)
+                            witherbornUnit.setEssenceDrainTarget((int) this.value);
+                    }  else if (this.unitAction == UnitAction.ESSENCE_DRAIN_SET_DURATION) {
+                        if (unit instanceof WitherbornUnit witherbornUnit)
+                            witherbornUnit.setEssenceDrainDuration((int) this.value);;
                     } else if (this.unitAction == UnitAction.ENCHANTED_TETHER) {
                         if (unit instanceof EnchanterUnit enchanterUnit)
                             enchanterUnit.tether((int) this.value, true);

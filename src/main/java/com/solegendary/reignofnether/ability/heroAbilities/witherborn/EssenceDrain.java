@@ -27,6 +27,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class EssenceDrain extends HeroAbility {
 
     public static final int RANGE = 10;
+    public static final int WINDUP_TICKS = 10;
     public static final int CHANNEL_SECONDS = 15;
     public static final int CHANNEL_TICKS = CHANNEL_SECONDS * ResourceCost.TICKS_PER_SECOND;
     public static final int DAMAGE_PER_SECOND_RANK_1 = 3;
@@ -34,7 +35,7 @@ public class EssenceDrain extends HeroAbility {
     public static final int DAMAGE_PER_SECOND_RANK_3 = 7;
 
     public EssenceDrain() {
-        super(3, 60, UnitAction.ESSENCE_DRAIN, 25 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 60, UnitAction.ESSENCE_DRAIN_SET_TARGET, 25 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
     }
 
     @Override
@@ -53,10 +54,10 @@ public class EssenceDrain extends HeroAbility {
         AbilityButton button = new AbilityButton("Essence Drain",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/essence_drain.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.ESSENCE_DRAIN,
+                () -> CursorClientEvents.getLeftClickAction() == UnitAction.ESSENCE_DRAIN_SET_TARGET,
                 () -> getRank(hero) == 0,
                 () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.ESSENCE_DRAIN),
+                () -> CursorClientEvents.setLeftClickAction(UnitAction.ESSENCE_DRAIN_SET_TARGET),
                 null,
                 getTooltipLines(hero),
                 this,

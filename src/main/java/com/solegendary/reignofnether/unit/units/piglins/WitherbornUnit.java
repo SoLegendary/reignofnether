@@ -8,32 +8,29 @@ import com.solegendary.reignofnether.ability.heroAbilities.witherborn.Castigatio
 import com.solegendary.reignofnether.ability.heroAbilities.witherborn.EssenceDrain;
 import com.solegendary.reignofnether.ability.heroAbilities.witherborn.WitheringMark;
 import com.solegendary.reignofnether.ability.heroAbilities.witherborn.WorldOfRot;
+import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizzard;
 import com.solegendary.reignofnether.blocks.RangeIndicator;
-import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WitherbornAnimations;
+import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -43,8 +40,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.DifficultyInstance;
@@ -56,16 +51,13 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
-import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import oshi.util.tuples.Pair;
 
@@ -357,9 +349,11 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         }
     }
 
+    @Nullable public LivingEntity essenceDrainTarget = null;
+    public int essenceDrainTicksLeft = 0;
+
     public WitherbornUnit(EntityType<? extends WitherSkeleton> entityType, Level level) {
         super(entityType, level);
-
         updateAbilityButtons();
         setStatsForLevel();
     }
@@ -439,6 +433,7 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
             }
             lastOnPos = getOnPos();
         }
+        tickEssenceDrain();
     }
 
     @Override
@@ -502,10 +497,11 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         this.itemGoal = new UnitItemGoal(this);
         this.castEssenceDrainGoal = new GenericTargetedSpellGoal(
                 this,
-                EssenceDrain.CHANNEL_TICKS,
+                EssenceDrain.WINDUP_TICKS,
                 EssenceDrain.RANGE,
                 UnitAnimationAction.CHARGE_SPELL,
-                this::essenceDrain,
+                UnitAnimationAction.END_SPELL,
+                this::startEssenceDrain,
                 null,
                 null
         );
@@ -548,7 +544,6 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
-        //this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     @Override
@@ -563,38 +558,50 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
         this.castWitheringMarkGoal.stop();
         this.castCastigationGoal.stop();
         this.castWorldOfRotGoal.stop();
+        setEssenceDrainDuration(0);
     }
 
-    public EssenceDrain getEssenceDrain() {
-        for (Ability ability : abilities.get())
-            if (ability instanceof EssenceDrain)
-                return (EssenceDrain) ability;
-        return null;
+    public void tickEssenceDrain() {
+        if (essenceDrainTicksLeft > 0) {
+            essenceDrainTicksLeft -= 1;
+            if (!level().isClientSide() && tickCount % 20 == 0 && essenceDrainTarget != null) {
+                AbilityClientboundPacket.doAbility(getId(), UnitAction.ESSENCE_DRAIN_SET_TARGET, essenceDrainTarget.getId());
+                AbilityClientboundPacket.doAbility(getId(), UnitAction.ESSENCE_DRAIN_SET_DURATION, essenceDrainTicksLeft);
+            }
+        }
+        if (essenceDrainTicksLeft <= 0 && essenceDrainTarget != null) {
+            essenceDrainTarget = null;
+            if (!level().isClientSide()) {
+                SoundClientboundPacket.stopSoundWithId(getId());
+                UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.END_SPELL, this);
+            }
+        } else if (essenceDrainTarget != null && (!essenceDrainTarget.isAlive() || essenceDrainTarget.isRemoved())) {
+            // TODO: look for withering mark target to switch to for a few ticks, then end if not found
+        }
     }
 
-    public WitheringMark getWitheringMark() {
-        for (Ability ability : abilities.get())
-            if (ability instanceof WitheringMark)
-                return (WitheringMark) ability;
-        return null;
+    // client side
+    public void setEssenceDrainTarget(int entityId) {
+        Entity targetEntity = level().getEntity(entityId);
+        if (targetEntity instanceof LivingEntity le) {
+            essenceDrainTarget = le;
+        }
     }
 
-    public Castigation getCastigation() {
-        for (Ability ability : abilities.get())
-            if (ability instanceof Castigation)
-                return (Castigation) ability;
-        return null;
+    public void setEssenceDrainDuration(int ticks) {
+        essenceDrainTicksLeft = ticks;
     }
 
-    public WorldOfRot getWorldOfRot() {
-        for (Ability ability : abilities.get())
-            if (ability instanceof WorldOfRot)
-                return (WorldOfRot) ability;
-        return null;
-    }
-
-    public void essenceDrain(LivingEntity target) {
-
+    // common side
+    public void startEssenceDrain(LivingEntity target) {
+        if (!level().isClientSide() && target != null && target.isAlive()) {
+            essenceDrainTarget = target;
+            essenceDrainTicksLeft = EssenceDrain.CHANNEL_SECONDS * 20;
+            AbilityClientboundPacket.doAbility(getId(), UnitAction.ESSENCE_DRAIN_SET_TARGET, target.getId());
+            AbilityClientboundPacket.doAbility(getId(), UnitAction.ESSENCE_DRAIN_SET_DURATION, essenceDrainTicksLeft);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WITHERBORN_ESSENCE_DRAIN_START, blockPosition());
+            SoundClientboundPacket.playFadeableLoopingSoundAtPos(SoundAction.WITHERBORN_ESSENCE_DRAIN_LOOP, blockPosition(), 1.0f, getId(), essenceDrainTicksLeft);
+        }
     }
 
     // currently only applies the visual effect; the attack speed and lifesteal bonuses aren't implemented yet

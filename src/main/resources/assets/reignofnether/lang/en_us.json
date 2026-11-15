@@ -542,7 +542,7 @@
     "abilities.reignofnether.scorching_gaze.rank3": "Rank 3: Lasts %ds",
     "abilities.reignofnether.essence_drain": "Essence Drain",
     "abilities.reignofnether.essence_drain.stats": "\uE004  %ds   \uE005  %d   \uE008  %d",
-    "abilities.reignofnether.essence_drain.tooltip1": "Channel to siphon the life essence of an enemy over %ds.",
+    "abilities.reignofnether.essence_drain.tooltip1": "Channel to siphon an enemy's life essence for up to %ds.",
     "abilities.reignofnether.essence_drain.tooltip2": "Follows the Withering Mark target if the mark is passed on.",
     "abilities.reignofnether.essence_drain.tooltip3": "Can be broken by stuns or if the target is beyond %d blocks.",
     "abilities.reignofnether.essence_drain.rank1": "Rank 1: %d damage per second",
