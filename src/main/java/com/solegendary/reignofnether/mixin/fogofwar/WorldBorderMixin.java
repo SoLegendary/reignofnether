@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
-import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
+import com.solegendary.reignofnether.replay.ReplaySnapshot;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.fml.LogicalSide;
@@ -20,22 +20,22 @@ public abstract class WorldBorderMixin {
 
     @Inject(method = "setSize(D)V", at = @At("TAIL"), cancellable = true)
     private void borderlock$onSetSize(double size, CallbackInfo ci) {
-        if (EffectiveSide.get() == LogicalSide.SERVER && FogChunkSnapshot.hasAny()) {
-            FogChunkSnapshot.shouldRecapture = true;
+        if (EffectiveSide.get() == LogicalSide.SERVER && ReplaySnapshot.hasAny()) {
+            ReplaySnapshot.shouldRecapture = true;
         }
     }
 
     @Inject(method = "lerpSizeBetween(DDJ)V", at = @At("TAIL"), cancellable = true)
     private void borderlock$onLerpSizeBetween(double oldSize, double newSize, long time, CallbackInfo ci) {
-        if (EffectiveSide.get() == LogicalSide.SERVER && FogChunkSnapshot.hasAny()) {
-            FogChunkSnapshot.shouldRecapture = true;
+        if (EffectiveSide.get() == LogicalSide.SERVER && ReplaySnapshot.hasAny()) {
+            ReplaySnapshot.shouldRecapture = true;
         }
     }
 
     @Inject(method = "setCenter(DD)V", at = @At("TAIL"), cancellable = true)
     private void borderlock$onSetCenter(double x, double z, CallbackInfo ci) {
-        if (EffectiveSide.get() == LogicalSide.SERVER && FogChunkSnapshot.hasAny()) {
-            FogChunkSnapshot.shouldRecapture = true;
+        if (EffectiveSide.get() == LogicalSide.SERVER && ReplaySnapshot.hasAny()) {
+            ReplaySnapshot.shouldRecapture = true;
         }
     }
 }

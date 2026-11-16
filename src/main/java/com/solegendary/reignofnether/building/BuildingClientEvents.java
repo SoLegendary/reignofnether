@@ -1,5 +1,10 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.hud.buttons.HelperButtons;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +21,7 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -37,6 +43,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
@@ -73,10 +80,14 @@ import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 public class BuildingClientEvents {
 
+    static {
+        WorldState.onClientReset(() -> setBuildingToPlace(null));
+    }
+
     static final Minecraft MC = Minecraft.getInstance();
 
     public static int getTotalPopulationSupply(String playerName) {
-        if (ResearchClient.hasCheat("foodforthought")) {
+        if (ResearchClient.hasCheat("foodforthought") || PlayerClientEvents.getPlayerFaction(playerName) == Factions.NONE) {
             return GameruleClient.maxPopulation;
         }
 
@@ -90,7 +101,7 @@ public class BuildingClientEvents {
     }
 
     // clientside buildings used for tracking position (for cursor selection)
-    private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
+    private static final ArrayList<BuildingPlacement> buildings = WorldState.client(new ArrayList<>());
     private static final ArrayList<BuildingPlacement> selectedBuildings = new ArrayList<>();
     private static Building buildingToPlace = null;
     private static Building lastBuildingToPlace = null;
@@ -169,7 +180,7 @@ public class BuildingClientEvents {
         BuildingPlacement idlestBuilding = null;
         float prodTicksLeftMax = Float.MAX_VALUE;
         for (BuildingPlacement building : selectedBuildings) {
-            if (!(building.getBuilding().equals(hudSelectedPlacement.getBuilding()) && building.isBuilt && building.ownerName.equals(MC.player.getName().getString()))) continue;
+            if (!(building.getBuilding().equals(hudSelectedPlacement.getBuilding()) && building.isBuilt && building.ownerName.equals(PlayerRolesClient.myOwner()))) continue;
             if (!(building instanceof ProductionPlacement prodB)) continue;
             float prodTicksLeft = 0f;
             for (ActiveProduction production : prodB.productionQueue) {
@@ -249,7 +260,7 @@ public class BuildingClientEvents {
             return;
 
         boolean valid = BuildingValidators.isPlacementValid(
-                MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation,
+                MC.level, buildingToPlace, originPos, PlayerRolesClient.myOwner(), buildingRotation,
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
         boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos, false);
@@ -376,7 +387,7 @@ public class BuildingClientEvents {
             buildingOrigins.add(b.originPos);
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
-                MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
+                MC.player != null && unit.getOwnerName().equals(PlayerRolesClient.myOwner()))
             {
                 Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
                 fogBlocks.keySet().removeIf(buildingOrigins::contains);
@@ -478,7 +489,7 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
-        if (buildingToPlace != null) {
+        if (buildingToPlace != null && !Keybindings.altMod.isDown()) { // Alt + wheel zooms instead
             if (buildingToPlace instanceof AbstractBridge bridge) {
                 bridgePlaceState += evt.getScrollDelta() > 0 ? 1 : -1;
                 if (bridgePlaceState < 0) {
@@ -528,10 +539,10 @@ public class BuildingClientEvents {
             BuildingPlacement preSelBuilding = getPreselectedBuilding();
 
             String errorMsgKey = BuildingValidators.getPlacementValidityError(
-                    MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+                    MC.level, buildingToPlace, originPos, PlayerRolesClient.myOwner(), buildingRotation, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
             );
             boolean valid = errorMsgKey == null;
-            boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, MC.player.getName().getString());
+            boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, PlayerRolesClient.myOwner());
 
             if (errorMsgKey != null && errorMsgKey.equals("building.reignofnether.build_centre_here")) {
                 OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
@@ -556,7 +567,7 @@ public class BuildingClientEvents {
                     ids[i] = builderIds.get(i);
                 }
                 if (Keybindings.shiftMod.isDown()) {
-                    String ownerName = MC.player.getName().getString();
+                    String ownerName = PlayerRolesClient.myOwner();
                     if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
                         ownerName = "";
                     else if (SandboxClientEvents.relationship == Relationship.HOSTILE)
@@ -599,7 +610,7 @@ public class BuildingClientEvents {
                             break;
                         }
                     }
-                    String ownerName = MC.player.getName().getString();
+                    String ownerName = PlayerRolesClient.myOwner();
                     if (SandboxClientEvents.isSandboxPlayer(ownerName) && !hasSelectedWorkers &&
                         !(buildingToPlace instanceof AbstractBridge)) {
                         if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
@@ -741,9 +752,11 @@ public class BuildingClientEvents {
             if (building != null && building.getBuilding().capturable && !isSandboxPlayer) {
                 HudClientEvents.showTemporaryMessage(I18n.get("server.reignofnether.cannot_delete_capturable"));
             } else if (building != null &&
-                ((building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
+                // unbuilt: cancel construction, under the same rule as the card's Cancel button (B)
+                (((building.isBuilt || !HelperButtons.buildingCancelButton.isHidden.get())
+                        && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
                 HudClientEvents.hudSelectedPlacement = null;
-                BuildingServerboundPacket.cancelBuilding(building.minCorner, MC.player.getName().getString());
+                BuildingServerboundPacket.cancelBuilding(building.minCorner, PlayerRolesClient.myOwner());
             }
         }
     }
@@ -787,7 +800,12 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(BuildingPlacement::shouldBeDestroyed);
-            buildings.removeIf(BuildingPlacement::shouldBeDestroyed);
+            buildings.removeIf(b -> {
+                if (!b.shouldBeDestroyed())
+                    return false;
+                onLost(b);
+                return true;
+            });
         }
     }
 
@@ -902,7 +920,7 @@ public class BuildingClientEvents {
 
     public static Relationship getPlayerToBuildingRelationship(BuildingPlacement building) {
         if (MC.player != null) {
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
             String buildingOwnerName = building.ownerName;
 
             if (playerName.equals(buildingOwnerName)) {
@@ -924,7 +942,7 @@ public class BuildingClientEvents {
     public static boolean hasFinishedBuilding(Building building) {
         for (BuildingPlacement bpl : buildings) {
             if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
-                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                    ((MC.player != null && bpl.ownerName.equals(PlayerRolesClient.myOwner())) ||
                             allyHasFinishedBuilding(building))) {
                 return true;
             }
@@ -934,7 +952,7 @@ public class BuildingClientEvents {
 
     // does the selected ally's unit own one of these buildings?
     public static boolean allyHasFinishedBuilding(Building building) {
-        if (!AlliancesClient.canControlAlly(hudSelectedEntity))
+        if (!SharingClient.canControl(hudSelectedEntity))
             return false;
 
         String allyName = "";
@@ -965,8 +983,24 @@ public class BuildingClientEvents {
     }
 
     public static void removeBuilding(BlockPos bp) {
-        buildings.removeIf(b -> b.originPos.equals(bp));
+        buildings.removeIf(b -> {
+            if (!b.originPos.equals(bp))
+                return false;
+            onLost(b);
+            return true;
+        });
         BuildingClientEvents.clearSelectedBuildings();
+    }
+
+    /** Losing your last capital: a tip in chat that surrender is in the pause menu. */
+    private static void onLost(BuildingPlacement b) {
+        if (!b.isCapitol || !b.isBuilt || MC.player == null || !PlayerClientEvents.isRTSPlayer()
+                || !b.ownerName.equals(MC.player.getName().getString()))
+            return;
+        boolean another = buildings.stream().anyMatch(o -> o != b && o.isCapitol && o.ownerName.equals(b.ownerName) && !o.shouldBeDestroyed());
+        if (!another)
+            MC.gui.getChat().addMessage(com.solegendary.reignofnether.chat.SystemMessage.important(
+                    net.minecraft.network.chat.Component.translatable("hud.reignofnether.capital_lost_tip")));
     }
 
     public static void removeFogQueuedBuilding(BlockPos bp) {

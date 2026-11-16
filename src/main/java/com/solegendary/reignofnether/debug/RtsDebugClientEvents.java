@@ -1,10 +1,15 @@
 package com.solegendary.reignofnether.debug;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+import com.solegendary.reignofnether.hud.panels.TopRightPanel;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -53,41 +58,40 @@ public class RtsDebugClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Pre evt) {
-        if (displayMode == DebugDisplayMode.NONE)
+        // this event fires once per overlay
+        if (displayMode == DebugDisplayMode.NONE || evt.getOverlay() != VanillaGuiOverlay.DEBUG_TEXT.type())
             return;
 
-        int x = evt.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.NONE ? 85 : 95);
-        int y = 25;
+        GuiGraphics g = evt.getGuiGraphics();
+        int x = HudGeometry.scale().width() - 95;
         int lineH = 10;
+        int y = TopRightPanel.bottom - lineH; // the first line is at y + lineH
 
         double worldTPS = Math.min(1000.0 / tickTime, 99.99);
 
-        int tpsCol = 0x00FF00; // green
-        if (worldTPS < 10) {
-            tpsCol = 0xFF0000; // red
-        } else if (worldTPS < 20) {
-            tpsCol = 0xFFFF00; // yellow
-        }
+        int tpsCol = worldTPS < 10 ? 0xFF0000 : worldTPS < 20 ? 0xFFFF00 : 0x00FF00; // red, yellow, green
         String fps = MC.fpsString.length() >= 6 ? MC.fpsString.substring(0, 6).replace("fps", "") : "?";
 
-        evt.getGuiGraphics().drawString(MC.font, "Tick: " + String.format("%.2f", tickTime), x, y + lineH, tpsCol);
-        evt.getGuiGraphics().drawString(MC.font, "TPS: " + String.format("%.2f", worldTPS),  x, y + lineH * 2, tpsCol);
-        evt.getGuiGraphics().drawString(MC.font, "FPS: " + fps,                              x, y + lineH * 3,  0xFFFFFF);
-        if (displayMode == DebugDisplayMode.PATHFINDING) {
-            evt.getGuiGraphics().drawString(MC.font, "Units: " + UnitClientEvents.getAllUnits().size(),  x, y + lineH * 4, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Paths: " + RtsDebugPathPreview.displayedPathCount(), x, y + lineH * 5, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Paths/s: " + pathsAvg,                             x, y + lineH * 6, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Queue: " + queueAvg,                               x, y + lineH * 7, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Stuck: " + stuckAvg,                               x, y + lineH * 8, stuckAvg > 0 ? 0xFF6060 : 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Path ms: " + String.format("%.2f", pathComputeMs),  x, y + lineH * 9, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Path e2e: " + String.format("%.2f", pathE2eMs),     x, y + lineH * 10, 0xFFFFFF);
-        }
-        if (displayMode == DebugDisplayMode.NAVMESH) {
-            evt.getGuiGraphics().drawString(MC.font, "NAVMESH",            x, y + lineH * 4, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "green=open",         x, y + lineH * 5, 0x40FF40);
-            evt.getGuiGraphics().drawString(MC.font, "red=crowded",        x, y + lineH * 6, 0xFF4040);
-            evt.getGuiGraphics().drawString(MC.font, "orange=no fit",      x, y + lineH * 7, 0xFF9020);
-            evt.getGuiGraphics().drawString(MC.font, "tiles: " + RtsDebugNavmesh.scoreTileCount(), x, y + lineH * 8, 0xFFFFFF);
-        }
+        Text.atGui(g, 0, 0, () -> {
+            g.drawString(MC.font, "Tick: " + String.format("%.2f", tickTime), x, y + lineH, tpsCol);
+            g.drawString(MC.font, "TPS: " + String.format("%.2f", worldTPS),  x, y + lineH * 2, tpsCol);
+            g.drawString(MC.font, "FPS: " + fps,                              x, y + lineH * 3,  0xFFFFFF);
+            if (displayMode == DebugDisplayMode.PATHFINDING) {
+                g.drawString(MC.font, "Units: " + UnitClientEvents.getAllUnits().size(),  x, y + lineH * 4, 0xFFFFFF);
+                g.drawString(MC.font, "Paths: " + RtsDebugPathPreview.displayedPathCount(), x, y + lineH * 5, 0xFFFFFF);
+                g.drawString(MC.font, "Paths/s: " + pathsAvg,                             x, y + lineH * 6, 0xFFFFFF);
+                g.drawString(MC.font, "Queue: " + queueAvg,                               x, y + lineH * 7, 0xFFFFFF);
+                g.drawString(MC.font, "Stuck: " + stuckAvg,                               x, y + lineH * 8, stuckAvg > 0 ? 0xFF6060 : 0xFFFFFF);
+                g.drawString(MC.font, "Path ms: " + String.format("%.2f", pathComputeMs),  x, y + lineH * 9, 0xFFFFFF);
+                g.drawString(MC.font, "Path e2e: " + String.format("%.2f", pathE2eMs),     x, y + lineH * 10, 0xFFFFFF);
+            }
+            if (displayMode == DebugDisplayMode.NAVMESH) {
+                g.drawString(MC.font, "NAVMESH",            x, y + lineH * 4, 0xFFFFFF);
+                g.drawString(MC.font, "green=open",         x, y + lineH * 5, 0x40FF40);
+                g.drawString(MC.font, "red=crowded",        x, y + lineH * 6, 0xFF4040);
+                g.drawString(MC.font, "orange=no fit",      x, y + lineH * 7, 0xFF9020);
+                g.drawString(MC.font, "tiles: " + RtsDebugNavmesh.scoreTileCount(), x, y + lineH * 8, 0xFFFFFF);
+            }
+        });
     }
 }

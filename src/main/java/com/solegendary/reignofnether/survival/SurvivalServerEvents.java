@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
@@ -29,7 +30,6 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
@@ -45,19 +45,27 @@ public class SurvivalServerEvents {
     @Nullable public static Wave currentWave = null;
     public static Wave nextWave = Wave.getWave(1);
     private static WaveDifficulty difficulty = WaveDifficulty.BEGINNER;
-    private static final ArrayList<WaveEnemy> enemies = new ArrayList<>();
+    private static final ArrayList<WaveEnemy> enemies = WorldState.server(new ArrayList<>());
     public static final String ENEMY_OWNER_NAME = "Enemy";
     private static final Random random = new Random();
     public static Faction lastFaction = Factions.NONE;
 
-    public static final ArrayList<WavePortal> portals = new ArrayList<>();
+    public static final ArrayList<WavePortal> portals = WorldState.server(new ArrayList<>());
 
     public static final long TICK_INTERVAL = 10;
     private static long lastTime = -1;
     private static long lastEnemyCount = 0;
+    static {
+        WorldState.onServerReset(() -> {
+            currentWave = null;
+            lastKilledEnemy = null;
+            lastTime = -1;
+            lastEnemyCount = 0;
+        });
+    }
     private static long ticks = 0;
 
-    private static ArrayList<BuildingPlacement> lastPortals = new ArrayList<>();
+    private static ArrayList<BuildingPlacement> lastPortals = WorldState.server(new ArrayList<>());
 
     private static ServerLevel serverLevel = null;
 
@@ -78,16 +86,6 @@ public class SurvivalServerEvents {
 
     // statics outlive the world: clear them so the next world opened in this game starts clean
     // (not reset(): that kills enemies and writes the save)
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        enemies.clear();
-        portals.clear();
-        lastPortals.clear();
-        currentWave = null;
-        lastKilledEnemy = null;
-        lastTime = -1;
-        lastEnemyCount = 0;
-    }
 
     @SubscribeEvent
     public static void loadWaveData(ServerStartedEvent evt) {

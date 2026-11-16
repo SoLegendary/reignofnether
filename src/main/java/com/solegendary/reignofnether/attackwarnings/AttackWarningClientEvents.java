@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.attackwarnings;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -59,7 +60,7 @@ public class AttackWarningClientEvents {
     public static void checkAndTriggerAttackWarning(String attackedPlayerName, BlockPos attackPos) {
         if (MC.player == null || !OrthoviewClientEvents.isEnabled())
             return;
-        if (!MC.player.getName().getString().equals(attackedPlayerName))
+        if (!PlayerRolesClient.myOwner().equals(attackedPlayerName))
             return;
 
         Vec3 centrePos = MiscUtil.getOrthoviewCentreWorldPos(MC);

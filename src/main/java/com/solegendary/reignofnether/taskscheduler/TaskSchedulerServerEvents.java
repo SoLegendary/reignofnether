@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.taskscheduler;
 
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TaskSchedulerServerEvents {
 
-    private static final List<ScheduledTask> tasks = new ArrayList<>();
+    private static final List<ScheduledTask> tasks = WorldState.server(new ArrayList<>());
 
     private record ScheduledTask(int ticksRemaining, Runnable task) {}
 
@@ -19,10 +19,6 @@ public class TaskSchedulerServerEvents {
     }
 
     // pending tasks hold the closed world's level/players: never run them in the next world
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        tasks.clear();
-    }
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
