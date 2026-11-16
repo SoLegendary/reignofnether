@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -136,9 +137,11 @@ public final class EntityTargetIndex {
     public record TargetGroup(String ownerName, boolean unit, Faction faction, boolean neutralAttackable) {
         public Relationship relationshipTo(String owner) {
             if (ownerName == null) return Relationship.NEUTRAL;
-            if (AlliancesServerEvents.isAllied(owner, ownerName) || owner.equals(ownerName))
+            // a soldier or co-commander fights for their commander; looked up each time, roles change after tracking
+            String other = unit ? ownerName : PlayerRoles.commanderOf(ownerName);
+            if (AlliancesServerEvents.isAllied(owner, other) || owner.equals(other))
                 return Relationship.FRIENDLY;
-            return owner.isBlank() || ownerName.isBlank() ? Relationship.NEUTRAL : Relationship.HOSTILE;
+            return owner.isBlank() || other.isBlank() ? Relationship.NEUTRAL : Relationship.HOSTILE;
         }
     }
 

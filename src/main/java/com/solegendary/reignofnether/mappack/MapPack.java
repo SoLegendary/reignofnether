@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -33,13 +34,15 @@ public final class MapPack {
     private MapPack() { }
 
     public static final String URL = "https://reignofnether.net/download/mappack";
+    /** The tutorial is one of the pack's maps, this world folder; the title screen's Tutorial button plays it. */
+    public static final String TUTORIAL = "[1p] Tutorial";
     private static final String MARKER = ".ron-mappack";
     // the pack is ~250 MB zipped; these only stop a broken or hostile download from filling the disk
     static final long MAX_DOWNLOAD = 1L << 30, MAX_EXTRACTED = 4L << 30;
     static final int MAX_ENTRIES = 100_000;
 
     /** The world folders map pack downloads installed (empty when it was never downloaded here). */
-    public static java.util.Set<String> installedWorlds() {
+    public static Set<String> installedWorlds() {
         return readMarker(saves()).keySet();
     }
 

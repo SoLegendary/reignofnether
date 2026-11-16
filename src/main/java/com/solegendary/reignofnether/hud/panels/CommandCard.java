@@ -36,8 +36,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
@@ -61,6 +59,7 @@ import net.minecraft.world.entity.Mob;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.hud.layout.CommandGrid.*;
 
@@ -76,7 +75,7 @@ public final class CommandCard {
     private static Object pageOwner = null;
 
     // buildings a worker's advanced tab shows; the rest are on the basic tab
-    private static final java.util.Set<Building> ADVANCED_BUILDINGS = java.util.Set.of(
+    private static final Set<Building> ADVANCED_BUILDINGS = Set.of(
             Buildings.DUNGEON, Buildings.SPIDER_LAIR, Buildings.SLIME_PIT, Buildings.LABORATORY, Buildings.STRONGHOLD,
             Buildings.BASTION, Buildings.HOGLIN_STABLES, Buildings.FLAME_SANCTUARY, Buildings.WITHER_SHRINE,
             Buildings.BASALT_SPRINGS, Buildings.FORTRESS,
@@ -291,9 +290,8 @@ public final class CommandCard {
                     if (ability instanceof CallToArmsUnit callToArms)
                         abilities.add(callToArms.getButton(Keybindings.hotkey1, vUnit));
         }
-        boolean showAbilities = TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO) &&
-                (UnitClientEvents.getPlayerToEntityRelationship(first) == Relationship.OWNED
-                        || !PlayerClientEvents.isRTSPlayer() || ResearchClient.hasCheat("wouldyoukindly"))
+        boolean showAbilities = UnitClientEvents.getPlayerToEntityRelationship(first) == Relationship.OWNED
+                || !PlayerClientEvents.isRTSPlayer() || ResearchClient.hasCheat("wouldyoukindly")
                 || SharingClient.canControl(first);
         if (showAbilities)
             for (Button b : unit.getAbilityButtons())

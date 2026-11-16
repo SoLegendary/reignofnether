@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.rtsmap;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -13,10 +16,23 @@ public class RTSMapInfoClientboundPacket {
 
     private final RTSMapInfoAction action;
     private final String value;
+    static final int MAX_LENGTH = 262144; // a whole map.json
 
     public static void sendValue(RTSMapInfoAction action, String value) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new RTSMapInfoClientboundPacket(action, value));
+    }
+
+    public static void sendTo(ServerPlayer player, RTSMapInfoAction action, String value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new RTSMapInfoClientboundPacket(action, value));
+    }
+
+    // for what only the Editor (ops) may see
+    public static void sendToOps(MinecraftServer server, RTSMapInfoAction action, String value) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers())
+            if (PlayerServerEvents.isOpOrHost(player))
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+                        new RTSMapInfoClientboundPacket(action, value));
     }
 
     public RTSMapInfoClientboundPacket(RTSMapInfoAction action, String value) {
@@ -26,12 +42,12 @@ public class RTSMapInfoClientboundPacket {
 
     public RTSMapInfoClientboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(RTSMapInfoAction.class);
-        this.value = buffer.readUtf();
+        this.value = buffer.readUtf(MAX_LENGTH);
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
-        buffer.writeUtf(this.value);
+        buffer.writeUtf(this.value, MAX_LENGTH);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -48,6 +64,9 @@ public class RTSMapInfoClientboundPacket {
                     case ADD_AUTHOR -> RTSMapInfoClientEvents.authors.add(value);
                     case SET_VERSION -> RTSMapInfoClientEvents.version = value;
                     case SET_TEAM_MODE -> RTSMapInfoClientEvents.teamMode = Boolean.parseBoolean(value);
+                    case SET_JSON -> RTSMapInfoClientEvents.setMapJson(value);
+                    case SET_FORMAT -> RTSMapInfoClientEvents.format = Integer.parseInt(value);
+                    case SET_LANG -> RTSMapInfoClientEvents.setLang(value);
                 }
             });
         });

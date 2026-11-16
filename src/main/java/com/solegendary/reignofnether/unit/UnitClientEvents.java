@@ -49,7 +49,6 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
@@ -552,13 +551,6 @@ public class UnitClientEvents {
                     unit.setOwnerName(ownerName);
     }
 
-    public static void syncScenarioRoleIndex(int entityId, int scenarioRoleIndex) {
-        for (LivingEntity entity : allUnits)
-            if (entity.getId() == entityId && MC.level != null)
-                if (entity instanceof Unit unit)
-                    unit.setScenarioRoleIndex(scenarioRoleIndex);
-    }
-
     /**
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
@@ -736,8 +728,6 @@ public class UnitClientEvents {
         Entity entity = evt.getEntity();
 
         if (entity instanceof Unit unit && evt.getLevel().isClientSide) {
-            TutorialClientEvents.updateStage();
-
             if (selectedUnits.removeIf(e -> e.getId() == entity.getId()))
                 selectedUnits.add((LivingEntity) entity);
             if (preselectedUnits.removeIf(e -> e.getId() == entity.getId()))

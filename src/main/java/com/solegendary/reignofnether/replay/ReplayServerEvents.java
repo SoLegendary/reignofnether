@@ -17,9 +17,7 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
-import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
-import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.util.WorldState;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -213,7 +211,7 @@ public class ReplayServerEvents {
         if (evt.phase != TickEvent.Phase.END || playbackWorld)
             return;
         MinecraftServer server = evt.getServer();
-        boolean active = PlayerServerEvents.isGameActive() && !TutorialServerEvents.isEnabled();
+        boolean active = PlayerServerEvents.isGameActive();
         if (!active)
             matchOver = false;
         // a saved match being loaded waits for someone to join, so there's someone to snapshot it for
@@ -339,7 +337,6 @@ public class ReplayServerEvents {
                 ResourcesServerEvents.onPlayerJoin(evt);
                 StartPosServerEvents.onPlayerJoin(evt);
             }
-            ScenarioServerEvents.syncScenarioRoles();
             PlayerServerEvents.syncUnits();
             // custom buildings' definitions, once (a join sync is per player): the buildings placed next need them
             for (CustomBuilding b : CustomBuildingServerEvents.customBuildings)

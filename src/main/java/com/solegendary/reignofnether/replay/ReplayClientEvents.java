@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.soldier.SoldierStateClientboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.ui.Toast;
 import com.solegendary.reignofnether.util.WorldState;
@@ -101,7 +100,7 @@ public class ReplayClientEvents {
             CameraClientboundPacket.class.getName(), CameraFadeClientboundPacket.class.getName(),
             MatchResumeClientboundPacket.class.getName(), PlayerChunksClientboundPacket.class.getName(),
             HudClientboundPacket.class.getName(), SoldierStateClientboundPacket.class.getName(),
-            ClientboundSyncResourceCostPacket.class.getName(), TutorialClientboundPacket.class.getName(),
+            ClientboundSyncResourceCostPacket.class.getName(),
             ReplayChunkClientboundPacket.class.getName(), FogSyncClientboundPacket.class.getName(),
             TeamChatClientboundPacket.class.getName()); // chat, in replays recorded before it was left out
 

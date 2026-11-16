@@ -397,6 +397,8 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Pre<? extends LivingEntity, ? extends Model> evt) {
+        if (!evt.getEntity().isAddedToWorld()) // a portrait-only entity (the guide's speaker), drawn at 0 0 0
+            return;
         if (MC.level != null && !MC.level.getWorldBorder().isWithinBounds(evt.getEntity().getOnPos())) {
             evt.setCanceled(true);
             return;

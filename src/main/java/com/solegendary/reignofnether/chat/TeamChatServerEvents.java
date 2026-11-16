@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +23,7 @@ import java.util.List;
 
 // During a match, chat goes to your team (commanders and soldiers); start a message with '!' to talk to everyone,
 // unless the allChat rule is off. Spectators only talk to other spectators. In the match lobby chat is formatted the same way
-// (no channel tag); sandbox, survival and other worlds keep vanilla chat. Runs after RoN's
+// (no channel tag); sandbox and other worlds keep vanilla chat. Runs after RoN's
 // cheat-code handler (normal priority), which only reads the message.
 public class TeamChatServerEvents {
 
@@ -57,12 +56,12 @@ public class TeamChatServerEvents {
     // a map with start positions and no match running yet
     static boolean isLobby() {
         return !PlayerServerEvents.isGameActive() && !StartPosServerEvents.startPoses.isEmpty()
-                && !SandboxServer.isAnyoneASandboxPlayer() && !SurvivalServerEvents.isEnabled();
+                && !SandboxServer.isAnyoneASandboxPlayer();
     }
 
-    // a real match; sandbox and survival chat stays as vanilla
+    // a real match; sandbox chat stays as vanilla
     public static boolean isMatch() {
-        return PlayerServerEvents.isGameActive() && !SandboxServer.isAnyoneASandboxPlayer() && !SurvivalServerEvents.isEnabled();
+        return PlayerServerEvents.isGameActive() && !SandboxServer.isAnyoneASandboxPlayer();
     }
 
     // '!' talks to everyone when allChat is on; otherwise players reach their team. Spectators (defeated players

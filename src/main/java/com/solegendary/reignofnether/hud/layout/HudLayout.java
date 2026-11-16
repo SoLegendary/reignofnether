@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ui.Rect;
 
 /**
  * Where every region of the RTS HUD goes, in HUD units. This is the only place screen positions are
- * decided; the panels, the minimap and the tutorial arrows all read from here.
+ * decided; the panels, the minimap and the campaign highlight all read from here.
  *
  * <pre>
  *  [resources........]                              [clock][utility bar]
@@ -67,10 +67,6 @@ public record HudLayout(
 
     public static int cardWidth() {
         return CommandGrid.COLS * CARD_CELL + (CommandGrid.COLS - 1) * CELL_GAP_X;
-    }
-
-    public static int cardHeight() {
-        return CommandGrid.ROWS * CARD_CELL + (CommandGrid.ROWS - 1) * CELL_GAP_Y;
     }
 
     public static HudLayout compute(int width, int height) {

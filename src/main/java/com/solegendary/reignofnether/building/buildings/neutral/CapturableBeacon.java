@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -61,7 +60,7 @@ public class CapturableBeacon extends Beacon {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/netherite_beacon.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
-                TutorialClientEvents::isEnabled,
+                () -> false,
                 () -> {
                     List<BuildingPlacement> list = new ArrayList<>();
                     for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {

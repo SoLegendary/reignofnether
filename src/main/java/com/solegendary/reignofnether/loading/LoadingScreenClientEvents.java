@@ -140,7 +140,24 @@ public final class LoadingScreenClientEvents {
     // world's options, reading a world) are a blink between menus, which keep their own background
     private static boolean isLoading(@Nullable Screen s) {
         return s instanceof LevelLoadingScreen || s instanceof ConnectScreen || s instanceof ReceivingLevelScreen
-                || s instanceof ProgressScreen || s instanceof GenericDirtMessageScreen && (isSaving(s) || isConnecting(s));
+                || s instanceof ProgressScreen || s instanceof GenericDirtMessageScreen && (isSaving(s) || isConnecting(s))
+                || isReadingWorld(s);
+    }
+
+    // "reading world data": a world opening, and where a map's resources.zip reloads the resources under it
+    private static boolean isReadingWorld(@Nullable Screen s) {
+        return s instanceof GenericDirtMessageScreen && s.getTitle().getContents() instanceof TranslatableContents tc
+                && tc.getKey().equals("selectWorld.data_read");
+    }
+
+    /** Vanilla's resource reload overlay (a map's resources.zip) draws over every screen: covered while loading. */
+    public static void drawOverOverlay(GuiGraphics g) {
+        Screen s = MC.screen;
+        if (mode == null && !isReadingWorld(s))
+            return;
+        if (mode == null)
+            begin(s);
+        draw(g, s);
     }
 
     private static boolean isSaving(Screen s) {
@@ -259,6 +276,11 @@ public final class LoadingScreenClientEvents {
 
     public static boolean isShowing() {
         return mode != null;
+    }
+
+    /** Nothing showing and nothing waiting out the moment after: the player sees the world. */
+    public static boolean isDone() {
+        return mode == null && delayed == null;
     }
 
     /** Runs once the whole animation has played out, or now if nothing is showing (the resume screen waits for it). */

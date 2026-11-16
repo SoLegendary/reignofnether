@@ -8,13 +8,16 @@ import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +33,23 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
     public ReturnResourcesGoal(Mob mob) {
         super(mob, true, 0);
+    }
+
+    // ron/events/resources_returned, then resources_returned/<food|wood|ore>: @s is the worker, $owner its owner, and
+    // the amount is the owner's score in the ron_returned objective
+    private void fireReturned(Resources res) {
+        var server = this.mob.getServer();
+        if (server == null || !RonFiles.matchRunning())
+            return;
+        var board = server.getScoreboard();
+        var objective = board.getObjective("ron_returned");
+        if (objective == null)
+            objective = board.addObjective("ron_returned", ObjectiveCriteria.DUMMY,
+                    Component.literal("ron_returned"), ObjectiveCriteria.RenderType.INTEGER);
+        board.getOrCreatePlayerScore(res.ownerName, objective).setScore(res.getTotalValue());
+        String type = res.food > 0 ? "food" : res.wood > 0 ? "wood" : "ore";
+        RonFiles.fire(server, "resources_returned", this.mob.createCommandSourceStack(), res.ownerName);
+        RonFiles.fire(server, "resources_returned/" + type, this.mob.createCommandSourceStack(), res.ownerName);
     }
 
     public void depositItems() {
@@ -53,6 +73,7 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
 
                 unit.getItems().clear();
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
+                fireReturned(res);
                 this.stopReturning();
             }
         }

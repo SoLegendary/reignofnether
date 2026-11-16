@@ -57,12 +57,6 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setAllowBeacons(value);
             }
-        } else if (nodes.get(1).getNode().getName().equals("pvpModesOnly")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                GameruleClientboundPacket.setPvpModesOnly(value);
-            }
         } else if (nodes.get(1).getNode().getName().equals("beaconWinMinutes")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
             if (args.containsKey("value")) {
@@ -93,18 +87,6 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setHideEnemyPicks(value);
                 StartPosServerEvents.syncAll(value); // the rule itself only changes after this event
-            }
-        } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                GameruleClientboundPacket.setScenarioMode(value);
-            }
-        } else if (nodes.get(1).getNode().getName().equals("coopMode")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                GameruleClientboundPacket.setCoopMode(value);
             }
         } else if (nodes.get(1).getNode().getName().equals("buildingsOutsideBorder")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
@@ -187,8 +169,6 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setFlyingMaxYLevel(flyingMaxYLevel);
             boolean allowBeacons = server.getGameRules().getRule(GameRuleRegistrar.ALLOW_BEACONS).get();
             GameruleClientboundPacket.setAllowBeacons(allowBeacons);
-            boolean pvpModesOnly = server.getGameRules().getRule(GameRuleRegistrar.PVP_MODES_ONLY).get();
-            GameruleClientboundPacket.setPvpModesOnly(pvpModesOnly);
             int beaconWinMinutes = server.getGameRules().getRule(GameRuleRegistrar.BEACON_WIN_MINUTES).get();
             GameruleClientboundPacket.setBeaconWinMinutes(beaconWinMinutes);
             boolean slantedBuilding = server.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get();
@@ -198,10 +178,6 @@ public class GameruleServerEvents {
             boolean lockAlliances = server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get();
             GameruleClientboundPacket.setLockAlliances(lockAlliances);
             GameruleClientboundPacket.setHideEnemyPicks(server.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).get());
-            boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
-            GameruleClientboundPacket.setScenarioMode(scenarioMode);
-            boolean coopMode = server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
-            GameruleClientboundPacket.setCoopMode(coopMode);
             boolean buildingsOutsideBorder = server.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get();
             GameruleClientboundPacket.setBuildingsOutsideBorder(buildingsOutsideBorder);
             boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();

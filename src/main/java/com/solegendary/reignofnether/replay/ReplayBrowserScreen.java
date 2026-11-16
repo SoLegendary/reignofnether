@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.ui.Backdrop;
 import com.solegendary.reignofnether.ui.Clip;
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -30,7 +31,6 @@ public class ReplayBrowserScreen extends Screen {
 
     private static final int PAD = 16, ROW_H = 48, BUTTON_H = 28, SMALL_BUTTON_H = 18;
 
-    private record Hit(int x, int y, int w, int h, Runnable action) { }
 
     // a header, or just the file when it can't be read
     private record Entry(Path file, @Nullable ReplayHeader header) { }
@@ -116,9 +116,8 @@ public class ReplayBrowserScreen extends Screen {
 
         int by = y + h - PAD - BUTTON_H;
         int closeW = Math.max(100, Text.mediumWidth(tr("replay.reignofnether.close")) + 24);
-        button(g, tr("replay.reignofnether.open_folder"), tx, by, rowW - closeW - 8, BUTTON_H, false, mx, my, true,
-                ReplayClientEvents::openReplaysFolder);
-        button(g, tr("replay.reignofnether.close"), tx + rowW - closeW, by, closeW, BUTTON_H, false, mx, my, true, this::onClose);
+        Hit.button(hits, g, tr("replay.reignofnether.open_folder"), tx, by, rowW - closeW - 8, BUTTON_H, false, true, mx, my, ReplayClientEvents::openReplaysFolder);
+        Hit.button(hits, g, tr("replay.reignofnether.close"), tx + rowW - closeW, by, closeW, BUTTON_H, false, true, mx, my, this::onClose);
         g.pose().popPose();
     }
 
@@ -129,10 +128,8 @@ public class ReplayBrowserScreen extends Screen {
         boolean confirming = e.file().equals(confirmDelete);
         // buttons on the right: Watch, Delete (asks once)
         if (h != null)
-            button(g, tr("replay.reignofnether.watch"), bx - 6 - bw, y + (ROW_H - SMALL_BUTTON_H) / 2, bw, SMALL_BUTTON_H, true, mx, my, clickable,
-                    () -> ReplayClientEvents.watch(h));
-        button(g, tr(confirming ? "replay.reignofnether.confirm_delete" : "replay.reignofnether.delete"), bx,
-                y + (ROW_H - SMALL_BUTTON_H) / 2, bw, SMALL_BUTTON_H, false, mx, my, clickable, () -> delete(e.file()));
+            Hit.button(hits, g, tr("replay.reignofnether.watch"), bx - 6 - bw, y + (ROW_H - SMALL_BUTTON_H) / 2, bw, SMALL_BUTTON_H, true, clickable, mx, my, () -> ReplayClientEvents.watch(h));
+        Hit.button(hits, g, tr(confirming ? "replay.reignofnether.confirm_delete" : "replay.reignofnether.delete"), bx, y + (ROW_H - SMALL_BUTTON_H) / 2, bw, SMALL_BUTTON_H, false, clickable, mx, my, () -> delete(e.file()));
         int textW = bx - 6 - bw - 8 - (x + 8);
 
         if (h == null) {
@@ -190,28 +187,11 @@ public class ReplayBrowserScreen extends Screen {
         load();
     }
 
-    private void button(GuiGraphics g, String label, int x, int y, int w, int h, boolean primary, int mx, int my,
-                        boolean clickable, Runnable action) {
-        boolean hov = clickable && mx >= x && mx < x + w && my >= y && my < y + h;
-        if (primary)
-            Theme.primaryButton(g, x, y, w, h, hov);
-        else
-            Theme.secondaryButton(g, x, y, w, h, hov);
-        Text.mediumCentered(g, label, x + w / 2, y + (h - 8) / 2, primary ? Theme.ON_ORANGE : hov ? Theme.GOLD : Theme.BODY);
-        if (clickable)
-            hits.add(new Hit(x, y, w, h, action));
-    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float k = Text.guiPerUnit();
-        double mx = mouseX / k, my = mouseY / k;
-        if (button == 0)
-            for (Hit h : List.copyOf(hits))
-                if (mx >= h.x && mx < h.x + h.w && my >= h.y && my < h.y + h.h) {
-                    h.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         confirmDelete = null;
         return super.mouseClicked(mouseX, mouseY, button);
     }

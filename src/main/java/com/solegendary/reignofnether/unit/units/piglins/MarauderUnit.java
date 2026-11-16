@@ -147,11 +147,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
 
-    // which scenario role does this unit use?
-    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
-    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.INT);
     
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
@@ -162,7 +157,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
     }
 

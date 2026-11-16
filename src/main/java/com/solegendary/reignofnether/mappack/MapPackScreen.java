@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.mappack;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ui.Backdrop;
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,7 +25,6 @@ public class MapPackScreen extends Screen {
     private static final int BANNER_W = 640, BANNER_H = 286;
     private static final int PAD = 16, BUTTON_H = 36;
 
-    private record Hit(int x, int y, int w, int h, Runnable action) { }
 
     private final Screen parent;
     private final List<Hit> hits = new ArrayList<>();
@@ -87,8 +87,8 @@ public class MapPackScreen extends Screen {
         switch (state) {
             case MISSING, FAILED -> {
                 int notNowW = Math.max(100, Text.mediumWidth(tr("mappack.reignofnether.not_now")) + 24);
-                button(g, tr("mappack.reignofnether.download"), tx, by, bw - notNowW - 8, true, mx, my, MapPack::download);
-                button(g, tr("mappack.reignofnether.not_now"), tx + bw - notNowW, by, notNowW, false, mx, my, this::onClose);
+                Hit.button(hits, g, tr("mappack.reignofnether.download"), tx, by, bw - notNowW - 8, BUTTON_H, true, true, mx, my, MapPack::download);
+                Hit.button(hits, g, tr("mappack.reignofnether.not_now"), tx + bw - notNowW, by, notNowW, BUTTON_H, false, true, mx, my, this::onClose);
             }
             case DOWNLOADING -> {
                 float p = MapPack.progress();
@@ -97,37 +97,22 @@ public class MapPackScreen extends Screen {
                 Text.small(g, tr(kickerKey(state)), tx, barY + 12, Theme.LABEL);
                 if (p >= 0)
                     Text.smallRight(g, Math.round(p * 100) + "%", tx + bw, barY + 12, Theme.GOLD);
-                button(g, tr("mappack.reignofnether.background"), tx, by, bw, false, mx, my, this::onClose);
+                Hit.button(hits, g, tr("mappack.reignofnether.background"), tx, by, bw, BUTTON_H, false, true, mx, my, this::onClose);
             }
             case INSTALLED -> {
                 int checkW = Math.max(100, Text.mediumWidth(tr("mappack.reignofnether.check_updates")) + 24);
-                button(g, tr("mappack.reignofnether.done"), tx, by, bw - checkW - 8, true, mx, my, this::onClose);
-                button(g, tr("mappack.reignofnether.check_updates"), tx + bw - checkW, by, checkW, false, mx, my, MapPack::download);
+                Hit.button(hits, g, tr("mappack.reignofnether.done"), tx, by, bw - checkW - 8, BUTTON_H, true, true, mx, my, this::onClose);
+                Hit.button(hits, g, tr("mappack.reignofnether.check_updates"), tx + bw - checkW, by, checkW, BUTTON_H, false, true, mx, my, MapPack::download);
             }
         }
         g.pose().popPose();
     }
 
-    private void button(GuiGraphics g, String label, int x, int y, int w, boolean primary, int mx, int my, Runnable action) {
-        boolean hov = mx >= x && mx < x + w && my >= y && my < y + BUTTON_H;
-        if (primary)
-            Theme.primaryButton(g, x, y, w, BUTTON_H, hov);
-        else
-            Theme.secondaryButton(g, x, y, w, BUTTON_H, hov);
-        Text.mediumCentered(g, label, x + w / 2, y + (BUTTON_H - 8) / 2, primary ? Theme.ON_ORANGE : hov ? Theme.GOLD : Theme.BODY);
-        hits.add(new Hit(x, y, w, BUTTON_H, action));
-    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float k = Text.guiPerUnit();
-        double mx = mouseX / k, my = mouseY / k;
-        if (button == 0)
-            for (Hit h : List.copyOf(hits))
-                if (mx >= h.x && mx < h.x + h.w && my >= h.y && my < h.y + h.h) {
-                    h.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

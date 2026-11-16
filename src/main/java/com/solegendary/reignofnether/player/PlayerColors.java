@@ -4,8 +4,6 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.resources.language.I18n;
@@ -233,7 +231,7 @@ public class PlayerColors {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),
+                () -> !MinimapClientEvents.isLargeMap(),
                 PlayerClientEvents::isRTSPlayer,
                 PlayerColors::toggleColorMode,
                 null,

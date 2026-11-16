@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.guide.CinematicClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -33,8 +34,6 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.faction.Factions;
@@ -253,7 +252,7 @@ public class OrthoviewClientEvents {
     }
 
     public static boolean isCameraLocked() {
-        return cameraLockTicksLeft > 0 || cameraLocked;
+        return cameraLockTicksLeft > 0 || cameraLocked || CinematicClient.isLocked();
     }
 
     public static void lockCam() {
@@ -496,7 +495,6 @@ public class OrthoviewClientEvents {
                 StartPosServerboundPacket.unreservePos(StartPosClientEvents.getPos().pos);
             }
         }
-        TutorialClientEvents.updateStage();
     }
 
     public static void tryToSetCamera(String playerName, boolean value) {
@@ -520,19 +518,27 @@ public class OrthoviewClientEvents {
             return;
         }
         MinimapClientEvents.setMapCentre(pos.x, pos.z);
+        Vec2 xz = cameraXZFor(pos);
+        PlayerServerboundPacket.teleportPlayer((double) xz.x, MC.player.getY(), (double) xz.y);
+    }
+
+    // where the camera (the player) goes for pos to be at the centre of the screen
+    private static Vec2 cameraXZFor(Vec3 pos) {
         // at 0deg by default camera is facing +Z and we want to move it backwards from this
         Vec2 XZRotated = MyMath.rotateCoords(0, -20, OrthoviewClientEvents.getCamRotX());
-
         float offset = (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX)));
-
         int yDiff = (int) (MC.player.getY() - pos.y) - 40;
-
         Vec2 XZRotatedOffset = MyMath.rotateCoords(0, -(offset * 35) - yDiff, -camRotX - camRotAdjX);
+        return new Vec2((float) (pos.x + XZRotated.x + XZRotatedOffset.x), (float) (pos.z + XZRotated.y + XZRotatedOffset.y));
+    }
 
-        PlayerServerboundPacket.teleportPlayer(
-                pos.x + XZRotated.x + XZRotatedOffset.x, MC.player.getY(),
-                pos.z + XZRotated.y + XZRotatedOffset.y
-        );
+    /** One step of keeping pos at the centre of the screen, eased so a moving target is followed smoothly. */
+    public static void followPos(Vec3 pos) {
+        if (MC.player == null || !isEnabled())
+            return;
+        Vec2 xz = cameraXZFor(pos);
+        MC.player.setPos(Mth.lerp(0.25, MC.player.getX(), xz.x), MC.player.getY(), Mth.lerp(0.25, MC.player.getZ(), xz.y));
+        clampPlayerToWorldBorder();
     }
 
     @SubscribeEvent
@@ -630,7 +636,7 @@ public class OrthoviewClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> hideLeavesMethod != LeafHideMethod.NONE,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),
+                () -> !MinimapClientEvents.isLargeMap(),
                 () -> true,
                 () -> {
                     FogOfWarClientEvents.resetFogChunks();
@@ -706,17 +712,13 @@ public class OrthoviewClientEvents {
         if (!Keybindings.altMod.isDown() && MC.isWindowActive() && !isCameraLocked()) {
             if (cursorX <= 0) {
                 panCam(getEdgeCamPanSensitivity(), 0, 0);
-                TutorialClientEvents.pannedLeft = true;
             } else if (cursorX >= glfwWinWidth) {
                 panCam(-getEdgeCamPanSensitivity(), 0, 0);
-                TutorialClientEvents.pannedRight = true;
             }
             if (cursorY <= 0) {
                 panCam(0, 0, getEdgeCamPanSensitivity());
-                TutorialClientEvents.pannedUp = true;
             } else if (cursorY >= glfwWinHeight) {
                 panCam(0, 0, -getEdgeCamPanSensitivity());
-                TutorialClientEvents.pannedDown = true;
             }
         }
         // lock mouse inside window

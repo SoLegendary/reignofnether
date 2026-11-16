@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.player.PlayerRoles;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -10,20 +12,16 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,9 +52,6 @@ public class ResourcesServerEvents {
     // tracks all players' resources
     public static ArrayList<Resources> resourcesList = new ArrayList<>();
 
-    public static final int STARTING_FOOD_TUTORIAL = 750;
-    public static final int STARTING_WOOD_TUTORIAL = 850;
-    public static final int STARTING_ORE_TUTORIAL = 250;
     public static final int STARTING_FOOD_SANDBOX = 999999;
     public static final int STARTING_WOOD_SANDBOX = 999999;
     public static final int STARTING_ORE_SANDBOX = 999999;
@@ -162,11 +157,7 @@ public class ResourcesServerEvents {
     public static void resetResources(String playerName, boolean readiedStart) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(playerName)) {
-                if (TutorialServerEvents.isEnabled()) {
-                    resources.food = STARTING_FOOD_TUTORIAL;
-                    resources.wood = STARTING_WOOD_TUTORIAL;
-                    resources.ore = STARTING_ORE_TUTORIAL;
-                } else if (SandboxServer.isSandboxPlayer(playerName)) {
+                if (SandboxServer.isSandboxPlayer(playerName)) {
                     resources.food = STARTING_FOOD_SANDBOX;
                     resources.wood = STARTING_WOOD_SANDBOX;
                     resources.ore = STARTING_ORE_SANDBOX;
@@ -234,27 +225,7 @@ public class ResourcesServerEvents {
 
     public static void assignResources(String playerName) {
         resourcesList.removeIf(r -> r.ownerName.equals(playerName));
-        Resources resources;
-        if (TutorialServerEvents.isEnabled()) {
-            resources = new Resources(playerName,
-                    STARTING_FOOD_TUTORIAL,
-                    STARTING_WOOD_TUTORIAL,
-                    STARTING_ORE_TUTORIAL
-            );
-        } else {
-            resources = new Resources(playerName, STARTING_FOOD, STARTING_WOOD, STARTING_ORE);
-        }
-        resourcesList.add(resources);
-        ResourcesClientboundPacket.syncResources(resourcesList);
-    }
-
-    public static void assignScenarioResources(RTSPlayer rtsPlayer) {
-        ScenarioRole role = ScenarioUtils.getScenarioRole(false, rtsPlayer.scenarioRoleIndex);
-        resourcesList.removeIf(r -> r.ownerName.equals(rtsPlayer.name));
-        Resources resources;
-        resources = role == null ?
-                new Resources(rtsPlayer.name, 0,0,0) :
-                new Resources(rtsPlayer.name, role.startingResources.food, role.startingResources.wood, role.startingResources.ore);
+        Resources resources = new Resources(playerName, STARTING_FOOD, STARTING_WOOD, STARTING_ORE);
         resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
@@ -341,37 +312,32 @@ public class ResourcesServerEvents {
 
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
+        registerSendCommand(evt, "sendfood", ResourceName.FOOD);
+        registerSendCommand(evt, "sendwood", ResourceName.WOOD);
+        registerSendCommand(evt, "sendore", ResourceName.ORE);
+        registerSendCommand(evt, "sendemerald", ResourceName.EMERALD);
+    }
 
-        evt.getDispatcher().register(Commands.literal("sendfood")
-            .then(Commands.argument("player", EntityArgument.player())
+    // a name, not an entity, so bots and offline allies can receive too
+    private static void registerSendCommand(RegisterCommandsEvent evt, String name, ResourceName resourceName) {
+        evt.getDispatcher().register(Commands.literal(name)
+            .then(Commands.argument("player", StringArgumentType.string())
+            .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                PlayerServerEvents.rtsPlayers.stream().map(p -> p.name).toList(), builder))
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
-            .executes((command) -> trySendingResources(command, ResourceName.FOOD)))));
-
-        evt.getDispatcher().register(Commands.literal("sendwood")
-            .then(Commands.argument("player", EntityArgument.player())
-            .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
-            .executes((command) -> trySendingResources(command, ResourceName.WOOD)))));
-
-        evt.getDispatcher().register(Commands.literal("sendore")
-            .then(Commands.argument("player", EntityArgument.player())
-            .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
-            .executes((command) -> trySendingResources(command, ResourceName.ORE)))));
-
-        evt.getDispatcher().register(Commands.literal("sendemerald")
-            .then(Commands.argument("player", EntityArgument.player())
-            .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
-            .executes((command) -> trySendingResources(command, ResourceName.EMERALD)))));
+            .executes((command) -> trySendingResources(command, resourceName)))));
     }
 
     public static int trySendingResources(CommandContext<CommandSourceStack> context, ResourceName resourceName) throws CommandSyntaxException {
         Player sendingPlayer = context.getSource().getPlayer();
-        Player receivingPlayer = EntityArgument.getPlayer(context, "player");
+        String receivingName = StringArgumentType.getString(context, "player");
+        String occupant = StartPosServerEvents.seatOccupant(receivingName); // a map seat name means whoever plays it
         int amount = IntegerArgumentType.getInteger(context, "amount");
         if (sendingPlayer == null) {
             return 0;
         } else {
             String sendingPlayerName = sendingPlayer.getName().getString();
-            String receivingPlayerName = receivingPlayer.getName().getString();
+            String receivingPlayerName = occupant != null ? occupant : receivingName;
             return trySendingResources(sendingPlayerName, receivingPlayerName, resourceName, amount);
         }
     }

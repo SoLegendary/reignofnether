@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.mappack.MapPack;
 import com.solegendary.reignofnether.mappack.MapPackScreen;
+import com.solegendary.reignofnether.worldselect.SavedGames;
 import com.solegendary.reignofnether.p2p.JoinScreen;
 import com.solegendary.reignofnether.worldselect.WorldSelectScreen;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
@@ -41,15 +42,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import com.solegendary.reignofnether.replay.ReplayBrowserScreen;
-import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.TitleScreenModUpdateIndicator;
 import net.minecraftforge.internal.BrandingControl;
@@ -65,6 +58,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 /**
@@ -296,25 +290,19 @@ public class TitleScreenMixin extends Screen {
         }
     }
 
-    // Opens the tutorial world, generating it from the tutorial seed the first time.
-    // Settings match the original tutorial map; TutorialServerEvents sets the spawn in the tutorial area.
+    // Plays a fresh copy of the map pack's tutorial map, or offers the map pack when it isn't installed.
     @Unique
     private void openTutorial() {
         Minecraft mc = Minecraft.getInstance();
-        String name = TutorialServerEvents.TUTORIAL_MAP_NAME;
-        if (mc.getLevelSource().levelExists(name)) {
-            mc.createWorldOpenFlows().loadLevel(this, name);
+        if (!mc.getLevelSource().levelExists(MapPack.TUTORIAL)) {
+            mc.setScreen(new MapPackScreen(this));
             return;
         }
-        GameRules rules = new GameRules();
-        rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
-        rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
-        rules.getRule(GameRules.RULE_DOINSOMNIA).set(false, null);
-        rules.getRule(GameRules.RULE_RANDOMTICKING).set(12, null);
-        mc.createWorldOpenFlows().createFreshLevel(name,
-                new LevelSettings(name, GameType.CREATIVE, false, Difficulty.NORMAL, true, rules, WorldDataConfiguration.DEFAULT),
-                new WorldOptions(TutorialServerEvents.TUTORIAL_MAP_SEED, true, false),
-                WorldPresets::createNormalWorldDimensions);
+        SavedGames.playMap(this, MapPack.TUTORIAL, plain(Component.translatable("menu.reignofnether.tutorial")))
+                .exceptionally(ex -> {
+                    ReignOfNether.LOGGER.error("Couldn't copy the tutorial map", ex);
+                    return null;
+                });
     }
 
     /**
@@ -443,7 +431,7 @@ public class TitleScreenMixin extends Screen {
     /** The design's label font (Silkscreen capitals) at full size. */
     @Unique
     private static Component silk(String s) {
-        return Component.literal(s.toUpperCase(java.util.Locale.ROOT)).withStyle(Text.SMALL_STYLE);
+        return Component.literal(s.toUpperCase(Locale.ROOT)).withStyle(Text.SMALL_STYLE);
     }
 
     @Unique

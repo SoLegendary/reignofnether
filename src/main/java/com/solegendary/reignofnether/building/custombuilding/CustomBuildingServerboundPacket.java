@@ -8,6 +8,13 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
+import com.solegendary.reignofnether.building.BuildingCommand;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -89,7 +96,10 @@ public class CustomBuildingServerboundPacket {
 
             CustomBuilding customBuilding = CustomBuildingServerEvents.getCustomBuilding(this.buildingName);
 
-            if (customBuilding != null) {
+            if (customBuilding != null) { // an old or newer format map has none (see loadCustomBuildings)
+                List<List<String>> linesBefore = new ArrayList<>();
+                for (BuildingCommand.TriggerCondition trigger : BuildingCommand.TriggerCondition.values())
+                    linesBefore.add(CustomBuildingServerEvents.commandLines(customBuilding, trigger));
                 switch (this.action) {
                     case DEREGISTER -> CustomBuildingServerEvents.deregisterCustomBuilding(this.buildingName);
                     case SET_PORTRAIT_BLOCK -> customBuilding.setIconAndPortrait(this.strValue);
@@ -115,7 +125,20 @@ public class CustomBuildingServerboundPacket {
                     case SET_COMMAND_TEXT -> customBuilding.setCommandText(this.intValue, this.strValue);
                     case SET_COMMAND_COOLDOWN -> customBuilding.setCommandCooldownTicks(this.intValue, this.strValue);
                     case SET_COMMAND_TRIGGER -> customBuilding.setCommandTrigger(this.intValue, this.strValue);
+                    case SET_TRIGGER_COOLDOWN -> customBuilding.setTriggerCooldown(this.strValue, this.intValue);
                     case SET_MAX_HEALTH -> customBuilding.maxHealth = this.intValue;
+                }
+                // only the command files this edit changed, hand edits to the others are kept
+                List<BuildingCommand.TriggerCondition> changed = new ArrayList<>();
+                for (BuildingCommand.TriggerCondition trigger : BuildingCommand.TriggerCondition.values())
+                    if (!linesBefore.get(trigger.ordinal()).equals(CustomBuildingServerEvents.commandLines(customBuilding, trigger)))
+                        changed.add(trigger);
+                if (this.action != CustomBuildingAction.DEREGISTER) {
+                    CustomBuildingServerEvents.saveFiles(sender.getServer(), customBuilding, changed);
+                    for (BuildingPlacement placement : BuildingServerEvents.getBuildings())
+                        if (placement instanceof CustomBuildingPlacement custom
+                                && placement.getBuilding() == customBuilding)
+                            custom.syncTriggers(customBuilding);
                 }
             }
             success.set(true);

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.matchstart.ResultBanner;
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ability.TradeAction;
@@ -39,10 +40,8 @@ import com.solegendary.reignofnether.hud.panels.SpectatorHud;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxPanel;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -194,8 +193,6 @@ public class PlayerClientEvents {
             if (MC.player != null) {
                 MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.toggle_fow","/rts-fog enable/disable")));
                 MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.surrender","/rts-surrender")));
-                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.reset", "/rts-reset")));
-                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.hard_reset", "/rts-hard-reset")));
                 MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.lock", "/rts-lock enable/disable")));
                 MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.ally", "/ally")));
                 MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.disband", "/disband")));
@@ -243,7 +240,7 @@ public class PlayerClientEvents {
             return;
 
         if (!SandboxClientEvents.isSandboxPlayer(playerName)) {
-            com.solegendary.reignofnether.matchstart.ResultBanner.show(false);
+            ResultBanner.show(false);
             MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
         }
         ResearchClient.removeAllResearch();
@@ -255,7 +252,7 @@ public class PlayerClientEvents {
         if (MC.player == null || !MC.player.getName().getString().equals(playerName)) {
             return;
         }
-        com.solegendary.reignofnether.matchstart.ResultBanner.show(true);
+        ResultBanner.show(true);
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
@@ -274,22 +271,6 @@ public class PlayerClientEvents {
             }
             if (!isSyncing)
                 HeroClientEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
-        }
-    }
-
-    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
-        if (!isRTSPlayer(playerName)) {
-            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true, -1L, -1L);
-            rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
-            rtsPlayers.add(rtsPlayer);
-            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
-            if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
-                GameruleClient.gamerulesMenuOpen = false;
-                    if (faction != Factions.NONE) {
-                    MC.getMusicManager().stopPlaying();
-                    ResearchClient.removeAllCheats();
-                }
-            }
         }
     }
 
@@ -325,7 +306,6 @@ public class PlayerClientEvents {
         PlayerRolesClient.clear();
         // PlayerLoggedOutEvent fires on the integrated server thread in singleplayer
         MC.execute(() -> {
-            ScenarioClientEvents.resetRoles();
             PlayerChunksClientEvents.reset();
             BarStates.clear();
             StartPosClientEvents.botFactions.clear();
@@ -378,7 +358,7 @@ public class PlayerClientEvents {
     }
 
     public static void resetRTS(boolean hardReset) {
-        boolean isSandboxOrScenario = SandboxClientEvents.isSandboxPlayer() || GameruleClient.scenarioMode;
+        boolean isSandbox = SandboxClientEvents.isSandboxPlayer();
         rtsPlayers.clear();
         FogOfWarClientEvents.refreshLocalIsRTSPlayer();
         HelperButtons.updateButtons();
@@ -387,9 +367,9 @@ public class PlayerClientEvents {
         HudClientEvents.controlGroups.clear();
         UnitClientEvents.clearSelectedUnits();
         UnitClientEvents.getPreselectedUnits().clear();
-        if (!isSandboxOrScenario)
+        if (!isSandbox)
             UnitClientEvents.getAllUnits().removeIf(u -> (hardReset || (u instanceof Unit unit && !Unit.hasAnchor(unit))));
-        if (!isSandboxOrScenario)
+        if (!isSandbox)
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity instanceof Unit unit)
                     unit.setOwnerName("");
@@ -397,15 +377,15 @@ public class PlayerClientEvents {
         ResearchClient.removeAllResearch();
         ResearchClient.removeAllCheats();
         BuildingClientEvents.getSelectedBuildings().clear();
-        if (!isSandboxOrScenario)
+        if (!isSandbox)
             BuildingClientEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
-        if (!isSandboxOrScenario)
+        if (!isSandbox)
             for (BuildingPlacement building : BuildingClientEvents.getBuildings())
                 building.ownerName = "";
         ResourcesClientEvents.resourcesList.clear();
         ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
         ClientGameModeHelper.gameModeLocked = false;
-        SurvivalClientEvents.reset();
+        ClientGameModeHelper.endMatchArmed = false;
         StartPosClientEvents.resetAll();
         HeroClientEvents.fallenHeroes.clear();
         AlliancesClient.playersWithAlliedControl.clear();
@@ -418,31 +398,6 @@ public class PlayerClientEvents {
         SandboxPanel.reset();
         SpectatorHud.reset();
         Toast.clear();
-    }
-
-    public static void publishScenarioMap() {
-        rtsPlayers.clear();
-        FogOfWarClientEvents.refreshLocalIsRTSPlayer();
-        HelperButtons.updateButtons();
-        SoundClientEvents.stopFadeableMusicInstance();
-        HudClientEvents.controlGroups.clear();
-        UnitClientEvents.clearSelectedUnits();
-        UnitClientEvents.getPreselectedUnits().clear();
-        UnitClientEvents.idleWorkerIds.clear();
-        ResearchClient.removeAllResearch();
-        ResearchClient.removeAllCheats();
-        BuildingClientEvents.getSelectedBuildings().clear();
-        ResourcesClientEvents.resourcesList.clear();
-        ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
-        ClientGameModeHelper.gameModeLocked = false;
-        SurvivalClientEvents.reset();
-        StartPosClientEvents.resetAll();
-        HeroClientEvents.fallenHeroes.clear();
-        AlliancesClient.playersWithAlliedControl.clear();
-        PlayerColors.reset();
-        PlayerDisplayClientEvents.resetDisplay();
-        TimeClientEvents.resetBloodMoon();
-        CustomBuildingClientEvents.setCustomBuildingToEdit(null);
     }
 
     public static void setRTSLock(boolean lock) {

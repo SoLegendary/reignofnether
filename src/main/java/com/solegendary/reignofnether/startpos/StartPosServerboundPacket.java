@@ -139,7 +139,7 @@ public class StartPosServerboundPacket {
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
                         if (startPos.pos.equals(blockPos) && startPos.enabled) {
                             startPos.reset();
-                            startPos.faction = faction;
+                            startPos.faction = startPos.fixedFaction != Factions.NONE ? startPos.fixedFaction : faction;
                             startPos.playerName = playerName;
                         } else if (startPos.playerName.equals(playerName)) {
                             startPos.reset();
@@ -156,7 +156,7 @@ public class StartPosServerboundPacket {
                         return;
                     // the host can also clear someone else's seat (kick); unready whoever sat there
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
-                        if (startPos.pos.equals(blockPos) &&
+                        if (startPos.pos.equals(blockPos) && !startPos.mapBot &&
                                 (startPos.playerName.equals(playerName) || StartPosServerEvents.isHost(player))) {
                             String seated = startPos.playerName;
                             startPos.reset();

@@ -13,6 +13,8 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -31,11 +33,6 @@ public class PlayerClientboundPacket {
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isForLogin) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction, isDogPerson, isForLogin));
-    }
-
-    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction, true, true));
     }
 
     public static void removeRTSPlayer(String playerName) {
@@ -61,11 +58,6 @@ public class PlayerClientboundPacket {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L));
         }
-    }
-
-    public static void publishScenarioMap() {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, "", 0L));
     }
 
     public static void syncRtsGameTime(Long rtsGameTicks) {
@@ -103,9 +95,13 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SYNC_ITEMS_DROPPED, playerName, itemsDropped));
     }
 
+    // also the seat's co-commanders; soldiers can't use the RTS camera
     public static void setRTSCamera(String playerName, boolean value) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0)));
+        List<String> names = new ArrayList<>(List.of(playerName));
+        names.addAll(PlayerRoles.coCommandersOf(playerName));
+        for (String name : names)
+            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                    new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, name, (long) (value ? 1 : 0)));
     }
 
     public static void setMarketRate(TradeAction tradeAction, String playerName, int value) {
@@ -199,11 +195,9 @@ public class PlayerClientboundPacket {
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
                             case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2, isDogPerson, isForLogin);
-                            case ADD_SCENARIO_NPC_RTS_PLAYER -> PlayerClientEvents.addScenarioNPCRTSPlayer(playerName, faction, value1, value2);
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);
                             case RESET_RTS_HARD -> PlayerClientEvents.resetRTS(true);
-                            case PUBLISH_SCENARIO_MAP -> PlayerClientEvents.publishScenarioMap();
                             case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(value1);
                             case LOCK_RTS -> PlayerClientEvents.setRTSLock(true);
                             case UNLOCK_RTS -> PlayerClientEvents.setRTSLock(false);

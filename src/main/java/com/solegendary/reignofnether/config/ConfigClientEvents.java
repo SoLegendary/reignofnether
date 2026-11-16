@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -56,7 +55,7 @@ public class ConfigClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
                 (Keybinding) null,
                 () -> false,
-                () -> !showDiffsButton || TutorialClientEvents.isEnabled(),
+                () -> !showDiffsButton,
                 () -> true,
                 () -> showDiffsButton = false,
                 null,

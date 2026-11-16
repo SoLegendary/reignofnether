@@ -28,6 +28,7 @@ public class RTSPlayerSaveData extends SavedData {
     public final ArrayList<RTSPlayer> rtsPlayers = new ArrayList<>();
     public final Map<String, String> soldierOf = new HashMap<>();     // PlayerRoles, soldier -> owner
     public final Map<String, String> coCommanderOf = new HashMap<>(); // PlayerRoles, co-commander -> owner
+    public final Map<String, String> seatOccupants = new HashMap<>(); // StartPosServerEvents, seat name -> occupant
 
     // match state that used to live only in memory, so a saved game resumes as it was left
     public final Map<String, Set<String>> alliances = new HashMap<>();
@@ -77,7 +78,6 @@ public class RTSPlayerSaveData extends SavedData {
                     };
                 }
                 int[] scores = ptag.contains("scores") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
-                int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
 
                 Map<TradeAction, Integer> tradeRates = new HashMap<>();
                 tradeRates.put(TradeAction.FOOD_FOR_EMERALD, ptag.contains("foodEmeraldRate") ? ptag.getInt("foodEmeraldRate") : TradeResources.START_SELL_RATE);
@@ -94,7 +94,7 @@ public class RTSPlayerSaveData extends SavedData {
 
                 RTSPlayer rtsPlayer = RTSPlayer.getFromSave(
                         name, id, ticksWithoutCapitol, faction,
-                        beaconOwnerTicks, scores, scenarioRoleIndex,
+                        beaconOwnerTicks, scores,
                         tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
                 );
                 rtsPlayer.startPosColorId = ptag.getInt("startPosColorId");
@@ -107,6 +107,7 @@ public class RTSPlayerSaveData extends SavedData {
         }
         readNames(tag.getCompound("soldierOf"), data.soldierOf);
         readNames(tag.getCompound("coCommanderOf"), data.coCommanderOf);
+        readNames(tag.getCompound("seatOccupants"), data.seatOccupants);
 
         CompoundTag match = tag.getCompound("match");
         CompoundTag allies = match.getCompound("alliances");
@@ -145,7 +146,6 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("beaconOwnerTicks", p.beaconOwnerTicks);
             cTag.putString("faction", p.faction.key.toString());
             cTag.putIntArray("scores", p.scores.getScoreListAsArray());
-            cTag.putInt("scenarioRoleIndex", p.scenarioRoleIndex);
             cTag.putInt("foodEmeraldRate", p.tradeRates.get(TradeAction.FOOD_FOR_EMERALD));
             cTag.putInt("emeraldFoodRate", p.tradeRates.get(TradeAction.EMERALD_FOR_FOOD));
             cTag.putInt("woodEmeraldRate", p.tradeRates.get(TradeAction.WOOD_FOR_EMERALD));
@@ -165,6 +165,7 @@ public class RTSPlayerSaveData extends SavedData {
         tag.put("rtsplayers", list);
         tag.put("soldierOf", writeNames(soldierOf));
         tag.put("coCommanderOf", writeNames(coCommanderOf));
+        tag.put("seatOccupants", writeNames(seatOccupants));
 
         CompoundTag match = new CompoundTag();
         CompoundTag allies = new CompoundTag();

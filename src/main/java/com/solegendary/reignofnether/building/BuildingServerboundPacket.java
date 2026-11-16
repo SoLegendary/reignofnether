@@ -10,7 +10,9 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.placements.StockpilePlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -181,6 +183,10 @@ public class BuildingServerboundPacket {
                 success.set(false);
                 return;
             }
+            // a cutscene took their control (rtsapi player control <player> false)
+            if ((newBuildingAuthActions.contains(this.action) || existingBuildingAuthActions.contains(this.action))
+                    && GuideServer.isLocked(player))
+                return;
             ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
             // only the owner's own workers can be assigned to build it
             if (newBuildingAuthActions.contains(this.action) && !SandboxServer.isSandboxOp(player)) {
@@ -205,6 +211,9 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.cancelBuilding(building, player.getName().getString());
                 }
                 case SET_RALLY_POINT -> {
+                    // ron/events/rally_set: @s is the player who set it
+                    if (RonFiles.matchRunning())
+                        RonFiles.fire(player.server, "rally_set", player.createCommandSourceStack(), player.getName().getString());
                     if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.setRallyPoint(rallyPos);
                         productionBuilding.attackRally = false;

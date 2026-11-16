@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.ping.PingType;
 import com.solegendary.reignofnether.player.PlayerRole;
 import com.solegendary.reignofnether.player.PlayerRoles;
@@ -82,6 +83,7 @@ public class SoldierServerEvents {
         long orderTick = 0;
         boolean deployed = false; // false until the commander first pays to deploy them
         int foodNeeded = 0; // the deploy cost while the commander can't afford it
+        BlockPos home = null; // a map's soldier seat: where they come back while their side has no building
     }
 
     private static final int DEPLOY_FOOD = 100; // paid on every deploy, respawns included
@@ -98,12 +100,18 @@ public class SoldierServerEvents {
     }
 
     public static void bind(ServerPlayer player, String owner, BlockPos startPos) {
+        bind(player, owner, startPos, false);
+    }
+
+    // home: respawns at startPos while the owner has no building (a map's soldier seat), instead of waiting for one
+    public static void bind(ServerPlayer player, String owner, BlockPos startPos, boolean home) {
         String name = player.getName().getString();
         PlayerServerEvents.closeTopdownGui(player.getId()); // restores its saved game mode first, so ours sticks
         PlayerRoles.setSoldier(name, owner);
         State state = new State();
         state.dead = true; // they spectate until their commander deploys them, like a respawn
         state.respawnAtTick = ticks;
+        state.home = home ? startPos : null;
         states.put(name, state);
         player.getInventory().clearContent();
         player.setGameMode(GameType.SPECTATOR);
@@ -114,6 +122,7 @@ public class SoldierServerEvents {
 
     // the soldier's faction lost: they watch from here on
     public static void toSpectator(ServerPlayer player) {
+        GuideServer.release(player);
         if (states.remove(player.getName().getString()) != null)
             player.getInventory().clearContent();
         player.setGameMode(GameType.SPECTATOR);
@@ -279,6 +288,12 @@ public class SoldierServerEvents {
 
     private static void tryRespawn(ServerPlayer player, State state) {
         BuildingPlacement building = respawnBuilding(PlayerRoles.commanderOf(player.getName().getString()), player.blockPosition());
+        if (building == null && state.home != null) {
+            BlockPos spawn = MiscUtil.getHighestNonAirBlock(player.level(), state.home.offset(3, 0, 3)).above();
+            state.deployed = true; // a map seat comes back for free
+            respawnAt(player, state, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5);
+            return;
+        }
         if (building == null) {
             if (!state.respawnBuilding.isEmpty()) {
                 state.respawnBuilding = "";
@@ -298,7 +313,11 @@ public class SoldierServerEvents {
         state.foodNeeded = 0;
         state.deployed = true;
         BlockPos spawn = building.getClosestGroundPos(player.blockPosition(), 1);
-        player.teleportTo(spawn.getX() + 0.5, spawn.getY() + 1, spawn.getZ() + 0.5);
+        respawnAt(player, state, spawn.getX() + 0.5, spawn.getY() + 1, spawn.getZ() + 0.5);
+    }
+
+    private static void respawnAt(ServerPlayer player, State state, double x, double y, double z) {
+        player.teleportTo(x, y, z);
         player.setGameMode(GameType.SURVIVAL);
         giveKit(player);
         state.dead = false;

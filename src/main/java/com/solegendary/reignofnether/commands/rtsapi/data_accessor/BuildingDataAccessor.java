@@ -140,7 +140,6 @@ public class BuildingDataAccessor implements DataAccessor {
 		pCompound.putInt("baseMsPerBuild", building.baseMsPerBuild);
 		pCompound.putFloat("minBlocksPercent", building.minBlocksPercent);
 		pCompound.putString("ownerName", building.ownerName);
-		pCompound.putInt("scenarioRoleIndex", building.scenarioRoleIndex);
 		pCompound.putLong("ticksToExtinguishMax", building.ticksToExtinguishMax);
 		pCompound.putLong("ticksToSpawnAnimalsMax", building.ticksToSpawnAnimalsMax);
 		pCompound.putInt("maxAnimals", building.maxAnimals);
@@ -156,7 +155,6 @@ public class BuildingDataAccessor implements DataAccessor {
 		building.baseMsPerBuild = pCompound.getInt("baseMsPerBuild");
 		building.minBlocksPercent = pCompound.getFloat("minBlocksPercent");
 		building.ownerName = pCompound.getString("ownerName");
-		building.scenarioRoleIndex = pCompound.getInt("scenarioRoleIndex");
 		building.ticksToExtinguishMax = pCompound.getLong("ticksToExtinguishMax");
 		building.ticksToSpawnAnimalsMax = pCompound.getLong("ticksToSpawnAnimalsMax");
 		building.maxAnimals = pCompound.getInt("maxAnimals");

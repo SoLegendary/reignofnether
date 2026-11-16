@@ -3,10 +3,10 @@ package com.solegendary.reignofnether.hud.custombutton;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingCommand;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 
 import net.minecraft.commands.CommandFunction;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -93,26 +93,7 @@ public class CustomButtonActions {
 		@Override
 		public void execute(BuildingPlacement building) {
 			if (building.level instanceof ServerLevel level) {
-				ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(building.ownerName);
-				
-				CommandSourceStack source;
-				if (player != null) {
-					source = player
-						.createCommandSourceStack()
-						.withPosition(building.minCorner.offset(-1, 0, -1).getCenter())
-						.withLevel(level)
-						.withSuppressedOutput()
-						.withPermission(2)
-						.withSource(player);
-				} else {
-					source = level.getServer()
-						.createCommandSourceStack()
-						.withPosition(building.minCorner.offset(-1, 0, -1).getCenter())
-						.withLevel(level)
-						.withPermission(2)
-						.withSuppressedOutput();
-				}
-				level.getServer().getCommands().performPrefixedCommand(source, command);
+				level.getServer().getCommands().performPrefixedCommand(BuildingCommand.sourceFor(building, level), command);
 			}
 		}
 	}
@@ -146,29 +127,7 @@ public class CustomButtonActions {
 				MinecraftServer minecraftserver = building.level.getServer();
 				function.get(minecraftserver.getFunctions()).ifPresent(
 					(p_289236_) -> {
-						ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(building.ownerName);
-						
-						CommandSourceStack source;
-						if (player != null) {
-							source = player
-								.createCommandSourceStack()
-								.withPosition(building.minCorner.offset(-1, 0, -1).getCenter())
-								.withLevel(level)
-								.withSuppressedOutput()
-								.withPermission(2)
-								.withSource(player);
-						} else {
-							source = level.getServer()
-								.createCommandSourceStack()
-								.withPosition(building.minCorner.offset(-1, 0, -1).getCenter())
-								.withLevel(level)
-								.withPermission(2)
-								.withSuppressedOutput();
-						}
-						minecraftserver.getFunctions().execute(
-							p_289236_,
-							source
-						);
+						minecraftserver.getFunctions().execute(p_289236_, BuildingCommand.sourceFor(building, level));
 					}
 				);
 			}

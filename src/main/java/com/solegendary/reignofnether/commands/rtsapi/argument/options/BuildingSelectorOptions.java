@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
 import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingSelector;
 import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingSelectorParser;
 
@@ -21,7 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,17 +102,13 @@ public class BuildingSelectorOptions {
 							CustomBuildingClientEvents.customBuildings.stream()
 						).collect(Collectors.toList()),
 						ctx,
-						building -> {
-							ResourceLocation id = ReignOfNetherRegistries.BUILDING.getKey(building);
-							return id != null ? id : ResourceLocation.fromNamespaceAndPath(
-								"custom",
-								building.structureName.toLowerCase().replace(' ', '_'));
-						},
+						RonIds::of,
 						building -> Component.literal(building.name))
 				);
 				
+				int start = p_121534_.getReader().getCursor();
 				ResourceLocation resourcelocation = ResourceLocation.read(p_121534_.getReader());
-				Building building = resolveBuilding(resourcelocation.toString());
+				Building building = RonIds.building(p_121534_.getReader().getString().substring(start, p_121534_.getReader().getCursor()));
 				if (building == null) {
 					throw ERROR_BUILDING_TYPE_INVALID.createWithContext(p_121534_.getReader(), resourcelocation);
 				}
@@ -152,25 +148,6 @@ public class BuildingSelectorOptions {
 		}
 	}
 	
-	private static Building resolveBuilding(String input) {
-		ResourceLocation location;
-		if (input.contains(":")) {
-			location = ResourceLocation.tryParse(input);
-		} else {
-			location = ResourceLocation.tryParse(ReignOfNether.MOD_ID + ":" + input);
-		}
-		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
-		if (building == null) {
-			building = CustomBuildingServerEvents.getCustomBuilding(
-				WordUtils.capitalize(
-					input
-						.replace("custom:", "")
-						.replace("_", " ")
-				)
-			);
-		}
-		return building;
-	}
 	
 	
 	private static Rotation parseRotation(String input) throws CommandSyntaxException {

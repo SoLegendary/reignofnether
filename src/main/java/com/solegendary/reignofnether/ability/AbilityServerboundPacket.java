@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.ability;
 
 import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -53,6 +54,8 @@ public class AbilityServerboundPacket {
                 success.set(false);
                 return;
             }
+            if (GuideServer.isLocked(player))
+                return; // a cutscene took their control
             for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
                 if (entity.getId() == this.unitId && entity instanceof Unit unit) {
 

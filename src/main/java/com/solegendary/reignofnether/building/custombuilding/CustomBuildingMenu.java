@@ -1,10 +1,10 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingCommand;
-import com.solegendary.reignofnether.hud.*;
+import com.solegendary.reignofnether.editor.CodeEditorPopup;
+import com.solegendary.reignofnether.hud.PortraitRendererBuilding;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
@@ -12,26 +12,28 @@ import com.solegendary.reignofnether.hud.panels.ButtonCell;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.rtsmap.RonFilesClient;
 import com.solegendary.reignofnether.ui.EditorRows;
 import com.solegendary.reignofnether.ui.EditorRows.Group;
 import com.solegendary.reignofnether.ui.EditorRows.Row;
 import com.solegendary.reignofnether.ui.EditorRows.Style;
 import com.solegendary.reignofnether.ui.Rect;
+import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.ui.Tooltip;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.getCustomBuildingToEdit;
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -39,30 +41,27 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 /**
  * The custom building editor: a popup in HUD units with the building's settings in grouped rows,
- * or its list of commands. Every change is sent to the server as it is made.
+ * or its triggers, each a file in ron/buildings/<id>/ opened in the code popup. Every change is sent to the server as it is made.
  */
 public class CustomBuildingMenu {
 
     private static final String KEY = "sandbox.reignofnether.custom_buildings.";
     private static final int PAD = 7;
     private static final int COL_W = 200;
-    private static final int COMMANDS_W = 450;
     private static final int FOOTER_H = 14;
-    private static final int COMMANDS_FOOTER_H = 21;
     private static final int PORTRAIT = 44; // the switch button, and the box of the preview next to it
     private static final int HEADER_H = PORTRAIT + 2;
 
     /** Draws the whole editor for this building. */
     public static void render(HudFrame f, CustomBuilding building) {
-        boolean commands = CustomBuildingClientEvents.showCommandsMenu;
+        boolean triggers = CustomBuildingClientEvents.showTriggersMenu;
         int top = HudLayout.MARGIN + HudLayout.TOP_CARD_H + HudLayout.GAP;
-        int footerH = commands ? COMMANDS_FOOTER_H : FOOTER_H;
-        int maxBody = f.layout.height() - HudLayout.MARGIN - top - PAD * 2 - HEADER_H - footerH - 6;
-        List<Group> groups = commands ? List.of() : groups(building);
-        int bodyH = commands ? VISIBLE_COMMAND_ROWS * COMMAND_ROW_H : EditorRows.measure(groups, COL_W, maxBody).h();
-        int bodyW = commands ? COMMANDS_W : EditorRows.measure(groups, COL_W, maxBody).w();
+        int maxBody = f.layout.height() - HudLayout.MARGIN - top - PAD * 2 - HEADER_H - FOOTER_H - 6;
+        List<Group> groups = triggers ? List.of() : groups(building);
+        int bodyH = triggers ? TRIGGERS.size() * TRIGGER_ROW_H : EditorRows.measure(groups, COL_W, maxBody).h();
+        int bodyW = triggers ? TRIGGERS_W : EditorRows.measure(groups, COL_W, maxBody).w();
         int w = bodyW + PAD * 2;
-        int h = HEADER_H + bodyH + 6 + footerH + PAD * 2;
+        int h = HEADER_H + bodyH + 6 + FOOTER_H + PAD * 2;
         int x = HudLayout.MARGIN;
         Theme.popup(f.g, x, top, w, h, Theme.ORANGE);
         f.zone(x, top, w, h);
@@ -71,11 +70,11 @@ public class CustomBuildingMenu {
         int y = top + PAD;
         renderHeader(f, building, cx, y, bodyW);
         y += HEADER_H;
-        if (commands)
-            renderCommands(f, building, cx, y);
+        if (triggers)
+            renderTriggers(f, building, cx, y);
         else
             EditorRows.render(f, groups, cx, y, COL_W, maxBody);
-        renderFooter(f, building, cx, top + h - PAD - footerH, bodyW, footerH);
+        renderFooter(f, building, cx, top + h - PAD - FOOTER_H, bodyW, FOOTER_H);
     }
 
     /** The change-icon cell, the spinning portrait block, the building's name and the close cross. */
@@ -97,57 +96,50 @@ public class CustomBuildingMenu {
         EditorRows.header(f, building.name, x + nameX, y, w - nameX, null, () -> setCustomBuildingToEdit(null));
     }
 
-    /** Left to right: the general/commands switch, Add Command on the commands tab and the two-click deregister button. */
+    /** Left to right: the general/triggers switch and the two-click deregister button. */
     private static void renderFooter(HudFrame f, CustomBuilding building, int x, int y, int w, int h) {
-        boolean commands = CustomBuildingClientEvents.showCommandsMenu;
-        int buttonW = commands ? 120 : 80;
-        int commandCount = 0;
-        for (BuildingCommand command : building.commands)
-            if (command.condition != BuildingCommand.TriggerCondition.NONE && !command.commandStr.isBlank())
-                commandCount += 1;
-        String countText = I18n.get(KEY + "commands_count", commandCount);
-        String label = commands ? I18n.get(KEY + "general_tab") : I18n.get(KEY + "commands_tab") + " (" + commandCount + ")";
-        EditorRows.textButton(f, "Toggle Commands Menu", label, new Rect(x, y, buttonW, h), Style.SECONDARY,
+        boolean triggers = CustomBuildingClientEvents.showTriggersMenu;
+        int buttonW = 80;
+        String label = triggers ? I18n.get(KEY + "general_tab") : I18n.get(KEY + "triggers_tab", triggerCount(building));
+        EditorRows.textButton(f, "Toggle Triggers Menu", label, new Rect(x, y, buttonW, h), Style.SECONDARY,
             () -> {
-                CustomBuildingClientEvents.showCommandsMenu = !commands;
-                forceRefreshCommandEditBoxes();
+                CustomBuildingClientEvents.showTriggersMenu = !triggers;
+                if (!triggers)
+                    RonFilesClient.refresh(); // files may have been written by hand
             }, null,
-            EditorRows.tip(I18n.get(KEY + (commands ? "switch_to_general_menu" : "switch_to_commands_menu")), countText));
-
-        if (commands && building.commands.size() < MAX_COMMANDS)
-            EditorRows.textButton(f, "Add Command", "+ " + I18n.get(KEY + "commands.add_label"), new Rect(x + buttonW + 4, y, 75, h), Style.SECONDARY,
-                () -> {
-                    if (building.commands.size() < MAX_COMMANDS)
-                        building.commands.add(new BuildingCommand());
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.ADD_COMMAND, building.name);
-                    // jump the view down to reveal the newly-added row
-                    commandScrollOffset = maxCommandScrollOffset(building.commands.size());
-                    forceRefreshCommandEditBoxes();
-                }, null,
-                EditorRows.tip(I18n.get(KEY + "commands.add"), null));
+            EditorRows.tip(I18n.get(KEY + (triggers ? "switch_to_general_menu" : "switch_to_triggers_menu")),
+                I18n.get(KEY + "triggers.folder", "ron/buildings/" + building.id + "/")));
 
         boolean confirm = CustomBuildingClientEvents.deregisterConfirm;
         String deregister = confirm ? I18n.get(KEY + "deregister.confirm") : I18n.get(KEY + "deregister.label");
-        EditorRows.textButton(f, "Deregister Custom Building", deregister, new Rect(x + buttonW + 4 + (commands ? 79 : 0), y, buttonW, h), Style.DANGER,
+        EditorRows.textButton(f, "Deregister Custom Building", deregister, new Rect(x + buttonW + 4, y, buttonW, h), Style.DANGER,
             () -> {
-                if (!CustomBuildingClientEvents.deregisterConfirm) {
-                    CustomBuildingClientEvents.deregisterConfirm = true;
-                } else {
-                    CustomBuildingServerboundPacket.deregisterBuilding(building.name);
-                    CustomBuildingClientEvents.customBuildings.removeIf(b -> b.name.equals(building.name));
-                    BuildingClientEvents.clearSelectedBuildings();
-                    BuildingClientEvents.getBuildings().removeIf(b -> b.getBuilding().name.equals(building.name));
+                if (deregister(building))
                     setCustomBuildingToEdit(null);
-                }
             },
             () -> CustomBuildingClientEvents.deregisterConfirm = false,
             () -> Tooltip.of(I18n.get(KEY + "deregister.tooltip1")).danger()
                 .body(I18n.get(KEY + (confirm ? "deregister.confirm" : "deregister.tooltip2"))));
     }
 
+    /** The first click arms it, the second removes the type and every building of it; true when removed. */
+    public static boolean deregister(CustomBuilding building) {
+        if (!CustomBuildingClientEvents.deregisterConfirm) {
+            CustomBuildingClientEvents.deregisterConfirm = true;
+            return false;
+        }
+        CustomBuildingClientEvents.deregisterConfirm = false;
+        CustomBuildingServerboundPacket.deregisterBuilding(building.name);
+        CustomBuildingClientEvents.customBuildings.removeIf(b -> b.name.equals(building.name));
+        BuildingClientEvents.clearSelectedBuildings();
+        BuildingClientEvents.getBuildings().removeIf(b -> b.getBuilding().name.equals(building.name));
+        return true;
+    }
+
     // ---------------------------------------------------------------- general tab
 
-    private static List<Group> groups(CustomBuilding b) {
+    /** The building type's attributes (the General tab), also the Editor's Build mode inspector. */
+    public static List<Group> groups(CustomBuilding b) {
         return List.of(
             new Group(I18n.get(KEY + "group.buildable_by"), List.of(
                 toggle(b, "set_buildable_by_villagers", CustomBuildingAction.SET_BUILDABLE_BY_VILLAGERS, () -> b.buildableByVillagers, v -> b.buildableByVillagers = v),
@@ -278,219 +270,117 @@ public class CustomBuildingMenu {
         };
     }
 
-    // ---------------------------------------------------------------- commands tab
+    // ---------------------------------------------------------------- triggers tab
 
-    private static final int MAX_COMMANDS = 50;
-    private static final int EDIT_BOX_HEIGHT = 9;
-    private static final int COOLDOWN_FIELD_W = 60;
-    private static final int COMMAND_ROW_H = 26;
-    private static final int COMMAND_CONTROL = 18; // delete and warning, right of the fields
     private static final int GUIDE_BUTTON_W = 13;
+    private static final int TRIGGERS_W = 450;
+    private static final int TRIGGER_ROW_H = 22;
+    private static final int TRIGGER_BUTTON_W = 50;
+    private static final int COOLDOWN_W = 76;
+    private static final List<BuildingCommand.TriggerCondition> TRIGGERS = Arrays.stream(BuildingCommand.TriggerCondition.values())
+        .filter(t -> t != BuildingCommand.TriggerCondition.NONE).toList();
 
-    // how many command rows are visible in the scrollable viewport at once
-    private static final int VISIBLE_COMMAND_ROWS = 10;
-    private static final int SCROLLBAR_WIDTH = 6;
-
-    // index of the first command row currently visible (i.e. scroll position)
-    private static int commandScrollOffset = 0;
-
-    // one per visible row; the cooldown list holds null for rows without a cooldown trigger
-    private static final ArrayList<MyEditBox> commandEditBoxes = new ArrayList<>();
-    private static final ArrayList<MyEditBox> commandCooldownEditBoxes = new ArrayList<>();
-    private static boolean commandEditBoxesDirty = true;
-
-    private static int maxCommandScrollOffset(int totalCommands) {
-        return Math.max(0, totalCommands - VISIBLE_COMMAND_ROWS);
+    private static String triggerKey(BuildingCommand.TriggerCondition t) {
+        return t.name().toLowerCase(Locale.ROOT);
     }
 
-    private static void clampCommandScrollOffset(int totalCommands) {
-        commandScrollOffset = Math.min(Math.max(commandScrollOffset, 0), maxCommandScrollOffset(totalCommands));
+    // the building's commands for this trigger: placements run its file through them, and they hold its cooldown
+    private static List<BuildingCommand> commandsOf(CustomBuilding b, BuildingCommand.TriggerCondition t) {
+        return b.commands.stream().filter(c -> c.condition == t).toList();
     }
 
-    /** Scroll the commands list by the given number of rows (positive = down, negative = up). Clamped to bounds. */
-    public static void scrollCommands(int rows) {
-        CustomBuilding building = getCustomBuildingToEdit();
-        int total = building == null ? 0 : building.commands.size();
-        commandScrollOffset += rows;
-        clampCommandScrollOffset(total);
-        forceRefreshCommandEditBoxes();
+    private static boolean hasCooldown(BuildingCommand.TriggerCondition t) {
+        BuildingCommand c = new BuildingCommand();
+        c.condition = t;
+        return c.hasCooldownCondition();
     }
 
-    /** Tear down all currently-registered EditBoxes and rebuild them for the currently visible rows only. */
-    private static void registerCommandEditBoxes(CustomBuilding customBuilding) {
-        forceRefreshCommandEditBoxes();
-
-        clampCommandScrollOffset(customBuilding.commands.size());
-
-        int firstVisible = commandScrollOffset;
-        int lastVisibleExclusive = Math.min(customBuilding.commands.size(), commandScrollOffset + VISIBLE_COMMAND_ROWS);
-
-        // positions are set every frame by EditorRows.field
-        for (int i = firstVisible; i < lastVisibleExclusive; i++) {
-            final int idx = i;
-            BuildingCommand cmd = customBuilding.commands.get(idx);
-
-            MyEditBox textBox = new MyEditBox.Builder(0, 0, 100, EDIT_BOX_HEIGHT)
-                .bordered(false)
-                .maxLength(256)
-                .value(cmd.commandStr)
-                .onDefocus(value -> {
-                    cmd.commandStr = value;
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TEXT, customBuilding.name, idx, value);
-                })
-                .responder(value -> {
-                    cmd.commandStr = value;
-                    cmd.updateValidityAndExceptions();
-                })
-                .commandSuggestions(true)
-                .build();
-
-            MyEditBox cdBox = null;
-            if (cmd.hasCooldownCondition()) {
-                cdBox = new MyEditBox.Builder(0, 0, 30, EDIT_BOX_HEIGHT)
-                    .bordered(false)
-                    .maxLength(5)
-                    .value(String.valueOf(cmd.tickCooldownMax))
-                    .isNumber(true)
-                    .onDefocus(value -> {
-                        try {
-                            cmd.tickCooldownMax = Integer.parseInt(value);
-                            CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, value);
-                        } catch (NumberFormatException e) {
-                            cmd.tickCooldownMax = 100;
-                            CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, "100");
-                        }
-                    })
-                    .tooltipLines(List.of(fcs(I18n.get(KEY + "commands.cooldown"))))
-                    .build();
-                TextInputClientEvents.registerEditBox(cdBox);
-            }
-            commandCooldownEditBoxes.add(cdBox);
-
-            TextInputClientEvents.registerEditBox(textBox);
-            commandEditBoxes.add(textBox);
-        }
-
-        commandEditBoxesDirty = false;
-    }
-
-    // run this to force a rebuild on the next render frame
-    public static void forceRefreshCommandEditBoxes() {
-        for (MyEditBox box : commandEditBoxes)
-            TextInputClientEvents.deregisterEditBox(box);
-        for (MyEditBox box : commandCooldownEditBoxes)
-            TextInputClientEvents.deregisterEditBox(box);
-        commandEditBoxes.clear();
-        commandCooldownEditBoxes.clear();
-        commandEditBoxesDirty = true;
-    }
-
-    /** Each row: trigger cell (click cycles, right click goes back), command text, cooldown, warning and delete. */
-    private static void renderCommands(HudFrame f, CustomBuilding customBuilding, int x, int y) {
-        BuildingCommand.TriggerCondition[] conditions = BuildingCommand.TriggerCondition.values();
-
-        clampCommandScrollOffset(customBuilding.commands.size());
-
-        if (!customBuilding.commands.isEmpty() && commandEditBoxesDirty)
-            registerCommandEditBoxes(customBuilding);
-
-        int rowH = COMMAND_ROW_H;
-        int cell = rowH - 2;
-        int firstVisible = commandScrollOffset;
-        int lastVisibleExclusive = Math.min(customBuilding.commands.size(), commandScrollOffset + VISIBLE_COMMAND_ROWS);
-        int right = x + COMMANDS_W - SCROLLBAR_WIDTH - 4;
-
-        for (int i = firstVisible; i < lastVisibleExclusive; i++) {
-            final int idx = i;
-            BuildingCommand cmd = customBuilding.commands.get(idx);
-            int rowY = y + (i - firstVisible) * rowH;
-            f.g.fill(x, rowY + rowH - 1, right, rowY + rowH, Theme.RAISED);
-
-            ResourceLocation condRl = switch (cmd.condition) {
-                case ON_BUILD_COMPLETE          -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_pickaxe.png");
-                case ON_DESTROY                 -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png");
-                case ON_DAMAGE_TAKEN            -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_sword.png");
-                case ON_CAPTURE                 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
-                case OFF_COOLDOWN_IF_COMPLETE   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png");
-                case OFF_COOLDOWN_IF_GARRISONED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/ladder.png");
-                case OFF_COOLDOWN_IF_CAPTURED   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock_half.png");
-                case ON_SCENARIO_START          -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/writable_book.png");
-                case NONE                       -> null;
-            };
-            ResourceLocation bgRl = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
-
-            String tooltip = I18n.get(KEY + "commands.trigger." + cmd.condition.name().toLowerCase(java.util.Locale.ROOT));
-
-            Button condButton = new ButtonBuilder("Cycle Trigger Condition " + idx)
-                .iconResource(condRl)
-                .bgIconResource(cmd.condition == BuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED ? bgRl : null)
-                .onLeftClick(() -> {
-                    int next = (cmd.condition.ordinal() + 1) % conditions.length;
-                    cmd.condition = conditions[next];
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TRIGGER, customBuilding.name, idx, cmd.condition.name());
-                    forceRefreshCommandEditBoxes();
-                })
-                .onRightClick(() -> {
-                    int prev = (cmd.condition.ordinal() - 1 + conditions.length) % conditions.length;
-                    cmd.condition = conditions[prev];
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TRIGGER, customBuilding.name, idx, cmd.condition.name());
-                    forceRefreshCommandEditBoxes();
-                })
-                .tooltipLines(List.of(fcs(tooltip)))
-                .build();
-            f.cell(condButton, x, rowY + 1, cell, null);
-
-            // delete, then the warning, then the cooldown field from the right
-            Rect delete = new Rect(right - COMMAND_CONTROL, rowY + (rowH - COMMAND_CONTROL) / 2, COMMAND_CONTROL, COMMAND_CONTROL);
-            Theme.secondaryButton(f.g, delete.x(), delete.y(), delete.w(), delete.h(), f.hovered(delete));
-            Theme.cross(f.g, delete, f.hovered(delete) ? Theme.ERROR : Theme.BODY);
-            f.register(new ButtonBuilder("Delete Command " + idx)
-                .onLeftClick(() -> {
-                    customBuilding.commands.remove(idx);
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.DELETE_COMMAND, customBuilding.name, idx);
-                    forceRefreshCommandEditBoxes();
-                }).build(), delete, null, EditorRows.tip(I18n.get(KEY + "commands.delete"), null));
-
-            Rect warning = new Rect(delete.x() - COMMAND_CONTROL - 2, delete.y(), COMMAND_CONTROL, COMMAND_CONTROL);
-            if (!cmd.isValid()) {
-                f.g.blit(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/warning.png"),
-                    warning.x() + 1, warning.y() + 1, 0, 0, COMMAND_CONTROL - 2, COMMAND_CONTROL - 2, COMMAND_CONTROL - 2, COMMAND_CONTROL - 2);
-                f.register(new ButtonBuilder("Validity " + idx).build(), warning, null, () -> {
-                    Tooltip t = Tooltip.of(I18n.get(KEY + "commands.invalid")).danger();
-                    for (CommandSyntaxException exception : cmd.getExceptions().values())
-                        t.body(String.valueOf(exception.getMessage()));
-                    return t;
-                });
-            }
-
-            int fieldH = rowH - 4;
-            int textX = x + cell + 4;
-            int cooldownX = warning.x() - 4 - COOLDOWN_FIELD_W;
-            int visible = i - firstVisible;
-            MyEditBox cdBox = visible < commandCooldownEditBoxes.size() ? commandCooldownEditBoxes.get(visible) : null;
-            int textRight = cdBox != null ? cooldownX - 4 : warning.x() - 4;
-            if (visible < commandEditBoxes.size())
-                EditorRows.field(f, commandEditBoxes.get(visible), new Rect(textX, rowY + 2, textRight - textX, fieldH));
-            if (cdBox != null)
-                EditorRows.field(f, cdBox, new Rect(cooldownX, rowY + 2, COOLDOWN_FIELD_W, fieldH));
-        }
-
-        renderCommandsScrollbar(f, customBuilding, x + COMMANDS_W - SCROLLBAR_WIDTH, y, rowH);
-    }
-
-    private static void renderCommandsScrollbar(HudFrame f, CustomBuilding customBuilding, int x, int y, int rowH) {
-        int total = customBuilding.commands.size();
-        // only show scroll controls once there are more commands than fit in the viewport
-        if (total <= VISIBLE_COMMAND_ROWS)
+    // a trigger without a command never runs its file: the server adds one, with the default cooldown
+    private static void ensureCommand(CustomBuilding b, BuildingCommand.TriggerCondition t) {
+        if (!commandsOf(b, t).isEmpty())
             return;
+        int value = new BuildingCommand().tickCooldownMax;
+        b.setTriggerCooldown(t.name(), value);
+        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_TRIGGER_COOLDOWN, b.name, value, t.name());
+    }
 
-        int trackHeight = VISIBLE_COMMAND_ROWS * rowH;
-        f.g.fill(x, y, x + SCROLLBAR_WIDTH, y + trackHeight, Theme.INK);
+    // the server adds the trigger's command when there's none (or its file never runs) and sets every one of them
+    private static void stepCooldown(CustomBuilding b, BuildingCommand.TriggerCondition t, int sign) {
+        int delta = Keybindings.shiftMod.isDown() ? 100 : 10;
+        List<BuildingCommand> commands = commandsOf(b, t);
+        int value = Math.max(0, Math.min(72000, (commands.isEmpty() ? 0 : commands.get(0).tickCooldownMax) + sign * delta));
+        b.setTriggerCooldown(t.name(), value);
+        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_TRIGGER_COOLDOWN, b.name, value, t.name());
+    }
 
-        int maxOffset = maxCommandScrollOffset(total);
-        int thumbHeight = Math.max(8, trackHeight * VISIBLE_COMMAND_ROWS / total);
-        int thumbTravel = trackHeight - thumbHeight;
-        int thumbY = y + (maxOffset == 0 ? 0 : thumbTravel * commandScrollOffset / maxOffset);
-        f.g.fill(x, thumbY, x + SCROLLBAR_WIDTH, thumbY + thumbHeight, Theme.LABEL);
+    /** How many commands a trigger's file has (from the file list, else the building's commands); null: no file. */
+    private static Integer commandCount(CustomBuilding b, BuildingCommand.TriggerCondition t) {
+        Integer n = RonFilesClient.files.get("buildings/" + b.id + "/" + triggerKey(t));
+        if (n != null)
+            return n;
+        long listed = commandsOf(b, t).stream().filter(c -> !c.commandStr.isBlank()).count();
+        return listed > 0 ? (int) listed : null;
+    }
+
+    private static int triggerCount(CustomBuilding b) {
+        int n = 0;
+        for (BuildingCommand.TriggerCondition t : TRIGGERS)
+            if (commandCount(b, t) != null)
+                n++;
+        return n;
+    }
+
+    /** Each row: the trigger's icon, its name, its file's command count, its cooldown and Edit / + Create. */
+    private static void renderTriggers(HudFrame f, CustomBuilding b, int x, int y) {
+        int right = x + TRIGGERS_W;
+        for (BuildingCommand.TriggerCondition t : TRIGGERS) {
+            String key = triggerKey(t);
+            String path = "buildings/" + b.id + "/" + key;
+            String name = I18n.get(KEY + "triggers." + key);
+            f.g.fill(x, y + TRIGGER_ROW_H - 1, right, y + TRIGGER_ROW_H, Theme.RAISED);
+
+            Button icon = new ButtonBuilder("Trigger " + key)
+                .iconResource(triggerIcon(t))
+                .bgIconResource(t == BuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED ? vanillaIcon("textures/item/nether_star.png") : null)
+                .tooltipLines(List.of(fcs(I18n.get(KEY + "commands.trigger." + key))))
+                .build();
+            f.cell(icon, x, y + 1, TRIGGER_ROW_H - 2, null);
+            Text.draw(f.g, name, x + TRIGGER_ROW_H + 4, y + (TRIGGER_ROW_H - 8) / 2, Theme.TEXT);
+
+            Integer n = commandCount(b, t);
+            String count = n == null ? I18n.get(KEY + "triggers.no_file") : I18n.get(KEY + "triggers.commands", n);
+            Text.draw(f.g, count, x + 190, y + (TRIGGER_ROW_H - 8) / 2, n == null ? Theme.DIM : Theme.BODY);
+
+            Rect button = new Rect(right - TRIGGER_BUTTON_W, y + 3, TRIGGER_BUTTON_W, TRIGGER_ROW_H - 6);
+            if (hasCooldown(t)) {
+                List<BuildingCommand> commands = commandsOf(b, t);
+                String cooldownLabel = I18n.get(KEY + "commands.cooldown");
+                EditorRows.wideStepper(f, cooldownLabel + " " + key, EditorRows.tip(cooldownLabel, I18n.get(KEY + "triggers.cooldown_tooltip")),
+                    commands.isEmpty() ? "100" : String.valueOf(commands.get(0).tickCooldownMax),
+                    () -> stepCooldown(b, t, 1), () -> stepCooldown(b, t, -1),
+                    button.x() - 6 - COOLDOWN_W, y + (TRIGGER_ROW_H - EditorRows.ROW_H) / 2, COOLDOWN_W);
+            }
+            String when = I18n.get(KEY + "triggers.when." + key);
+            EditorRows.textButton(f, "Trigger file " + key, I18n.get(KEY + (n == null ? "triggers.create" : "triggers.edit")), button, Style.SECONDARY,
+                () -> {
+                    ensureCommand(b, t);
+                    CodeEditorPopup.open(path, b.name + " · " + name, when);
+                }, null,
+                EditorRows.tip(name, "ron/" + path + ".mcfunction · " + when));
+            y += TRIGGER_ROW_H;
+        }
+    }
+
+    private static ResourceLocation triggerIcon(BuildingCommand.TriggerCondition t) {
+        return switch (t) {
+            case ON_BUILD_COMPLETE          -> vanillaIcon("textures/item/iron_pickaxe.png");
+            case ON_DESTROY                 -> modIcon("textures/icons/blocks/tnt.png");
+            case ON_DAMAGE_TAKEN            -> vanillaIcon("textures/item/iron_sword.png");
+            case ON_CAPTURE                 -> vanillaIcon("textures/item/nether_star.png");
+            case OFF_COOLDOWN_IF_COMPLETE   -> modIcon("textures/icons/items/clock.png");
+            case OFF_COOLDOWN_IF_GARRISONED -> vanillaIcon("textures/block/ladder.png");
+            case OFF_COOLDOWN_IF_CAPTURED   -> modIcon("textures/icons/items/clock_half.png");
+            case NONE                       -> null;
+        };
     }
 }

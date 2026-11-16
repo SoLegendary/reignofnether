@@ -17,8 +17,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -96,7 +94,7 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/raw_gold_block.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
+                () -> false,
                 () -> true,
                 List.of(
                         Component.translatable("buildings.reignofnether.piglin_market").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),

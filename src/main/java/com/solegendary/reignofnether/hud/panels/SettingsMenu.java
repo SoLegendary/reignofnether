@@ -7,13 +7,15 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
+import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ui.Rect;
@@ -32,6 +34,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,6 +43,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 /**
@@ -51,10 +55,20 @@ public final class SettingsMenu {
     private SettingsMenu() { }
 
 
-    /** Same rule as the old HUD button: sandbox players and spectators, outside the tutorial and scenarios. Sandbox players get game rules in the dock; mapmaker rules stay here. */
+    /** Same rule as the old HUD button: sandbox players and spectators. Sandbox players get game rules in the dock. */
     public static boolean canOpenGamerules() {
         return (SandboxClientEvents.isSandboxPlayer() || !PlayerClientEvents.isRTSPlayer())
-                && !TutorialClientEvents.isEnabled() && !GameruleClient.scenarioMode && !StartPosClientEvents.isStarting;
+                && !StartPosClientEvents.isStarting;
+    }
+
+    private static void openRules() {
+        if (SandboxClientEvents.isSandboxPlayer()) {
+            Minecraft.getInstance().setScreen(null);
+            SandboxPanel.openRules();
+        } else {
+            GameruleClient.gamerulesMenuOpen = true;
+            Minecraft.getInstance().setScreen(new MatchStartScreen());
+        }
     }
 
     private static boolean inPauseMenu = false;
@@ -80,7 +94,7 @@ public final class SettingsMenu {
             return;
         AbstractWidget back = null;
         for (var l : evt.getListenersList())
-            if (l instanceof AbstractWidget w && w.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+            if (l instanceof AbstractWidget w && w.getMessage().getContents() instanceof TranslatableContents t
                     && t.getKey().equals("menu.returnToGame"))
                 back = w;
         if (back == null)
@@ -90,13 +104,10 @@ public final class SettingsMenu {
         int y = back.getY() + 24;
         evt.addListener(new IconButton(x, y, Icon.SETTINGS, Component.translatable("hud.reignofnether.settings"),
                 () -> Minecraft.getInstance().setScreen(settingsScreen(pause))));
-        boolean rulesInDock = SandboxClientEvents.isSandboxPlayer();
-        if (canOpenGamerules() && !rulesInDock)
-            evt.addListener(new IconButton(x, y + 24, Icon.LIST, Component.translatable("hud.gamerule.reignofnether.title"),
-                    () -> Minecraft.getInstance().setScreen(new Panel(pause, "hud.gamerule.reignofnether.title", GameruleClient::ruleRows))));
+        // a shortcut to where the rules are set: the Editor's Rules tab, or the match setup's More options
         if (canOpenGamerules())
-            evt.addListener(new IconButton(x, y + (rulesInDock ? 24 : 48), Icon.LIST, Component.translatable("hud.gamerule.reignofnether.mapmaker_title"),
-                    () -> Minecraft.getInstance().setScreen(new Panel(pause, "hud.gamerule.reignofnether.mapmaker_title", GameruleClient::mapmakerRuleRows))));
+            evt.addListener(new IconButton(x, y + 24, Icon.LIST, Component.translatable("hud.gamerule.reignofnether.title"),
+                    SettingsMenu::openRules));
         // surrender, red, under the last pause button; a second click within 3 s confirms
         if (PlayerClientEvents.isRTSPlayer() && !SandboxClientEvents.isSandboxPlayer()) {
             int bottom = back.getY();
@@ -108,7 +119,7 @@ public final class SettingsMenu {
     }
 
     private static String key(AbstractWidget w) {
-        return w.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
+        return w.getMessage().getContents() instanceof TranslatableContents t ? t.getKey() : "";
     }
 
     /**
@@ -142,7 +153,7 @@ public final class SettingsMenu {
         }
         // close the gaps: each remaining row of the column goes right under the one above
         int left = back.getX(), right = back.getX() + back.getWidth();
-        java.util.TreeSet<Integer> rows = new java.util.TreeSet<>();
+        TreeSet<Integer> rows = new TreeSet<>();
         List<AbstractWidget> column = new ArrayList<>();
         for (var l : evt.getListenersList())
             if (l instanceof AbstractWidget w && w.getX() >= left && w.getX() + w.getWidth() <= right && w.getY() >= back.getY()) {
@@ -168,7 +179,7 @@ public final class SettingsMenu {
         @Override
         public void onPress() {
             if (armed()) {
-                com.solegendary.reignofnether.player.PlayerServerboundPacket.surrender();
+                PlayerServerboundPacket.surrender();
                 Minecraft.getInstance().setScreen(null);
             } else {
                 armedAt = System.currentTimeMillis();
@@ -233,6 +244,7 @@ public final class SettingsMenu {
     private static class Panel extends Screen {
         private final Screen parent;
         private final Supplier<List<SettingRow>> rows;
+        private int shownRows;
 
         Panel(Screen parent, String titleKey, Supplier<List<SettingRow>> rows) {
             super(Component.translatable(titleKey));
@@ -242,7 +254,8 @@ public final class SettingsMenu {
 
         @Override
         protected void init() {
-            List<SettingRow> list = rows.get(); // every value is a supplier, so the rows themselves never change
+            List<SettingRow> list = rows.get();
+            shownRows = list.size();
             int perColumn = (list.size() + 1) / 2;
             int top = Math.max(32, (height - perColumn * 24 - 32) / 2);
             for (int i = 0; i < list.size(); i++)
@@ -253,6 +266,8 @@ public final class SettingsMenu {
 
         @Override
         public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            if (rows.get().size() != shownRows) // a toggle like the rules' Advanced adds or removes rows
+                rebuildWidgets();
             renderBackground(g);
             g.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
             super.render(g, mouseX, mouseY, partialTick);

@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -35,7 +36,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -54,6 +54,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
@@ -544,10 +545,6 @@ public class BuildingClientEvents {
             boolean valid = errorMsgKey == null;
             boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, PlayerRolesClient.myOwner());
 
-            if (errorMsgKey != null && errorMsgKey.equals("building.reignofnether.build_centre_here")) {
-                OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
-            }
-
             // place a new building
             if (buildingToPlace != null && valid && MC.player != null) {
                 Building building = buildingToPlace;
@@ -907,12 +904,11 @@ public class BuildingClientEvents {
         }
     }
 
-    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, double partialBlocksDestroyed, String ownerName, int scenarioRoleIndex) {
+    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, double partialBlocksDestroyed, String ownerName) {
         for (BuildingPlacement building : buildings) {
             if (building.originPos.equals(serverBuilding.originPos)) {
                 building.setServerBlocksPlaced(blocksPlaced);
                 building.ownerName = ownerName;
-                building.scenarioRoleIndex = scenarioRoleIndex;
                 building.partialBlocksDestroyed = partialBlocksDestroyed;
             }
         }
@@ -999,8 +995,8 @@ public class BuildingClientEvents {
             return;
         boolean another = buildings.stream().anyMatch(o -> o != b && o.isCapitol && o.ownerName.equals(b.ownerName) && !o.shouldBeDestroyed());
         if (!another)
-            MC.gui.getChat().addMessage(com.solegendary.reignofnether.chat.SystemMessage.important(
-                    net.minecraft.network.chat.Component.translatable("hud.reignofnether.capital_lost_tip")));
+            MC.gui.getChat().addMessage(SystemMessage.important(
+                    Component.translatable("hud.reignofnether.capital_lost_tip")));
     }
 
     public static void removeFogQueuedBuilding(BlockPos bp) {

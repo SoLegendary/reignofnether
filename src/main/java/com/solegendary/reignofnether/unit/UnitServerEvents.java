@@ -34,6 +34,7 @@ import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
@@ -89,6 +90,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 
@@ -527,6 +529,8 @@ public class UnitServerEvents {
             RTSPlayerScores.addToScore(victim.getOwnerName(), RTSPlayerScoresEnum.UNITS_LOST);
             if (evt.getSource().getEntity() instanceof Unit killer && !killer.getOwnerName().equals(victim.getOwnerName()))
                 RTSPlayerScores.addToScore(killer.getOwnerName(), RTSPlayerScoresEnum.UNITS_KILLED);
+            if (PlayerServerEvents.isGameActive() && evt.getEntity().getServer() != null) // not the units a reset kills
+                RonFiles.fire(evt.getEntity().getServer(), "unit_died", evt.getEntity().createCommandSourceStack(), victim.getOwnerName());
         }
         // Convert nearby blocks arond a death into something that is sculk convertible
         // supposed to add to sculk_spreadable.json tag under the data/minecraft/tags/blocks
@@ -940,6 +944,16 @@ public class UnitServerEvents {
             }
         }
         return entities;
+    }
+
+    // ron/events/unit_damaged during a match: @s is the unit, $owner its owner
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onUnitDamaged(LivingDamageEvent evt) {
+        if (evt.isCanceled() || evt.getAmount() <= 0 || !(evt.getEntity() instanceof Unit unit) || evt.getEntity().level().isClientSide()
+                || !RonFiles.matchRunning())
+            return;
+        RonFiles.fire(evt.getEntity().getServer(), "unit_damaged",
+                evt.getEntity().createCommandSourceStack(), unit.getOwnerName());
     }
 
     // LivingEntityMixin.actuallyHurt ignores the amount returned from LivingDamageEvent for unit attacks,

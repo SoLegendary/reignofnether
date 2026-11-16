@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.p2p;
 
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,7 +23,6 @@ public class JoinScreen extends Screen {
 
     private static final int PAD = 16, BUTTON_H = 32, W = 420;
 
-    private record Hit(int x, int y, int w, int h, Runnable action) { }
 
     private final Screen parent;
     private final List<Hit> hits = new ArrayList<>();
@@ -121,12 +121,12 @@ public class JoinScreen extends Screen {
         int by = y + h - PAD - BUTTON_H;
         int backW = Math.max(90, Text.mediumWidth(I18n.get("gui.back")) + 24);
         if (step == P2PJoin.Step.CONFIRM)
-            button(g, I18n.get("p2p.reignofnether.join_anyway"), tx, by, bw - backW - 8, true, mx, my, P2PJoin::confirm);
+            Hit.button(hits, g, I18n.get("p2p.reignofnether.join_anyway"), tx, by, bw - backW - 8, BUTTON_H, true, true, mx, my, P2PJoin::confirm);
         else if (busy)
-            button(g, I18n.get("gui.cancel"), tx, by, bw - backW - 8, false, mx, my, P2PJoin::cancel);
+            Hit.button(hits, g, I18n.get("gui.cancel"), tx, by, bw - backW - 8, BUTTON_H, false, true, mx, my, P2PJoin::cancel);
         else
-            button(g, I18n.get("p2p.reignofnether.join"), tx, by, bw - backW - 8, !input.getValue().isBlank(), mx, my, this::submit);
-        button(g, I18n.get("gui.back"), tx + bw - backW, by, backW, false, mx, my, this::onClose);
+            Hit.button(hits, g, I18n.get("p2p.reignofnether.join"), tx, by, bw - backW - 8, BUTTON_H, !input.getValue().isBlank(), true, mx, my, this::submit);
+        Hit.button(hits, g, I18n.get("gui.back"), tx + bw - backW, by, backW, BUTTON_H, false, true, mx, my, this::onClose);
         g.pose().popPose();
     }
 
@@ -148,15 +148,6 @@ public class JoinScreen extends Screen {
             P2PJoin.join(input.getValue(), parent);
     }
 
-    private void button(GuiGraphics g, String label, int x, int y, int w, boolean primary, int mx, int my, Runnable action) {
-        boolean hov = mx >= x && mx < x + w && my >= y && my < y + BUTTON_H;
-        if (primary)
-            Theme.primaryButton(g, x, y, w, BUTTON_H, hov);
-        else
-            Theme.secondaryButton(g, x, y, w, BUTTON_H, hov);
-        Text.mediumCentered(g, label, x + w / 2, y + (BUTTON_H - 8) / 2, primary ? Theme.ON_ORANGE : hov ? Theme.GOLD : Theme.BODY);
-        hits.add(new Hit(x, y, w, BUTTON_H, action));
-    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -165,12 +156,8 @@ public class JoinScreen extends Screen {
         input.setFocused(input.isMouseOver(mx, my));
         if (input.isFocused())
             return input.mouseClicked(mx, my, button);
-        if (button == 0)
-            for (Hit h : List.copyOf(hits))
-                if (mx >= h.x && mx < h.x + h.w && my >= h.y && my < h.y + h.h) {
-                    h.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

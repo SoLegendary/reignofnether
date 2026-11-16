@@ -69,7 +69,7 @@ public class BotProduction {
     }
 
     private boolean canTrain(BuildingPlacement b, BotPlan.ArmyUnit a, Map<ProductionItem, Integer> have) {
-        return BotBrain.makes(b, a.item()) && unlocked(a, have) && affordable(a.item().getCost(false, bot.name)) && !spendsLastWood(a.item());
+        return BotBrain.makes(b, a.item()) && !bot.denied(a.item()) && unlocked(a, have) && affordable(a.item().getCost(false, bot.name)) && !spendsLastWood(a.item());
     }
 
     // trained somewhere we have, its building or research done, below its cap

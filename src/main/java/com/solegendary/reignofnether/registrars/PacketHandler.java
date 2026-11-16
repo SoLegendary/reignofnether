@@ -49,19 +49,20 @@ import com.solegendary.reignofnether.replay.ReplayChunkClientboundPacket;
 import com.solegendary.reignofnether.replay.ReplayDownloadServerboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
+import com.solegendary.reignofnether.rtsmap.RonFileClientboundPacket;
+import com.solegendary.reignofnether.rtsmap.RonFileServerboundPacket;
+import com.solegendary.reignofnether.guide.GuideClientboundPacket;
+import com.solegendary.reignofnether.guide.GuideServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
-import com.solegendary.reignofnether.scenario.ScenarioClientboundPacket;
-import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.restrictions.RestrictionsClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalClientboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.debug.RtsDebugChunksClientboundPacket;
 import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
+import com.solegendary.reignofnether.editor.EditorTestClientboundPacket;
+import com.solegendary.reignofnether.editor.EditorTestServerboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkDirection;
@@ -229,14 +230,6 @@ public final class PacketHandler {
                 .encoder(SoundClientboundPacket::encode).decoder(SoundClientboundPacket::new)
                 .consumerMainThread(SoundClientboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(TutorialClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(TutorialClientboundPacket::encode).decoder(TutorialClientboundPacket::new)
-                .consumerMainThread(TutorialClientboundPacket::handle).add();
-
-        INSTANCE.messageBuilder(TutorialServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(TutorialServerboundPacket::encode).decoder(TutorialServerboundPacket::new)
-                .consumerMainThread(TutorialServerboundPacket::handle).add();
-
         INSTANCE.messageBuilder(AllianceClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AllianceClientboundPacket::encode)
                 .decoder(AllianceClientboundPacket::new)
@@ -260,18 +253,6 @@ public final class PacketHandler {
                 .encoder(GameModeClientboundPacket::encode)
                 .decoder(GameModeClientboundPacket::new)
                 .consumerMainThread(GameModeClientboundPacket::handle)
-                .add();
-
-        INSTANCE.messageBuilder(SurvivalServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(SurvivalServerboundPacket::encode)
-                .decoder(SurvivalServerboundPacket::new)
-                .consumerMainThread(SurvivalServerboundPacket::handle)
-                .add();
-
-        INSTANCE.messageBuilder(SurvivalClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SurvivalClientboundPacket::encode)
-                .decoder(SurvivalClientboundPacket::new)
-                .consumerMainThread(SurvivalClientboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(ClientboundSyncResourceCostPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
@@ -302,6 +283,12 @@ public final class PacketHandler {
                 .encoder(StartPosServerboundPacket::encode)
                 .decoder(StartPosServerboundPacket::new)
                 .consumerMainThread(StartPosServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RestrictionsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RestrictionsClientboundPacket::encode)
+                .decoder(RestrictionsClientboundPacket::new)
+                .consumerMainThread(RestrictionsClientboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(StartPosClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
@@ -364,18 +351,6 @@ public final class PacketHandler {
                 .consumerMainThread(MapColoursClientboundPacket::handle)
                 .add();
 
-        INSTANCE.messageBuilder(ScenarioServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(ScenarioServerboundPacket::encode)
-                .decoder(ScenarioServerboundPacket::new)
-                .consumerMainThread(ScenarioServerboundPacket::handle)
-                .add();
-
-        INSTANCE.messageBuilder(ScenarioClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(ScenarioClientboundPacket::encode)
-                .decoder(ScenarioClientboundPacket::new)
-                .consumerMainThread(ScenarioClientboundPacket::handle)
-                .add();
-
         INSTANCE.messageBuilder(MatchStatsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(MatchStatsClientboundPacket::encode)
                 .decoder(MatchStatsClientboundPacket::new)
@@ -392,6 +367,30 @@ public final class PacketHandler {
                 .encoder(RTSMapInfoServerboundPacket::encode)
                 .decoder(RTSMapInfoServerboundPacket::new)
                 .consumerMainThread(RTSMapInfoServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RonFileClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RonFileClientboundPacket::encode)
+                .decoder(RonFileClientboundPacket::new)
+                .consumerMainThread(RonFileClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(GuideClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(GuideClientboundPacket::encode)
+                .decoder(GuideClientboundPacket::new)
+                .consumerMainThread(GuideClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(GuideServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(GuideServerboundPacket::encode)
+                .decoder(GuideServerboundPacket::new)
+                .consumerMainThread(GuideServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RonFileServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RonFileServerboundPacket::encode)
+                .decoder(RonFileServerboundPacket::new)
+                .consumerMainThread(RonFileServerboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(PlayerChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
@@ -517,5 +516,16 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(FogSyncClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FogSyncClientboundPacket::encode).decoder(FogSyncClientboundPacket::new)
                 .consumerMainThread(FogSyncClientboundPacket::handle).add();
+        INSTANCE.messageBuilder(EditorTestServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(EditorTestServerboundPacket::encode)
+                .decoder(EditorTestServerboundPacket::new)
+                .consumerMainThread(EditorTestServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(EditorTestClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(EditorTestClientboundPacket::encode)
+                .decoder(EditorTestClientboundPacket::new)
+                .consumerMainThread(EditorTestClientboundPacket::handle)
+                .add();
     }
 }

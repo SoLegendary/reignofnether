@@ -69,6 +69,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * The middle of the HUD bar: what is selected, in fixed columns. The portrait with health below it, stats, item
@@ -398,6 +399,14 @@ public final class SelectionPanel {
         f.zone(portraitRect);
     }
 
+    /** The selected unit's kind of portrait for any entity (the guide's speaker), animated by its own renderer. */
+    public static void drawPortrait(HudFrame f, LivingEntity e, PortraitRendererUnit<?, ?, ?> renderer, int x, int y, int w, int h) {
+        portraitFrame(f, x, y, w, h, owner(e));
+        Clip.push(f.g, x, y, w, h);
+        renderer.drawEntity(f.g, e, x, y, w, h);
+        Clip.pop(f.g);
+    }
+
     @Nullable
     private static String owner(LivingEntity e) {
         return e instanceof Unit u ? u.getOwnerName() : e instanceof Player p ? p.getName().getString() : null;
@@ -448,7 +457,7 @@ public final class SelectionPanel {
     }
 
     private static boolean isMe(String owner) {
-        var me = net.minecraft.client.Minecraft.getInstance().player;
+        var me = Minecraft.getInstance().player;
         return me != null && owner.equals(me.getName().getString());
     }
 
@@ -781,7 +790,7 @@ public final class SelectionPanel {
 
     // ------------------------------------------------------------------ army
 
-    private static <T> Map<String, List<T>> groupBy(List<T> items, java.util.function.Function<T, String> name) {
+    private static <T> Map<String, List<T>> groupBy(List<T> items, Function<T, String> name) {
         Map<String, List<T>> types = new LinkedHashMap<>();
         for (T t : items)
             types.computeIfAbsent(name.apply(t), k -> new ArrayList<>()).add(t);

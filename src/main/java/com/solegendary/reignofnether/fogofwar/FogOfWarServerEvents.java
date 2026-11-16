@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
+
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.ai.BotServerEvents;
 import com.solegendary.reignofnether.alliance.Share;
 import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.player.PlayerRole;
@@ -195,7 +198,7 @@ public class FogOfWarServerEvents {
             return false;
         // bots (and bot-controlled disconnected players) have no ServerPlayer or fog state; the bot AI limits its
         // own knowledge to its sight ranges
-        if (PlayerServerEvents.isBot(playerName) || com.solegendary.reignofnether.ai.BotServerEvents.isControlled(playerName))
+        if (PlayerServerEvents.isBot(playerName) || BotServerEvents.isControlled(playerName))
             return true;
         for (ServerPlayer sp : serverLevel.players())
             if (sp.getName().getString().equals(playerName))
@@ -418,12 +421,17 @@ public class FogOfWarServerEvents {
         syncClientFog();
 
         // fog means a competitive match: enemy picks hidden and all chat off (the host can turn either back)
+        // (but not ones the map locks)
         if (!wasEnabled && enabled && serverLevel != null) {
-            serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
-            GameruleClientboundPacket.setHideEnemyPicks(true);
-            StartPosServerEvents.syncAll(true);
-            serverLevel.getGameRules().getRule(GameRuleRegistrar.ALL_CHAT).set(false, serverLevel.getServer());
-            GameruleClientboundPacket.setAllChat(false);
+            if (!RTSMapInfoServerEvents.isLocked("hideEnemyPicks")) {
+                serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
+                GameruleClientboundPacket.setHideEnemyPicks(true);
+                StartPosServerEvents.syncAll(true);
+            }
+            if (!RTSMapInfoServerEvents.isLocked("allChat")) {
+                serverLevel.getGameRules().getRule(GameRuleRegistrar.ALL_CHAT).set(false, serverLevel.getServer());
+                GameruleClientboundPacket.setAllChat(false);
+            }
         }
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks

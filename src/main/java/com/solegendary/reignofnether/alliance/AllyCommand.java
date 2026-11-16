@@ -124,8 +124,6 @@ public class AllyCommand {
         boolean rts = PlayerServerEvents.isRTSPlayer(a) || PlayerServerEvents.isRTSPlayer(b);
         if (rts && server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get())
             return Component.translatable("alliance.reignofnether.alliances_lock");
-        if (rts && server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get())
-            return Component.translatable("alliance.reignofnether.alliances_lock_coop");
         return null;
     }
 

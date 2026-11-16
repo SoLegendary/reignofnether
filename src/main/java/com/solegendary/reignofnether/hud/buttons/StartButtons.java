@@ -5,8 +5,8 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
+import com.solegendary.reignofnether.ui.Tooltip;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.util.LanguageUtil;
@@ -41,8 +41,8 @@ public class StartButtons {
         ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_VILLAGERS,
-        () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.PLACE_WORKERS_B) || !PlayerClientEvents.canStartRTS,
-        () -> true,
+        () -> !PlayerClientEvents.canStartRTS,
+        StartButtons::playable,
         () -> {
             CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_VILLAGERS);
         },
@@ -51,7 +51,12 @@ public class StartButtons {
             fcs(LanguageUtil.getTranslation("hud.startbuttons.villagers.reignofnether.first"), true),
             fcs(LanguageUtil.getTranslation("hud.startbuttons.villagers.reignofnether.second", STARTING_WORKERS))
         )
-    );
+    ) {
+        @Override
+        public Tooltip hudTooltip() {
+            return refusalOr(super.hudTooltip());
+        }
+    };
 
     public static Button monsterStartButton = new Button(
         "Monsters",
@@ -59,15 +64,20 @@ public class StartButtons {
         ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"),
         (Keybinding) null,
         () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_MONSTERS,
-        () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,
-        () -> !TutorialClientEvents.isEnabled(),
+        () -> !PlayerClientEvents.canStartRTS,
+        StartButtons::playable,
         () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_MONSTERS),
         null,
         List.of(
             fcs(LanguageUtil.getTranslation("hud.startbuttons.monsters.reignofnether.first"), true),
             fcs(LanguageUtil.getTranslation("hud.startbuttons.monsters.reignofnether.second", STARTING_WORKERS))
         )
-    );
+    ) {
+        @Override
+        public Tooltip hudTooltip() {
+            return refusalOr(super.hudTooltip());
+        }
+    };
 
     public static Button piglinStartButton = new Button(
             "Piglins",
@@ -75,13 +85,28 @@ public class StartButtons {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
             (Keybinding) null,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
-            () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,
-            () -> !TutorialClientEvents.isEnabled(),
+            () -> !PlayerClientEvents.canStartRTS,
+            StartButtons::playable,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
             null,
             List.of(
                     fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.first"), true),
                     fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.second", STARTING_WORKERS))
             )
-    );
+    ) {
+        @Override
+        public Tooltip hudTooltip() {
+            return refusalOr(super.hudTooltip());
+        }
+    };
+
+    // an old or newer format map can't be played: the faction buttons are off and their tooltip says why
+    private static boolean playable() {
+        return RTSMapInfoClientEvents.playRefusal() == null;
+    }
+
+    private static Tooltip refusalOr(Tooltip tooltip) {
+        String refusal = RTSMapInfoClientEvents.playRefusal();
+        return refusal == null ? tooltip : Tooltip.fromLines(List.of(fcs(refusal)));
+    }
 }

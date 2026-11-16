@@ -13,7 +13,6 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.soldier.SoldierServerEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -69,8 +68,7 @@ public class ResearchSoldierGear extends ProductionItem {
             () -> PlayerRolesClient.soldiersOf(prodBuilding.ownerName).isEmpty()
                 || itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(this)
-                || (previous != null && !ResearchClient.hasResearch(previous))
-                || TutorialClientEvents.isEnabled(),
+                || (previous != null && !ResearchClient.hasResearch(previous)),
             () -> true,
             List.of(fcs(I18n.get(langKey(), NUMERALS[tier]), true),
                 ResourceCosts.getFormattedCost(defaultCost),

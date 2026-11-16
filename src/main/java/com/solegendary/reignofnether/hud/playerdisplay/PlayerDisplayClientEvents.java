@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
@@ -37,6 +38,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -94,7 +96,9 @@ public class PlayerDisplayClientEvents {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/map.png"),
             (Keybinding) null, // its key is handled in onKeyPress so it works even when this button isn't shown
             () -> displayType == DisplayType.OBSERVER,
-            PlayerClientEvents::isRTSPlayer, // with no players its panel is just the big map, so it's shown before a match too
+            // for watching a match: hidden before one starts (the Game / Editor button has its place then)
+            () -> PlayerClientEvents.isRTSPlayer() || PlayerClientEvents.rtsPlayers.isEmpty()
+                    || PlayerClientEvents.rtsPlayers.stream().allMatch(p -> p.faction == Factions.NONE),
             () -> true,
             () -> toggle(DisplayType.OBSERVER),
             null,
@@ -225,7 +229,7 @@ public class PlayerDisplayClientEvents {
     /** "Allies can control my units" chip with an on/off dot, like the match setup's rule toggles. */
     private static void renderShareControlToggle(HudFrame f, int right, int y) {
         boolean sharing = AlliancesClient.sharingAllyControl();
-        String label = I18n.get("hud.reignofnether.diplomacy.share_control").toUpperCase(java.util.Locale.ROOT);
+        String label = I18n.get("hud.reignofnether.diplomacy.share_control").toUpperCase(Locale.ROOT);
         int w = Text.smallWidth(label) + 19;
         Rect r = new Rect(right - w, y, w, 16);
         Theme.chip(f.g, r.x(), y, w, r.h(), false, f.hovered(r));

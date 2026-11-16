@@ -15,8 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -58,10 +57,6 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_ALLOW_BEACONS, "", allowBeacons ? 1L : 0L));
     }
-    public static void setPvpModesOnly(boolean pvpModesOnly) {
-        PacketHandler.INSTANCE.sendToServer(
-            new GameruleServerboundPacket(GameruleAction.SET_PVP_MODES_ONLY, "", pvpModesOnly ? 1L : 0L));
-    }
     public static void setBeaconWinMinutes(long beaconWinMinutes) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_BEACON_WIN_MINUTES, "", beaconWinMinutes));
@@ -85,10 +80,6 @@ public class GameruleServerboundPacket {
     public static void setHideEnemyPicks(boolean hideEnemyPicks) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_HIDE_ENEMY_PICKS, "", hideEnemyPicks ? 1L : 0L));
-    }
-    public static void setCoopMode(boolean coopMode) {
-        PacketHandler.INSTANCE.sendToServer(
-                new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
     }
     public static void setRtsPathfinding(boolean rtsPathfinding) {
         PacketHandler.INSTANCE.sendToServer(
@@ -139,21 +130,21 @@ public class GameruleServerboundPacket {
     }
 
 
-    // rules the match host can change from the match setup screen without being a full operator
-    private static final Set<GameruleAction> LOBBY_RULES = EnumSet.of(
-            GameruleAction.SET_HIDE_ENEMY_PICKS,
-            GameruleAction.SET_FOG_OF_WAR,
-            GameruleAction.SET_MAX_POPULATION,
-            GameruleAction.SET_ALLOWED_HEROES,
-            GameruleAction.SET_RANDOM_ITEM_DROPS,
-            GameruleAction.SET_NEUTRAL_AGGRO,
-            GameruleAction.SET_LOCK_ALLIANCES,
-            GameruleAction.SET_ALLOW_BEACONS,
-            GameruleAction.SET_BEACON_WIN_MINUTES,
-            GameruleAction.SET_SOLDIERS_PER_TEAM,
-            GameruleAction.SET_CO_COMMANDERS,
-            GameruleAction.SET_SOLDIER_RESPAWN_SECONDS,
-            GameruleAction.SET_ALL_CHAT
+    // rules the match host can change from the match setup screen without being a full operator, with their id in
+    // map.json (RTSMapInfo.MATCH_RULES), where the map can lock them
+    private static final Map<GameruleAction, String> LOBBY_RULES = Map.ofEntries(
+            Map.entry(GameruleAction.SET_HIDE_ENEMY_PICKS, "hideEnemyPicks"),
+            Map.entry(GameruleAction.SET_FOG_OF_WAR, "fogOfWar"),
+            Map.entry(GameruleAction.SET_MAX_POPULATION, "maxPopulation"),
+            Map.entry(GameruleAction.SET_ALLOWED_HEROES, "allowedHeroes"),
+            Map.entry(GameruleAction.SET_RANDOM_ITEM_DROPS, "randomItemDrops"),
+            Map.entry(GameruleAction.SET_NEUTRAL_AGGRO, "neutralAggro"),
+            Map.entry(GameruleAction.SET_LOCK_ALLIANCES, "lockAlliances"),
+            Map.entry(GameruleAction.SET_BEACON_WIN_MINUTES, "beaconWinMinutes"),
+            Map.entry(GameruleAction.SET_SOLDIERS_PER_TEAM, "soldiersPerTeam"),
+            Map.entry(GameruleAction.SET_CO_COMMANDERS, "coCommanders"),
+            Map.entry(GameruleAction.SET_SOLDIER_RESPAWN_SECONDS, "soldierRespawnSeconds"),
+            Map.entry(GameruleAction.SET_ALL_CHAT, "allChat")
     );
 
     // server-side packet-consuming functions
@@ -166,8 +157,9 @@ public class GameruleServerboundPacket {
                 success.set(false);
                 return;
             }
-            // the match setup's rules are also open to the match host (op 2 or the singleplayer/P2P host)
-            else if (!player.hasPermissions(4) && !(LOBBY_RULES.contains(action) && StartPosServerEvents.isHost(player)
+            // the match setup's rules are also open to the match host (op 2 or the singleplayer/P2P host), unless the map locks them
+            else if (!player.hasPermissions(4) && !(LOBBY_RULES.containsKey(action) && StartPosServerEvents.isHost(player)
+                    && !RTSMapInfoServerEvents.isLocked(LOBBY_RULES.get(action))
                     && PlayerServerEvents.rtsPlayers.isEmpty() && !StartPosServerEvents.isStartingGame())) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
@@ -213,10 +205,6 @@ public class GameruleServerboundPacket {
                     gameRules.getRule(GameRuleRegistrar.ALLOW_BEACONS).set(booleanValue, server);
                     GameruleClientboundPacket.setAllowBeacons(booleanValue);
                 }
-                case SET_PVP_MODES_ONLY -> {
-                    gameRules.getRule(GameRuleRegistrar.PVP_MODES_ONLY).set(booleanValue, server);
-                    GameruleClientboundPacket.setPvpModesOnly(booleanValue);
-                }
                 case SET_BEACON_WIN_MINUTES -> {
                     gameRules.getRule(GameRuleRegistrar.BEACON_WIN_MINUTES).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setBeaconWinMinutes(value);
@@ -239,10 +227,6 @@ public class GameruleServerboundPacket {
                     gameRules.getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(booleanValue, server);
                     GameruleClientboundPacket.setHideEnemyPicks(booleanValue);
                     StartPosServerEvents.syncAll(booleanValue);
-                }
-                case SET_COOP_MODE -> {
-                    gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);
-                    GameruleClientboundPacket.setCoopMode(booleanValue);
                 }
                 case SET_RTS_PATHFINDING -> {
                     gameRules.getRule(GameRuleRegistrar.RTS_PATHFINDING).set(booleanValue, server);

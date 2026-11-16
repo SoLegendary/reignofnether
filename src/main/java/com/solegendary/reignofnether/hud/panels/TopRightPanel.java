@@ -7,8 +7,8 @@ import com.solegendary.reignofnether.building.buildings.placements.BeaconPlaceme
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
-import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
@@ -20,13 +20,9 @@ import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.replay.ReplayClientEvents;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
@@ -43,7 +39,7 @@ import java.util.List;
 
 /**
  * Top-right of the HUD: the utility bar (idle workers, army, players, chat), a second row with the
- * buttons that only exist in some situations (match start, scenario, beacon, game rules,
+ * buttons that only exist in some situations (match start, beacon, game rules,
  * datapack buttons), the clock to the left of the bar and the attack alert under it.
  */
 public final class TopRightPanel {
@@ -74,8 +70,11 @@ public final class TopRightPanel {
         addIfShown(main, HelperButtons.armyButton);
         if (!SpectatorHud.isActive()) // the scoreboard already shows every player
             addIfShown(main, PlayerDisplayClientEvents.observerButton);
-        addIfShown(main, PlayerDisplayClientEvents.diplomacyButton);
-        addIfShown(main, TutorialClientEvents.helpButton);
+        if (!SandboxPanel.isEditing()) // nobody to ally with in the editor
+            addIfShown(main, PlayerDisplayClientEvents.diplomacyButton);
+        // game or editor: in diplomacy's place until a match starts, then just after it
+        ClientGameModeHelper.refreshModeButton();
+        addIfShown(main, ClientGameModeHelper.modeButton);
 
         Rect bar = renderBar(f, main, right, top);
         int barLeft = bar.isEmpty() ? right : bar.x();
@@ -83,7 +82,7 @@ public final class TopRightPanel {
         int below = top + HudLayout.TOP_CARD_H + HudLayout.GAP;
 
         // spectators have the clock in their scoreboard
-        if (TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) && !SpectatorHud.isActive())
+        if (!SpectatorHud.isActive())
             renderClock(f, barLeft - (bar.isEmpty() ? 0 : HudLayout.GAP), top);
 
         Rect contextBar = renderBar(f, contextButtons(), right, below);
@@ -124,31 +123,23 @@ public final class TopRightPanel {
     /** Buttons that only appear in some game states, in a second row under the utility bar. */
     private static List<Button> contextButtons() {
         List<Button> list = new ArrayList<>();
+        addIfShown(list, SandboxPanel.toggleButton); // under the mode button
         addIfShown(list, MatchEndClientEvents.getResultsButton());
         // a replay's viewer isn't in the match, but can't join it either
         if (!PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsLocked && !ReplayClientEvents.isActive()) {
-            if (GameruleClient.scenarioMode) {
-                Button cycleRole = ScenarioClientEvents.getCycleRoleToPlayButton();
-                if (cycleRole != null)
-                    list.add(cycleRole);
-                list.add(ScenarioClientEvents.getScenarioStartButton());
-            } else {
-                addIfShown(list, ConfigClientEvents.getDiffsButton());
-                if (ClientGameModeHelper.gameMode != GameMode.SANDBOX) {
-                    if (!StartPosClientEvents.isEnabled()) {
-                        addIfShown(list, StartButtons.villagerStartButton);
-                        addIfShown(list, StartButtons.monsterStartButton);
-                        addIfShown(list, StartButtons.piglinStartButton);
-                    }
-                } else {
-                    addIfShown(list, StartButtons.sandboxStartButton);
+            addIfShown(list, ConfigClientEvents.getDiffsButton());
+            if (ClientGameModeHelper.gameMode != GameMode.SANDBOX) {
+                if (!StartPosClientEvents.isEnabled()) {
+                    addIfShown(list, StartButtons.villagerStartButton);
+                    addIfShown(list, StartButtons.monsterStartButton);
+                    addIfShown(list, StartButtons.piglinStartButton);
                 }
-                Button gamemode = ClientGameModeHelper.getButton();
-                if (gamemode != null && !TutorialClientEvents.isEnabled())
-                    addIfShown(list, gamemode);
+            } else {
+                addIfShown(list, StartButtons.sandboxStartButton);
             }
-        } else if (SurvivalClientEvents.isEnabled) {
-            addIfShown(list, SurvivalClientEvents.getNextWaveButton());
+            Button gamemode = ClientGameModeHelper.getButton();
+            if (gamemode != null)
+                addIfShown(list, gamemode);
         }
 
         BeaconPlacement beacon = BuildingUtils.getBeacon(true);
@@ -178,7 +169,7 @@ public final class TopRightPanel {
         long time = TimeClientEvents.serverNormDayTime;
         boolean bloodMoon = TimeClientEvents.isBloodMoonActive();
         boolean day = TimeUtils.isDay(time);
-        boolean showGameTime = PlayerClientEvents.isRTSPlayer() && !SurvivalClientEvents.isEnabled;
+        boolean showGameTime = PlayerClientEvents.isRTSPlayer();
 
         String phase = bloodMoon ? I18n.get("hud.reignofnether.clock.blood_moon")
                 : I18n.get(day ? "hud.reignofnether.clock.day" : "hud.reignofnether.clock.night") + " " + TimeClientEvents.dayNumber();

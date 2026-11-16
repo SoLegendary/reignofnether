@@ -4,6 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.chat.ChatLines;
 import com.solegendary.reignofnether.chat.ChatPanel;
+import com.solegendary.reignofnether.guide.CinematicClient;
+import com.solegendary.reignofnether.guide.GuideClientEvents;
+import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
@@ -107,6 +110,14 @@ public class SoldierHudClientEvents {
         g.pose().pushPose();
         g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
 
+        // a map script's cutscene: letterbox bars and the dialogue only
+        if (CinematicClient.isLocked()) {
+            HudFrame f = new HudFrame(g, scale, HudGeometry.layout(), Integer.MIN_VALUE / 2, Integer.MIN_VALUE / 2);
+            CinematicClient.renderBars(f);
+            GuideClientEvents.renderDialogue(f, 10, h - 34 - 6);
+            g.pose().popPose();
+            return;
+        }
         String commander = PlayerRolesClient.myCommander();
         if (SoldierClient.dead) {
             g.fill(0, 0, w, h, 0x99140508);
@@ -123,7 +134,8 @@ public class SoldierHudClientEvents {
             renderHotbar(g, w, h);
         }
         renderTeamBar(g, w, commander);
-        if (!(MC.screen instanceof ChatPanel))
+        HudFrame f = new HudFrame(g, scale, HudGeometry.layout(), Integer.MIN_VALUE / 2, Integer.MIN_VALUE / 2);
+        if (!(MC.screen instanceof ChatPanel) && !GuideClientEvents.renderDialogue(f, 10, chatBottom(h)))
             ChatLines.renderRecent(g, 10, chatBottom(h), 300);
         g.pose().popPose();
 

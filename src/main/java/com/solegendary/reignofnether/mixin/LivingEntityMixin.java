@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -97,10 +96,6 @@ public abstract class LivingEntityMixin extends Entity {
             boolean canMagma = false;
             boolean canNetherrack = false;
 
-            if (SurvivalServerEvents.isEnabled() && SurvivalServerEvents.ENEMY_OWNER_NAME.equals(unit.getOwnerName())) {
-                canFrost = true;
-                canNetherrack = true;
-            }
             if (le instanceof UnitInventory inv) {
                 if (inv.isHolding(UnitItems.FROST_WALKER_BOOTS))
                     canFrost = true;

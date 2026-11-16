@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.panels;
 
+import com.solegendary.reignofnether.guide.GuideClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
@@ -75,10 +76,7 @@ public final class HudFrame {
 
     /** Registers a clickable area drawn by the caller. */
     public void register(Button b, Rect r, @Nullable Keybinding key, @Nullable Supplier<Tooltip> tooltip) {
-        b.x = r.x();
-        b.y = r.y();
-        b.drawnSize = r.w();
-        placed.add(new Placed(b, r, key, tooltip, null));
+        register(b, r, key, tooltip, null);
     }
 
     /** Registers a clickable area whose hotkey runs altAction instead when Alt is held (hero rank-up). */
@@ -161,6 +159,7 @@ public final class HudFrame {
         playClick();
         p.button().pressedMs = System.currentTimeMillis();
         action.run();
+        GuideClientEvents.buttonUsed(p.button());
         return true;
     }
 
@@ -201,6 +200,7 @@ public final class HudFrame {
                 b.onRightClick.run(); // other buttons keep whatever Ctrl + key did before (queueing several...)
             else
                 b.pressHotkey();
+            GuideClientEvents.buttonUsed(b);
             return true;
         }
         return false;

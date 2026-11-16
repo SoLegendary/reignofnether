@@ -22,7 +22,6 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
@@ -84,7 +83,7 @@ public final class SpectatorHud {
 
     public static boolean isActive() {
         return !PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsPlayers.isEmpty()
-                && !TutorialClientEvents.isEnabled() && !SandboxClientEvents.isSandboxPlayer();
+                && !SandboxClientEvents.isSandboxPlayer();
     }
 
     public static void render(HudFrame f) {

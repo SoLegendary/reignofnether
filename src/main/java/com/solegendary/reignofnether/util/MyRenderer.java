@@ -506,53 +506,6 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    // render a HUD frame
-    public static void renderFrameWithBg(GuiGraphics guiGraphics, int x, int y, int width, int height, int bgCol) {
-        // draw icon frame with dark transparent bg
-        guiGraphics.fill(// x1,y1, x2,y2,
-                x + 2, y + 2,
-                x + width - 2,
-                y + height - 2,
-                bgCol); //ARGB(hex); note that alpha ranges between ~0-16 in RenderOverlayEvent, not 0-255
-
-        // draw edges first so they aren't stretched on large dimensions
-        int thickness = 4;
-
-        ResourceLocation iconFrameResource;
-        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_left" + (height < 50 ? "_small" : "") + ".png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        guiGraphics.blit(iconFrameResource,
-                x, y, 0,
-                0, 0, // where on texture to start drawing from
-                thickness, height, // dimensions of blit texture
-                thickness, height // size of texture itself (if < dimensions, texture is repeated)
-        );
-        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_right" + (height < 50 ? "_small" : "") + ".png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        guiGraphics.blit(iconFrameResource,
-                x + width - thickness, y, 0,
-                0, 0, // where on texture to start drawing from
-                thickness, height, // dimensions of blit texture
-                thickness, height // size of texture itself (if < dimensions, texture is repeated)
-        );
-        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_top.png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        guiGraphics.blit(iconFrameResource,
-                x + thickness, y, 0,
-                0, 0, // where on texture to start drawing from
-                width - thickness * 2, thickness, // dimensions of blit texture
-                width, thickness // size of texture itself (if < dimensions, texture is repeated)
-        );
-        iconFrameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/unit_frame_bottom.png");
-        RenderSystem.setShaderTexture(0, iconFrameResource);
-        guiGraphics.blit(iconFrameResource,
-                x + thickness, y + height - thickness, 0,
-                0, 0, // where on texture to start drawing from
-                width - thickness * 2, thickness, // dimensions of blit texture
-                width, thickness // size of texture itself (if < dimensions, texture is repeated)
-        );
-    }
-
     public static void renderIcon(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int x, int y, int size) {
         RenderSystem.setShaderTexture(0, resourceLocation);
         guiGraphics.blit(resourceLocation,

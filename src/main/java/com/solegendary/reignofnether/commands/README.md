@@ -43,7 +43,6 @@ Custom command support has been added for normal buildings using `/rtsapi buildi
 - /rtsapi player research get &lt;player&gt;
 - /rtsapi player teammode &lt;mode&gt;
 - /rtsapi player starting-teams-mode &lt;mode&gt;
-- /rtsapi player start-scenario-role &lt;player&gt; &lt;scenarioId&gt;
 - /rtsapi player camera &lt;value&gt; &lt;player&gt;
 - /rtsapi player camera move &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [lockTicks] [forcePanTicks] [zoom]
 - /rtsapi player camera fade &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [fadeTicks] [blackoutTicks]
@@ -96,8 +95,8 @@ Like EntityArgument, but it can only select RoN Units
 
 This combines the EntityArgument and the StringTypeArgument. You can use `@a` as an EntitySelector, or `"a"` as a fake player name. Four use cases:
 - `*` (optional) — all players (including fake players like "Enemy")
-- `@a` / `@p` / `@r` / ... — EntitySelector **(excluding offline or virtual players like scenario NPCs)**
-- `a` / `b` / `c` / ... — an **online** player's name **(excluding offline or virtual players like scenario NPCs)**
+- `@a` / `@p` / `@r` / ... — EntitySelector **(excluding offline or virtual players)**
+- `a` / `b` / `c` / ... — an **online** player's name **(excluding offline or virtual players)**
 - `"a"` / `"b"` / `"c"` / ... — player name as a string (`""` is valid as neutral)
 
 The result is a string representing the player's name. It is usually appended to the BuildingArgument and UnitArgument as the `ownerName` selector.
@@ -116,7 +115,6 @@ You can now use `/data get/merge/modify/remove building` on building data:
 - `baseMsPerBuild`: int
 - `minBlocksPercent`: float
 - `ownerName`: string
-- `scenarioRoleIndex`: int
 - `ticksToExtinguishMax`: long
 - `ticksToSpawnAnimalsMax`: long
 - `maxAnimals`: int

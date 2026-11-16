@@ -50,11 +50,13 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -201,7 +203,7 @@ public class MatchStartScreen extends Screen {
     }
 
     // picked teams get their own colours, apart from the players' colours
-    private static final int[] TEAM_COLOURS = { 0xFF4C8DFF, 0xFFE5534B, 0xFF57C75C, 0xFFF2C14E, 0xFFB06CFF, 0xFF3FC8C8, 0xFFFF8A3D, 0xFFE86AB4 };
+    public static final int[] TEAM_COLOURS = { 0xFF4C8DFF, 0xFFE5534B, 0xFF57C75C, 0xFFF2C14E, 0xFFB06CFF, 0xFF3FC8C8, 0xFFFF8A3D, 0xFFE86AB4 };
 
     /** On maps that set teams, a team is its start block colour; elsewhere each number has its own colour. */
     private static int teamAccent(int team) {
@@ -303,15 +305,11 @@ public class MatchStartScreen extends Screen {
         Text.title(g, map.toUpperCase(Locale.ROOT), M, M + 9, titleScale);
         int tx = M + Text.titleWidth(map.toUpperCase(Locale.ROOT), titleScale) + 12;
 
-        // right side: ready count, game rules, close
+        // right side: ready count, invite, close (the game rules are the roster's More options)
         int right = w - M;
         int bh = 22;
         int by = M + 6;
         right = headerButton(I18n.get("matchstart.reignofnether.close"), null, right, by, bh, MatchStartClientEvents::dismiss, null, true);
-        right = headerButton(I18n.get("matchstart.reignofnether.game_rules"), Icon.LIST, right - 6, by, bh,
-                () -> GameruleClient.gamerulesMenuOpen = !GameruleClient.gamerulesMenuOpen,
-                Tooltip.of(I18n.get("matchstart.reignofnether.game_rules")).body(I18n.get(StartPosClientEvents.isHost()
-                        ? "matchstart.reignofnether.rules_host" : "matchstart.reignofnether.rules_view")), true);
         // our own world: let players elsewhere join by code
         if (Minecraft.getInstance().hasSingleplayerServer())
             right = headerButton(I18n.get(P2PHost.state == P2PHost.State.OFF ? "matchstart.reignofnether.host_online" : "matchstart.reignofnether.invite"),
@@ -503,7 +501,8 @@ public class MatchStartScreen extends Screen {
         var g = frame.g;
         Theme.panel(g, p.x(), p.y(), p.w(), p.h(), PANEL_FILL);
         Text.small(g, I18n.get("matchstart.reignofnether.roster"), p.x() + 11, p.y() + 9, Theme.LABEL);
-        renderRuleToggles(p.right() - 11, p.y() + 6);
+        renderRuleToggles(p.right() - 11, p.y() + 6,
+                p.x() + 11 + Text.smallWidth(I18n.get("matchstart.reignofnether.roster")) + 8);
 
         List<StartPos> empty = new ArrayList<>();
         boolean anySeated = false;
@@ -589,29 +588,60 @@ public class MatchStartScreen extends Screen {
             renderBlocker(new Rect(p.x() + 1, p.bottom() - blockerH - 1, p.w() - 2, blockerH), empty.size());
     }
 
-    /** Fog of war and alliance lock as quick toggles, right-aligned at `right`. Host only; players see them in the rules panel. */
-    private void renderRuleToggles(int right, int y) {
+    private record QuickRule(String rule, boolean on, @Nullable String value, Runnable click) { }
+
+    private final Set<String> chipRules = new HashSet<>(); // the quick toggles shown, More options skips them
+
+    /**
+     * More options (every other rule, in a popup), then for the host the rules worth changing most as quick toggles,
+     * right-aligned at `right`; one that doesn't fit before minX stays in More options.
+     */
+    private void renderRuleToggles(int right, int y, int minX) {
+        chipRules.clear();
+        String more = I18n.get("matchstart.reignofnether.more_options").toUpperCase(Locale.ROOT);
+        int moreW = Text.smallWidth(more) + 12;
+        Rect m = new Rect(right - moreW, y, moreW, 15);
+        Theme.chip(frame.g, m.x(), y, moreW, 15, GameruleClient.gamerulesMenuOpen, frame.hovered(m));
+        Text.smallCentered(frame.g, more, m.centerX(), y + 3, GameruleClient.gamerulesMenuOpen ? Theme.GOLD : Theme.BODY);
+        frame.register(new ButtonBuilder("more options").onLeftClick(() -> GameruleClient.gamerulesMenuOpen = !GameruleClient.gamerulesMenuOpen)
+                .build(), m, null, () -> Tooltip.of(I18n.get("matchstart.reignofnether.more_options")).body(I18n.get(StartPosClientEvents.isHost()
+                        ? "matchstart.reignofnether.rules_host" : "matchstart.reignofnether.rules_view")));
         if (!StartPosClientEvents.isHost())
             return;
-        int x = ruleToggle(right, y, "fog_of_war", FogOfWarClientEvents.isMatchFogOn(), GameruleServerboundPacket::setFogOfWar);
-        x = ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
-        x = ruleToggle(x - 4, y, "co_commanders", GameruleClient.coCommanders, GameruleServerboundPacket::setCoCommanders);
-        // soldiers cycle 0..MAX seats per team
-        ruleChip(x - 4, y, "soldiers_per_team", GameruleClient.soldiersPerTeam > 0, String.valueOf(GameruleClient.soldiersPerTeam),
-                () -> GameruleServerboundPacket.setSoldiersPerTeam((GameruleClient.soldiersPerTeam + 1) % (GameruleClient.MAX_SOLDIERS_PER_TEAM + 1)));
+        List<QuickRule> quick = List.of(
+                new QuickRule("fog_of_war", FogOfWarClientEvents.isMatchFogOn(), null,
+                        () -> GameruleServerboundPacket.setFogOfWar(!FogOfWarClientEvents.isMatchFogOn())),
+                new QuickRule("lock_alliances", GameruleClient.lockAlliances, null,
+                        () -> GameruleServerboundPacket.setLockAlliances(!GameruleClient.lockAlliances)),
+                new QuickRule("co_commanders", GameruleClient.coCommanders, null,
+                        () -> GameruleServerboundPacket.setCoCommanders(!GameruleClient.coCommanders)),
+                // soldiers cycle 0..MAX seats per team
+                new QuickRule("soldiers_per_team", GameruleClient.soldiersPerTeam > 0, String.valueOf(GameruleClient.soldiersPerTeam),
+                        () -> GameruleServerboundPacket.setSoldiersPerTeam((GameruleClient.soldiersPerTeam + 1) % (GameruleClient.MAX_SOLDIERS_PER_TEAM + 1))));
+        int x = m.x();
+        for (QuickRule q : quick) {
+            if (x - 4 - ruleChipWidth(q.rule(), q.value()) < minX)
+                break;
+            x = ruleChip(x - 4, y, q.rule(), q.on(), q.value(), q.click());
+            chipRules.add(q.rule());
+        }
     }
 
-    /** An ON/OFF chip for a lobby game rule. Returns its left edge. */
-    private int ruleToggle(int right, int y, String rule, boolean on, Consumer<Boolean> set) {
-        return ruleChip(right, y, rule, on, null, () -> set.accept(!on));
+    private static String ruleChipLabel(String rule, @Nullable String value) {
+        return I18n.get("gamerule.reignofnether.name." + rule).toUpperCase(Locale.ROOT) + (value != null ? " " + value : "");
+    }
+
+    private static int ruleChipWidth(String rule, @Nullable String value) {
+        return Text.smallWidth(ruleChipLabel(rule, value)) + 19;
     }
 
     /** A lobby game rule chip, with its value after the name when given. Returns its left edge. */
     private int ruleChip(int right, int y, String rule, boolean on, @Nullable String value, Runnable click) {
         boolean teamLocked = rule.equals("lock_alliances") && RTSMapInfoClientEvents.teamMode;
-        boolean canToggle = StartPosClientEvents.isHost() && !StartPosClientEvents.isStarting && !teamLocked;
-        String label = I18n.get("gamerule.reignofnether.name." + rule).toUpperCase(Locale.ROOT) + (value != null ? " " + value : "");
-        int w = Text.smallWidth(label) + 19;
+        boolean mapLocked = GameruleClient.isMapLocked(rule);
+        boolean canToggle = StartPosClientEvents.isHost() && !StartPosClientEvents.isStarting && !teamLocked && !mapLocked;
+        String label = ruleChipLabel(rule, value);
+        int w = ruleChipWidth(rule, value);
         Rect r = new Rect(right - w, y, w, 15);
         Theme.chip(frame.g, r.x(), y, w, 15, false, canToggle && frame.hovered(r));
         frame.g.fill(r.x() + 5, y + 5, r.x() + 10, y + 10, on ? Theme.OK : Theme.FAINT);
@@ -622,7 +652,8 @@ public class MatchStartScreen extends Screen {
                 .build(), r, null, () -> Tooltip.of(I18n.get("gamerule.reignofnether.name." + rule))
                 .tag(value != null ? value : I18n.get(on ? "options.on" : "options.off"), on ? Theme.OK : Theme.LABEL)
                 .body(I18n.get("commands.reignofnether.gamerule." + rule))
-                .status(canToggle ? "" : I18n.get(teamLocked ? "hud.gamerule.reignofnether.team_locked" : "matchstart.reignofnether.host_only"), Theme.LABEL));
+                .status(canToggle ? "" : I18n.get(teamLocked ? "hud.gamerule.reignofnether.team_locked"
+                        : mapLocked ? "hud.gamerule.reignofnether.map_locked" : "matchstart.reignofnether.host_only"), Theme.LABEL));
         return r.x();
     }
 
@@ -685,7 +716,8 @@ public class MatchStartScreen extends Screen {
         int nx = hx + HEAD + 8;
         if (mine || editBot) {
             int size = 20;
-            Faction[] choices = mine ? FACTIONS : botFactions();
+            // a map seat with a fixed faction offers only that one
+            Faction[] choices = sp.fixedFaction != Factions.NONE ? new Faction[] { sp.fixedFaction } : mine ? FACTIONS : botFactions();
             int fx = right - pickerWidth(choices, size);
             renderFactionPicker(sp, choices, fx, y + (ROW_H - size) / 2, size, visible);
             right = fx - 8;
@@ -714,7 +746,7 @@ public class MatchStartScreen extends Screen {
                 : empty ? I18n.get("matchstart.reignofnether.seat.open_title")
                 : mine ? I18n.get("matchstart.reignofnether.you_name", sp.playerName) : sp.playerName;
         Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : empty || (sp.hidden && known == null) || !sp.enabled ? Theme.LABEL : Theme.TEXT);
-        String seat = I18n.get("matchstart.reignofnether.seat_number", StartPosClientEvents.startPoses.indexOf(sp) + 1);
+        String seat = !sp.seatName.isBlank() ? sp.seatName : I18n.get("matchstart.reignofnether.seat_number", StartPosClientEvents.startPoses.indexOf(sp) + 1);
         Text.small(g, seat, nx, y + 19, Theme.DIM);
         if (!empty && !sp.hidden)
             drawPing(sp.playerName, nx + Text.smallWidth(seat) + 6, y + 19);
@@ -879,13 +911,13 @@ public class MatchStartScreen extends Screen {
     private int renderSeatActions(StartPos sp, boolean mine, boolean empty, boolean host, int right, int y, int h) {
         if (StartPosClientEvents.isStarting) {
             // a bot is always ready: the host can still take it out, which stops the countdown
-            if (StartPosClientEvents.isHost() && sp.isBot())
+            if (StartPosClientEvents.isHost() && sp.isBot() && !sp.mapBot)
                 right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
                         () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
             return right;
         }
         if (!sp.enabled) {
-            if (host)
+            if (host && !sp.mapBot)
                 right = rowButton(I18n.get("matchstart.reignofnether.action.open"), right, y, h, false, () -> setSeatOpen(sp, true)) - 4;
             return right;
         }
@@ -903,7 +935,7 @@ public class MatchStartScreen extends Screen {
         }
         if (mine)
             return rowButton(I18n.get("matchstart.reignofnether.action.leave"), right, y, h, false, this::leaveOwnSeat) - 4;
-        if (host)
+        if (host && !sp.mapBot)
             right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
                     () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
         if (sp.isBot())
@@ -974,7 +1006,7 @@ public class MatchStartScreen extends Screen {
     }
 
     private static Faction[] botFactions() {
-        java.util.List<Faction> list = new java.util.ArrayList<>(StartPosClientEvents.botFactions);
+        java.util.List<Faction> list = new ArrayList<>(StartPosClientEvents.botFactions);
         if (list.size() > 1)
             list.add(Factions.RANDOM);
         return list.toArray(Faction[]::new);
@@ -992,7 +1024,7 @@ public class MatchStartScreen extends Screen {
             else
                 Theme.button(frame.g, x, y, w, size, hovered);
             drawFactionIcon(frame.g, f, x + 3, y + 3, size - 6);
-            if (clickable)
+            if (clickable && sp.fixedFaction == Factions.NONE)
                 frame.register(new ButtonBuilder(f.getName()).onLeftClick(() -> pickFaction(sp, f)).build(), r, null,
                         () -> Tooltip.of(MiscUtil.getFactionName(f)).body(I18n.get("matchstart.reignofnether.faction_desc." + factionKey(f))));
             x += w + 4;
@@ -1203,6 +1235,9 @@ public class MatchStartScreen extends Screen {
             title = MiscUtil.getFactionName(faction);
             desc = I18n.get("matchstart.reignofnether.faction_desc." + factionKey(faction));
         }
+        String refusal = RTSMapInfoClientEvents.playRefusal(); // an old or newer format map can't be played
+        if (refusal != null)
+            desc = refusal;
 
         int pad = 11;
         int btnH = 26;
@@ -1216,8 +1251,9 @@ public class MatchStartScreen extends Screen {
         Text.heading(g, title.toUpperCase(Locale.ROOT), p.x() + pad, y - 19, Theme.TEXT, Text.px(32));
         Text.medium(g, kicker, p.x() + pad, y - 30, Theme.ORANGE);
 
-        boolean canReady = picked && !(StartPosClientEvents.isStarting && !ready);
-        String label = mine == null && join == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
+        boolean canReady = picked && refusal == null && !(StartPosClientEvents.isStarting && !ready);
+        String label = refusal != null ? I18n.get("matchstart.reignofnether.ready.unplayable")
+                : mine == null && join == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
                 : pending ? I18n.get("matchstart.reignofnether.ready.pending")
                 : !picked ? I18n.get("matchstart.reignofnether.ready.pick_faction")
                 : ready ? I18n.get("matchstart.reignofnether.ready.unready") : I18n.get("matchstart.reignofnether.ready.ready_up");
@@ -1278,7 +1314,7 @@ public class MatchStartScreen extends Screen {
         frame.register(new ButtonBuilder("close rules").onLeftClick(() -> GameruleClient.gamerulesMenuOpen = false).build(),
                 new Rect(0, 0, w, h), null, null);
 
-        List<SettingRow> rules = GameruleClient.ruleRows();
+        List<SettingRow> rules = GameruleClient.ruleRows(chipRules);
         int colW = 253;
         int pad = 12;
         int maxH = h - 2 * M - 60;
@@ -1289,7 +1325,7 @@ public class MatchStartScreen extends Screen {
         int y = (h - ph) / 2;
         Theme.popup(g, x, y, pw, ph, Theme.ORANGE);
         frame.register(new ButtonBuilder("rules panel").build(), new Rect(x, y, pw, ph), null, null);
-        Text.heading(g, I18n.get("matchstart.reignofnether.game_rules").toUpperCase(Locale.ROOT), x + pad, y + pad - 1, Theme.GOLD, Text.px(26));
+        Text.heading(g, I18n.get("matchstart.reignofnether.more_options").toUpperCase(Locale.ROOT), x + pad, y + pad - 1, Theme.GOLD, Text.px(26));
         String note = I18n.get(StartPosClientEvents.isHost() ? "matchstart.reignofnether.rules_host" : "matchstart.reignofnether.rules_view");
         Rect close = new Rect(x + pw - pad - 18, y + pad - 4, 18, 18);
         Text.smallRight(g, note, close.x() - 8, y + pad + 1, StartPosClientEvents.isHost() ? Theme.OK : Theme.LABEL);

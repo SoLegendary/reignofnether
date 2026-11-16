@@ -28,6 +28,9 @@ public class StartPosClientboundPacket {
     int botDifficulty = -1;
     boolean pending = false;
     int team = 0;
+    String seatName = "";
+    Faction fixedFaction = Factions.NONE;
+    boolean mapBot = false;
 
     // seats are sent per player: with hideEnemyPicks each player only sees their own team's picks
     public static void sendTo(ServerPlayer player, StartPosAction action, StartPos sp) {
@@ -36,6 +39,9 @@ public class StartPosClientboundPacket {
         packet.hidden = sp.hidden;
         packet.botDifficulty = sp.botDifficulty;
         packet.team = sp.team;
+        packet.seatName = sp.seatName;
+        packet.fixedFaction = sp.fixedFaction;
+        packet.mapBot = sp.mapBot;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
@@ -115,6 +121,9 @@ public class StartPosClientboundPacket {
         this.botDifficulty = buffer.readInt();
         this.pending = buffer.readBoolean();
         this.team = buffer.readInt();
+        this.seatName = buffer.readUtf();
+        this.fixedFaction = Factions.getFaction(buffer.readResourceLocation());
+        this.mapBot = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -128,6 +137,9 @@ public class StartPosClientboundPacket {
         buffer.writeInt(this.botDifficulty);
         buffer.writeBoolean(this.pending);
         buffer.writeInt(this.team);
+        buffer.writeUtf(this.seatName);
+        buffer.writeResourceLocation(this.fixedFaction.key);
+        buffer.writeBoolean(this.mapBot);
     }
 
     // server-side packet-consuming functions
@@ -146,6 +158,9 @@ public class StartPosClientboundPacket {
                                 pos.hidden = hidden;
                                 pos.botDifficulty = botDifficulty;
                                 pos.team = team;
+                                pos.seatName = seatName;
+                                pos.fixedFaction = fixedFaction;
+                                pos.mapBot = mapBot;
                                 StartPosClientEvents.startPoses.add(pos);
                             }
                             case CLEAR -> {

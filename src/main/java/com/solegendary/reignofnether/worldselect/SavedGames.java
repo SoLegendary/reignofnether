@@ -3,7 +3,13 @@ package com.solegendary.reignofnether.worldselect;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.level.storage.LevelStorageSource;
+
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
@@ -41,6 +48,25 @@ public final class SavedGames {
     /** The name a saved game of this map gets, e.g. "Oceanborn · 26 Oct 21:40". */
     public static String saveName(String mapName, long time) {
         return mapName + " · " + new SimpleDateFormat("d MMM HH:mm", Locale.ROOT).format(new Date(time));
+    }
+
+    /** Copies the map into a new saved game off the main thread, then opens it. Fails when the copy does. */
+    public static CompletableFuture<Void> playMap(Screen parent, String mapId, String mapName) {
+        Minecraft mc = Minecraft.getInstance();
+        Path saves = mc.getLevelSource().getBaseDir();
+        long now = System.currentTimeMillis();
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return cloneMap(saves, mapId, mapName, now);
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        }, Util.backgroundExecutor()).thenAcceptAsync(saveId -> {
+            try (LevelStorageSource.LevelStorageAccess access = mc.getLevelSource().createAccess(saveId)) {
+                access.renameLevel(saveName(mapName, now));
+            } catch (Exception ignored) { } // keeps the map's name, still playable
+            mc.createWorldOpenFlows().loadLevel(parent, saveId);
+        }, mc);
     }
 
     /**

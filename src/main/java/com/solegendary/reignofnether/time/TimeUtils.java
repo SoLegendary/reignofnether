@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.time;
 
-import com.solegendary.reignofnether.survival.WaveDifficulty;
 import net.minecraft.world.level.Level;
 
 public class TimeUtils {
@@ -27,25 +26,6 @@ public class TimeUtils {
         if (currentTime > targetTime) currentTime -= 24000;
         long timeDiff = targetTime - currentTime;
         return formatTimeFromTicks(timeDiff);
-    }
-
-    // Returns a string representing real time in min/sec until the given time
-    public static String getTimeUntilStrWithOffset(long currentTime, long targetTime, long offset) {
-        if (currentTime > targetTime) currentTime -= 24000;
-        long timeDiff = targetTime - currentTime + offset;
-        return formatTimeFromTicks(timeDiff);
-    }
-
-    // standard vanilla length is 20mins for a full day/night cycle (24000)
-    // 1min == 1200, but is applied twice per cycle (dawn and dusk), so effectively 1min == 600
-    public static long getWaveSurvivalTimeModifier(WaveDifficulty difficulty) {
-        return switch (difficulty) {
-            default -> 0; // 20mins per day
-            case EASY -> 3000; // 15mins per day
-            case MEDIUM -> 4800; // 12mins per day
-            case HARD -> 6600; // 9mins per day
-            case EXTREME -> 8400; // 6mins per day
-        };
     }
 
     // Returns a string representing real time in min/sec from ticks

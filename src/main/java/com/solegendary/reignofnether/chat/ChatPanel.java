@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
-import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
@@ -32,6 +31,7 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Chat in the RTS view, replacing vanilla's ChatScreen: the log, a TEAM / ALL channel chip, the input and SEND.
@@ -82,7 +82,7 @@ public class ChatPanel extends Screen {
 
     // mirrors TeamChatServerEvents.isMatch: only then do TEAM and ALL differ
     private static boolean inMatch() {
-        return !PlayerClientEvents.rtsPlayers.isEmpty() && !SandboxClientEvents.isSandboxPlayer() && !SurvivalClientEvents.isEnabled;
+        return !PlayerClientEvents.rtsPlayers.isEmpty() && !SandboxClientEvents.isSandboxPlayer();
     }
 
     /** Where the next message goes. Spectators in a match always reach spectators only. */
@@ -170,12 +170,12 @@ public class ChatPanel extends Screen {
         // voice follows the chat channel, so its state sits here instead of a tag of its own
         if (VoiceClientEvents.connected() && inMatch()) {
             String voice = I18n.get("voice.reignofnether.tag", I18n.get("voice.reignofnether.channel."
-                    + VoiceClientEvents.current().name().toLowerCase(java.util.Locale.ROOT)));
+                    + VoiceClientEvents.current().name().toLowerCase(Locale.ROOT)));
             int vw = Text.smallWidth(voice);
             Text.small(g, voice, right - vw, y + 7, Theme.OK_TEXT);
             Rect vr = new Rect(right - vw, y + 4, vw, 13);
             frame.register(new ButtonBuilder("voice").build(), vr, null,
-                    () -> com.solegendary.reignofnether.ui.Tooltip.of(voice).body(I18n.get("voice.reignofnether.tooltip")));
+                    () -> Tooltip.of(voice).body(I18n.get("voice.reignofnether.tooltip")));
             right -= vw + 8;
         }
         String hints = I18n.get("chat.reignofnether.panel.hints");

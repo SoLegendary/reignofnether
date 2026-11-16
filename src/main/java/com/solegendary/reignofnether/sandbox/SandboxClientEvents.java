@@ -5,10 +5,15 @@ import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.editor.CodeEditorPopup;
+import com.solegendary.reignofnether.editor.EditorHistory;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import net.minecraft.client.gui.screens.Screen;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
@@ -151,27 +156,30 @@ public class SandboxClientEvents {
         }
     }
 
-    public static Button getExitSandboxButton() {
-        return new Button(
-                "Exit Sandbox Mode",
-                Button.itemIconSize,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                PlayerServerboundPacket::resetRTS,
-                null,
-                List.of(
-                        fcs(I18n.get("sandbox.reignofnether.exit1"), true)
-                )
-        );
-    }
-
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
         if (SandboxPanel.takesWheel())
             SandboxPanel.scroll(evt.getScrollDelta() > 0 ? -1 : 1);
+    }
+
+    // the editor's undo and redo: Ctrl+Z, Ctrl+Y or Ctrl+Shift+Z, by the letter on the key (AZERTY...)
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        // only on the RTS view itself: not in chat or another screen, nor behind the code popup
+        if (!SandboxPanel.isEditing() || !Screen.hasControlDown() || TextInputClientEvents.isAnyInputFocused()
+                || !(evt.getScreen() instanceof TopdownGui)
+                || CodeEditorPopup.isOpen())
+            return;
+        String name = GLFW.glfwGetKeyName(evt.getKeyCode(), evt.getScanCode());
+        boolean z = name != null ? name.equalsIgnoreCase("z") : evt.getKeyCode() == GLFW.GLFW_KEY_Z;
+        boolean y = name != null ? name.equalsIgnoreCase("y") : evt.getKeyCode() == GLFW.GLFW_KEY_Y;
+        if (z && !Screen.hasShiftDown())
+            EditorHistory.undo();
+        else if (y || z)
+            EditorHistory.redo();
+        else
+            return;
+        evt.setCanceled(true);
     }
 
     @SubscribeEvent

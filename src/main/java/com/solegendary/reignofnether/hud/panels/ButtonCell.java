@@ -3,7 +3,10 @@ package com.solegendary.reignofnether.hud.panels;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
+import com.solegendary.reignofnether.restrictions.RestrictionsClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -39,6 +42,7 @@ public final class ButtonCell {
     public static final ResourceLocation ICON_EMERALD = rl("textures/icons/items/emerald.png");
     public static final ResourceLocation ICON_MANA = rl("textures/icons/items/lapis.png");
     public static final ResourceLocation ICON_CLOCK = rl("textures/icons/items/clock.png");
+    private static final ResourceLocation BARRIER = ResourceLocation.withDefaultNamespace("textures/item/barrier.png");
 
     private static ResourceLocation rl(String path) {
         return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, path);
@@ -102,6 +106,10 @@ public final class ButtonCell {
         } else if (state == CellState.POOR) {
             g.fill(x, y, x + size, y + size, 0x55251619);
         }
+        if (isRestricted(b)) {
+            g.fill(x, y, x + size, y + size, 0x99000000);
+            MyRenderer.renderIcon(g, BARRIER, ix, iy, icon);
+        }
 
         if (state == CellState.COOLDOWN && b instanceof AbilityButton ab) {
             float max = ab.ability.cooldownMax;
@@ -137,6 +145,13 @@ public final class ButtonCell {
             if (t != null && !t.isEmpty())
                 Text.smallShadowed(g, t, x + 2, y + size - 9, b.bottomLeftTextColor | 0xFF000000);
         }
+    }
+
+    // denied by the map with /rtsapi restrict: the server refuses it, so show that up front
+    private static boolean isRestricted(Button b) {
+        if (b instanceof StartProductionButton sp)
+            return RestrictionsClient.isDenied(RonIds.of(sp.production));
+        return b instanceof BuildingPlaceButton bp && RestrictionsClient.isDenied(RonIds.of(bp.building));
     }
 
     // hero spell art was drawn to fill the whole button
@@ -287,6 +302,8 @@ public final class ButtonCell {
         Tooltip t = Tooltip.fromLines(b.tooltipLines);
         if (t == null)
             t = Tooltip.of(b.name);
+        if (isRestricted(b))
+            t.status(I18n.get("hud.reignofnether.restricted"), Theme.ERROR);
         switch (stateOf(b)) {
             case LOCKED -> t.status(I18n.get("hud.reignofnether.cell.locked"), Theme.ERROR);
             case COOLDOWN -> {

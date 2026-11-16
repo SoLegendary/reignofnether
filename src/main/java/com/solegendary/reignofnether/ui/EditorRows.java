@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
- * Rows of the sandbox editors (custom building, scenario role), drawn like the settings menu rows:
+ * Rows of the sandbox editors (custom building), drawn like the settings menu rows:
  * name on the left, and on the right a checkbox, a ◀ value ▶ stepper or a value with a small button.
  * Every method draws one row at (x, y), registers its clickable parts on the frame and returns the next y.
  */
@@ -59,11 +59,6 @@ public final class EditorRows {
         return f != null && f.isOverHud(f.scale.toUnits(mouseX), f.scale.toUnits(mouseY));
     }
 
-    /** Height in units of a field that holds an unbordered vanilla edit box (drawn in GUI pixels). */
-    public static int fieldHeight(HudFrame f) {
-        return 12;
-    }
-
     /**
      * Draws a sunken field and moves the edit box into it, in HUD units: TextInputClientEvents draws and
      * clicks it under the HUD scale, so its text is the same size as the rest of the HUD.
@@ -79,6 +74,11 @@ public final class EditorRows {
         box.setX(r.x() + 3);
         box.setY(r.centerY() - 4);
         box.setWidth(r.w() - 6);
+    }
+
+    /** Width of the field in a "label + text field" row, leaving room for labels like "Description". */
+    public static int fieldWidth(int rowW) {
+        return rowW - 76;
     }
 
     public static Supplier<Tooltip> tip(String title, @Nullable String body) {

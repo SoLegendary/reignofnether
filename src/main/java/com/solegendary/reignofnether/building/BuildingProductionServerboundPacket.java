@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.buildings.placements.CustomBuildin
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
@@ -106,6 +107,8 @@ public class BuildingProductionServerboundPacket {
                 success.set(false);
                 return;
             }
+            if (this.action != BuildingAction.REQUEST_PRODUCTION_SYNC && GuideServer.isLocked(player))
+                return; // a cutscene took their control
             if (building instanceof ProductionPlacement pBuilding) {
                 if (this.action == BuildingAction.REQUEST_PRODUCTION_SYNC) {
                     for (ActiveProduction activeProd : pBuilding.productionQueue) {

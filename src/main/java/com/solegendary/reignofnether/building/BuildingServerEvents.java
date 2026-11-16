@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
+import com.solegendary.reignofnether.restrictions.RestrictionsServerEvents;
 import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.alliance.Share;
 import com.google.common.collect.Sets;
@@ -28,11 +30,11 @@ import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -71,7 +73,7 @@ import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.Scoreboard;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
@@ -89,7 +91,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 
 public class BuildingServerEvents {
     
@@ -158,7 +159,6 @@ public class BuildingServerEvents {
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
     
-    public static Object2IntArrayMap<String> populations = new Object2IntArrayMap<>();
     public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
     public static ArrayList<BuildingPlacement> getBuildings() {
@@ -225,7 +225,6 @@ public class BuildingServerEvents {
                     b.getUpgradeLevel(),
                     portalType,
                     b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
-                    b.scenarioRoleIndex,
                     b.getDataStorage(),
                     b.partialBlocksDestroyed,
                     b instanceof CustomBuildingPlacement cb ? cb.commandsNbt : new ListTag()
@@ -277,7 +276,6 @@ public class BuildingServerEvents {
                     building.tags = b.dataStorage.getData(BUILDING_TAGS);
                     building.commands = b.dataStorage.getData(BUILDING_COMMANDS);
                     
-                    building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
                     if (building instanceof ProductionPlacement pb) {
@@ -345,7 +343,6 @@ public class BuildingServerEvents {
             netherZones.clear();
             buildings.clear();
         }
-        populations.clear();
     }
 
     @Nullable
@@ -411,6 +408,12 @@ public class BuildingServerEvents {
                     FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
                     return null;
                 }
+            }
+
+            if (!fromCommand && RestrictionsServerEvents.isDenied(ownerName, RonIds.of(newBuilding.getBuilding()))) {
+                HudClientboundPacket.showTempMessageI18n(ownerName, "hud.reignofnether.restricted");
+                FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                return null;
             }
 
             boolean canAfford = fromCommand || newBuilding.canAfford(ownerName);
@@ -479,7 +482,6 @@ public class BuildingServerEvents {
                     newBuilding.getBuilding(),
                     rotation,
                     newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
-                    -1,
                     newBuilding.blockPlaceQueue.size(),
                     isDiagonalBridge,
                     0,
@@ -646,19 +648,13 @@ public class BuildingServerEvents {
 
         // AOE2-style refund: return the % of the non-built portion of the building
         // eg. cancelling a building at 70% completion will refund only 30% cost
-        // in survival, refund 50% of this amount
-        if (!building.isBuilt || SurvivalServerEvents.isEnabled()) {
+        if (!building.isBuilt) {
 
             float buildPercent = building.getBlocksPlacedPercent();
             int food = Math.round(building.getBuilding().cost.food * (1 - buildPercent));
             int wood = Math.round(building.getBuilding().cost.wood * (1 - buildPercent));
             int ore = Math.round(building.getBuilding().cost.ore * (1 - buildPercent));
 
-            if (building.isBuilt && SurvivalServerEvents.isEnabled()) {
-                food = Math.round(building.getBuilding().cost.food * 0.5f * buildPercent);
-                wood = Math.round(building.getBuilding().cost.wood * 0.5f * buildPercent);
-                ore = Math.round(building.getBuilding().cost.ore * 0.5f * buildPercent);
-            }
             if (food > 0 || wood > 0 || ore > 0) {
                 Resources res = new Resources(building.ownerName, food, wood, ore);
                 ResourcesServerEvents.addSubtractResources(res);
@@ -697,7 +693,6 @@ public class BuildingServerEvents {
                     building.getBuilding(),
                     building.rotation,
                     building.ownerName,
-                    building.scenarioRoleIndex,
                     building.blockPlaceQueue.size(),
                     building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                     building.getUpgradeLevel(),
@@ -726,7 +721,6 @@ public class BuildingServerEvents {
                         building.getBuilding(),
                         building.rotation,
                         building.ownerName,
-                        building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
                         building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
@@ -805,7 +799,7 @@ public class BuildingServerEvents {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (BuildingPlacement building : buildings)
                 BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(),
-                        building.partialBlocksDestroyed, building.ownerName, building.scenarioRoleIndex);
+                        building.partialBlocksDestroyed, building.ownerName);
         }
         // need to remove from the list first as destroy() will read it to check defeats
         List<BuildingPlacement> buildingsToDestroy = new ArrayList<>();
@@ -848,18 +842,8 @@ public class BuildingServerEvents {
 
         String playerName;
         if (serverLevel.getServer().getTickCount() % 10 == 0) {
-            for (Objective objective : serverLevel.getScoreboard().getObjectives()) {
-                if (objective.getCriteria().equals(ResourceObjectiveCriteria.POPULATION))
-                    for (ServerPlayer player : serverLevel.players()) {
-                        playerName = player.getName().getString();
-                        int currentPopulation = UnitServerEvents.getCurrentPopulation(playerName);
-                        if (serverLevel != null && currentPopulation != populations.getInt(playerName)) {
-                            populations.put(playerName, currentPopulation);
-	                        serverLevel.getScoreboard().forAllObjectives(ResourceObjectiveCriteria.POPULATION, playerName, (p_9178_) -> p_9178_.setScore(currentPopulation));
-                        }
-                    }
-            }
-            
+            updateResourceScores(serverLevel.getScoreboard());
+
             for (BuildingPlacement bpl : getBuildings()) {
                 if (bpl instanceof GraveyardPlacement gy && gy.getUpgradeLevel() > 0 && gy.autoRelease) {
                     playerName = gy.ownerName;
@@ -869,6 +853,24 @@ public class BuildingServerEvents {
                         gy.releaseNextUnit();
                 }
             }
+        }
+    }
+
+    // resources.* scoreboard criteria, by owner name so bots and offline players count too (setScore only
+    // sends to clients when the value changes)
+    private static void updateResourceScores(Scoreboard scoreboard) {
+        if (scoreboard.getObjectives().stream().noneMatch(o -> o.getCriteria() == ResourceObjectiveCriteria.POPULATION
+                || o.getCriteria() == ResourceObjectiveCriteria.FOOD || o.getCriteria() == ResourceObjectiveCriteria.WOOD
+                || o.getCriteria() == ResourceObjectiveCriteria.ORE))
+            return;
+        for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
+            int population = UnitServerEvents.getCurrentPopulation(rtsPlayer.name);
+            scoreboard.forAllObjectives(ResourceObjectiveCriteria.POPULATION, rtsPlayer.name, score -> score.setScore(population));
+        }
+        for (Resources res : ResourcesServerEvents.resourcesList) {
+            scoreboard.forAllObjectives(ResourceObjectiveCriteria.FOOD, res.ownerName, score -> score.setScore(res.food));
+            scoreboard.forAllObjectives(ResourceObjectiveCriteria.WOOD, res.ownerName, score -> score.setScore(res.wood));
+            scoreboard.forAllObjectives(ResourceObjectiveCriteria.ORE, res.ownerName, score -> score.setScore(res.ore));
         }
     }
 
@@ -911,13 +913,8 @@ public class BuildingServerEvents {
             for (BlockPos bp : evt.getAffectedBlocks()) {
                 BuildingPlacement building = BuildingUtils.findBuilding(false, bp);
 
-                if (building != null) {
-                    // prevent enemy ghasts friendly firing their own buildings
-                    if (!(SurvivalServerEvents.isEnabled() && ghastUnit != null &&
-                            SurvivalServerEvents.ENEMY_OWNER_NAME.equals(ghastUnit.getOwnerName()) &&
-                            SurvivalServerEvents.ENEMY_OWNER_NAME.equals(building.ownerName)))
-                        affectedBuildings.add(building);
-                }
+                if (building != null)
+                    affectedBuildings.add(building);
             }
             for (BuildingPlacement building : affectedBuildings) {
                 float atkDmg = 0;
@@ -1020,7 +1017,6 @@ public class BuildingServerEvents {
                         building.getBuilding(),
                         building.rotation,
                         building.ownerName,
-                        building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
                         building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),

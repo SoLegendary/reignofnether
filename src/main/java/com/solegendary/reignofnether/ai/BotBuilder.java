@@ -73,6 +73,7 @@ public class BotBuilder {
             steps.addAll(bot.matchup.tech());
         for (BotPlan.Step step : steps) {
             if (isDone(step) || bot.tick < stepSkipUntil.getOrDefault(step, 0L) || !step.needs().stream().allMatch(bot::hasFinished) ||
+                    (step.type() == BotPlan.StepType.BUILD ? bot.denied(step.building()) : bot.denied(step.item())) ||
                     (step.type() == BotPlan.StepType.RESEARCH && !bot.hasFinished(step.building())) ||
                     (step.building() == Buildings.BEACON && !bot.level.getGameRules().getBoolean(GameRuleRegistrar.ALLOW_BEACONS)))
                 continue;
@@ -264,6 +265,10 @@ public class BotBuilder {
     // places a building near an anchor with workers assigned; null if no spot or it was rejected
     @Nullable
     BuildingPlacement place(Building building, BlockPos anchor, int minR, int maxR) {
+        if (bot.denied(building)) {
+            bot.placer.waiting = false; // a verdict: never here
+            return null;
+        }
         Search search = new Search(building, BlockPos.asLong(anchor.getX() >> 3, 0, anchor.getZ() >> 3), minR);
         if (bot.tick < placeRetryTick.getOrDefault(search, 0L) || !bot.hasActions(1) ||
                 (bot.heroReserve != null && !bot.canAfford(building.cost, false))) { // a dead hero's revive comes first

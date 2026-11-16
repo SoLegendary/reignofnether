@@ -9,9 +9,12 @@ import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlace
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.guide.CinematicClient;
+import com.solegendary.reignofnether.guide.GuideClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Axis;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
@@ -26,7 +29,10 @@ import com.solegendary.reignofnether.hud.panels.SpectatorHud;
 import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import com.solegendary.reignofnether.replay.ReplayHud;
 import com.solegendary.reignofnether.chat.SpectatorFeed;
+import com.solegendary.reignofnether.editor.EditorTest;
+import com.solegendary.reignofnether.editor.EditorTestBar;
 import com.solegendary.reignofnether.hud.panels.TopLeftPanel;
+import com.solegendary.reignofnether.hud.panels.ObjectivesHud;
 import com.solegendary.reignofnether.hud.panels.TopRightPanel;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
@@ -41,7 +47,6 @@ import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
@@ -326,6 +331,15 @@ public class HudClientEvents {
         updateSelectedPlacement();
 
         HudFrame f = new HudFrame(g, scale, layout, scale.toUnits(mouseX), scale.toUnits(mouseY));
+        if (CinematicClient.isLocked()) { // a cutscene: letterbox and dialogue only
+            g.pose().pushPose();
+            g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+            CinematicClient.renderBars(f);
+            GuideClientEvents.renderHighlight(f);
+            GuideClientEvents.renderDialogue(f, HudLayout.MARGIN, layout.height() - 34 - HudLayout.GAP);
+            g.pose().popPose();
+            return f;
+        }
         SelectionPanel.prepare();
 
         g.pose().pushPose();
@@ -339,6 +353,29 @@ public class HudClientEvents {
 
         g.pose().pushPose();
         g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+        renderRtsPanels(f);
+        EditorTestBar.render(f); // nothing outside a test
+        PlayerDisplayClientEvents.render(f);
+        renderItemShop(f);
+        renderOverlays(f);
+        GuideClientEvents.renderHighlight(f);
+        if (showChat) {
+            renderChatButtonAndRecent(f);
+        }
+        g.pose().popPose();
+
+        renderStartPositions(f);
+
+        g.pose().pushPose();
+        g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+        f.showHoveredTooltip();
+        Tooltip.renderPending(g, layout.width(), layout.height());
+        g.pose().popPose();
+        return f;
+    }
+
+    /** The match HUD's panels: command card, selection, map tools, the top bars and the sandbox dock. */
+    private static void renderRtsPanels(HudFrame f) {
         // the command card goes first so its keys win over anything else bound to the same key
         if (!SelectionPanel.isEmpty()) // nothing selected, nothing to command
             CommandCard.render(f);
@@ -352,24 +389,11 @@ public class HudClientEvents {
             ReplayHud.render(f);
         }
         TopRightPanel.render(f);
-        SandboxPanel.render(f);
-        PlayerDisplayClientEvents.render(f);
-        renderItemShop(f);
-        renderOverlays(f);
-        if (showChat) {
-            renderChatButtonAndRecent(f);
+        ObjectivesHud.render(f, TopRightPanel.bottom);
+        if (!EditorTest.isTesting()) { // a test plays as a normal match
+            SandboxPanel.render(f);
+            SandboxPanel.renderBanner(f);
         }
-        g.pose().popPose();
-
-        renderStartPositions(f);
-
-        g.pose().pushPose();
-        g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
-        f.showHoveredTooltip();
-        Tooltip.renderPending(g, layout.width(), layout.height());
-        TutorialClientEvents.checkAndRenderNextAction(g, f.placed());
-        g.pose().popPose();
-        return f;
     }
 
     /** Chat button at the bottom-left, where chat shows; recent messages stack up from above it. */
@@ -386,7 +410,9 @@ public class HudClientEvents {
             f.register(chat, cell, null, () -> ButtonCell.tooltipFor(chat, key));
             y -= HudLayout.GAP;
         }
-        ChatLines.renderRecent(f.g, x, y, 300);
+        // an NPC talking takes the place of the recent chat lines
+        if (!GuideClientEvents.renderDialogue(f, x, y))
+            ChatLines.renderRecent(f.g, x, y, 300);
     }
 
     // assign hudSelectedPlacement like hudSelectedEntity in onRenderLiving
@@ -434,7 +460,7 @@ public class HudClientEvents {
         int side = Math.round(map.w() / (float) Math.sqrt(2));
         f.g.pose().pushPose();
         f.g.pose().translate(map.x() + map.w() / 2f, map.y() + map.h() / 2f, 0);
-        f.g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(45));
+        f.g.pose().mulPose(Axis.ZP.rotationDegrees(45));
         Theme.outline(f.g, -side / 2 - 2, -side / 2 - 2, side + 4, side + 4, 1, Theme.INK);
         Theme.outline(f.g, -side / 2, -side / 2, side, side, 2, Theme.CONSOLE_RIM);
         f.g.fill(-side / 2, -side / 2, side / 2, side / 2, Theme.INK);
@@ -792,7 +818,9 @@ public class HudClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        // this event fires once per overlay
+        // this event fires once per overlay; the RTS view draws the bossbars itself (ObjectivesHud)
+        if (evt.getOverlay() == VanillaGuiOverlay.BOSS_EVENT_PROGRESS.type() && OrthoviewClientEvents.isEnabled())
+            evt.setCanceled(true);
         if (evt.getOverlay() != VanillaGuiOverlay.PLAYER_LIST.type())
             return;
         // no vanilla player list in the RTS view: Tab cycles unit types there, and diplomacy lists the players

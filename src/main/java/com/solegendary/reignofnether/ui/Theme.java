@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ui;
 
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -120,7 +121,7 @@ public final class Theme {
 
     /** FLOATING, or fully solid when the player turned see-through panels off. */
     public static int floating() {
-        return com.solegendary.reignofnether.config.ReignOfNetherClientConfigs.SOLID_PANELS.get() ? PANEL : FLOATING;
+        return ReignOfNetherClientConfigs.SOLID_PANELS.get() ? PANEL : FLOATING;
     }
 
     public static void panel(GuiGraphics g, int x, int y, int w, int h, int fill) {
@@ -216,11 +217,6 @@ public final class Theme {
         bevel(g, x, y, w, h, hovered ? BUTTON_HOVER : SECONDARY, BTN_HIGHLIGHT, SHADE, 1, RING_DARK);
     }
 
-    /** {@link #secondaryButton} in another fill colour (the title screen's Discord button). */
-    public static void colourButton(GuiGraphics g, int x, int y, int w, int h, int fill) {
-        bevel(g, x, y, w, h, fill, BTN_HIGHLIGHT, SHADE, 1, RING_DARK);
-    }
-
     /** Small row button (ADD AI, CLOSE, SEND): highlight only. */
     public static void button(GuiGraphics g, int x, int y, int w, int h, boolean hovered) {
         bevel(g, x, y, w, h, hovered ? BUTTON_HOVER : SECONDARY, BTN_HIGHLIGHT, 0, 1, INK);
@@ -292,8 +288,33 @@ public final class Theme {
     }
 
     /** Close cross exactly centred on a button, half units included. */
-    public static void cross(GuiGraphics g, com.solegendary.reignofnether.ui.Rect r, int colour) {
+    public static void cross(GuiGraphics g, Rect r, int colour) {
         pixelCross(g, r.x() + r.w() / 2f, r.y() + r.h() / 2f, colour);
+    }
+
+    // small header-button arts, '#' = a pixel, drawn like the close cross so they stay sharp at any scale
+    public static final String[] ART_PREVIOUS = { "..##", ".##.", "##..", ".##.", "..##" };
+    public static final String[] ART_NEXT = { "##..", ".##.", "..##", ".##.", "##.." };
+    public static final String[] ART_BACK = { "..#....", ".##....", "#######", ".##....", "..#...." };
+    public static final String[] ART_UNDO = { "..#....", ".##....", "######.", ".##...#", "..#...#", "......#", "..####." };
+
+    /** Pixel art (rows of '#' and '.') exactly centred on a button, on whole screen pixels like the close cross. */
+    public static void pixelArt(GuiGraphics g, Rect r, String[] art, int colour) {
+        var m = g.pose().last().pose();
+        float guiScale = (float) Minecraft.getInstance().getWindow().getGuiScale();
+        int k = Math.max(1, Math.round(m.m00() * guiScale / 2)); // an art pixel is half a unit
+        int w = art[0].length(), h = art.length;
+        int x = Math.round((m.m30() + (r.x() + r.w() / 2f) * m.m00()) * guiScale - w * k / 2f);
+        int y = Math.round((m.m31() + (r.y() + r.h() / 2f) * m.m11()) * guiScale - h * k / 2f);
+        g.pose().pushPose();
+        g.pose().setIdentity();
+        g.pose().translate(0, 0, m.m32());
+        g.pose().scale(1 / guiScale, 1 / guiScale, 1);
+        for (int row = 0; row < h; row++)
+            for (int col = 0; col < w; col++)
+                if (art[row].charAt(col) == '#')
+                    g.fill(x + col * k, y + row * k, x + (col + 1) * k, y + (row + 1) * k, colour);
+        g.pose().popPose();
     }
 
     /** Icon.CLOSE's 7x7 art redrawn on whole screen pixels: scaled to fractional ones, its diagonals lose pixels. */

@@ -38,6 +38,11 @@ public class ResearchClientboundPacket {
                 new ResearchClientboundPacket(playerName, itemName, true, false, 0));
     }
 
+    public static void removeResearch(String playerName, String itemName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResearchClientboundPacket(playerName, itemName, false, false, 0));
+    }
+
     public ResearchClientboundPacket(String playerName, String itemName, boolean add, boolean isCheat, int value) {
         this.playerName = playerName;
         this.itemName = itemName;
@@ -80,6 +85,8 @@ public class ResearchClientboundPacket {
                             } else {
                                 if (add)
                                     ResearchClient.addResearch(this.playerName, ResourceLocation.tryParse(this.itemName));
+                                else
+                                    ResearchClient.removeResearch(ResourceLocation.tryParse(this.itemName));
                             }
                         }
                         success.set(true);

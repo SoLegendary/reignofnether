@@ -147,24 +147,6 @@ public final class Text {
         small(g, s, cx - smallWidth(s) / 2, y, colour);
     }
 
-    /** Small text split on spaces so each line fits maxW. */
-    public static List<String> wrapSmall(String text, int maxW) {
-        List<String> lines = new ArrayList<>();
-        String current = "";
-        for (String word : text.split(" ")) {
-            String next = current.isEmpty() ? word : current + " " + word;
-            if (!current.isEmpty() && Text.smallWidth(next) > maxW) {
-                lines.add(current);
-                current = word;
-            } else {
-                current = next;
-            }
-        }
-        if (!current.isEmpty())
-            lines.add(current);
-        return lines;
-    }
-
     public static String fitSmall(String s, int maxWidth) {
         return fit(s, maxWidth, Text::smallWidth);
     }

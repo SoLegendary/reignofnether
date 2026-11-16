@@ -1,11 +1,15 @@
 package com.solegendary.reignofnether.worldselect;
 
+import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.mappack.MapPack;
 import com.solegendary.reignofnether.mappack.MapPackScreen;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoLoader;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.ui.Account;
 import com.solegendary.reignofnether.ui.Backdrop;
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
@@ -20,27 +24,27 @@ import net.minecraft.client.gui.screens.FaviconTexture;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +68,8 @@ public class WorldSelectScreen extends Screen {
         volatile Boolean rtsOptimised;  // read from level.dat in the background, null until then
         volatile List<String> modes = List.of(); // the game modes of its rtsmap.json, e.g. "1v1", "ffa_4"
         volatile String author = "", description = ""; // also from rtsmap.json
+        volatile int format = RTSMapInfoServerEvents.SUPPORTED_FORMAT; // its map format (RTSMapInfoLoader.mapFormat)
+        volatile boolean formatRead = false; // until then a map can't be played: an old one would be copied
         FaviconTexture icon;            // the world's own icon.png, when it has one
         final List<Entry> saves = new ArrayList<>(); // a map's saved games, newest first
         Entry mapEntry;                 // a saved game's map, when that map is in the list
@@ -87,11 +93,6 @@ public class WorldSelectScreen extends Screen {
         }
     }
 
-    private record Hit(int x, int y, int w, int h, Runnable action) {
-        boolean contains(double mx, double my) {
-            return mx >= x && mx < x + w && my >= y && my < y + h;
-        }
-    }
 
     private final Screen parent;
     private final List<Entry> entries = new ArrayList<>();
@@ -146,10 +147,10 @@ public class WorldSelectScreen extends Screen {
             // official: installed by the map pack download, or named like the pack's maps ("[2p] Oceanborn") with an
             // rtsmap.json, for packs unzipped by hand
             boolean official = pack.contains(source)
-                    || hasPlayers && Files.isRegularFile(saves.resolve(source).resolve("rtsmap.json"));
+                    || hasPlayers && mapJson(saves.resolve(source)) != null;
             String name = save == null && official ? prettyName(id) : s.getLevelName();
             Entry e = new Entry(s, name, hasPlayers ? Integer.parseInt(m.group(1)) : 0, official, save,
-                    Files.isRegularFile(saves.resolve(id).resolve("rtsmap.json")));
+                    mapJson(saves.resolve(id)) != null);
             if (s.getIcon() != null && Files.isRegularFile(s.getIcon())) {
                 try (InputStream in = Files.newInputStream(s.getIcon())) {
                     e.icon = FaviconTexture.forWorld(minecraft.getTextureManager(), id);
@@ -167,13 +168,13 @@ public class WorldSelectScreen extends Screen {
                     e.rtsOptimised = false;
                 }
                 try {
-                    Path json = saves.resolve(id).resolve("rtsmap.json");
-                    if (Files.isRegularFile(json)) {
-                        var info = com.google.gson.JsonParser.parseString(Files.readString(json)).getAsJsonObject();
+                    Path json = mapJson(saves.resolve(id));
+                    if (json != null) {
+                        var info = JsonParser.parseString(Files.readString(json)).getAsJsonObject();
                         if (info.has("description"))
                             e.description = info.get("description").getAsString();
-                        if (info.has("author")) { // a name or a list of names
-                            var a = info.get("author");
+                        if (info.has("authors") || info.has("author")) { // a name or a list of names
+                            var a = info.has("authors") ? info.get("authors") : info.get("author");
                             List<String> names = new ArrayList<>();
                             if (a.isJsonArray())
                                 a.getAsJsonArray().forEach(n -> names.add(n.getAsString()));
@@ -185,6 +186,10 @@ public class WorldSelectScreen extends Screen {
                             e.modes = List.copyOf(info.getAsJsonObject("modes").keySet());
                     }
                 } catch (Exception ignored) { } // no modes shown
+                try {
+                    e.format = RTSMapInfoLoader.mapFormat(saves.resolve(id));
+                } catch (Exception ignored) { } // no format chip
+                e.formatRead = true;
 
             });
             entries.add(e);
@@ -209,6 +214,15 @@ public class WorldSelectScreen extends Screen {
         if (selected == null)
             selected = entries.stream().filter(e -> e.mapEntry == null).findFirst().orElse(null);
         loading = false;
+    }
+
+    // ron/map.json, or the rtsmap.json of maps made before it; null if it's not an RTS map
+    private static Path mapJson(Path world) {
+        Path json = world.resolve("ron").resolve("map.json");
+        if (Files.isRegularFile(json))
+            return json;
+        json = world.resolve("rtsmap.json");
+        return Files.isRegularFile(json) ? json : null;
     }
 
     private static String prettyName(String folder) {
@@ -241,29 +255,23 @@ public class WorldSelectScreen extends Screen {
     }
 
     private void playMap(Entry e) {
-        if (cloning || e.summary.isLocked() || e.summary.isDisabled())
+        if (cloning || !e.formatRead || e.summary.isLocked() || e.summary.isDisabled())
             return;
+        // an old format map is Editor-only: it opens itself (no copy), so its Convert changes the real map
+        if (e.format < RTSMapInfoServerEvents.SUPPORTED_FORMAT) {
+            open(e);
+            return;
+        }
+        if (e.format > RTSMapInfoServerEvents.SUPPORTED_FORMAT) {
+            error = I18n.get("map.reignofnether.format.play_newer");
+            return;
+        }
         cloning = true;
         error = null;
-        Path saves = minecraft.getLevelSource().getBaseDir();
-        String mapId = e.summary.getLevelId();
-        long now = System.currentTimeMillis();
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                return SavedGames.cloneMap(saves, mapId, e.name, now);
-            } catch (IOException ex) {
-                throw new UncheckedIOException(ex);
-            }
-        }, Util.backgroundExecutor()).whenCompleteAsync((saveId, ex) -> {
+        SavedGames.playMap(this, e.summary.getLevelId(), e.name).whenCompleteAsync((v, ex) -> {
             cloning = false;
-            if (ex != null) {
-                error = "Couldn't copy the map: " + (ex.getCause() != null ? ex.getCause() : ex).getMessage();
-                return;
-            }
-            try (LevelStorageSource.LevelStorageAccess access = minecraft.getLevelSource().createAccess(saveId)) {
-                access.renameLevel(SavedGames.saveName(e.name, now));
-            } catch (Exception ignored) { } // keeps the map's name, still playable
-            minecraft.createWorldOpenFlows().loadLevel(this, saveId);
+            if (ex != null)
+                error = tr("copy_failed", (ex.getCause() != null ? ex.getCause() : ex).getMessage());
         }, minecraft);
     }
 
@@ -334,14 +342,8 @@ public class WorldSelectScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // hits are in HUD units
-        double mx = mouseX / Text.guiPerUnit(), my = mouseY / Text.guiPerUnit();
-        if (button == 0)
-            for (Hit h : List.copyOf(hits))
-                if (h.contains(mx, my)) {
-                    h.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -422,7 +424,7 @@ public class WorldSelectScreen extends Screen {
     }
 
     private static Component label(String s) {
-        return Component.literal(s.toUpperCase(java.util.Locale.ROOT)).withStyle(Text.SMALL_STYLE);
+        return Component.literal(s.toUpperCase(Locale.ROOT)).withStyle(Text.SMALL_STYLE);
     }
 
     private int tw(String s) {
@@ -462,16 +464,20 @@ public class WorldSelectScreen extends Screen {
     }
 
     /** "Today", "3 days ago"... for when a world was last played. */
+    private static String tr(String key, Object... args) {
+        return I18n.get("worldselect.reignofnether." + key, args);
+    }
+
     private static String ago(long time) {
         if (time <= 0)
-            return "NEVER PLAYED";
+            return tr("never_played");
         long days = (System.currentTimeMillis() - time) / 86_400_000L;
-        if (days <= 0) return "TODAY";
-        if (days == 1) return "YESTERDAY";
-        if (days < 7) return days + " DAYS AGO";
-        if (days < 14) return "LAST WEEK";
-        if (days < 60) return days / 7 + " WEEKS AGO";
-        return days / 30 + " MONTHS AGO";
+        if (days <= 0) return tr("today");
+        if (days == 1) return tr("yesterday");
+        if (days < 7) return tr("days_ago", days);
+        if (days < 14) return tr("last_week");
+        if (days < 60) return tr("weeks_ago", days / 7);
+        return tr("months_ago", days / 30);
     }
 
     /** When a map was last played: its newest saved game, or the world itself. */
@@ -491,10 +497,10 @@ public class WorldSelectScreen extends Screen {
         int pad = 10;
 
         // header: back, kicker and title; the account chip on the right
-        int backW = tw("← BACK") + 16;
-        button(g, "← BACK", pad, 8, backW, 26, mx, my, this::onClose);
-        text(g, "SINGLEPLAYER · HOST A MATCH", pad + backW + 10, 8, Theme.ORANGE);
-        pix(g, "CHOOSE A MAP", pad + backW + 10, 20, 12, null, 0);
+        int backW = tw(tr("back")) + 16;
+        button(g, tr("back"), pad, 8, backW, 26, mx, my, this::onClose);
+        text(g, tr("header"), pad + backW + 10, 8, Theme.ORANGE);
+        pix(g, tr("title"), pad + backW + 10, 20, 12, null, 0);
         renderAccount(g, width - pad, 8);
         int top = 42;
 
@@ -521,19 +527,19 @@ public class WorldSelectScreen extends Screen {
         int y = gridTop + 8 - (int) scroll;
         int startY = y;
         List<Hit> gridHits = new ArrayList<>();
-        y = section(g, "COMPATIBLE MAPS", compatible.size() + " MAPS", gx, y, gw, mx, my, false, gridHits);
+        y = section(g, tr("compatible_maps"), tr("map_count", compatible.size()), gx, y, gw, mx, my, false, gridHits);
         y = cards(g, compatible, gx, y, cols, cardW, cardH, gap, mx, my, gridHits);
-        y = section(g, "YOUR MAPS FOLDER", folder.size() + " MAPS", gx, y + 6, gw, mx, my, true, gridHits);
+        y = section(g, tr("maps_folder"), tr("map_count", folder.size()), gx, y + 6, gw, mx, my, true, gridHits);
         y = cards(g, folder, gx, y, cols, cardW, cardH, gap, mx, my, gridHits);
         if (loading)
-            text(g, "LOADING WORLDS…", gx, y, Theme.LABEL);
+            text(g, tr("loading_worlds"), gx, y, Theme.LABEL);
         if (error != null)
             body(g, fitBody(error, gw), gx, y + 12, Theme.ERROR, false);
         g.disableScissor();
         contentHeight = y + 24 - startY;
         // clicks in the list only count where it is visible
         for (Hit h : gridHits)
-            if (h.y + h.h > gridTop && h.y < gridBottom)
+            if (h.y() + h.h() > gridTop && h.y() < gridBottom)
                 hits.add(h);
 
         renderSide(g, sideX, top, sideW, bottom - top, mx, my);
@@ -550,7 +556,7 @@ public class WorldSelectScreen extends Screen {
         int ruleX = cx + tw(count) + 8, right = x + w;
         int hitsBefore = hits.size();
         if (folder) {
-            String open = "OPEN FOLDER", create = "+ CREATE WORLD";
+            String open = tr("open_folder"), create = tr("create_world");
             int ow = tw(open) + 12, cw = tw(create) + 12;
             button(g, open, right - ow, y - 4, ow, 16, mx, my, () -> Util.getPlatform().openFile(minecraft.getLevelSource().getBaseDir().toFile()));
             int bx = right - ow - 4 - cw;
@@ -563,7 +569,7 @@ public class WorldSelectScreen extends Screen {
             right -= ow + cw + 12;
         } else {
             // always there, so an installed pack can be checked for updates too
-            String get = "OFFICIAL MAP PACK";
+            String get = tr("map_pack");
             int bw = tw(get) + 12;
             button(g, get, right - bw, y - 2, bw, 14, mx, my, () -> minecraft.setScreen(new MapPackScreen(this)));
             right -= bw + 8;
@@ -599,14 +605,18 @@ public class WorldSelectScreen extends Screen {
             // tags: saves, not RTS, then when it was last played
             int tagX = tx;
             if (!e.saves.isEmpty())
-                tagX = tag(g, e.saves.size() + (e.saves.size() == 1 ? " SAVE" : " SAVES"), tagX, cy + 28, 0xEB2F2418, Theme.GOLD);
+                tagX = tag(g, tr(e.saves.size() == 1 ? "save_count_one" : "save_count", e.saves.size()), tagX, cy + 28, 0xEB2F2418, Theme.GOLD);
             if (e.save != null)
-                tagX = tag(g, "SAVED GAME", tagX, cy + 28, 0xEB2F2418, Theme.GOLD);
+                tagX = tag(g, tr("saved_game"), tagX, cy + 28, 0xEB2F2418, Theme.GOLD);
+            if (e.format < RTSMapInfoServerEvents.SUPPORTED_FORMAT)
+                tagX = tag(g, I18n.get("worldselect.reignofnether.format.v1").toUpperCase(Locale.ROOT), tagX, cy + 28, 0xD90B0A0F, Theme.ORANGE);
+            else if (e.format > RTSMapInfoServerEvents.SUPPORTED_FORMAT)
+                tagX = tag(g, I18n.get("worldselect.reignofnether.format.newer").toUpperCase(Locale.ROOT), tagX, cy + 28, 0xD90B0A0F, Theme.ERROR);
             if (Boolean.FALSE.equals(e.rtsOptimised) && !e.isMap())
-                tag(g, "NOT RTS", tagX, cy + 28, 0xD90B0A0F, Theme.ORANGE);
+                tag(g, tr("not_rts"), tagX, cy + 28, 0xD90B0A0F, Theme.ORANGE);
             long last = lastPlayed(e);
             if (last > 0)
-                text(g, fit("PLAYED " + ago(last), tw), tx, cy + h - 12, MUTED);
+                text(g, fit(tr("played", ago(last)), tw), tx, cy + h - 12, MUTED);
             gridHits.add(new Hit(cx, cy, w, h, () -> {
                 // a second click on the same card plays it
                 long now = Util.getMillis();
@@ -654,7 +664,7 @@ public class WorldSelectScreen extends Screen {
         Theme.outline(g, x, y, w, h, 1, INK);
         g.fill(x, y, x + w, y + 1, Theme.ORANGE);
         if (selected == null) {
-            text(g, loading ? "LOADING…" : "NO WORLDS YET", x + 10, y + 12, Theme.LABEL);
+            text(g, loading ? tr("loading") : tr("no_worlds"), x + 10, y + 12, Theme.LABEL);
             return;
         }
         Entry e = selected;
@@ -674,9 +684,9 @@ public class WorldSelectScreen extends Screen {
             ty += 17;
             pix(g, name[1], x + in, ty, 14, gold, Theme.ON_ORANGE);
         }
-        String kind = e.save != null ? "SAVED GAME" : e.official() ? "OFFICIAL MAP PACK" : e.isMap() ? "YOUR MAP" : "YOUR WORLD";
+        String kind = e.save != null ? tr("saved_game") : e.official() ? tr("map_pack") : e.isMap() ? tr("your_map") : tr("your_world");
         if (!e.author.isEmpty())
-            kind += " \u00b7 BY " + e.author.toUpperCase();
+            kind += tr("by", e.author.toUpperCase());
         text(g, fit(kind, iw), x + in, ty + 18, MUTED);
 
         int ly = ty + 32;
@@ -686,31 +696,44 @@ public class WorldSelectScreen extends Screen {
             chips.add(e.players + "P");
         boolean rts = Boolean.TRUE.equals(e.rtsOptimised);
         if (rts)
-            chips.add("RTS OPTIMIZED");
+            chips.add(tr("rts_optimized"));
         for (String mode : e.modes)
             chips.add(mode.replace('_', ' ').toUpperCase());
+        // an old (v1) map only opens in the Editor to be converted, a newer one can't be played
+        boolean newer = e.format > RTSMapInfoServerEvents.SUPPORTED_FORMAT;
+        String formatChip = e.format < RTSMapInfoServerEvents.SUPPORTED_FORMAT ? I18n.get("worldselect.reignofnether.format.v1")
+                : newer ? I18n.get("worldselect.reignofnether.format.newer") : null;
+        if (formatChip != null)
+            chips.add(formatChip);
         int chipX = x + in;
         for (String c : chips) {
-            boolean green = rts && c.equals("RTS OPTIMIZED");
+            boolean green = rts && c.equals(tr("rts_optimized"));
+            boolean format = c.equals(formatChip);
             int chipW = tw(c) + 10 + (green ? 12 : 0);
             if (chipX + chipW > x + in + iw && chipX > x + in) {
                 chipX = x + in;
                 ly += 18;
             }
+            int formatColour = newer ? Theme.ERROR : Theme.ORANGE;
             g.fill(chipX, ly, chipX + chipW, ly + 14, green ? 0xFF16301A : CARD);
+            if (format)
+                g.fill(chipX, ly, chipX + chipW, ly + 14, Theme.withAlpha(formatColour, 0.15f));
             Theme.outline(g, chipX, ly, chipW, 14, 1, INK);
             if (green) {
                 Icon.CHECK.draw(g, chipX + 3, ly + 1, 12, Theme.OK);
                 text(g, c, chipX + 15, ly + 3, Theme.OK);
             } else
-                text(g, c, chipX + 5, ly + 3, Theme.BODY);
+                text(g, c, chipX + 5, ly + 3, format ? formatColour : Theme.BODY);
+            if (format && hovered(chipX, ly, chipW, 14, mx, my))
+                setTooltipForNextRenderPass(Component.translatable(newer ? "worldselect.reignofnether.format.newer_tooltip"
+                        : "worldselect.reignofnether.format.v1_tooltip"));
             chipX += chipW + 4;
         }
         if (!chips.isEmpty())
             ly += 22;
         // the map's description, up to four lines
         if (!e.description.isEmpty()) {
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(e.description), iw);
+            List<FormattedCharSequence> lines = font.split(Component.literal(e.description), iw);
             for (int i = 0; i < Math.min(4, lines.size()); i++)
                 g.drawString(font, lines.get(i), x + in, ly + i * 10, Theme.DESC, false);
             ly += Math.min(4, lines.size()) * 10 + 8;
@@ -722,8 +745,8 @@ public class WorldSelectScreen extends Screen {
         }
         if (Boolean.FALSE.equals(e.rtsOptimised) && !e.isMap()) {
             // the design's warning: an orange edge and the reason
-            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(
-                    "Terrain, resources and start positions weren't planned for Reign of Nether, so matches may feel unbalanced."),
+            List<FormattedCharSequence> lines = font.split(Component.literal(
+                    tr("not_rts_warning")),
                     iw - 10);
             int wh = lines.size() * 10 + 8;
             g.fill(x + in, ly, x + in + iw, ly + wh, 0x0FF19A0F);
@@ -735,25 +758,25 @@ public class WorldSelectScreen extends Screen {
 
         // saved games (of a map, or copies of a world): Continue or Delete each
         if (e.isMap() || !e.saves.isEmpty()) {
-            text(g, "SAVES", x + in, ly, MUTED);
+            text(g, tr("saves"), x + in, ly, MUTED);
             String n = String.valueOf(e.saves.size());
-            text(g, n, x + in + tw("SAVES") + 6, ly, GREY);
-            g.fill(x + in + tw("SAVES") + tw(n) + 12, ly + 4, x + in + iw, ly + 5, 0xFF24232C);
+            text(g, n, x + in + tw(tr("saves")) + 6, ly, GREY);
+            g.fill(x + in + tw(tr("saves")) + tw(n) + 12, ly + 4, x + in + iw, ly + 5, 0xFF24232C);
             ly += 14;
             if (e.saves.isEmpty()) {
                 Theme.outline(g, x + in + 1, ly + 1, iw - 2, 18, 1, 0xFF1C1B22);
-                text(g, fit("No saves yet. Press Play to start one.", iw - 10), x + in + 5, ly + 6, GREY);
+                text(g, fit(tr("no_saves"), iw - 10), x + in + 5, ly + 6, GREY);
             }
             int rh = 26;
             for (int i = 0; i < e.saves.size() && ly + rh <= playY - 6; i++, ly += rh + 3) {
                 Entry sv = e.saves.get(i);
                 if (ly + 2 * rh + 3 > playY - 6 && i < e.saves.size() - 1) { // no room for the rest
-                    text(g, "+" + (e.saves.size() - i) + " MORE", x + in, ly + 4, GREY);
+                    text(g, tr("more", e.saves.size() - i), x + in, ly + 4, GREY);
                     break;
                 }
                 g.fill(x + in, ly, x + in + iw, ly + rh, CARD);
                 g.fill(x + in, ly + rh - 1, x + in + iw, ly + rh, 0x80000000);
-                String del = "DELETE", cont = "CONTINUE";
+                String del = tr("delete"), cont = tr("continue");
                 int dw = tw(del) + 8, cw2 = tw(cont) + 8;
                 int bx = x + in + iw - 4 - dw - 3 - cw2;
                 boolean hc = hovered(bx, ly + 5, cw2, 16, mx, my), hd = hovered(bx + cw2 + 3, ly + 5, dw, 16, mx, my);
@@ -784,8 +807,10 @@ public class WorldSelectScreen extends Screen {
                 g.fill(x + in, playY, x + in + iw, playY + playH, Theme.HOVER);
         } else
             Theme.readyButton(g, x + in, playY, iw, playH, Theme.ReadyState.DISABLED, false);
-        String label = cloning ? "COPYING MAP…" : e.isMap() ? "PLAY" : e.save != null ? "RESUME" : "OPEN";
-        String sub = e.isMap() ? "NEW SAVE · THE MAP STAYS UNTOUCHED" : e.save != null ? "CONTINUE WHERE YOU LEFT OFF" : "OPENS THIS WORLD";
+        boolean oldMap = e.isMap() && e.format < RTSMapInfoServerEvents.SUPPORTED_FORMAT; // opens itself, see playMap
+        String label = cloning ? tr("copying") : oldMap ? tr("edit_map") : e.isMap() ? tr("play") : e.save != null ? tr("resume") : tr("open");
+        String sub = oldMap ? tr("sub_old_map") : e.isMap() ? tr("sub_map")
+                : e.save != null ? tr("sub_resume") : tr("sub_open");
         int lh = 12;
         String l = fitPix(label, lh, iw - 8);
         pix(g, l, x + in + (iw - pixWidth(l, lh)) / 2, playY + 5, lh, canPlay ? DARK : new int[]{ Theme.DIM, Theme.DIM, Theme.DIM, Theme.DIM }, 0);
@@ -796,16 +821,17 @@ public class WorldSelectScreen extends Screen {
 
         // Continue the latest save, or New save when the big button doesn't make one, Edit (a map opens its original) and Delete
         int by = playY + playH + 6;
-        boolean cont = e.isMap() && !e.saves.isEmpty();
+        // an old format map can't be played: its saves can't either, so only Edit and Delete
+        boolean cont = e.isMap() && !e.saves.isEmpty() && !oldMap;
         boolean newSave = !e.isMap() && e.save == null;
         int n = cont || newSave ? 3 : 2;
         int bw = (iw - 4 * (n - 1)) / n, bx = x + in;
         if (cont || newSave) {
-            button(g, cont ? "CONTINUE" : "NEW SAVE", bx, by, bw, rowH, mx, my, () -> { if (cont) open(e.saves.get(0)); else playMap(e); });
+            button(g, cont ? tr("continue") : tr("new_save"), bx, by, bw, rowH, mx, my, () -> { if (cont) open(e.saves.get(0)); else playMap(e); });
             bx += bw + 4;
         }
-        button(g, e.isMap() ? "EDIT MAP" : "EDIT", bx, by, bw, rowH, mx, my, () -> { if (e.isMap()) open(e); else edit(e); });
+        button(g, e.isMap() ? tr("edit_map") : tr("edit"), bx, by, bw, rowH, mx, my, () -> { if (e.isMap()) open(e); else edit(e); });
         bx += bw + 4;
-        button(g, e.isMap() ? "DELETE MAP" : "DELETE", bx, by, x + in + iw - bx, rowH, mx, my, () -> delete(e));
+        button(g, e.isMap() ? tr("delete_map") : tr("delete"), bx, by, x + in + iw - bx, rowH, mx, my, () -> delete(e));
     }
 }

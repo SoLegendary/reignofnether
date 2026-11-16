@@ -144,11 +144,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(GruntUnit.class, EntityDataSerializers.STRING);
 
-    // which scenario role does this unit use?
-    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
-    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(GruntUnit.class, EntityDataSerializers.INT);
     
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
@@ -159,7 +154,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
     }
 

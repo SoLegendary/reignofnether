@@ -24,6 +24,7 @@ public class CustomBuildingClientboundPacket {
     // pos is used to identify the building object serverside
     public String playerName;
     public String name;
+    public String id;
     public BlockPos structureSize;
     public CompoundTag structureNbt;
     public CompoundTag attributesNbt;
@@ -41,13 +42,14 @@ public class CustomBuildingClientboundPacket {
         CompoundTag commandsTag = new CompoundTag();
         commandsTag.put("commands", building.commandsNbt);
         return new CustomBuildingClientboundPacket(
-                playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt, commandsTag
+                playerName, building.name, building.id, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt, commandsTag
         );
     }
 
     public CustomBuildingClientboundPacket(
             String playerName,
             String name,
+            String id,
             BlockPos structureSize,
             CompoundTag structureNbt,
             CompoundTag attributesNbt,
@@ -55,6 +57,7 @@ public class CustomBuildingClientboundPacket {
     ) {
         this.playerName = playerName;
         this.name = name;
+        this.id = id;
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
         this.attributesNbt = attributesNbt;
@@ -92,6 +95,7 @@ public class CustomBuildingClientboundPacket {
     public CustomBuildingClientboundPacket(FriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.name = buffer.readUtf();
+        this.id = buffer.readUtf();
         this.structureSize = buffer.readBlockPos();
         this.structureNbt = readCompressedNbt(buffer);
         this.attributesNbt = buffer.readNbt();
@@ -101,6 +105,7 @@ public class CustomBuildingClientboundPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeUtf(this.name);
+        buffer.writeUtf(this.id);
         buffer.writeBlockPos(this.structureSize);
         writeCompressedNbt(buffer, this.structureNbt);
         buffer.writeNbt(this.attributesNbt);
@@ -113,7 +118,7 @@ public class CustomBuildingClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 CustomBuildingClientEvents.registerCustomBuilding(
-                        playerName, name, structureSize, structureNbt, attributesNbt, commandsNbt.getList("commands", Tag.TAG_COMPOUND)
+                        playerName, name, id, structureSize, structureNbt, attributesNbt, commandsNbt.getList("commands", Tag.TAG_COMPOUND)
                 );
                 success.set(true);
             });

@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.Minecraft;
@@ -66,6 +67,8 @@ public class BuildingAbilityServerboundPacket {
                 success.set(false);
                 return;
             }
+            if (GuideServer.isLocked(player))
+                return; // a cutscene took their control
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
             if (building != null) {
                 if (!PlayerRoles.ownerOf(player.getName().getString()).equals(building.ownerName)) {

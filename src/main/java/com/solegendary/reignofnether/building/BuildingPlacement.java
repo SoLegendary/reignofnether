@@ -36,6 +36,7 @@ import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.panels.SelectionPanel;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -49,19 +50,18 @@ import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.blocks.BlockUtils;
+import com.solegendary.reignofnether.chat.SpectatorFeed;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
@@ -81,6 +81,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -163,7 +164,6 @@ public class BuildingPlacement {
     protected int totalBlocks = 0;
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
-    public int scenarioRoleIndex = -1;  // if -1, no role
     public int serverBlocksPlaced = 1;
     private int totalBlocksEverBroken = 0;
     public int captureDistFromEdge = 5;
@@ -302,7 +302,7 @@ public class BuildingPlacement {
         // re-hide players if they were revealed
         if (this.isCapitol && !this.level.isClientSide()) {
             if (BuildingUtils.getTotalCompletedBuildingsOwned(false, this.ownerName) == 1 &&
-                !TutorialServerEvents.isEnabled() && FogOfWarServerEvents.isEnabled()) {
+                FogOfWarServerEvents.isEnabled()) {
                 sendMessageToAllPlayers("hud.reignofnether.placed_capitol", false, this.ownerName);
             }
             FogOfWarClientboundPacket.revealOrHidePlayer(false, this.ownerName);
@@ -391,10 +391,6 @@ public class BuildingPlacement {
     public boolean canAfford(String ownerName) {
         if (SandboxServer.isAnyoneASandboxPlayer() &&
             (ownerName.isEmpty() || ownerName.equals("Enemy")))
-            return true;
-
-        if (SurvivalServerEvents.isEnabled() &&
-            SurvivalServerEvents.ENEMY_OWNER_NAME.equals(ownerName))
             return true;
 
         for (Resources resources : ResourcesServerEvents.resourcesList)
@@ -739,7 +735,7 @@ public class BuildingPlacement {
                         break;
                     }
                 }
-                if (!flag && FogOfWarServerEvents.isEnabled() && !ScenarioUtils.isScenarioNpc(false, scenarioRoleIndex)) {
+                if (!flag && FogOfWarServerEvents.isEnabled()) {
                     sendMessageToAllPlayers("server.reignofnether.lost_capitol",
                         false,
                         this.ownerName,
@@ -766,6 +762,19 @@ public class BuildingPlacement {
         for (BuildingCommand command : commands)
             if (command.condition == BuildingCommand.TriggerCondition.ON_DESTROY)
                 command.run(this);
+        fireRonEvent(serverLevel, "building_destroyed");
+    }
+
+    // ron/events/<event>.mcfunction, then <event>/<building> (e.g. building_built/barracks, custom ones custom_<id>),
+    // run at the building's origin so @b[...] with @s is this building; the source is its owner
+    private void fireRonEvent(ServerLevel serverLevel, String event) {
+        if (!RonFiles.matchRunning()) // not while editing the map or for the buildings a reset clears away
+            return;
+        var source = RonFiles.ownerSource(serverLevel.getServer(), ownerName).withLevel(serverLevel).withPosition(originPos.getCenter());
+        RonFiles.fire(serverLevel.getServer(), event, source, ownerName);
+        ResourceLocation id = RonIds.of(building);
+        String type = id.getNamespace().equals(RonIds.CUSTOM) ? "custom_" + id.getPath() : id.getPath();
+        RonFiles.fire(serverLevel.getServer(), event + "/" + type, source, ownerName);
     }
     
     private void awardBounty() {
@@ -903,8 +912,7 @@ public class BuildingPlacement {
             if (rtsPlayer != null)
                 rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);
         } else {
-            com.solegendary.reignofnether.chat.SpectatorFeed.built(ownerName, com.solegendary.reignofnether.hud.panels.SelectionPanel.buildingName(this));
-            TutorialClientEvents.updateStage();
+            SpectatorFeed.built(ownerName, SelectionPanel.buildingName(this));
             if (this.isCapitol && !SandboxClientEvents.isSandboxPlayer() &&
                 getTotalCompletedBuildingsOwned(this.level.isClientSide(), ownerName) == 1)
                 SoundClientEvents.playFactionCalmTheme(this.getFaction(), ownerName);
@@ -920,10 +928,12 @@ public class BuildingPlacement {
                     this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
 
         getBuilding().onBuilt(this);
-        if (!this.level.isClientSide())
+        if (!this.level.isClientSide()) {
             for (BuildingCommand command : commands)
                 if (command.condition == BuildingCommand.TriggerCondition.ON_BUILD_COMPLETE)
                     command.run(this);
+            fireRonEvent((ServerLevel) this.level, "building_built");
+        }
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) {

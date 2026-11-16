@@ -29,9 +29,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import com.solegendary.reignofnether.building.production.ReviveHeroProductionItem;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
+import com.solegendary.reignofnether.restrictions.RestrictionsServerEvents;
 
 import java.util.*;
 
@@ -245,7 +248,7 @@ public class BotBrain {
         for (BuildingPlacement b : before)
             if (!buildings.contains(b) && memory != null)
                 log("lost {} at {} from home, {}, {} enemies near", b.getBuilding().name, fromHome(b.centrePos),
-                        b.isBuilt ? "built" : (int) (b.getBlocksPlacedPercent() * 100) + "% built", memory.enemiesNear(net.minecraft.world.phys.Vec3.atCenterOf(b.centrePos), 16).size());
+                        b.isBuilt ? "built" : (int) (b.getBlocksPlacedPercent() * 100) + "% built", memory.enemiesNear(Vec3.atCenterOf(b.centrePos), 16).size());
 
         units.clear();
         workers.clear();
@@ -411,10 +414,19 @@ public class BotBrain {
         return b.getBuilding() instanceof ProductionBuilding prod && prod.productions.get().contains(item);
     }
 
+    // denied by the map (/rtsapi restrict): never planned or saved for, so no refused orders
+    boolean denied(ProductionItem item) {
+        return RestrictionsServerEvents.isDenied(name, RonIds.of(item));
+    }
+
+    boolean denied(Building building) {
+        return RestrictionsServerEvents.isDenied(name, RonIds.of(building));
+    }
+
     boolean startProduction(ProductionPlacement pp, ProductionItem item) {
         // everything but a revive leaves the money held for a dead hero alone
         boolean heldBack = heroReserve != null && !(item instanceof ReviveHeroProductionItem) && !canAfford(item.getCost(false, name), false);
-        if (!makes(pp, item) || !item.canProduce(pp) || !item.canAfford(pp) || heldBack || !spendAction())
+        if (!makes(pp, item) || denied(item) || !item.canProduce(pp) || !item.canAfford(pp) || heldBack || !spendAction())
             return false;
         if (!pp.startProductionItem(item))
             return false;

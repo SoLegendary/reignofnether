@@ -5,7 +5,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class TaskSchedulerServerEvents {
@@ -24,17 +23,14 @@ public class TaskSchedulerServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END) return;
 
-        Iterator<ScheduledTask> it = tasks.iterator();
-        List<ScheduledTask> next = new ArrayList<>();
-        while (it.hasNext()) {
-            ScheduledTask t = it.next();
-            if (t.ticksRemaining() <= 0) {
-                t.task().run();
-            } else {
-                next.add(new ScheduledTask(t.ticksRemaining() - 1, t.task()));
-            }
-        }
+        // a task may schedule another (a map file rescheduling itself): it goes in the emptied list, for a later tick
+        List<ScheduledTask> due = new ArrayList<>(tasks);
         tasks.clear();
-        tasks.addAll(next);
+        for (ScheduledTask t : due) {
+            if (t.ticksRemaining() <= 0)
+                t.task().run();
+            else
+                tasks.add(new ScheduledTask(t.ticksRemaining() - 1, t.task()));
+        }
     }
 }

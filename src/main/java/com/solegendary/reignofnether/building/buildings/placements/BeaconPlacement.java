@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -217,10 +216,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
                 PlayerServerEvents.sendMessageToAllPlayers("buildings.reignofnether.beacon.time_to_win",
                         false, ownerName, PlayerServerEvents.getBeaconWinTime(ownerName));
             }
-            if (SurvivalServerEvents.isEnabled() && !msg.equals("destroy_warning"))
-                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
-            else
-                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ENEMY);
+            SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ENEMY);
         }
     }
 

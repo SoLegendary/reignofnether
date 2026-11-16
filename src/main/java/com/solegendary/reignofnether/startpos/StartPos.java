@@ -27,12 +27,14 @@ public class StartPos {
     public Faction faction = Factions.NONE; // if != NONE, is reserved by a player
     public String playerName = ""; // name of player who has reserved this spot
     public int colorId; // is the actual hex color if it's created via MapInfo
-    public boolean isFromStartBlock = true;
     public boolean enabled = true;
     public boolean ready = false; // player on this spot is ready to start the game
     public boolean hidden = false; // client only: taken by an enemy whose pick is hidden (hideEnemyPicks)
     public int botDifficulty = -1; // BotDifficulty ordinal when an AI bot holds this seat, else -1
     public int team = 0; // picked in the lobby on maps without set teams, from 1; 0 goes by start block colour
+    public String seatName = ""; // from a map.json seat, e.g. "Rebels"
+    public Faction fixedFaction = Factions.NONE; // from a map.json seat: whoever sits here plays this faction
+    public boolean mapBot = false; // a map.json "bot" seat: always an AI bot, never offered to players
 
     public static final String BUTTON_NAME = "Start Pos";
 
@@ -97,6 +99,8 @@ public class StartPos {
     public Button getButton(String localPlayerName, boolean isOp) {
         ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
 
+        if (!seatName.isBlank())
+            fcsList.add(fcs(seatName, true));
         if (enabled) {
             if (playerName.isBlank()) {
                 fcsList.add(fcs(I18n.get("startpos.reignofnether.not_reserved"), true));

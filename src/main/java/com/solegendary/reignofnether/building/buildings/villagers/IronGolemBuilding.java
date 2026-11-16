@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -60,7 +59,7 @@ public class IronGolemBuilding extends ProductionBuilding {
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/iron_block.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.IRON_GOLEM_BUILDING,
-            TutorialClientEvents::isEnabled,
+            () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BLACKSMITH) && (
                 ResearchClient.hasResearch(ProductionItems.RESEARCH_GOLEM_SMITHING) || ResearchClient.hasCheat(
                     "modifythephasevariance")

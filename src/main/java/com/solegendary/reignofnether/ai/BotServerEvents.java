@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
-import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.server.MinecraftServer;
@@ -200,8 +199,6 @@ public class BotServerEvents {
 
     // a reloaded world keeps its bot RTSPlayers, so give them their brains back (Normal is the only difficulty)
     private static void restoreBrains() {
-        if (TutorialServerEvents.isEnabled())
-            return;
         synchronized (PlayerServerEvents.rtsPlayers) {
             for (RTSPlayer p : PlayerServerEvents.rtsPlayers)
                 if (p.isBot() && isBotName(p.name) && !brains.containsKey(p.name))

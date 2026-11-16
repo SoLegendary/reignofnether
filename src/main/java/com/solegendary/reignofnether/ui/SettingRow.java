@@ -20,6 +20,11 @@ public record SettingRow(String name, String description, @Nullable String tag,
         this(name, description, tag, value, on, increase, decrease, editable, lockedHint, null);
     }
 
+    /** A group's title between rows (value is null). */
+    public static SettingRow header(String title) {
+        return new SettingRow(title, "", null, null, null, null, null, null, "");
+    }
+
     public boolean isToggle() {
         return decrease == null;
     }

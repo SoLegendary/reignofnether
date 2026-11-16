@@ -3,6 +3,10 @@ package com.solegendary.reignofnether.unit.packets;
 import com.solegendary.reignofnether.alliance.Share;
 import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
+import com.solegendary.reignofnether.guide.GuideServer;
+import com.solegendary.reignofnether.restrictions.RestrictionsServerEvents;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -11,6 +15,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -104,6 +109,12 @@ public class UnitActionServerboundPacket {
                 ReignOfNether.LOGGER.warn("UnitActionServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);
             }
+            // a cutscene took their control, or the map denies this order (rtsapi restrict <player> deny action:<order>)
+            else if (GuideServer.isLocked(player)
+                    || RestrictionsServerEvents.isDenied(ownerName,
+                        RonIds.actionId(this.action))) {
+                success.set(false);
+            }
             else {
                 //ReignOfNether.LOGGER.info("[UnitAction] {} issued {} (unitIds: {})", player.getName(), this.action, java.util.Arrays.toString(this.unitIds));
                 UnitServerEvents.addActionItem(
@@ -117,6 +128,12 @@ public class UnitActionServerboundPacket {
                         this.groupMove
                 );
                 success.set(true);
+                // ron/events/order_given, then order_given/<order> (move, attack, build_repair...): @s is the player
+                if (RonFiles.matchRunning() && this.action != UnitAction.NONE) {
+                    String order = this.action.name().toLowerCase(Locale.ROOT);
+                    RonFiles.fire(player.server, "order_given", player.createCommandSourceStack(), this.ownerName);
+                    RonFiles.fire(player.server, "order_given/" + order, player.createCommandSourceStack(), this.ownerName);
+                }
             }
         });
         ctx.get().setPacketHandled(true);

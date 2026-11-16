@@ -27,7 +27,7 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
     public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
     public final ArrayList<BlockPos> spawnBlocks = new ArrayList<>();
-    public final ArrayList<BuildingCommand> commands = new ArrayList<>();
+    public final ArrayList<BuildingCommand> triggerCommands = new ArrayList<>(); // the building type's trigger files; BuildingPlacement.commands are this placement's own /rtsapi commands
     public ListTag commandsNbt = new ListTag();
     private final Random random = new Random();
 
@@ -43,19 +43,33 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
                 spawnBlocks.add(bb.getBlockPos());
             }
         }
+        syncTriggers(customBuilding);
+    }
+
+    // one command per trigger, which runs that trigger's file ron/buildings/<id>/<trigger>.mcfunction; called again
+    // when the Editor changes the building's triggers, so placed buildings pick up new ones and cooldowns at once
+    public void syncTriggers(CustomBuilding customBuilding) {
         for (BuildingCommand command : customBuilding.commands) {
+            if (command.condition == BuildingCommand.TriggerCondition.NONE)
+                continue;
+            BuildingCommand existing = this.triggerCommands.stream().filter(c -> c.condition == command.condition).findFirst().orElse(null);
+            if (existing != null) {
+                existing.tickCooldownMax = command.tickCooldownMax;
+                existing.tickCooldown = Math.min(existing.tickCooldown, command.tickCooldownMax);
+                continue;
+            }
             BuildingCommand newCommand = new BuildingCommand();
             newCommand.tickCooldown = command.tickCooldown;
             newCommand.tickCooldownMax = command.tickCooldownMax;
-            newCommand.commandStr = command.commandStr;
             newCommand.condition = command.condition;
-            this.commands.add(newCommand);
+            newCommand.file = "buildings/" + customBuilding.id + "/" + command.triggerFileName();
+            this.triggerCommands.add(newCommand);
         }
     }
 
     public void packCommandsNbt() {
         this.commandsNbt.clear();
-        for (BuildingCommand command : commands) {
+        for (BuildingCommand command : triggerCommands) {
             CompoundTag ctag = new CompoundTag();
             ctag.putInt("tickCooldown", command.tickCooldown);
             ctag.putInt("tickCooldownMax", command.tickCooldownMax);
@@ -103,13 +117,17 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
         return entity;
     }
 
+    // the commands themselves come from the building's files, only their cooldown and trigger count are restored
     public void setAndUnpackCommandsNbt(ListTag nbt) {
-        if (nbt.isEmpty())
-            return;
-        this.commands.clear();
-        this.commandsNbt = nbt;
-        for (Tag tag : this.commandsNbt) {
-            this.commands.add(BuildingCommand.getFromNbt((CompoundTag) tag));
+        for (Tag tag : nbt) {
+            BuildingCommand saved = BuildingCommand.getFromNbt((CompoundTag) tag);
+            for (BuildingCommand command : triggerCommands) {
+                if (command.condition == saved.condition) {
+                    command.tickCooldown = saved.tickCooldown;
+                    command.triggerCount = saved.triggerCount;
+                    break;
+                }
+            }
         }
     }
 
@@ -117,7 +135,7 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     public void onBuilt() {
         super.onBuilt();
         if (!this.level.isClientSide())
-            for (BuildingCommand command : commands)
+            for (BuildingCommand command : triggerCommands)
                 if (command.condition == BuildingCommand.TriggerCondition.ON_BUILD_COMPLETE)
                     command.run(this);
     }
@@ -125,7 +143,7 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     @Override
     public void destroy(ServerLevel serverLevel) {
         super.destroy(serverLevel);
-        for (BuildingCommand command : commands)
+        for (BuildingCommand command : triggerCommands)
             if (command.condition == BuildingCommand.TriggerCondition.ON_DESTROY)
                 command.run(this);
     }
@@ -134,7 +152,7 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     protected boolean checkAndDoCapture(ServerLevel serverLevel) {
         boolean captured = super.checkAndDoCapture(serverLevel);
         if (captured) {
-            for (BuildingCommand command : commands) {
+            for (BuildingCommand command : triggerCommands) {
                 if (command.condition == BuildingCommand.TriggerCondition.ON_CAPTURE ||
                     command.condition == BuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED) {
                     command.triggerCount = 0; // allow retrigger after the cooldown is done
@@ -148,7 +166,7 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     @Override
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         super.onBlockBreak(level, pos, breakBlocks);
-        for (BuildingCommand command : commands)
+        for (BuildingCommand command : triggerCommands)
             if (command.condition == BuildingCommand.TriggerCondition.ON_DAMAGE_TAKEN && command.isOffCooldown())
                 command.run(this);
     }
@@ -157,12 +175,12 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
         if (!tickLevel.isClientSide())
-            for (BuildingCommand command : commands)
+            for (BuildingCommand command : triggerCommands)
                 command.tick(this);
     }
 
     public void resetAllCommands() {
-        for (BuildingCommand command : commands) {
+        for (BuildingCommand command : triggerCommands) {
             command.reset();
         }
     }

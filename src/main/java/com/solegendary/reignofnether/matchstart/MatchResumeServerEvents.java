@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.matchstart;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.util.WorldState;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -11,6 +13,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
@@ -88,6 +91,12 @@ public class MatchResumeServerEvents {
     public static void resume(ServerPlayer host) {
         if (!resumePending || !StartPosServerEvents.isHost(host))
             return;
+        // a saved game of an old or newer format map stays frozen: it can't be played
+        Component refusal = RTSMapInfoServerEvents.playRefusal();
+        if (refusal != null) {
+            host.sendSystemMessage(SystemMessage.error(refusal));
+            return;
+        }
         resumePending = false;
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new MatchResumeClientboundPacket(false, "", 0, false, List.of(), false));

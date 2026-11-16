@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.guide.GuideClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -32,8 +33,6 @@ import com.solegendary.reignofnether.ping.PingType;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
@@ -357,7 +356,7 @@ public class MinimapClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> !largeMap,
                 () -> true,
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(true),
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(false),
@@ -376,7 +375,7 @@ public class MinimapClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> !largeMap,
                 () -> true,
                 () -> {
                     if (nightCircleMode == NightCircleMode.ALL) {
@@ -409,7 +408,7 @@ public class MinimapClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> !largeMap,
                 () -> true,
                 () -> {
                     lockedMap = !lockedMap;
@@ -431,7 +430,7 @@ public class MinimapClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 MinimapClientEvents::shouldHighlightAnimals,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> !largeMap,
                 () -> true,
                 () -> ReignOfNetherClientConfigs.HIGHLIGHT_ANIMALS.set(!shouldHighlightAnimals()),
                 null,
@@ -451,7 +450,7 @@ public class MinimapClientEvents {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> !largeMap,
                 () -> true,
                 () -> ReignOfNetherClientConfigs.UNDERLINES.set(!shouldUnderline()),
                 null,
@@ -1137,17 +1136,16 @@ public class MinimapClientEvents {
                     getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
 
             if (MC.player != null && moveTo != null) {
+                GuideClientEvents.input("minimap_clicked", null);
                 if (!altDown && Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
                     forceUpdateAllPartitions = true;
-                    TutorialClientEvents.clickedMinimap = true;
                     PlayerServerboundPacket.teleportPlayer(
                         (double) moveTo.getX(),
                         MC.player.getY(),
                         (double) moveTo.getZ()
                     );
                 } else if (!altDown) {
-                    TutorialClientEvents.clickedMinimap = true;
                     PlayerServerboundPacket.teleportPlayer(
                         (double) moveTo.getX(),
                         MC.player.getY(),
@@ -1224,8 +1222,7 @@ public class MinimapClientEvents {
     public static void render(GuiGraphics guiGraphics) {
         // still drawn while paused and under the match screens: the HUD stays in view behind Esc and slides out
         // under the start screen, and a missing map would blink
-        if (!OrthoviewClientEvents.isEnabled() || !HudClientEvents.enabled
-            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
+        if (!OrthoviewClientEvents.isEnabled() || !HudClientEvents.enabled) {
             return;
         }
 

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.hud.panels;
 
+import com.mojang.math.Axis;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 
 import com.solegendary.reignofnether.alliance.AlliancesClient;
@@ -28,7 +30,6 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
@@ -45,8 +46,12 @@ import net.minecraft.world.entity.LivingEntity;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -61,9 +66,13 @@ public final class TopLeftPanel {
     private static final int TILE_GAP = 5;
     private static final float VALUE = Text.px(20); // medium, like the spectator scoreboard
     private static final ResourceLocation WORKER_ICON =
-            ResourceLocation.fromNamespaceAndPath(com.solegendary.reignofnether.ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
+
+    /** Where the resource bar was last drawn, for the campaign highlight. */
+    public static Rect resourcesRect = Rect.EMPTY;
 
     public static void render(HudFrame f) {
+        resourcesRect = Rect.EMPTY;
         int x = HudLayout.MARGIN;
         int y = HudLayout.MARGIN;
 
@@ -78,7 +87,7 @@ public final class TopLeftPanel {
         if (viewed != null && !viewed.equals(self) && resources != null) {
             eyeBanner(f, x, y, viewed, I18n.get("hud.reignofnether.players_resources", viewed));
             y += 14;
-        } else if (resources == null && !PlayerClientEvents.isRTSPlayer() && !TutorialClientEvents.isEnabled()) {
+        } else if (resources == null && !PlayerClientEvents.isRTSPlayer()) {
             eyeBanner(f, x, y, "", I18n.get("hud.reignofnether.you_are_spectator"));
             y += 14;
         }
@@ -86,6 +95,7 @@ public final class TopLeftPanel {
         int rowY = y;
         if (resources != null) {
             Rect bar = renderResources(f, x, y, viewed, resources);
+            resourcesRect = bar;
             rowY = bar.bottom() + HudLayout.GAP;
         }
         renderGroupsAndQueue(f, x, rowY, viewed);
@@ -150,7 +160,7 @@ public final class TopLeftPanel {
         if (ItemClientEvents.ENABLED) {
             int found = rtsPlayer != null ? rtsPlayer.itemsDropped : 0;
             String foundText = I18n.get("hud.reignofnether.items_found_short", found);
-            cells.add(new Cell(ButtonCell.ICON_EMERALD, String.format(java.util.Locale.US, "%,d", res.emerald),
+            cells.add(new Cell(ButtonCell.ICON_EMERALD, String.format(Locale.US, "%,d", res.emerald),
                     compact ? "" : foundText, Theme.MUTED, null, false, () -> {
                 Tooltip t = Tooltip.of(I18n.get("resources.reignofnether.emerald")).tag(I18n.get("hud.reignofnether.tag.resource"), Theme.EMERALD);
                 if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED)
@@ -231,7 +241,7 @@ public final class TopLeftPanel {
         int rate = IncomeTracker.perMinute(owner, name);
         // "+200/-330": gathered/spent per minute
         String sub = I18n.get("hud.reignofnether.gain_spend_short", rate, IncomeTracker.spentPerMinute(owner, name));
-        return new Cell(icon, String.format(java.util.Locale.US, "%,d", value), sub, Theme.MUTED, String.valueOf(workers), false, () ->
+        return new Cell(icon, String.format(Locale.US, "%,d", value), sub, Theme.MUTED, String.valueOf(workers), false, () ->
                 Tooltip.of(I18n.get("resources.reignofnether." + lower))
                         .tag(I18n.get("hud.reignofnether.tag.resource"), Theme.ORANGE)
                         .body(I18n.get("hud.reignofnether.resource_desc." + lower))
@@ -285,7 +295,7 @@ public final class TopLeftPanel {
         return workerCounts.computeIfAbsent(owner, TopLeftPanel::scanWorkers);
     }
 
-    private static final java.util.Map<String, int[]> workerCounts = new java.util.HashMap<>();
+    private static final Map<String, int[]> workerCounts = new HashMap<>();
     private static long workerCountTick = -1;
 
     private static int[] scanWorkers(String owner) {
@@ -349,7 +359,7 @@ public final class TopLeftPanel {
         String label = I18n.get("hud.reignofnether.queue");
         f.g.pose().pushPose();
         f.g.pose().translate(cx, y + (TILE + Text.smallWidth(label)) / 2f, 0);
-        f.g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90));
+        f.g.pose().mulPose(Axis.ZP.rotationDegrees(-90));
         Text.smallShadowed(f.g, label, 0, -1, Theme.GOLD);
         f.g.pose().popPose();
         int qx = cx + labelW;
@@ -426,7 +436,7 @@ public final class TopLeftPanel {
     }
 
     private static String composition(List<LivingEntity> members) {
-        java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+        Map<String, Integer> counts = new LinkedHashMap<>();
         for (LivingEntity e : members)
             counts.merge(SelectionPanel.displayName(e), 1, Integer::sum);
         StringBuilder sb = new StringBuilder();

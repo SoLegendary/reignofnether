@@ -7,11 +7,8 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -35,8 +32,6 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 
 public class TimeServerEvents {
 
-    private static long serverStartTime = 0;
-
     private static int bloodMoonTicksLeft = 0;
     private static LivingEntity bloodMoonOwner = null;
     private static BlockPos bloodMoonTarget = null; // area to spawn enemies
@@ -46,7 +41,6 @@ public class TimeServerEvents {
     static {
         WorldState.onServerReset(() -> {
             resetBloodMoon();
-            serverStartTime = 0;
             lastTime = -1;
         });
     }
@@ -106,13 +100,6 @@ public class TimeServerEvents {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
 
-        if (serverStartTime == 0)
-            serverStartTime = evt.level.getDayTime();
-
-        if (PlayerServerEvents.rtsPlayers.isEmpty() && evt.level.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
-            ((ServerLevel) evt.level).setDayTime(serverStartTime);
-        }
-
         if (bloodMoonTicksLeft > 0 && bloodMoonOwner != null) {
             bloodMoonTicksLeft -= 1;
             if (bloodMoonTicksLeft <= 0) {
@@ -126,7 +113,7 @@ public class TimeServerEvents {
         }
 
         long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
-        if (!SurvivalServerEvents.isEnabled() && !PlayerServerEvents.rtsPlayers.isEmpty() && lastTime >= 0) {
+        if (!PlayerServerEvents.rtsPlayers.isEmpty() && lastTime >= 0) {
             if (lastTime <= TimeUtils.DUSK && normTime > TimeUtils.DUSK) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dusk", true);
                 SoundClientboundPacket.playSoundForAllPlayers(SoundAction.DUSK_WOLF);

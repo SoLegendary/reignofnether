@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.sounds.FadeableMusicInstance;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
-import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.ui.Theme;
 import com.solegendary.reignofnether.ui.Tooltip;
 import net.minecraft.client.Minecraft;
@@ -84,11 +83,7 @@ public class TimeClientEvents {
         t.status(isDay ? I18n.get("time.reignofnether.time_until_night", getTimeUntilStr(serverNormDayTime, DUSK))
                 : I18n.get("time.reignofnether.time_until_day", getTimeUntilStr(serverNormDayTime, DAWN)), Theme.BODY);
 
-        if (SurvivalClientEvents.isEnabled) {
-            long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
-            t.status(I18n.get("time.reignofnether.time_until_next_wave",
-                    getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset)), Theme.ORANGE);
-        } else if (PlayerClientEvents.isRTSPlayer()) {
+        if (PlayerClientEvents.isRTSPlayer()) {
             t.status(I18n.get("time.reignofnether.game_time", getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks)), Theme.BODY);
         }
         return t;

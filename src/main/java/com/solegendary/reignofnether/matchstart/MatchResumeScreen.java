@@ -5,8 +5,10 @@ import com.solegendary.reignofnether.hud.layout.HudGeometry;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.p2p.HostPopup;
 import com.solegendary.reignofnether.p2p.P2PHost;
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.HudScale;
 import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ui.Text;
@@ -56,11 +58,6 @@ public class MatchResumeScreen extends Screen {
     private static final int M = 14, G = 10, ROW_H = 36, ROW_PAD = 7, HEAD = 24, CARD_PAD = 11;
     private static final int PANEL_FILL = 0xE016151B;
 
-    private record Hit(int x, int y, int w, int h, Runnable action) {
-        boolean contains(double mx, double my) {
-            return mx >= x && mx < x + w && my >= y && my < y + h;
-        }
-    }
 
     private final String mapName;
     private final long gameTicks;
@@ -364,6 +361,9 @@ public class MatchResumeScreen extends Screen {
     }
 
     private String description(List<String> offline) {
+        String refusal = RTSMapInfoClientEvents.playRefusal(); // an old or newer format map can't be resumed
+        if (refusal != null)
+            return refusal;
         String desc = host
                 ? "The match is frozen: units, buildings, resources and alliances are as they were."
                 : "The match is frozen where it was left. The host resumes it.";
@@ -394,18 +394,20 @@ public class MatchResumeScreen extends Screen {
             Text.draw(g, lines.get(i), px + pad, y + i * lh, Theme.DESC);
 
         int bx = px + pad, bw = pw - pad * 2;
-        boolean hover = host && over(mx, my, bx, btnY, bw, btnH);
-        Theme.readyButton(g, bx, btnY, bw, btnH, host ? Theme.ReadyState.CAN_READY : Theme.ReadyState.DISABLED, hover);
-        String label = !host ? "WAITING FOR THE HOST" : offline.isEmpty() ? "RESUME"
+        boolean playable = RTSMapInfoClientEvents.playRefusal() == null;
+        boolean canResume = host && playable;
+        boolean hover = canResume && over(mx, my, bx, btnY, bw, btnH);
+        Theme.readyButton(g, bx, btnY, bw, btnH, canResume ? Theme.ReadyState.CAN_READY : Theme.ReadyState.DISABLED, hover);
+        String label = !playable ? "CAN'T BE PLAYED" : !host ? "WAITING FOR THE HOST" : offline.isEmpty() ? "RESUME"
                 : "RESUME WITHOUT " + offline.size() + (offline.size() == 1 ? " PLAYER" : " PLAYERS");
-        int lw = Text.mediumWidth(label) + (host ? 12 + 6 : 0);
+        int lw = Text.mediumWidth(label) + (canResume ? 12 + 6 : 0);
         int lx = bx + (bw - lw) / 2;
-        if (host) {
+        if (canResume) {
             Icon.CHECK.draw(g, lx, btnY + (btnH - 12) / 2, 12, Theme.ON_ORANGE);
             lx += 12 + 6;
         }
-        Text.medium(g, label, lx, btnY + (btnH - 9) / 2, host ? Theme.ON_ORANGE : Theme.DIM);
-        if (host)
+        Text.medium(g, label, lx, btnY + (btnH - 9) / 2, canResume ? Theme.ON_ORANGE : Theme.DIM);
+        if (canResume)
             hits.add(new Hit(bx, btnY, bw, btnH, MatchResumeServerboundPacket::resume));
     }
 
@@ -415,18 +417,12 @@ public class MatchResumeScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float k = Text.guiPerUnit();
-        double mx = mouseX / k, my = mouseY / k;
         if (HostPopup.open && frame != null) {
             frame.click(frame.scale.toUnits(mouseX), frame.scale.toUnits(mouseY), button == 0);
             return true;
         }
-        if (button == 0)
-            for (Hit hit : List.copyOf(hits))
-                if (hit.contains(mx, my)) {
-                    hit.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

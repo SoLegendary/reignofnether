@@ -22,7 +22,7 @@ import java.util.Locale;
  * recent-chat overlay and the match setup screen.
  *
  * Lines are captured where vanilla adds them to the chat (ChatComponentMixin), so client-side messages
- * (tutorial, ready checks) are caught too. Whoever knows who said what (player chat, team chat) calls
+ * (ready checks) are caught too. Whoever knows who said what (player chat, team chat) calls
  * {@link #expect} just before, and the next line added is tagged with it; anything else is INFO.
  */
 public final class ChatLog {

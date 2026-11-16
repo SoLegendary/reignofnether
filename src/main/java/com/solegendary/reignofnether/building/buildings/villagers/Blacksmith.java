@@ -22,8 +22,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MiscUtil;
 
 import net.minecraft.core.BlockPos;
@@ -100,7 +98,7 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/smithing_table_front.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.BLACKSMITH,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.ATTACK_ENEMY_BASE),
+                () -> false,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(

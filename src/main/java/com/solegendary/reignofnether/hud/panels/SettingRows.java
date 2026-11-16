@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.ui.Tooltip;
 import net.minecraft.client.resources.language.I18n;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Rows of "name ... [-] value [+]" (or an ON/OFF toggle): the game rules (HUD popover and match setup
@@ -43,6 +44,10 @@ public final class SettingRows {
     }
 
     public static void renderRow(HudFrame f, SettingRow rule, int x, int y, int w) {
+        if (rule.value() == null) { // a group header
+            Text.small(f.g, rule.name().toUpperCase(Locale.ROOT), x, y + 7, Theme.LABEL);
+            return;
+        }
         boolean editable = rule.editable().get();
         f.g.fill(x, y + ROW_H - 1, x + w, y + ROW_H, Theme.RAISED);
         int vy = y + 2;
@@ -116,18 +121,4 @@ public final class SettingRows {
                 .build();
     }
 
-    /** A titled popup with these rows, anchored with its top-right corner at (right, top). */
-    public static Rect renderPopover(HudFrame f, String title, List<SettingRow> rows, int right, int top, int maxBottom, int colW) {
-        int pad = 7;
-        int maxH = maxBottom - top - pad * 2 - 16;
-        Rect size = measure(rows, colW, maxH);
-        int w = size.w() + pad * 2;
-        int h = size.h() + pad * 2 + 16;
-        int x = right - w;
-        Theme.popup(f.g, x, top, w, h, Theme.ORANGE);
-        f.zone(x, top, w, h);
-        Text.heading(f.g, title, x + pad, top + pad, Theme.GOLD, Text.px(18));
-        render(f, rows, x + pad, top + pad + 16, colW, maxH);
-        return new Rect(x, top, w, h);
-    }
 }

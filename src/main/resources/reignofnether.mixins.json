@@ -65,6 +65,7 @@
     "minVersion": "0.8",
     "client": [
         "CameraMixin",
+        "LoadingOverlayMixin",
         "ChatComponentMixin",
         "ClientLevelMixin",
         "ClientPacketMixin",

@@ -31,6 +31,7 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -226,7 +227,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
             return;
         ResourcesServerboundPacket.sendResources(new Resources(playerName, amounts[0], amounts[1], amounts[2], amounts[3]),
                 PlayerRolesClient.myOwner());
-        java.util.Arrays.fill(amounts, 0);
+        Arrays.fill(amounts, 0);
         if (focused == this)
             focused = null;
     }
@@ -241,10 +242,6 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
             return true;
         if (GameruleClient.lockAlliances) {
             MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock")));
-            return true;
-        }
-        if (GameruleClient.coopMode) {
-            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock_coop")));
             return true;
         }
         return false;

@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -58,7 +57,7 @@ public class ArcaneTower extends ProductionBuilding {
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/amethyst_block.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.ARCANE_TOWER,
-            TutorialClientEvents::isEnabled,
+            () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(

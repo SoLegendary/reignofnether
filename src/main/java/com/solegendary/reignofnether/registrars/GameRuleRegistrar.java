@@ -16,12 +16,9 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> FLYING_MAX_Y_LEVEL;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_BEACONS;
     public static GameRules.Key<GameRules.IntegerValue> BEACON_WIN_MINUTES;
-    public static GameRules.Key<GameRules.BooleanValue> PVP_MODES_ONLY;
     public static GameRules.Key<GameRules.BooleanValue> SLANTED_BUILDING;
     public static GameRules.Key<GameRules.IntegerValue> ALLOWED_HEROES;
     public static GameRules.Key<GameRules.BooleanValue> LOCK_ALLIANCES;
-    public static GameRules.Key<GameRules.BooleanValue> SCENARIO_MODE;
-    public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
     public static GameRules.Key<GameRules.BooleanValue> FORCE_FOG;
@@ -72,10 +69,6 @@ public class GameRuleRegistrar {
         ALLOW_BEACONS = GameRules.register("allowBeacons", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(true)
         );
-        // allow only classic/king of the beacon gamemodes
-        PVP_MODES_ONLY = GameRules.register("pvpModesOnly", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(false)
-        );
         // ticks to win with a beacon
         BEACON_WIN_MINUTES = GameRules.register("beaconWinMinutes", GameRules.Category.PLAYER,
                 GameRules.IntegerValue.create(10)
@@ -92,20 +85,12 @@ public class GameRuleRegistrar {
         LOCK_ALLIANCES = GameRules.register("lockAlliances", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
         );
-        // map is set to be played as a scenario by the player that opens it
-        SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
-                GameRules.BooleanValue.create(false)
-        );
         // in the match lobby, other teams' factions and chosen start positions are hidden
         HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(true)
         );
         // a bot plays a disconnected player's base until they reconnect
         BOT_TAKEOVER = GameRules.register("botTakeover", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(false)
-        );
-        // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
-        COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
         );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands

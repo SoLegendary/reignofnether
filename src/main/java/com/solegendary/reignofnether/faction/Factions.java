@@ -11,9 +11,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
-import com.solegendary.reignofnether.survival.spawners.IllagerWaveSpawner;
-import com.solegendary.reignofnether.survival.spawners.MonsterWaveSpawner;
-import com.solegendary.reignofnether.survival.spawners.PiglinWaveSpawner;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
 
@@ -31,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 public class Factions {
 	
 	public static final ArrayList<ResourceLocation> CLASSIC_FACTIONS = new ArrayList<>();
-	public static final ArrayList<ResourceLocation> SURVIVAL_FACTIONS = new ArrayList<>();
 	public static final ArrayList<ResourceLocation> PLAYABLE_FACTIONS = new ArrayList<>();
 	
 	public static final HashMap<ResourceLocation, ResourceLocation> ENTITY_FACTION = new HashMap<>();
@@ -50,7 +46,6 @@ public class Factions {
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setSound(SoundRegistrar.VILLAGER_CALM_THEME_SONG.get())
-			.setSpawnWave(IllagerWaveSpawner::spawnIllagerWave)
 			.setCustomBuildingCondition((cb) -> cb.buildableByVillagers)
 		);
 		
@@ -58,17 +53,14 @@ public class Factions {
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"))
 			.setSound(SoundRegistrar.MONSTER_CALM_THEME_SONG.get())
-			.setSpawnWave(MonsterWaveSpawner::spawnMonsterWave)
 			.setCustomBuildingCondition((cb) -> cb.buildableByMonsters)
 		);
 		
 		PIGLINS = register("piglins", new Faction()
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
-			.setSpawnWave(IllagerWaveSpawner::spawnIllagerWave)
 			.setSound(SoundRegistrar.PIGLIN_CALM_THEME_SONG.get())
 			.setCustomBuildingCondition((cb) -> cb.buildableByPiglins)
-			.setSpawnWave(PiglinWaveSpawner::spawnPiglinWave)
 		);
 		
 		NEUTRAL = register("neutral", new Faction()
@@ -233,8 +225,6 @@ public class Factions {
 			CLASSIC_FACTIONS.add(key);
 		if (faction.playable)
 			PLAYABLE_FACTIONS.add(key);
-		if (faction.spawnWave != null)
-			SURVIVAL_FACTIONS.add(key);
 		faction = register(key, faction).setKey(key);
 		return faction;
 	}

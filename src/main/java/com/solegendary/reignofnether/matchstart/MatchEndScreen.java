@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import com.solegendary.reignofnether.replay.ReplayHeader;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.time.TimeUtils;
+import com.solegendary.reignofnether.ui.Hit;
 import com.solegendary.reignofnether.ui.Rect;
 import com.solegendary.reignofnether.ui.Text;
 import com.solegendary.reignofnether.ui.Theme;
@@ -40,7 +41,6 @@ public class MatchEndScreen extends Screen {
 
     private enum Tab { OVERVIEW, ECONOMY, MILITARY }
 
-    private record Hit(int x, int y, int w, int h, Runnable action) { }
 
     // one stats column: its header, the big number and an optional line under it
     private record Column(String key, ToIntFunction<MatchStatRow> value, @Nullable Function<MatchStatRow, String> sub) { }
@@ -153,7 +153,7 @@ public class MatchEndScreen extends Screen {
         Text.small(g, tr("matchend.reignofnether.esc_hint"), bx, fy + (FOOTER_H - 7) / 2, Theme.MUTED);
         String close = tr("matchend.reignofnether.view_battlefield");
         int cw = Text.mediumWidth(close) + 24;
-        button(g, close, x + w - PAD - cw, fy + (FOOTER_H - BUTTON_H) / 2, cw, BUTTON_H, false, true, mx, my, this::onClose);
+        Hit.button(hits, g, close, x + w - PAD - cw, fy + (FOOTER_H - BUTTON_H) / 2, cw, BUTTON_H, false, true, mx, my, this::onClose);
         g.pose().popPose();
     }
 
@@ -332,7 +332,7 @@ public class MatchEndScreen extends Screen {
         Text.smallRight(g, "v" + ReplayHeader.modVersion(), x + w - 8, ry + 8, Theme.MUTED);
         ReplayClientEvents.Download state = ReplayClientEvents.download();
         boolean busy = state == ReplayClientEvents.Download.WAITING || state == ReplayClientEvents.Download.DOWNLOADING;
-        button(g, replayLabel(state), x + 8, ry + 22, w - 16, BUTTON_H + 4, state != ReplayClientEvents.Download.DONE, !busy, mx, my, () -> {
+        Hit.button(hits, g, replayLabel(state), x + 8, ry + 22, w - 16, BUTTON_H + 4, state != ReplayClientEvents.Download.DONE, !busy, mx, my, () -> {
             if (ReplayClientEvents.download() == ReplayClientEvents.Download.DONE)
                 ReplayClientEvents.openReplaysFolder();
             else
@@ -368,29 +368,11 @@ public class MatchEndScreen extends Screen {
         };
     }
 
-    private void button(GuiGraphics g, String label, int x, int y, int w, int h, boolean primary, boolean clickable,
-                        int mx, int my, Runnable action) {
-        boolean hov = clickable && mx >= x && mx < x + w && my >= y && my < y + h;
-        if (primary)
-            Theme.primaryButton(g, x, y, w, h, hov);
-        else
-            Theme.secondaryButton(g, x, y, w, h, hov);
-        Text.mediumCentered(g, Text.fit(label, w - 8), x + w / 2, y + (h - 8) / 2,
-                primary ? Theme.ON_ORANGE : hov ? Theme.GOLD : clickable ? Theme.BODY : Theme.MUTED);
-        if (clickable)
-            hits.add(new Hit(x, y, w, h, action));
-    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float k = Text.guiPerUnit();
-        double mx = mouseX / k, my = mouseY / k;
-        if (button == 0)
-            for (Hit h : List.copyOf(hits))
-                if (mx >= h.x && mx < h.x + h.w && my >= h.y && my < h.y + h.h) {
-                    h.action.run();
-                    return true;
-                }
+        if (Hit.click(hits, mouseX, mouseY, button))
+            return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
