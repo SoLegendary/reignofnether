@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -401,6 +402,9 @@ public class ResourcesServerEvents {
     }
 
     public static int trySendingResources(String sendingPlayerName, String receivingPlayerName, ResourceName resourceName, int amount) {
+        // co-commanders send from and receive into their lead's stock
+        sendingPlayerName = PlayerRoles.ownerOf(sendingPlayerName);
+        receivingPlayerName = PlayerRoles.ownerOf(receivingPlayerName);
         Resources res = null;
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(sendingPlayerName))

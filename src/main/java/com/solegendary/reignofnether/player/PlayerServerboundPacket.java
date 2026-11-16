@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
@@ -20,7 +21,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -92,49 +92,33 @@ public class PlayerServerboundPacket {
                     String diffMsg = I18n.get("hud.gamemode.reignofnether.survival5",
                             diff, SurvivalClientEvents.getMinutesPerDay()).toLowerCase();
                     diffMsg = diffMsg.substring(0,1).toUpperCase() + diffMsg.substring(1);
-                    MC.player.sendSystemMessage(Component.literal(""));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.survival1")
-                            .withStyle(Style.EMPTY.withBold(true)));
-                    MC.player.sendSystemMessage(Component.literal(diffMsg));
-                    MC.player.sendSystemMessage(Component.literal(new String(new char[diffMsg.length()]).replace("\0", "-")));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.survival2"));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.survival3"));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.survival4"));
-                    MC.player.sendSystemMessage(Component.literal(""));
+                    MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("hud.gamemode.reignofnether.survival1")));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.literal(diffMsg)));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.survival2")));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.survival3")));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.survival4")));
                 });
             } else if (ClientGameModeHelper.gameMode == GameMode.CLASSIC) {
                 BeaconPlacement beacon = BuildingUtils.getBeacon(true);
                 boolean isKotB = beacon != null && beacon.getBuilding().capturable;
                 if (isKotB) {
                     CompletableFuture.delayedExecutor(2000, TimeUnit.MILLISECONDS).execute(() -> {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.kotb1")
-                                .withStyle(Style.EMPTY.withBold(true)));
-                        MC.player.sendSystemMessage(Component.literal("--------"));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.kotb2"));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.kotb3"));
-                        MC.player.sendSystemMessage(Component.literal(""));
+                        MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("hud.gamemode.reignofnether.kotb1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.kotb2")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.kotb3")));
                     });
                 } else {
                     CompletableFuture.delayedExecutor(2000, TimeUnit.MILLISECONDS).execute(() -> {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.classic1")
-                                .withStyle(Style.EMPTY.withBold(true)));
-                        MC.player.sendSystemMessage(Component.literal("--------"));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.classic2"));
-                        MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.classic3"));
-                        MC.player.sendSystemMessage(Component.literal(""));
+                        MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("hud.gamemode.reignofnether.classic1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.classic2")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.classic3")));
                     });
                 }
             } else if (ClientGameModeHelper.gameMode == GameMode.SANDBOX) {
                 CompletableFuture.delayedExecutor(2000, TimeUnit.MILLISECONDS).execute(() -> {
-                    MC.player.sendSystemMessage(Component.literal(""));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.sandbox1")
-                            .withStyle(Style.EMPTY.withBold(true)));
-                    MC.player.sendSystemMessage(Component.literal("--------"));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.sandbox2"));
-                    MC.player.sendSystemMessage(Component.translatable("hud.gamemode.reignofnether.sandbox3"));
-                    MC.player.sendSystemMessage(Component.literal(""));
+                    MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("hud.gamemode.reignofnether.sandbox1")));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.sandbox2")));
+                    MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("hud.gamemode.reignofnether.sandbox3")));
                 });
             }
         }

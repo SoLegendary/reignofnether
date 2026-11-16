@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.blocks;
 
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
@@ -135,7 +136,7 @@ public class BlockClientEvents {
             } else if (BuildingClientEvents.getPreselectedBuilding() instanceof SculkCatalystPlacement scp &&
                         CursorClientEvents.getLeftClickAction() == UnitAction.CAST_SONIC_BOOM &&
                         ResearchClient.hasResearch(ProductionItems.RESEARCH_SCULK_AMPLIFIERS) &&
-                        MC.player != null && scp.ownerName.equals(MC.player.getName().getString())) {
+                        MC.player != null && scp.ownerName.equals(PlayerRolesClient.myOwner())) {
                 tempMouseCircleOrigin = new Pair<>(scp.centrePos, ResearchSculkAmplifiers.SPLIT_BOOM_RANGE);
             } else {
                 tempMouseCircleOrigin = null;

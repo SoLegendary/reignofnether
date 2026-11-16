@@ -6,28 +6,18 @@ import com.solegendary.reignofnether.scenario.ScenarioRole;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 
 public class AlliancesServerEvents {
-    private static final Map<String, Set<String>> alliances = new HashMap<>();
-    public static final Map<String, Set<String>> pendingAlliances = new HashMap<>();
-    public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
+    private static final Map<String, Set<String>> alliances = WorldState.server(new HashMap<>());
+    public static final Map<String, Set<String>> pendingAlliances = WorldState.server(new HashMap<>());
+    public static final HashSet<String> playersWithAlliedControl = WorldState.server(new HashSet<>());
 
-    public static boolean canControlAlly(String player, LivingEntity entity) {
-        return entity instanceof Unit unit && canControlAlly(player, unit.getOwnerName());
-    }
-    public static boolean canControlAlly(String player, Unit unit) {
-        return canControlAlly(player, unit.getOwnerName());
-    }
-    public static boolean canControlAlly(String player, String ownerName) {
-        return (AlliancesServerEvents.isAllied(player, ownerName) &&
-                AlliancesServerEvents.playersWithAlliedControl.contains(ownerName));
-    }
 
     public static void addAlliance(String owner1, String owner2) {
         if (!owner1.equals(owner2)) {
@@ -144,12 +134,6 @@ public class AlliancesServerEvents {
     }
 
     // statics outlive the world: clear them so the next world opened in this game starts clean
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        alliances.clear();
-        pendingAlliances.clear();
-        playersWithAlliedControl.clear();
-    }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {

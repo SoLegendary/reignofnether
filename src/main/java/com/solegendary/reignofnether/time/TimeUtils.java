@@ -63,12 +63,17 @@ public class TimeUtils {
         return isDay(level.getDayTime());
     }
 
+    // eg. 75 -> 1:15, for countdowns on the HUD
+    public static String formatSeconds(int seconds) {
+        return (seconds / 60) + ":" + String.format("%02d", seconds % 60);
+    }
+
     // Helper to format ticks into min/sec string
     private static String formatTimeFromTicks(long ticks) {
         int sec = (int) (ticks / 20);
         int min = sec / 60;
         sec %= 60;
 
-        return min == 0 ? sec + "s" : min + "m" + sec + "s";
+        return String.format("%02d:%02d", min, sec);
     }
 }

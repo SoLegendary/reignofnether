@@ -16,10 +16,12 @@ public class RTSMapInfoLoader {
     private static final String FILE_NAME = "rtsmap.json";
 
     public static RTSMapInfo load(ServerLevel level) {
-        Path worldFolder = level.getServer()
-                .getWorldPath(LevelResource.ROOT)
-                .toAbsolutePath();
+        return load(level.getServer().getWorldPath(LevelResource.ROOT));
+    }
 
+    /** From the world's folder; the loading screen reads it before the server has started. */
+    public static RTSMapInfo load(Path worldFolder) {
+        worldFolder = worldFolder.toAbsolutePath();
         Path jsonPath = worldFolder.resolve(FILE_NAME);
 
         if (!Files.exists(jsonPath)) {

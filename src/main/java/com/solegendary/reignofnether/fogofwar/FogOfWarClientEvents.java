@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -9,10 +10,12 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -48,7 +51,7 @@ public class FogOfWarClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
 
     // mirror of the server's authoritative sent (bright) set for this player
-    public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
+    public static final Set<ChunkPos> brightChunks = WorldState.client(ConcurrentHashMap.newKeySet());
 
     // Per-edge-chunk 16x16 column visibility bitmask (long[4] = 256 bits, index = (localX<<4)|localZ),
     // server-authoritative: arrives with the bright set in FogChunksClientboundPacket, so the tint circle
@@ -61,62 +64,46 @@ public class FogOfWarClientEvents {
     private static boolean enabled = false;
 
     // cached - isEnabled() runs per quad during chunk mesh rebuilds
-    private static volatile boolean localSeesFog = false;
+    private static volatile boolean localIsRTSPlayer = false;
 
-    // Mirror of the server's per-spectator fog opt-out (FogViewClientboundPacket). Never applies to RTS players.
-    private static boolean spectatorFogHidden = false;
-
-    // fog shows for everyone once any RTS player exists (non-RTS players see the combined vision of all of them)
-    // unless a spectator has hidden it for themselves
-    public static void refreshLocalSeesFog() {
-        boolean was = localSeesFog;
-        localSeesFog = MC.player != null && !PlayerClientEvents.rtsPlayers.isEmpty()
-                && !(spectatorFogHidden && !PlayerClientEvents.isRTSPlayer());
-        if (was != localSeesFog && enabled) resetFogChunks();
+    public static void refreshLocalIsRTSPlayer() {
+        boolean was = localIsRTSPlayer;
+        localIsRTSPlayer = MC.player != null && PlayerRolesClient.myRole().hasFog;
+        if (was != localIsRTSPlayer && enabled) resetFogChunks();
     }
 
-    public static void setSpectatorFogHidden(boolean hidden) {
-        spectatorFogHidden = hidden;
-        if (hidden) { // the server stops sending vision updates, so don't keep stale ones around
+    // players a spectator is looking through (top bar); empty = no fog, see everything
+    private static final Set<String> spectatorViews = WorldState.client(ConcurrentHashMap.newKeySet());
+    private static volatile boolean spectatorFog = false;
+    static {
+        WorldState.onClientReset(() -> spectatorFog = false);
+    }
+
+    public static boolean isViewing(String name) {
+        return spectatorViews.contains(name);
+    }
+
+    public static void toggleSpectatorView(String name) {
+        if (!spectatorViews.remove(name))
+            spectatorViews.add(name);
+        SpectatorViewServerboundPacket.send(Set.copyOf(spectatorViews));
+        setSpectatorFog(!spectatorViews.isEmpty());
+    }
+
+    private static void setSpectatorFog(boolean value) {
+        if (spectatorFog == value) return;
+        spectatorFog = value;
+        if (!value) {
             brightChunks.clear();
             edgeMasks = Map.of();
         }
-        refreshLocalSeesFog();
-    }
-
-    public static void resetSpectatorFogHidden() {
-        spectatorFogHidden = false;
-    }
-
-    public static boolean isSpectatorFogHidden() {
-        return spectatorFogHidden && !PlayerClientEvents.isRTSPlayer();
-    }
-
-    // fog is on server-side and there is something to see through (the toggle button is pointless otherwise)
-    public static boolean canToggleSpectatorFog() {
-        return enabled && !PlayerClientEvents.rtsPlayers.isEmpty() && !PlayerClientEvents.isRTSPlayer();
-    }
-
-    public static Button getSpectatorFogButton() {
-        boolean hidden = isSpectatorFogHidden();
-        return new Button("Toggle Fog (spectator)",
-                Button.DEFAULT_ICON_SIZE,
-                hidden
-                        ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png")
-                        : ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_eye.png"),
-                null,
-                () -> hidden,
-                () -> !canToggleSpectatorFog(),
-                () -> true,
-                () -> FogViewServerboundPacket.setFogHidden(!hidden),
-                null,
-                List.of(fcs(I18n.get(hidden
-                        ? "fogofwar.reignofnether.spectator_fog_hidden"
-                        : "fogofwar.reignofnether.spectator_fog_shown")))
-        );
+        if (enabled) resetFogChunks();
     }
 
     public static boolean movedToCapitol = false;
+    static {
+        WorldState.onClientReset(() -> movedToCapitol = false);
+    }
 
     public static void applyServerFogState(Set<ChunkPos> bright, Map<ChunkPos, long[]> masks) {
         Set<ChunkPos> newlyDark = new HashSet<>(brightChunks);
@@ -236,7 +223,7 @@ public class FogOfWarClientEvents {
     private static final int CHUNK_REQUEST_COOLDOWN_TICKS = 100; // before asking again for a chunk the server didn't deliver
 
     // missing chunk -> client tick at which it may next be requested
-    private static final Map<ChunkPos, Long> nextChunkRequestTick = new HashMap<>();
+    private static final Map<ChunkPos, Long> nextChunkRequestTick = WorldState.client(new HashMap<>());
     private static long clientTicks = 0;
 
     public static void resetChunkRequests() {
@@ -314,12 +301,19 @@ public class FogOfWarClientEvents {
             if (!enabled) {
                 brightChunks.clear();
                 edgeMasks = Map.of();
+                spectatorViews.clear(); // the server drops its copy on disable too
+                spectatorFog = false;
             }
         }
     }
 
     public static boolean isEnabled() {
-        return enabled && localSeesFog;
+        return enabled && (localIsRTSPlayer || spectatorFog);
+    }
+
+    /** Whether the match has fog of war, whatever this client's role (isEnabled is only true for RTS players). */
+    public static boolean isMatchFogOn() {
+        return enabled;
     }
 
     // client-side mirror of WorldBorderServerEvents.isRtsOptimisedMap using the client's known border
@@ -339,8 +333,7 @@ public class FogOfWarClientEvents {
                     // Fog only works on RTS-optimised maps; refuse locally so the toggle is effectively
                     // hidden on vanilla-sized maps instead of bouncing off the server.
                     if (!isOnRtsOptimisedMap()) {
-                        MC.player.sendSystemMessage(Component.literal(
-                                I18n.get("server.reignofnether.fog_requires_rts_map")));
+                        MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("server.reignofnether.fog_requires_rts_map")));
                         return -1;
                     }
                     setServerFog(true);
@@ -414,7 +407,7 @@ public class FogOfWarClientEvents {
     }
 
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
-        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked))
+        if (MC.player != null && PlayerRolesClient.myCommander().equals(playerBeingAttacked))
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
