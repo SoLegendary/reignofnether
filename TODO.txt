@@ -58,15 +58,13 @@ Bugfixes
 --------
 [❌] Basic pathfinding for flying units to avoid tall structures
 [❌] Investigate farm balance again?
-[❌] Units killed with scorching gaze don't drop items
 
 [✅] Fixed units getting stuck on half-slab gaps
-[🟡] Fixed units getting stuck on the grand library glass panes
-
-[❌] Scorching gaze doesn't credit kills
-
-[✅] Fixed ghasts fireball impacts dealing too little damage
-
+[✅] Fixed units getting stuck on the grand library glass panes
+[✅] Fixed Wildfires being unable to get item drops
+[✅] Added the missing spawn eggs for the Enchanter, Wretched Wraith and Wildfire
+[🟡] Fixed ghasts fireball impacts dealing too little damage
+[❌] Disconnecting no longer causes any upgraded buildings to show as unupgraded
 
 Languages
 ---------

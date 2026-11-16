@@ -648,6 +648,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
             targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
         }
         targetEntity.setSecondsOnFire(getScorchingGaze().durationSeconds);
+        targetEntity.setLastHurtByMob(this);
         if (targetEntity instanceof Unit unit)
             unit.aggroToEnemyIfIdle(this);
     }

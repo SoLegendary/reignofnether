@@ -50,6 +50,9 @@
     "item.reignofnether.panda_unit_spawn_egg": "Spawn Panda Unit",
     "item.reignofnether.llama_unit_spawn_egg": "Spawn Llama Unit",
     "item.reignofnether.bee_unit_spawn_egg": "Spawn Bee Unit",
+    "item.reignofnether.enchanter_unit_spawn_egg": "Spawn Enchanter Unit",
+    "item.reignofnether.wretched_wraith_unit_spawn_egg": "Spawn Wretched Wraith Unit",
+    "item.reignofnether.wildfire_unit_spawn_egg": "Spawn Wildfire Unit",
 
     "unititemtype.reignofnether.consumable": "Consumable",
     "unititemtype.reignofnether.passive": "Passive",
