@@ -562,6 +562,9 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
     }
 
     public void tickEssenceDrain() {
+        // TODO: break on stun, freeze or other interrupt, or when the target is too far away, dead or removed
+        // boolean shouldBreak
+
         if (essenceDrainTicksLeft > 0) {
             essenceDrainTicksLeft -= 1;
             if (!level().isClientSide() && tickCount % 20 == 0 && essenceDrainTarget != null) {
@@ -606,8 +609,10 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
 
     // currently only applies the visual effect; the attack speed and lifesteal bonuses aren't implemented yet
     public void witheringMark(LivingEntity target) {
+
         if (!level().isClientSide()) {
             target.addEffect(new MobEffectInstance(MobEffectRegistrar.WITHERING_MARK.get(), WitheringMark.DURATION_TICKS, 0, true, false));
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WITHERBORN_WITHERING_MARK, target.blockPosition());
         }
     }
 

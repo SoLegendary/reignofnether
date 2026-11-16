@@ -114,8 +114,5 @@ public class WitheringMark extends HeroAbility {
             return;
         ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setAbility(this);
         ((WitherbornUnit) unitUsing).getCastWitheringMarkGoal().setTarget(targetEntity);
-        if (!level.isClientSide()) {
-            SoundClientboundPacket.playSoundAtPos(SoundAction.WITHERBORN_WITHERING_MARK, targetEntity.blockPosition());
-        }
     }
 }

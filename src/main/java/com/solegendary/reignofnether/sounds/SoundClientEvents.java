@@ -45,6 +45,9 @@ public class SoundClientEvents {
     private static final int SOUND_MAX_STACKS = 10; // volume floors at diminish^maxStacks
 
     public static final float SOUND_RANGE = 96; // all sounds have this max range
+    private static final float SOUND_FULL_VOLUME_FRACTION = 0.25f; // sounds play at full volume within this fraction of the range
+    private static final float SOUND_FULL_VOLUME_RANGE = SOUND_RANGE * SOUND_FULL_VOLUME_FRACTION;
+    private static final float SOUND_FADE_RANGE = SOUND_RANGE - SOUND_FULL_VOLUME_RANGE; // volume fades linearly to 0 over this
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
@@ -129,7 +132,7 @@ public class SoundClientEvents {
 
         float dist = (float) Math.sqrt(listenerPos.distanceToSqr(bp.getCenter()));
         if (dist > SOUND_RANGE) return;
-        float attenuatedVolume = dist <= (SOUND_RANGE / 4) ? diminishedVolume : diminishedVolume * (1.0f - (dist - (SOUND_RANGE / 4)) / (((SOUND_RANGE * 3) / 4)));
+        float attenuatedVolume = dist <= SOUND_FULL_VOLUME_RANGE ? diminishedVolume : diminishedVolume * (1.0f - (dist - SOUND_FULL_VOLUME_RANGE) / SOUND_FADE_RANGE);
 
         level.playLocalSound(bp.getX(), bp.getY(), bp.getZ(), soundEvent, SoundSource.NEUTRAL, attenuatedVolume, 1.0F, false);
     }

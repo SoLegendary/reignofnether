@@ -5,6 +5,32 @@
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
+Witherborn
+----------
+Essence drain
+    [❌] Change target automatically to withering mark target
+    [❌] Channel animation
+    [❌] Damage and healing, including magic damage type
+    [❌] Break on max range or target death/removal
+    [❌] Auto rotation
+
+Withering mark
+    [❌] Buff on attackers
+    [❌] Move on target death/removal to nearest ally
+    [❌] Sync sound and animation
+
+Castigation
+    [❌] Green particle effect on usage
+    [❌] Damage and cooldown reduction
+    [❌] Error if can't afford health
+
+World of Rot
+    [❌] Global effect like blood moon
+    [❌] Green overlay and sky
+    [❌] Extend on enemy death
+    [❌] Mob effect
+    [❌] Music
+
 
 Balance
 -------
@@ -27,13 +53,20 @@ Quality of Life
 
 [❌] Thin highlight on targetable mobs when cursor action is a buff (like enchanter abilities)
 
+
 Bugfixes
 --------
 [❌] Basic pathfinding for flying units to avoid tall structures
 [❌] Investigate farm balance again?
 [❌] Units killed with scorching gaze don't drop items
 
-[❌] Check attenuation distances on sounds (40 vs 256?)
+[✅] Fixed units getting stuck on half-slab gaps
+[🟡] Fixed units getting stuck on the grand library glass panes
+
+[❌] Scorching gaze doesn't credit kills
+
+[✅] Fixed ghasts fireball impacts dealing too little damage
+
 
 Languages
 ---------

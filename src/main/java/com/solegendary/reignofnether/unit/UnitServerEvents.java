@@ -993,12 +993,8 @@ public class UnitServerEvents {
             return;
         }
 
-        // halve direct ghast damage since they get bonus damage from launching units into the air
+        // support ghast bonus strength
         if (evt.getSource().getEntity() instanceof GhastUnit ghastUnit) {
-            // (unless its to a garrisoned unit)
-            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuildingAddon.getGarrison(unit) != null)) {
-                evt.setAmount(evt.getAmount() / 2);
-            }
             evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
         }
 

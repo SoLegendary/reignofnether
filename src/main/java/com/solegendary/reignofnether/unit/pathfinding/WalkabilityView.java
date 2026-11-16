@@ -18,6 +18,12 @@ public interface WalkabilityView {
     // true if the block in this cell is solid-blocking. used to require headroom before a unit steps up a ledge.
     boolean solidAt(int wx, int y, int wz);
 
+    // where the block in this cell's collision starts / ends, in eighths of a block from the cell's base (see
+    // WalkabilityBuilder.packSolid). open cells read bottom = SHAPE_STEPS, top = 0. lets a 2-tall unit tell a
+    // half-height ceiling (top slab) over a half-height floor (bottom slab) from a full block.
+    int solidBottom8At(int wx, int y, int wz);
+    int solidTop8At(int wx, int y, int wz);
+
     // precomputed crowding malus for this cell (steering cost that keeps units off walls/edges/corners), baked
     // into the chunk at build time instead of rescanned per A* node. 0 for open cells / outside the view.
     float crowdAt(int wx, int y, int wz);

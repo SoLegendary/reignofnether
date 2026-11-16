@@ -148,7 +148,7 @@ public class AbilityClientboundPacket {
                             witherbornUnit.setEssenceDrainTarget((int) this.value);
                     }  else if (this.unitAction == UnitAction.ESSENCE_DRAIN_SET_DURATION) {
                         if (unit instanceof WitherbornUnit witherbornUnit)
-                            witherbornUnit.setEssenceDrainDuration((int) this.value);;
+                            witherbornUnit.setEssenceDrainDuration((int) this.value);
                     } else if (this.unitAction == UnitAction.ENCHANTED_TETHER) {
                         if (unit instanceof EnchanterUnit enchanterUnit)
                             enchanterUnit.tether((int) this.value, true);

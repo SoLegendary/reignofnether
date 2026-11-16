@@ -136,7 +136,8 @@ public class MobEffectRegistrar {
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||
-                mobEffect == UNCONTROLLABLE.get();
+                mobEffect == UNCONTROLLABLE.get() ||
+                mobEffect == FREEZE.get();
     }
 
     public static void init(FMLJavaModLoadingContext context) {
