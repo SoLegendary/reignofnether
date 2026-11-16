@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -24,6 +26,7 @@ public class UnitSyncWorkerClientBoundPacket {
     private final BlockPos gatherPos;
     private final int gatherTicks;
     private final BlockPos farmPos; // origin of the farm this worker is assigned to (0,0,0 if none)
+    @Nullable private final int[] villagerExp; // farmer, lumberjack, miner, mason, hunter; null for other workers
 
     public static void sendSyncWorkerPacket(LivingEntity entity) {
         if (entity instanceof WorkerUnit workerUnit) {
@@ -37,7 +40,8 @@ public class UnitSyncWorkerClientBoundPacket {
                     workerUnit.getGatherResourceGoal().getTargetResourceName(),
                     bp == null ? new BlockPos(0,0,0) : bp,
                     workerUnit.getGatherResourceGoal().getGatherTicksLeft(),
-                    farm == null ? new BlockPos(0,0,0) : farm.originPos)
+                    farm == null ? new BlockPos(0,0,0) : farm.originPos,
+                    entity instanceof VillagerUnit v ? new int[] { v.farmerExp, v.lumberjackExp, v.minerExp, v.masonExp, v.hunterExp } : null)
             );
         }
     }
@@ -50,7 +54,8 @@ public class UnitSyncWorkerClientBoundPacket {
         ResourceName gatherName,
         BlockPos gatherPos,
         int gatherTicks,
-        BlockPos farmPos
+        BlockPos farmPos,
+        @Nullable int[] villagerExp
     ) {
         // filter out non-owned entities so we can't control them
         this.entityId = unitId;
@@ -60,6 +65,7 @@ public class UnitSyncWorkerClientBoundPacket {
         this.gatherPos = gatherPos;
         this.gatherTicks = gatherTicks;
         this.farmPos = farmPos;
+        this.villagerExp = villagerExp;
     }
 
     public UnitSyncWorkerClientBoundPacket(FriendlyByteBuf buffer) {
@@ -70,6 +76,14 @@ public class UnitSyncWorkerClientBoundPacket {
         this.gatherPos = buffer.readBlockPos();
         this.gatherTicks = buffer.readInt();
         this.farmPos = buffer.readBlockPos();
+        // appended last and optional, so jars from before this field still read each other's packets
+        if (buffer.readableBytes() >= 5 * 4) {
+            this.villagerExp = new int[5];
+            for (int i = 0; i < 5; i++)
+                this.villagerExp[i] = buffer.readInt();
+        } else {
+            this.villagerExp = null;
+        }
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -80,6 +94,9 @@ public class UnitSyncWorkerClientBoundPacket {
         buffer.writeBlockPos(this.gatherPos);
         buffer.writeInt(this.gatherTicks);
         buffer.writeBlockPos(this.farmPos);
+        if (this.villagerExp != null)
+            for (int exp : this.villagerExp)
+                buffer.writeInt(exp);
     }
 
     // client-side packet-consuming functions
@@ -97,6 +114,8 @@ public class UnitSyncWorkerClientBoundPacket {
                         this.gatherPos.equals(new BlockPos(0,0,0)) ? null : this.gatherPos,
                         this.gatherTicks,
                         this.farmPos.equals(new BlockPos(0,0,0)) ? null : this.farmPos);
+                    if (this.villagerExp != null)
+                        UnitClientEvents.syncVillagerExp(this.entityId, this.villagerExp);
                 });
         });
         ctx.get().setPacketHandled(true);

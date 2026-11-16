@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 
 public class HeroServerEvents {
 
-    public static ArrayList<HeroUnitSave> fallenHeroes = new ArrayList<>();
+    public static ArrayList<HeroUnitSave> fallenHeroes = WorldState.server(new ArrayList<>());
 
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent evt) {

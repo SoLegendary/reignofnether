@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class StartProductionButton extends Button {
+   public final ProductionItem production;
+
    public StartProductionButton(String name, ResourceLocation rl, Keybinding hotkey,
                                 Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled,
                                 List<FormattedCharSequence> tooltipLines, ProductionItem production) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
         super(name, Button.itemIconSize, rl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingProductionServerboundPacket.startProduction(production), () -> {}, tooltipLines);
+        this.production = production;
     }
 
     public StartProductionButton(String name, ResourceLocation iconRl, ResourceLocation frameRl, Keybinding hotkey,
@@ -25,5 +28,6 @@ public class StartProductionButton extends Button {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
         super(name, Button.itemIconSize, iconRl, frameRl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingProductionServerboundPacket.startProduction(production), () -> {}, tooltipLines);
+        this.production = production;
     }
 }

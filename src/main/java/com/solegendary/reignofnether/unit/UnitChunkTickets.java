@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.util.WorldState;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -27,6 +28,9 @@ public final class UnitChunkTickets {
             "reignofnether_unit", (first, second) -> Long.compare(first.toLong(), second.toLong()));
     private static final Map<ServerLevel, LevelTickets> LEVELS = new IdentityHashMap<>();
     private static final Map<ServerLevel, RestoredTickets> RESTORED_TICKETS = new IdentityHashMap<>();
+    static {
+        WorldState.onServerReset(UnitChunkTickets::clear);
+    }
 
     private record RestoredTickets(int checkTick, Map<UUID, Pair<LongSet, LongSet>> owners) {}
 

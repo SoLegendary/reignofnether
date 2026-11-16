@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -34,7 +35,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -52,6 +52,9 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 public class FogOfWarServerEvents {
 
     private static boolean enabled = false; // enforced for all clients
+    static {
+        WorldState.onServerReset(() -> enabled = false);
+    }
     private static ServerLevel serverLevel = null;
 
     // Per-player vision, recomputed every UPDATE_TICKS ticks. Three tiers:
@@ -61,29 +64,29 @@ public class FogOfWarServerEvents {
     //    columns stay frozen so out-of-circle changes don't leak.
     //  - edgeMasks: 16x16 covered-column bitmask (long[4]) per edge chunk. Authoritative for entity gating,
     //    update gating AND the client's fog tint (synced via FogChunksClientboundPacket).
-    private static final Map<UUID, Set<ChunkPos>> playerLiveChunks = new ConcurrentHashMap<>();
-    private static final Map<UUID, Set<ChunkPos>> playerEdgeChunks = new ConcurrentHashMap<>();
-    private static final Map<UUID, Map<ChunkPos, long[]>> playerEdgeMasks = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<ChunkPos>> playerLiveChunks = WorldState.server(new ConcurrentHashMap<>());
+    private static final Map<UUID, Set<ChunkPos>> playerEdgeChunks = WorldState.server(new ConcurrentHashMap<>());
+    private static final Map<UUID, Map<ChunkPos, long[]>> playerEdgeMasks = WorldState.server(new ConcurrentHashMap<>());
 
     // (player, chunk) pairs needing a full-chunk resend at the next fog tick: a multi-block section update
     // straddled the vision circle in an edge chunk, so the packet was dropped for that player but part of
     // the change IS visible to them. Drained by updatePlayerBrightChunks.
-    private static final Map<UUID, Set<ChunkPos>> pendingResends = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<ChunkPos>> pendingResends = WorldState.server(new ConcurrentHashMap<>());
 
     // game time of each player's last accepted FogChunkRequestServerboundPacket, to throttle request spam
-    private static final Map<UUID, Long> lastChunkRequestTick = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> lastChunkRequestTick = WorldState.server(new ConcurrentHashMap<>());
     private static final int CHUNK_REQUEST_MIN_TICKS = 10;
 
     // players whose units/buildings ignore fog and are visible to everyone
-    private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+    private static final Set<String> revealedPlayerNames = WorldState.server(ConcurrentHashMap.newKeySet());
 
     // <entityId <name of attacked player, ticks to expiry>>.
     // A unit that attacks out of the fog is revealed to the player it attacked
     // capped at REVEALED_ATTACKER_SIGHT_BLOCKS
-    private static final Map<Integer, Map<String, Long>> revealedUnitExpiryTick = new ConcurrentHashMap<>();
+    private static final Map<Integer, Map<String, Long>> revealedUnitExpiryTick = WorldState.server(new ConcurrentHashMap<>());
 
     // snapshot of neutral unit starting positions
-    public static final Map<Integer, AABB> neutralFogUnits = new HashMap<>();
+    public static final Map<Integer, AABB> neutralFogUnits = WorldState.server(new HashMap<>());
 
     public static void captureNeutralFogUnits() {
         neutralFogUnits.clear();
@@ -117,7 +120,7 @@ public class FogOfWarServerEvents {
 
     // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
     // without this the first ones to start would leave the rest unfogged until they've been added too
-    private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
+    private static final Set<String> startingPlayers = WorldState.server(ConcurrentHashMap.newKeySet());
 
     public static void setStartingPlayers(Collection<String> names) {
         startingPlayers.clear();
@@ -126,8 +129,8 @@ public class FogOfWarServerEvents {
 
     // Spectators (non-RTS players) who have chosen to see no fog. Purely per-player: every fog check goes
     // through isFogActiveFor(player), so nothing about any other player's vision changes.
-    private static final Set<UUID> fogHiddenPlayers = ConcurrentHashMap.newKeySet();
-    private static final Map<UUID, Long> lastFogViewToggleTick = new ConcurrentHashMap<>();
+    private static final Set<UUID> fogHiddenPlayers = WorldState.server(ConcurrentHashMap.newKeySet());
+    private static final Map<UUID, Long> lastFogViewToggleTick = WorldState.server(new ConcurrentHashMap<>());
     private static final int FOG_VIEW_TOGGLE_MIN_TICKS = 20;
 
     // Fog applies to everyone once any RTS player exists: RTS players see through their own/allied vision,
@@ -386,23 +389,6 @@ public class FogOfWarServerEvents {
             FogChunkSnapshot.rebuildIndex(level);
     }
 
-    // statics outlive the world: clear them so the next world opened in this game starts clean
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        FogChunkSnapshot.forget();
-        enabled = false;
-        playerLiveChunks.clear();
-        playerEdgeChunks.clear();
-        playerEdgeMasks.clear();
-        pendingResends.clear();
-        lastChunkRequestTick.clear();
-        fogHiddenPlayers.clear();
-        lastFogViewToggleTick.clear();
-        revealedPlayerNames.clear();
-        revealedUnitExpiryTick.clear();
-        neutralFogUnits.clear();
-        startingPlayers.clear();
-    }
 
     public static void setEnabled(boolean value) {
         if (!value && isForceFog()) {
@@ -434,7 +420,7 @@ public class FogOfWarServerEvents {
 
         syncClientFog();
 
-        // fog means a competitive match: enemy picks hidden (the host can turn it back off)
+        // fog means a competitive match: enemy picks hidden (the host can turn it back)
         if (!wasEnabled && enabled && serverLevel != null) {
             serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
             GameruleClientboundPacket.setHideEnemyPicks(true);

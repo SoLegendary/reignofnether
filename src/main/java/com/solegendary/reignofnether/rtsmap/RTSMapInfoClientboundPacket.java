@@ -47,6 +47,7 @@ public class RTSMapInfoClientboundPacket {
                     case SET_DESCRIPTION -> RTSMapInfoClientEvents.description = value;
                     case ADD_AUTHOR -> RTSMapInfoClientEvents.authors.add(value);
                     case SET_VERSION -> RTSMapInfoClientEvents.version = value;
+                    case SET_TEAM_MODE -> RTSMapInfoClientEvents.teamMode = Boolean.parseBoolean(value);
                 }
             });
         });
