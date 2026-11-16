@@ -73,7 +73,7 @@ public class Factions {
 		
 		RANDOM = register("random", new Faction()
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/unknown.png"))
-			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark_bg.png"))
+			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/gui/icons/shuffle.png"))
 			.setUnplayable()
 			.noCubeMap()
 		);

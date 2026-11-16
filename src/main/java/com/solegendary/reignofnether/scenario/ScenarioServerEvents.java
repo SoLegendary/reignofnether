@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +20,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -41,6 +41,13 @@ public class ScenarioServerEvents {
             new ScenarioRole(6),
             new ScenarioRole(7)
     ));
+    static {
+        WorldState.onServerReset(() -> {
+            scenarioRoles.clear();
+            for (int i = 0; i < 8; i++)
+                scenarioRoles.add(new ScenarioRole(i));
+        });
+    }
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
@@ -51,12 +58,6 @@ public class ScenarioServerEvents {
     }
 
     // statics outlive the world: back to the defaults, or a world without saved roles inherits these
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        scenarioRoles.clear();
-        for (int i = 0; i < 8; i++)
-            scenarioRoles.add(new ScenarioRole(i));
-    }
 
     public static void saveScenarioRoles() {
         saveScenarioRoles(PlayerServerEvents.serverLevel);

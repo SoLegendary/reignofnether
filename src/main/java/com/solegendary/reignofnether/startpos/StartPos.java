@@ -14,6 +14,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.material.MapColor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -26,6 +31,7 @@ public class StartPos {
     public boolean enabled = true;
     public boolean ready = false; // player on this spot is ready to start the game
     public boolean hidden = false; // client only: taken by an enemy whose pick is hidden (hideEnemyPicks)
+    public int team = 0; // picked in the lobby on maps without set teams, from 1; 0 goes by start block colour
 
     public static final String BUTTON_NAME = "Start Pos";
 
@@ -130,5 +136,41 @@ public class StartPos {
                 .greyWhenDisabled(false)
                 .playerNameForHeadIcon(playerName)
                 .build();
+    }
+
+    /** Each seat's team number from 1: picked teams keep theirs, the rest go by start block colour, taking the lowest numbers left in map order. */
+    public static Map<StartPos, Integer> teamNumbers(List<StartPos> seats) {
+        Map<StartPos, Integer> numbers = new HashMap<>();
+        Set<Integer> used = new HashSet<>();
+        for (StartPos sp : seats)
+            if (sp.team > 0) {
+                numbers.put(sp, sp.team);
+                used.add(sp.team);
+            }
+        Map<Integer, Integer> byColour = new HashMap<>();
+        int next = 1;
+        for (StartPos sp : seats) {
+            if (sp.team > 0)
+                continue;
+            Integer n = byColour.get(sp.colorId);
+            if (n == null) {
+                while (used.contains(next))
+                    next++;
+                n = next;
+                used.add(n);
+                byColour.put(sp.colorId, n);
+            }
+            numbers.put(sp, n);
+        }
+        return numbers;
+    }
+
+    public static int teamOf(StartPos sp, List<StartPos> seats) {
+        return teamNumbers(seats).getOrDefault(sp, 0);
+    }
+
+    /** Picking teams goes up to one per seat, and always allows two. */
+    public static int maxTeams(List<StartPos> seats) {
+        return Math.max(2, seats.size());
     }
 }

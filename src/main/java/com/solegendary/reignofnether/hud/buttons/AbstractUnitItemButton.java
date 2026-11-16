@@ -6,23 +6,19 @@ import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -51,7 +47,6 @@ public abstract class AbstractUnitItemButton extends Button {
     public static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
     public static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
     public static final Style POINTS_STYLE = Style.EMPTY
-            .withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"))
             .withColor(TextColor.fromRgb(0x97C459));
     public static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
     public static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
@@ -104,16 +99,11 @@ public abstract class AbstractUnitItemButton extends Button {
         }
     }
 
+    // the hotkey uses the item straight away; the press part of a click would start dragging it
     @Override
-    public void checkPressed(int key) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (hotkey != null && hotkey.getKey() == key) {
-            if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+    public void pressHotkey() {
+        if (this.onLeftClickRelease != null)
             this.onLeftClickRelease.run();
-        }
     }
 
     public boolean hasUseAction() {
@@ -124,30 +114,38 @@ public abstract class AbstractUnitItemButton extends Button {
                 this.unitItem.onUseGround != null);
     }
 
-    // scale down and recentre
     @Override
-    protected void renderHotkey(GuiGraphics guiGraphics, int x, int y) {
-        if (this.hotkey != null) {
-            String hotkeyStr = hotkey.getCurrentLabel();
-            hotkeyStr = hotkeyStr.substring(0, Math.min(3, hotkeyStr.length()));
-
-            int drawX = x + iconSize + 8 - (hotkeyStr.length() * 4);
-            int drawY = y + iconSize;
-
-            guiGraphics.pose().pushPose();
-
-            guiGraphics.pose().translate(drawX, drawY, 0);
-            guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 5);
-
-            guiGraphics.drawCenteredString(MC.font,
-                    hotkeyStr,
-                    drawX,
-                    drawY,
-                    0xFFFFFF);
-
-            guiGraphics.pose().popPose();
-        }
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        if (!unitItem.enableTooltip)
+            return null;
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        String name = I18n.get(nameKey);
+        if (name.equals(nameKey))
+            name = itemStack.getDisplayName().getString();
+        if (itemStack.getCount() > 1)
+            name += " (" + itemStack.getCount() + ")";
+        TextColor rarity = unitItem.rarity.getStyleModifier().apply(NAME_STYLE).getColor();
+        var t = com.solegendary.reignofnether.ui.Tooltip.of(name)
+                .titleColour(rarity != null ? 0xFF000000 | rarity.getValue() : com.solegendary.reignofnether.ui.Theme.TEXT)
+                .tag(unitItem.type.getLabel(), com.solegendary.reignofnether.ui.Theme.ORANGE);
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank())
+            t.body(desc);
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        points.addAll(getEnchantmentDescs(itemStack));
+        points.addAll(getAttributeDescs(unitItem));
+        for (String point : points)
+            t.body(MyRenderer.styledWithIcons(point, POINTS_STYLE).getVisualOrderText());
+        if (unitItem.manaCost > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_MANA, String.valueOf(unitItem.manaCost), 0xFF6EA8D9);
+        if (unitItem.cooldownTicksMax > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_CLOCK, (unitItem.cooldownTicksMax / 20) + "s", 0xFFD9C46E);
+        if (unitItem.range > 0)
+            t.cost(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/bow.png"),
+                    String.valueOf((int) unitItem.range), com.solegendary.reignofnether.ui.Theme.TEXT);
+        if (emeraldValue > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_EMERALD, String.valueOf(emeraldValue), 0xFF5DCAA5);
+        return t;
     }
 
     @Override
