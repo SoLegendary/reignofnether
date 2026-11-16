@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -54,6 +57,14 @@ import java.util.Comparator;
 import java.util.List;
 
 public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, KeyframeAnimated {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot1);

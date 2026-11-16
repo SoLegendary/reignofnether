@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -81,6 +84,14 @@ import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitPro
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit, VillagerDataHolder, ConvertableUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.WORKER);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new CallToArmsUnit(), Keybindings.abilitySlot1);
@@ -312,6 +323,38 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
+    // experience in a profession; half of the requirement teaches it, all of it makes a veteran
+    public int getExp(VillagerUnitProfession p) {
+        return switch (p) {
+            case FARMER -> farmerExp;
+            case LUMBERJACK -> lumberjackExp;
+            case MINER -> minerExp;
+            case MASON -> masonExp;
+            case HUNTER -> hunterExp;
+            default -> 0;
+        };
+    }
+
+    public static int getExpReq(VillagerUnitProfession p) {
+        return switch (p) {
+            case FARMER -> FARMER_EXP_REQ;
+            case LUMBERJACK -> LUMBERJACK_EXP_REQ;
+            case MINER -> MINER_EXP_REQ;
+            case MASON -> MASON_EXP_REQ;
+            case HUNTER -> HUNTER_EXP_REQ;
+            default -> 1;
+        };
+    }
+
+    // clientside, from the worker sync packet
+    public void syncExp(int[] exp) {
+        farmerExp = exp[0];
+        lumberjackExp = exp[1];
+        minerExp = exp[2];
+        masonExp = exp[3];
+        hunterExp = exp[4];
+    }
+
     public Item chestplate = Items.AIR;
     public boolean chestplateEnchanted = false;
     public boolean swordEnchanted = false;
@@ -394,7 +437,9 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             WorkerUnit.tick(this);
             this.callToArmsGoal.tick();
 
-            if (tickCount % 20 == 0) {
+            // server only: getAllUnits() is the server's list, and in singleplayer the client thread iterating it
+            // while the server changes it crashed the game (ConcurrentModificationException)
+            if (!level().isClientSide() && tickCount % 20 == 0) {
                 if (getMainHandItem().getAllEnchantments().containsKey(Enchantments.BLOCK_EFFICIENCY) &&
                     !hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
                     EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());

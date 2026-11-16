@@ -1,7 +1,22 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.chat.SystemMessage;
+import com.solegendary.reignofnether.chat.ChatLines;
+import com.solegendary.reignofnether.chat.ChatPanel;
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.soldier.SoldierHudClientEvents;
+import com.solegendary.reignofnether.ui.HudScale;
+import com.solegendary.reignofnether.ui.Text;
+import com.solegendary.reignofnether.ui.Theme;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ChatScreen;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
@@ -11,6 +26,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxPanel;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -19,10 +35,12 @@ import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
+import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
@@ -62,6 +80,10 @@ import static net.minecraft.util.Mth.sign;
  * @author SoLegendary, adapted from Mineshot by Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class OrthoviewClientEvents {
+
+    static {
+        WorldState.onClientReset(OrthoviewClientEvents::unlockCam);
+    }
 
     public static final int CHAT_Y_OFFSET = -55; // shift chat up by this much when in RTS cam to make room for the
 
@@ -192,7 +214,28 @@ public class OrthoviewClientEvents {
     }
 
     public static float getZoom() {
-        return zoom;
+        float top = StrategicMapClientEvents.blend();
+        return top <= 0 ? zoom : Mth.lerp(top, zoom, topDownZoom());
+    }
+
+    private static float screenAspect() {
+        return MC.getWindow().getWidth() / (float) Math.max(1, MC.getWindow().getHeight());
+    }
+
+    // the screen stays inside the circle of drawn chunks and inside the world border, so no edge is ever empty
+    private static float topDownZoom() {
+        float aspect = screenAspect();
+        float radius = (MC.options.getEffectiveRenderDistance() - 1) * 16;
+        float fit = radius * 2 / Mth.sqrt(1 + aspect * aspect);
+        if (MC.level != null) {
+            WorldBorder border = MC.level.getWorldBorder();
+            float cos = Math.abs(Mth.cos(getCamRotX() * Mth.DEG_TO_RAD));
+            float sin = Math.abs(Mth.sin(getCamRotX() * Mth.DEG_TO_RAD));
+            // how far the turned screen reaches along each axis of the border
+            fit = Math.min(fit, (float) Math.min((border.getMaxZ() - border.getMinZ()) / (cos + aspect * sin),
+                    (border.getMaxX() - border.getMinX()) / (aspect * cos + sin)));
+        }
+        return Mth.clamp(fit, ZOOM_DEFAULT, 400);
     }
 
     public static float getCamRotX() {
@@ -200,7 +243,13 @@ public class OrthoviewClientEvents {
     }
 
     public static float getCamRotY() {
-        return -camRotY - camRotAdjY;
+        return Mth.lerp(StrategicMapClientEvents.blend(), -camRotY - camRotAdjY, 90);
+    }
+
+    // a replay following a player's recorded camera (zoom and getCamRotX())
+    public static void setCam(float zoomValue, float rotX) {
+        zoom = Mth.clamp(zoomValue, ZOOM_MIN, ZOOM_MAX);
+        camRotX = -rotX - camRotAdjX;
     }
 
     public static boolean isCameraLocked() {
@@ -246,6 +295,17 @@ public class OrthoviewClientEvents {
         if (isCameraLocked()) {
             return;
         }
+        // past the furthest zoom the camera turns to look straight down
+        if (StrategicMapClientEvents.isOpen()) {
+            if (zoomAdj < 0)
+                StrategicMapClientEvents.close();
+            return;
+        }
+        if (zoomAdj > 0 && zoom >= ZOOM_MAX) {
+            StrategicMapClientEvents.scrollPast();
+            return;
+        }
+        StrategicMapClientEvents.cancelScroll();
         zoom += zoomAdj;
         if (zoom < ZOOM_MIN) {
             zoom = ZOOM_MIN;
@@ -257,7 +317,7 @@ public class OrthoviewClientEvents {
 
     public static void panCam(float x, float y, float z) { // pan camera relative to rotation
         if (MC.player != null) {
-            Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
+            Vec2 XZRotated = MyMath.rotateCoords(x, z, getCamRotX());
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
             clampPlayerToWorldBorder();
         }
@@ -333,6 +393,7 @@ public class OrthoviewClientEvents {
 
         if (isEnabled() && MC.gameMode != null && (
             MC.gameMode.getPlayerMode() == GameType.ADVENTURE || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                || PlayerRolesClient.myRole() == PlayerRole.SOLDIER
         )) {
             toggleEnable();
         }
@@ -413,6 +474,7 @@ public class OrthoviewClientEvents {
         }
 
         enabled = !enabled;
+        FaceCulling.setRtsView(enabled);
 
         if (enabled) {
             MC.options.tutorialStep = TutorialSteps.NONE;
@@ -496,6 +558,9 @@ public class OrthoviewClientEvents {
                 tryToToggleEnable();
             } else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
+            } else if (enabled && Keybindings.altMod.isDown() && !TextInputClientEvents.isAnyInputFocused()
+                    && (evt.getKey() == Keybindings.rotCW.getKey() || evt.getKey() == Keybindings.rotCCW.getKey())) {
+                fixedRotateCam(evt.getKey() == Keybindings.rotCW.getKey()); // Alt + arrow, like the minimap's rotate buttons
             }
             int i = 1;
             for (Keybinding keybind : CAMERA_KEYBINDS) {
@@ -545,8 +610,9 @@ public class OrthoviewClientEvents {
             if (MC.player != null && (
                     MC.gameMode.getPlayerMode() == GameType.ADVENTURE
                             || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                            || (!enabled && PlayerRolesClient.myRole() == PlayerRole.SOLDIER)
             )) {
-                MC.player.sendSystemMessage(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error")));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error"))));
             } else {
                 toggleEnable();
             }
@@ -557,13 +623,13 @@ public class OrthoviewClientEvents {
         return new Button("Hide Leaves Method",
                 14,
                 switch(hideLeavesMethod) {
-                    case NONE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/leaves.png");
-                    case AROUND_UNITS_AND_CURSOR -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/lime_stained_glass.png");
-                    case ALL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/glass.png");
+                    case NONE -> Icon.LEAF.texture;
+                    case AROUND_UNITS_AND_CURSOR -> Icon.LEAF.texture;
+                    case ALL -> Icon.EYE.texture;
                 },
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
-                () -> false,
+                () -> hideLeavesMethod != LeafHideMethod.NONE,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),
                 () -> true,
                 () -> {
@@ -576,6 +642,7 @@ public class OrthoviewClientEvents {
                     } else if (hideLeavesMethod == LeafHideMethod.ALL) {
                         hideLeavesMethod = LeafHideMethod.NONE;
                     }
+                    ReignOfNetherClientConfigs.HIDE_LEAVES.set(hideLeavesMethod);
                 },
                 null,
                 List.of(
@@ -608,7 +675,10 @@ public class OrthoviewClientEvents {
         if (!enabled || isCameraLocked()) {
             return;
         }
-        if (Keybindings.altMod.isDown()) {
+        // placing a bridge or scrolling the building editor or sandbox sheet uses the wheel too: Alt zooms during those
+        boolean wheelTaken = BuildingClientEvents.getBuildingToPlace() != null || CustomBuildingClientEvents.getCustomBuildingToEdit() != null
+                || SandboxPanel.takesWheel();
+        if (evt.getScreen() instanceof TopdownGui && (Keybindings.altMod.isDown() || !wheelTaken)) {
             zoomCam((float) sign(evt.getScrollDelta()) * -ZOOM_STEP_SCROLL);
         }
     }
@@ -663,8 +733,6 @@ public class OrthoviewClientEvents {
             GLFW.glfwSetCursorPos(glfwWindow, cursorX, 0);
         }
 
-        Player player = MC.player;
-
         // zoom in/out with keys
         if (Keybindings.zoomIn.isDown()) {
             zoomCam(-ZOOM_STEP_KEY);
@@ -688,11 +756,20 @@ public class OrthoviewClientEvents {
                 panCam(0, 0, -getEdgeCamPanSensitivity());
             }
         }
+    }
+
+    // every frame, not just while the RTS screen draws: between a menu closing and the RTS screen reopening there's
+    // no screen, the mouse is grabbed, and vanilla mouse look would turn the camera
+    @SubscribeEvent
+    public static void onRenderTick(TickEvent.RenderTickEvent evt) {
+        Player player = MC.player;
+        if (evt.phase != TickEvent.Phase.START || !enabled || player == null)
+            return;
         // note that we treat x and y rot as horizontal and vertical, but MC treats it the other way around...
-        if (player != null) {
-            player.setXRot(-camRotY - camRotAdjY);
-            player.setYRot(-camRotX - camRotAdjX);
-        }
+        player.setXRot(getCamRotY());
+        player.setYRot(getCamRotX());
+        player.xRotO = player.getXRot();
+        player.yRotO = player.getYRot();
     }
 
     // prevents stuff like fire and water effects being shown on your HUD
@@ -752,8 +829,8 @@ public class OrthoviewClientEvents {
             float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
             float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;
 
-            float moveX = normalizedX * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
-            float moveZ = normalizedZ * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveX = normalizedX * 0.20f * (getZoom() / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveZ = normalizedZ * 0.20f * (getZoom() / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
@@ -784,6 +861,37 @@ public class OrthoviewClientEvents {
         }
     }
 
+    /** A spectator in first person, outside the RTS view: gets the RTS chat and a hint to press F12. */
+    public static boolean spectatingOutside() {
+        return !enabled && MC.player != null && MC.player.isSpectator() && !MC.options.hideGui
+                && PlayerRolesClient.myRole() != PlayerRole.SOLDIER;
+    }
+
+    @SubscribeEvent
+    public static void onScreenOpening(ScreenEvent.Opening evt) {
+        if (spectatingOutside() && evt.getNewScreen() instanceof ChatScreen && !MC.options.keyCommand.isDown())
+            evt.setNewScreen(new ChatPanel());
+    }
+
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiEvent.Post evt) {
+        if (!spectatingOutside())
+            return;
+        GuiGraphics g = evt.getGuiGraphics();
+        HudScale scale = HudGeometry.scale();
+        g.pose().pushPose();
+        g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
+        String key = Keybindings.getFnum(12).getCurrentLabel();
+        String hint = PlayerClientEvents.rtsLocked && !PlayerClientEvents.isRTSPlayer()
+                ? I18n.get("hud.reignofnether.join_rts_locked", key) : I18n.get("hud.reignofnether.join_rts", key);
+        int w = Theme.font().width(hint) + 20;
+        Theme.popup(g, (scale.width() - w) / 2, 10, w, 20, Theme.ORANGE);
+        Text.draw(g, hint, (scale.width() - w) / 2 + 10, 16, Theme.TEXT);
+        if (!(MC.screen instanceof ChatPanel))
+            ChatLines.renderRecent(g, 10, SoldierHudClientEvents.chatBottom(scale.height()), 300);
+        g.pose().popPose();
+    }
+
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
@@ -795,6 +903,10 @@ public class OrthoviewClientEvents {
 
     // OrthoViewMixin uses this to generate a customisation orthographic view to replace the usual view
     // shamelessly copied from ImmersivePortals 1.16
+    private static float lastProjectedZoom = 0;
+    private static int lastProjectedWidth = 0;
+    private static int lastProjectedHeight = 0;
+
     public static Matrix4f getOrthographicProjection() {
         int width = MC.getWindow().getScreenWidth();
         int height = MC.getWindow().getScreenHeight();
@@ -802,7 +914,16 @@ public class OrthoviewClientEvents {
         float near = -3000;
         float far = 3000;
 
-        float zoomFinal = zoom;
+        float zoomFinal = getZoom();
+
+        // vanilla only re-picks which chunks are in view when the camera moves or turns, so a wider view from
+        // zooming out would keep the narrower one's chunks until the camera next moved
+        if (zoomFinal != lastProjectedZoom || width != lastProjectedWidth || height != lastProjectedHeight) {
+            lastProjectedZoom = zoomFinal;
+            lastProjectedWidth = width;
+            lastProjectedHeight = height;
+            MC.levelRenderer.needsUpdate();
+        }
 
         float wView = (zoomFinal / height) * width;
         float left = -wView / 2;

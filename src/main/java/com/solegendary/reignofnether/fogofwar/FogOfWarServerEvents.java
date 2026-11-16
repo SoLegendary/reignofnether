@@ -1,16 +1,24 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.replay.FogRestore;
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
+import com.solegendary.reignofnether.replay.ReplaySnapshot;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -34,7 +42,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -52,6 +59,11 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 public class FogOfWarServerEvents {
 
     private static boolean enabled = false; // enforced for all clients
+    static {
+        WorldState.onServerReset(() -> {
+            enabled = false;
+        });
+    }
     private static ServerLevel serverLevel = null;
 
     // Per-player vision, recomputed every UPDATE_TICKS ticks. Three tiers:
@@ -61,29 +73,32 @@ public class FogOfWarServerEvents {
     //    columns stay frozen so out-of-circle changes don't leak.
     //  - edgeMasks: 16x16 covered-column bitmask (long[4]) per edge chunk. Authoritative for entity gating,
     //    update gating AND the client's fog tint (synced via FogChunksClientboundPacket).
-    private static final Map<UUID, Set<ChunkPos>> playerLiveChunks = new ConcurrentHashMap<>();
-    private static final Map<UUID, Set<ChunkPos>> playerEdgeChunks = new ConcurrentHashMap<>();
-    private static final Map<UUID, Map<ChunkPos, long[]>> playerEdgeMasks = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<ChunkPos>> playerLiveChunks = WorldState.server(new ConcurrentHashMap<>());
+    private static final Map<UUID, Set<ChunkPos>> playerEdgeChunks = WorldState.server(new ConcurrentHashMap<>());
+    private static final Map<UUID, Map<ChunkPos, long[]>> playerEdgeMasks = WorldState.server(new ConcurrentHashMap<>());
 
     // (player, chunk) pairs needing a full-chunk resend at the next fog tick: a multi-block section update
     // straddled the vision circle in an edge chunk, so the packet was dropped for that player but part of
     // the change IS visible to them. Drained by updatePlayerBrightChunks.
-    private static final Map<UUID, Set<ChunkPos>> pendingResends = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<ChunkPos>> pendingResends = WorldState.server(new ConcurrentHashMap<>());
 
     // game time of each player's last accepted FogChunkRequestServerboundPacket, to throttle request spam
-    private static final Map<UUID, Long> lastChunkRequestTick = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> lastChunkRequestTick = WorldState.server(new ConcurrentHashMap<>());
     private static final int CHUNK_REQUEST_MIN_TICKS = 10;
 
+    // the last vision recorded for each disconnected RTS player, see recordOfflineVision
+    private static final Map<String, FogChunksClientboundPacket> offlineVision = WorldState.server(new HashMap<>());
+
     // players whose units/buildings ignore fog and are visible to everyone
-    private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+    private static final Set<String> revealedPlayerNames = WorldState.server(ConcurrentHashMap.newKeySet());
 
     // <entityId <name of attacked player, ticks to expiry>>.
     // A unit that attacks out of the fog is revealed to the player it attacked
     // capped at REVEALED_ATTACKER_SIGHT_BLOCKS
-    private static final Map<Integer, Map<String, Long>> revealedUnitExpiryTick = new ConcurrentHashMap<>();
+    private static final Map<Integer, Map<String, Long>> revealedUnitExpiryTick = WorldState.server(new ConcurrentHashMap<>());
 
     // snapshot of neutral unit starting positions
-    public static final Map<Integer, AABB> neutralFogUnits = new HashMap<>();
+    public static final Map<Integer, AABB> neutralFogUnits = WorldState.server(new HashMap<>());
 
     public static void captureNeutralFogUnits() {
         neutralFogUnits.clear();
@@ -115,76 +130,49 @@ public class FogOfWarServerEvents {
     private static final int UPDATE_TICKS = 10;
     private static int ticksUntilUpdate = UPDATE_TICKS;
 
+    private static final Map<UUID, Boolean> hasFogCache = WorldState.server(new ConcurrentHashMap<>());
+
+    // spectators looking through some players' eyes (top bar): their fog is the union of those players' vision
+    private static final Map<UUID, Set<String>> spectatorViews = WorldState.server(new ConcurrentHashMap<>());
+
+    public static void setSpectatorViews(ServerPlayer sp, Set<String> names) {
+        if (PlayerRoles.roleOf(sp.getName().getString()) != PlayerRole.SPECTATOR) return;
+        UUID uuid = sp.getUUID();
+        boolean wasViewing = spectatorViews.containsKey(uuid);
+        if (names.isEmpty()) spectatorViews.remove(uuid);
+        else spectatorViews.put(uuid, Set.copyOf(names));
+        hasFogCache.remove(uuid);
+        // fog off again: the client still holds the chunks that were frozen while fogged
+        if (wasViewing && names.isEmpty()) {
+            clearPlayerVision(uuid);
+            if (serverLevel != null) resendAllTrackedChunks(sp);
+        }
+    }
+
+    public static void invalidateRtsCache() {
+        hasFogCache.clear();
+    }
+
     // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
     // without this the first ones to start would leave the rest unfogged until they've been added too
-    private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
+    private static final Set<String> startingPlayers = WorldState.server(ConcurrentHashMap.newKeySet());
 
     public static void setStartingPlayers(Collection<String> names) {
         startingPlayers.clear();
         startingPlayers.addAll(names);
     }
 
-    // Spectators (non-RTS players) who have chosen to see no fog. Purely per-player: every fog check goes
-    // through isFogActiveFor(player), so nothing about any other player's vision changes.
-    private static final Set<UUID> fogHiddenPlayers = ConcurrentHashMap.newKeySet();
-    private static final Map<UUID, Long> lastFogViewToggleTick = new ConcurrentHashMap<>();
-    private static final int FOG_VIEW_TOGGLE_MIN_TICKS = 20;
-
     // Fog applies to everyone once any RTS player exists: RTS players see through their own/allied vision,
-    // non-RTS players (spectators etc.) see through the combined vision of all RTS players, unless they hid it.
+    // non-RTS players (spectators etc.) see through the combined vision of all RTS players.
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
-        String name = player.getName().getString();
-        if (isFogHiddenFor(player, name)) return false;
-        return PlayerServerEvents.isGameActive() || startingPlayers.contains(name);
-    }
-
-    // RTS players (and those about to become one) can never opt out, even if they were in the set earlier
-    private static boolean isFogHiddenFor(ServerPlayer player, String name) {
-        return !fogHiddenPlayers.isEmpty() && fogHiddenPlayers.contains(player.getUUID())
-                && !PlayerServerEvents.isRTSPlayer(name) && !startingPlayers.contains(name);
-    }
-
-    public static boolean isFogHiddenFor(ServerPlayer player) {
-        return isFogHiddenFor(player, player.getName().getString());
-    }
-
-    // Called by FogViewServerboundPacket after it has checked the sender is a non-RTS player.
-    public static void setFogHiddenFor(ServerPlayer sp, boolean hidden) {
-        if (serverLevel == null || PlayerServerEvents.isRTSPlayer(sp.getName().getString())) return;
-
-        UUID uuid = sp.getUUID();
-        long now = serverLevel.getGameTime();
-        Long last = lastFogViewToggleTick.get(uuid);
-        if (last != null && now - last < FOG_VIEW_TOGGLE_MIN_TICKS) {
-            // still tell the client the real state so its button doesn't drift
-            FogViewClientboundPacket.send(sp, fogHiddenPlayers.contains(uuid));
-            return;
-        }
-        boolean changed = hidden ? fogHiddenPlayers.add(uuid) : fogHiddenPlayers.remove(uuid);
-        if (!changed) {
-            FogViewClientboundPacket.send(sp, hidden);
-            return;
-        }
-        lastFogViewToggleTick.put(uuid, now);
-        ReignOfNether.LOGGER.info("[FogOfWar] {} {} fog for themselves", sp.getName().getString(),
-                hidden ? "hid" : "unhid");
-
-        // Hiding: the next fog tick sees the player is no longer fog-active, drops their vision and resends
-        // live chunks/entity tracking (see updatePlayerBrightChunks).
-        // Unhiding: the client holds live data for every chunk, so serve the snapshot for the fogged ones now;
-        // the next fog tick then computes their vision and resends the live chunks they can see.
-        if (!hidden && enabled && sp.serverLevel() == serverLevel) {
-            int viewDist = serverLevel.getServer().getPlayerList().getViewDistance();
-            ChunkPos center = sp.chunkPosition();
-            for (int dx = -viewDist; dx <= viewDist; dx++) {
-                for (int dz = -viewDist; dz <= viewDist; dz++) {
-                    LevelChunk chunk = serverLevel.getChunkSource().getChunk(center.x + dx, center.z + dz, false);
-                    if (chunk != null) sendFoggedChunk(sp, chunk);
-                }
-            }
-        }
-        FogViewClientboundPacket.send(sp, hidden);
+        if (startingPlayers.contains(player.getName().getString())) return true;
+        Boolean cached = hasFogCache.get(player.getUUID());
+        if (cached != null) return cached;
+        PlayerRole role = PlayerRoles.roleOf(player.getName().getString());
+        boolean v = role.hasFog || (role == PlayerRole.SPECTATOR && spectatorViews.containsKey(player.getUUID()));
+        hasFogCache.put(player.getUUID(), v);
+        return v;
     }
 
     // A chunk is "live" (receives all updates unfiltered) only when fully inside the vision circle.
@@ -205,6 +193,10 @@ public class FogOfWarServerEvents {
     public static boolean isBlockVisibleFor(String playerName, int x, int z) {
         if (serverLevel == null)
             return false;
+        // bots (and bot-controlled disconnected players) have no ServerPlayer or fog state; the bot AI limits its
+        // own knowledge to its sight ranges
+        if (PlayerServerEvents.isBot(playerName) || com.solegendary.reignofnether.ai.BotServerEvents.isControlled(playerName))
+            return true;
         for (ServerPlayer sp : serverLevel.players())
             if (sp.getName().getString().equals(playerName))
                 return isBlockVisibleFor(sp, x, z);
@@ -293,7 +285,7 @@ public class FogOfWarServerEvents {
                 || pos.getMaxBlockZ() + 1 <= border.getMinZ() || pos.getMinBlockZ() >= border.getMaxZ())
             return false;
 
-        ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
+        ClientboundLevelChunkWithLightPacket snap = ReplaySnapshot.get(pos);
         if (snap != null)
             sp.connection.send(snap);
         if (isChunkSentFor(sp, pos))
@@ -346,6 +338,13 @@ public class FogOfWarServerEvents {
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
     }
 
+    // a replay starting mid-match needs everyone's current vision; it only goes out again once it changes
+    public static void resendFogState(ServerPlayer sp) {
+        Set<ChunkPos> sent = playerEdgeChunks.get(sp.getUUID());
+        if (sent != null && isFogActiveFor(sp))
+            FogChunksClientboundPacket.send(sp, sent, playerEdgeMasks.getOrDefault(sp.getUUID(), Map.of()));
+    }
+
     private static void clearPlayerVision(UUID playerId) {
         playerLiveChunks.remove(playerId);
         playerEdgeChunks.remove(playerId);
@@ -356,8 +355,8 @@ public class FogOfWarServerEvents {
     public static void onPlayerDisconnect(UUID playerId) {
         clearPlayerVision(playerId);
         lastChunkRequestTick.remove(playerId);
-        fogHiddenPlayers.remove(playerId); // the client's mirror also resets on logout
-        lastFogViewToggleTick.remove(playerId);
+        hasFogCache.remove(playerId);
+        spectatorViews.remove(playerId);
     }
 
     // drop bookkeeping so re-entering orthoview later resends a full vision set
@@ -383,26 +382,9 @@ public class FogOfWarServerEvents {
     public static void onServerStarted(ServerStartedEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null && WorldBorderServerEvents.isRtsOptimisedMap(level))
-            FogChunkSnapshot.rebuildIndex(level);
+            ReplaySnapshot.rebuildIndex(level);
     }
 
-    // statics outlive the world: clear them so the next world opened in this game starts clean
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        FogChunkSnapshot.forget();
-        enabled = false;
-        playerLiveChunks.clear();
-        playerEdgeChunks.clear();
-        playerEdgeMasks.clear();
-        pendingResends.clear();
-        lastChunkRequestTick.clear();
-        fogHiddenPlayers.clear();
-        lastFogViewToggleTick.clear();
-        revealedPlayerNames.clear();
-        revealedUnitExpiryTick.clear();
-        neutralFogUnits.clear();
-        startingPlayers.clear();
-    }
 
     public static void setEnabled(boolean value) {
         if (!value && isForceFog()) {
@@ -410,7 +392,7 @@ public class FogOfWarServerEvents {
             return;
         }
         // Fog only works on an RTS-optimised map: the small world border bounds the play area, so the
-        // pre-match snapshot (FogChunkSnapshot) can cover it in full and dark chunks can never fall back
+        // pre-match snapshot (ReplaySnapshot) can cover it in full and dark chunks can never fall back
         // to the live world on reload/relog. On a vanilla-sized border the snapshot can't be captured, so
         // refuse rather than silently leaking. A null serverLevel can't be verified, so it's refused too.
         if (value && !WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
@@ -431,14 +413,17 @@ public class FogOfWarServerEvents {
         playerEdgeChunks.clear();
         playerEdgeMasks.clear();
         pendingResends.clear();
+        if (!enabled) spectatorViews.clear(); // clients drop theirs on disable too
 
         syncClientFog();
 
-        // fog means a competitive match: enemy picks hidden (the host can turn it back off)
+        // fog means a competitive match: enemy picks hidden and all chat off (the host can turn either back)
         if (!wasEnabled && enabled && serverLevel != null) {
             serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
             GameruleClientboundPacket.setHideEnemyPicks(true);
             StartPosServerEvents.syncAll(true);
+            serverLevel.getGameRules().getRule(GameRuleRegistrar.ALL_CHAT).set(false, serverLevel.getServer());
+            GameruleClientboundPacket.setAllChat(false);
         }
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
@@ -467,6 +452,13 @@ public class FogOfWarServerEvents {
         return enabled;
     }
 
+    // a saved game had fog on: turn it back on now, the resume screen freezes ticks until the host resumes
+    public static void restoreOnLoad(ServerLevel level, boolean wasEnabled) {
+        serverLevel = level;
+        if (wasEnabled && !enabled)
+            setEnabled(true);
+    }
+
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
@@ -493,7 +485,9 @@ public class FogOfWarServerEvents {
                 refreshEntityTracking(sp);
         for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers) {
             // TODO: on server restart (or singleplayer map relog) unit ids change so fog units always get removed as soon as they're explored
-            PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
+            // every player's vision: only for those without fog, or enemies would see it
+            if (!isFogActiveFor(p))
+                PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
             for (int id : neutralFogUnits.keySet()) {
                 Vec3 center = neutralFogUnits.get(id).getCenter();
                 if (isBlockVisibleFor(p, (int) center.x, (int) center.z) && serverLevel.getEntity(id) == null) {
@@ -554,6 +548,14 @@ public class FogOfWarServerEvents {
                     b.centrePos.getX(), b.centrePos.getZ(), b.getSightRange());
         }
 
+        // living soldiers are eyes for their whole faction
+        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
+            String name = sp.getName().getString();
+            if (sp.gameMode.isSurvival() && PlayerRoles.roleOf(name) == PlayerRole.SOLDIER)
+                addViewer(viewersByOwner.computeIfAbsent(PlayerRoles.commanderOf(name), k -> new Long2IntOpenHashMap()),
+                        sp.blockPosition().getX(), sp.blockPosition().getZ(), PLAYER_SIGHT_BLOCKS);
+        }
+
         // Rasterise each owner's viewer circles ONCE into covered-column masks (chunkLong -> 16x16 bitmask),
         // reused across that owner, all its allies, and (if revealed) every other player.
         Map<String, Long2ObjectOpenHashMap<long[]>> coveredByOwner = new HashMap<>();
@@ -590,34 +592,22 @@ public class FogOfWarServerEvents {
                 }
                 continue;
             }
-            String ownerName = sp.getName().getString();
-            boolean isRts = PlayerServerEvents.isRTSPlayer(ownerName);
+            String playerName = sp.getName().getString();
+            // whose vision this player gets: their own, or for a spectator each player they're viewing
+            Set<String> views = spectatorViews.get(uuid);
+            Collection<String> povs = views != null && PlayerRoles.roleOf(playerName) == PlayerRole.SPECTATOR
+                    ? views : List.of(playerName);
 
             // Union this player's own + allied + revealed owners' covered masks (+ FPS self-bubble).
             Long2ObjectOpenHashMap<long[]> covered = new Long2ObjectOpenHashMap<>();
             if (!orthoviewUuids.contains(uuid) && sp.gameMode.isSurvival())
                 rasterizeCircle(covered, sp.blockPosition().getX(), sp.blockPosition().getZ(), PLAYER_SIGHT_BLOCKS);
-            mergeMasks(covered, coveredByOwner.get(ownerName));
-            // non-RTS players are treated as allied with every RTS player
-            Set<String> alliedOwners = isRts ? collectAlliedOwners(ownerName, viewersByOwner.keySet())
-                    : collectRtsOwners(viewersByOwner.keySet());
-            for (String ally : alliedOwners)
-                mergeMasks(covered, coveredByOwner.get(ally));
-            for (String revealed : revealedOwners)
-                mergeMasks(covered, coveredByOwner.get(revealed)); // no-op if already merged as self/ally
-            // enemy units that attacked this player (or an ally) out of the fog
-            mergeMasks(covered, revealedMasksByTarget.get(ownerName));
-            for (String ally : alliedOwners)
-                mergeMasks(covered, revealedMasksByTarget.get(ally));
+            mergeVision(covered, povs, viewersByOwner.keySet(), coveredByOwner, revealedMasksByTarget, revealedOwners);
 
             // Classify: fully-covered chunk -> live; partially-covered -> edge (keep its column mask).
             Set<ChunkPos> live = new HashSet<>();
             Map<ChunkPos, long[]> edge = new HashMap<>();
-            for (Long2ObjectMap.Entry<long[]> e : covered.long2ObjectEntrySet()) {
-                ChunkPos cp = new ChunkPos(e.getLongKey());
-                if (maskFull(e.getValue())) live.add(cp);
-                else edge.put(cp, e.getValue());
-            }
+            classify(covered, live, edge);
             Set<ChunkPos> sent = new HashSet<>(live);
             sent.addAll(edge.keySet());
 
@@ -665,6 +655,7 @@ public class FogOfWarServerEvents {
             playerLiveChunks.put(uuid, live);
             playerEdgeChunks.put(uuid, sent);
             playerEdgeMasks.put(uuid, edge);
+            FogRestore.onVision(uuid, sent);
 
             // The mask packet must go out BEFORE the chunk resends: the client merges each incoming chunk
             // against its CURRENT mask (restoring fogged columns, see ClientChunkCacheMixin), so it needs
@@ -680,6 +671,71 @@ public class FogOfWarServerEvents {
                 sp.connection.send(new ClientboundLevelChunkWithLightPacket(chunk, level.getLightEngine(),
                         updateLight ? null : noLight, updateLight ? null : noLight));
             }
+        }
+        recordOfflineVision(viewersByOwner.keySet(), coveredByOwner, revealedMasksByTarget, revealedOwners);
+    }
+
+    // Disconnected RTS players' vision, recorded as if sent so a reconnect (FogRestore) knows what their units saw
+    // while they were away. Nothing is sent to anyone.
+    private static void recordOfflineVision(Set<String> owners, Map<String, Long2ObjectOpenHashMap<long[]>> coveredByOwner,
+                                            Map<String, Long2ObjectOpenHashMap<long[]>> revealedMasksByTarget,
+                                            List<String> revealedOwners) {
+        if (!ReplayServerEvents.isRecording()) {
+            offlineVision.clear();
+            return;
+        }
+        Set<String> online = new HashSet<>();
+        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers())
+            online.add(sp.getName().getString());
+        List<String> offline = new ArrayList<>();
+        synchronized (PlayerServerEvents.rtsPlayers) {
+            for (RTSPlayer p : PlayerServerEvents.rtsPlayers)
+                if (!p.isBot() && !online.contains(p.name))
+                    offline.add(p.name);
+        }
+        offlineVision.keySet().retainAll(offline);
+        for (String name : offline) {
+            Long2ObjectOpenHashMap<long[]> covered = new Long2ObjectOpenHashMap<>();
+            mergeVision(covered, List.of(name), owners, coveredByOwner, revealedMasksByTarget, revealedOwners);
+            Set<ChunkPos> live = new HashSet<>();
+            Map<ChunkPos, long[]> edge = new HashMap<>();
+            classify(covered, live, edge);
+            Set<ChunkPos> sent = new HashSet<>(live);
+            sent.addAll(edge.keySet());
+            FogChunksClientboundPacket last = offlineVision.get(name);
+            if (last != null && last.bright.equals(sent) && masksEqual(last.edgeMasks, edge))
+                continue;
+            FogChunksClientboundPacket packet = new FogChunksClientboundPacket(sent, edge);
+            offlineVision.put(name, packet);
+            ReplayServerEvents.recordFor(name, packet);
+        }
+    }
+
+    // a pov's vision: its faction's own, its allies', and enemies revealed to it or to everyone
+    private static void mergeVision(Long2ObjectOpenHashMap<long[]> covered, Collection<String> povs, Set<String> owners,
+                                    Map<String, Long2ObjectOpenHashMap<long[]>> coveredByOwner,
+                                    Map<String, Long2ObjectOpenHashMap<long[]>> revealedMasksByTarget,
+                                    List<String> revealedOwners) {
+        for (String pov : povs) {
+            String ownerName = PlayerRoles.commanderOf(pov); // the faction whose vision this pov gets
+            mergeMasks(covered, coveredByOwner.get(ownerName));
+            Set<String> alliedOwners = collectSharedOwners(pov, ownerName, owners);
+            for (String ally : alliedOwners)
+                mergeMasks(covered, coveredByOwner.get(ally));
+            // enemy units that attacked this player (or an ally) out of the fog
+            mergeMasks(covered, revealedMasksByTarget.get(ownerName));
+            for (String ally : alliedOwners)
+                mergeMasks(covered, revealedMasksByTarget.get(ally));
+        }
+        for (String revealed : revealedOwners)
+            mergeMasks(covered, coveredByOwner.get(revealed)); // no-op if already merged as self/ally
+    }
+
+    private static void classify(Long2ObjectOpenHashMap<long[]> covered, Set<ChunkPos> live, Map<ChunkPos, long[]> edge) {
+        for (Long2ObjectMap.Entry<long[]> e : covered.long2ObjectEntrySet()) {
+            ChunkPos cp = new ChunkPos(e.getLongKey());
+            if (maskFull(e.getValue())) live.add(cp);
+            else edge.put(cp, e.getValue());
         }
     }
 
@@ -778,17 +834,11 @@ public class FogOfWarServerEvents {
         return true;
     }
 
-    private static Set<String> collectAlliedOwners(String me, Set<String> owners) {
+    // other owners whose vision this player gets (allies, through Sharing)
+    private static Set<String> collectSharedOwners(String player, String faction, Set<String> owners) {
         Set<String> out = new HashSet<>();
         for (String o : owners)
-            if (!o.equals(me) && AlliancesServerEvents.isAllied(me, o)) out.add(o);
-        return out;
-    }
-
-    private static Set<String> collectRtsOwners(Set<String> owners) {
-        Set<String> out = new HashSet<>();
-        for (String o : owners)
-            if (PlayerServerEvents.isRTSPlayer(o)) out.add(o);
+            if (!o.equals(faction) && Sharing.shares(o, player, Share.VISION)) out.add(o);
         return out;
     }
 

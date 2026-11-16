@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.BackToWorkUnit;
@@ -62,6 +65,16 @@ import java.util.List;
 import java.util.UUID;
 
 public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, RangedAttackerUnit, VillagerDataHolder, ConvertableUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return isUsingBow() ? BOW_ROLES : ROLES;
+    }
+
+    private static final Set<UnitRole> BOW_ROLES = Set.of(UnitRole.RANGED, UnitRole.ANTI_AIR);
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new BackToWorkUnit(), Keybindings.build);

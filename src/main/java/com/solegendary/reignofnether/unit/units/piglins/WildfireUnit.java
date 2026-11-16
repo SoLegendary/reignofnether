@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -71,6 +73,14 @@ import java.util.Set;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.HERO, UnitRole.RANGED, UnitRole.ANTI_AIR, UnitRole.CASTER, UnitRole.AOE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public final Abilities ABILITIES = new Abilities(
             List.of(
                     new Pair<>(new MoltenBomb(), Keybindings.abilitySlot1),

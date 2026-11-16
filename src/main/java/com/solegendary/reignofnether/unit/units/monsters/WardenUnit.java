@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.SonicBoom;
@@ -57,6 +59,14 @@ import java.util.List;
 import java.util.Set;
 
 public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.FRONTLINE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new SonicBoom(), Keybindings.abilitySlot1);
