@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -56,16 +57,32 @@ public class BuildingClientboundPacket {
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
             boolean placingSeenBuilding = b.seenByPlayers.contains(sp.getName().getString()) &&
                     List.of(BuildingAction.PLACE, BuildingAction.PLACE_CUSTOM).contains(packet.action);
+            boolean alliedOrOwned = MiscUtil.isAlliedOrOwned(b.level, sp.getName().getString(), b.ownerName);
             boolean canSeeBuilding = FogOfWarServerEvents.canPlayerSeeBuilding(sp, b);
-            if (placingSeenBuilding && !canSeeBuilding) { // strip unnecessary info so players don't intentionally relog to gain data
-                packet.isBuilt = true;
-                packet.upgradeLevel = 0;
-                packet.portalType = PortalPlacement.PortalType.BASIC;
-                packet.portalDestination = new BlockPos(0,0,0);
+            BuildingClientboundPacket toSend = packet;
+            if (placingSeenBuilding && !canSeeBuilding && !alliedOrOwned) {
+                // strip unnecessary info so players don't intentionally relog to gain data
+                toSend = new BuildingClientboundPacket(
+                        packet.action,
+                        packet.itemKey,
+                        packet.itemName,
+                        packet.buildingPos,
+                        packet.rotation,
+                        packet.ownerName,
+                        packet.scenarioRoleIndex,
+                        packet.blocksPlaced,
+                        packet.numQueuedBlocks,
+                        packet.isDiagonalBridge,
+                        0,
+                        true,
+                        PortalPlacement.PortalType.BASIC,
+                        new BlockPos(0,0,0)
+                );
+                toSend.partialBlocksDestroyed = packet.partialBlocksDestroyed;
             }
-            if (canSeeBuilding || placingSeenBuilding) {
+            if (canSeeBuilding || placingSeenBuilding || alliedOrOwned) {
                 b.seenByPlayers.add(sp.getName().getString());
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), toSend);
             }
         }
     }

@@ -34,8 +34,10 @@ World of Rot
 
 Balance
 -------
-
-
+[✅] Ghost cloak duration reduced from 15s to 10s, but now grants 50% evasion chance
+[✅] Ice wand duration on heroes reduced from 7.5s to 5s
+[✅] The hitbox size of all hero units have been set to 1x1x2 to avoid issues with garrisons and terrain
+    - visual size is unchanged
 
 Quality of Life
 ---------------
@@ -61,12 +63,12 @@ Bugfixes
 [✅] Fixed units getting stuck on half-slab gaps
 [✅] Fixed units getting stuck on the grand library glass panes
 [✅] Fixed Wildfires being unable to get item drop
-[🟡] Fixed ghasts fireball impacts dealing too little damage
-[❌] Disconnecting no longer causes any upgraded buildings to show as unupgraded
+[✅] Fixed issues with shift-clicking to deselect units with the bottom menu
+[✅] Fixed ghasts fireballs dealing too little damage
+    - they dealt about 6-7 on direct impact, and now deal 8-9, matching the tooltip damage
+[🟡] Relogging no longer causes upgraded buildings to show as unupgraded when fog of war is on
 [❌] Dying in RTS mode no longer bugs out your screen
 [❌] Basic pathfinding for flying units to avoid tall structures
-[✅] The hitbox size of all hero units have been set to 1x1x2 to avoid issues with garrisons and terrain
-[❌] Fixed issues with shift-clicking in the bottom menu to deselect units from a group
 
 [❌] WW can't attack enemies in garrisons?
 

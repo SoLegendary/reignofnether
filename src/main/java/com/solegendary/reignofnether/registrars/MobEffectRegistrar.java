@@ -99,8 +99,9 @@ public class MobEffectRegistrar {
             .addAttributeModifier(AttributeRegistrar.FASTER_COOLDOWNS.get(), "c967f9cf-ef58-46be-a775-d69c80c688ed", 0.5f, AttributeModifier.Operation.ADDITION)
             .addAttributeModifier(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), "e47194b6-8fc3-42c1-99fb-4957cbaa23eb", 1.0, AttributeModifier.Operation.ADDITION));
 
-    // no knockback taken or received, not pushable
+    // no knockback taken or received, not pushable, 30% evasion
     public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
+            .addAttributeModifier(AttributeRegistrar.EVASION_CHANCE.get(), "5244c70e-8337-4555-bca5-94cedda427da", UnitItems.GHOST_CLOAK_EVASION_CHANCE, AttributeModifier.Operation.ADDITION)
             .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "709b8a00-a856-4161-b32a-32c4970c1490", 1.0f, AttributeModifier.Operation.ADDITION));
 
     // temporary night zone

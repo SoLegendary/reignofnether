@@ -342,7 +342,8 @@ public class UnitItems {
             })
             .build();
 
-    private static final int GHOST_CLOAK_DURATION_SECONDS = 15;
+    private static final int GHOST_CLOAK_DURATION_SECONDS = 10;
+    public static final float GHOST_CLOAK_EVASION_CHANCE = 0.5f;
     public static final UnitItem GHOST_CLOAK = UnitItemBuilder.of(ItemRegistrar.GHOST_CLOAK.get())
             .descId("ghost_cloak")
             .type(UnitItemType.ACTIVE)
@@ -397,7 +398,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
             .cooldownTicks(45 * 20)
-            .manaCost(25)
+            .manaCost(45)
             .range(10)
             .showRangeCircle()
             .onUseEntity((unit, entity) -> {
@@ -408,7 +409,7 @@ public class UnitItems {
 
                         SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
                         int duration = ICE_WAND_DURATION_SECONDS * 20;
-                        if (le instanceof HeroUnit) duration /= 2;
+                        if (le instanceof HeroUnit) duration /= 3;
                         BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
                                 BlockRegistrar.PROJECTILE_PASSABLE_ICE.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
                         BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),

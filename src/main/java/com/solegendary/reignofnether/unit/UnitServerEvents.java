@@ -993,9 +993,9 @@ public class UnitServerEvents {
             return;
         }
 
-        // support ghast bonus strength
+        // support ghast bonus strength and normalise it to tooltip damage (actual direct hit does about 10-11 damage, tooltip is 8)
         if (evt.getSource().getEntity() instanceof GhastUnit ghastUnit) {
-            evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
+            evt.setAmount(evt.getAmount() * 0.75f * ghastUnit.getEffectiveDamageMultiplier());
         }
 
         // checked via tag rather than the pillager's current state, as it may have dismounted or died since firing
