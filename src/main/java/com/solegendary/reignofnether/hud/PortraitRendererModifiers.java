@@ -134,7 +134,7 @@ public class PortraitRendererModifiers {
             yOffset = -6;
             scale = -24;
         } else if (entity instanceof WildfireUnit) {
-            yOffset = -30;
+            yOffset = -38;
             scale = -32;
         } else if (entity instanceof EnchanterUnit) {
             yOffset = -12;

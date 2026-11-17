@@ -909,8 +909,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.15f, 0, 0.15f);
-        aabb.setMaxY(aabb.maxY + 0.4875f);
-        return aabb;
+        AABB aabb = this.getBoundingBox().inflate(-0.05f, 0, -0.05f);
+        return aabb.setMaxY(aabb.maxY + 0.5f);
     }
 }

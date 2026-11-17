@@ -677,9 +677,8 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.3f, 0, 0.3f);
-        aabb.setMaxY(aabb.maxY + 0.8f);
-        return aabb;
+        AABB aabb = this.getBoundingBox().inflate(0.5f, 0, 0.5f);
+        return aabb.setMaxY(aabb.maxY + 0.7f);
     }
 
     @Override

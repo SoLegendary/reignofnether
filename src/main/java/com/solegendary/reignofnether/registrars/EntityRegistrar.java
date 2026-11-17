@@ -25,6 +25,9 @@ public class EntityRegistrar {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ReignOfNether.MOD_ID);
 
     private static final int UNIT_CLIENT_TRACKING_RANGE = 100;
+    // all hero units share the same hitbox; their visual selection boxes are set in getInflatedSelectionBox()
+    private static final float HERO_WIDTH = 1.0f;
+    private static final float HERO_HEIGHT = 2.0f;
 
     public static final RegistryObject<EntityType<ZombieVillagerUnit>> ZOMBIE_VILLAGER_UNIT = ENTITIES.register("zombie_villager_unit",
             () -> EntityType.Builder.of(ZombieVillagerUnit::new, MobCategory.CREATURE)
@@ -291,48 +294,44 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<RoyalGuardUnit>> ROYAL_GUARD_UNIT = ENTITIES.register("royal_guard_unit",
             () -> EntityType.Builder.of(RoyalGuardUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.VINDICATOR.getWidth(),
-                            EntityType.VINDICATOR.getHeight())
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard_unit").toString()));
 
     public static final RegistryObject<EntityType<EnchanterUnit>> ENCHANTER_UNIT = ENTITIES.register("enchanter_unit",
             () -> EntityType.Builder.of(EnchanterUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.VINDICATOR.getWidth(),
-                            EntityType.VINDICATOR.getHeight())
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanter_unit").toString()));
 
     public static final RegistryObject<EntityType<NecromancerUnit>> NECROMANCER_UNIT = ENTITIES.register("necromancer_unit",
             () -> EntityType.Builder.of(NecromancerUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.SKELETON.getWidth() * NecromancerRenderer.SCALE_MULT,
-                            EntityType.SKELETON.getHeight() * NecromancerRenderer.SCALE_MULT)
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer_unit").toString()));
 
     public static final RegistryObject<EntityType<WretchedWraithUnit>> WRETCHED_WRAITH_UNIT = ENTITIES.register("wretched_wraith_unit",
             () -> EntityType.Builder.of(WretchedWraithUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight())
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretched_wraith_unit").toString()));
 
     public static final RegistryObject<EntityType<PiglinMerchantUnit>> PIGLIN_MERCHANT_UNIT = ENTITIES.register("piglin_merchant_unit",
             () -> EntityType.Builder.of(PiglinMerchantUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant_unit").toString()));
 
     public static final RegistryObject<EntityType<WildfireUnit>> WILDFIRE_UNIT = ENTITIES.register("wildfire_unit",
             () -> EntityType.Builder.of(WildfireUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.BLAZE.getWidth() * WildfireRenderer.SCALE_MULT,
-                            EntityType.BLAZE.getHeight() * WildfireRenderer.SCALE_MULT)
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .fireImmune()
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wildfire_unit").toString()));
 
     public static final RegistryObject<EntityType<WitherbornUnit>> WITHERBORN_UNIT = ENTITIES.register("witherborn_unit",
             () -> EntityType.Builder.of(WitherbornUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight() + 0.5f)
+                    .sized(HERO_WIDTH, HERO_HEIGHT)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_unit").toString()));
 
