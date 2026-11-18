@@ -569,7 +569,7 @@
   "abilities.reignofnether.world_of_rot": "腐化寰宇（终极技能）",
   "abilities.reignofnether.world_of_rot.stats": "\uE004  %d 秒   \uE008  %d",
   "abilities.reignofnether.world_of_rot.tooltip1": "以污浊腐化污染世界，使场上所有敌方单位",
-  "abilities.reignofnether.world_of_rot.tooltip2": "虚弱并减速至 %d%%，持续 %d 秒。在技能期间死亡的敌方单位会延长此技能，",
+  "abilities.reignofnether.world_of_rot.tooltip2": "虚弱并减速 %d%%，持续 %d 秒。在技能期间死亡的敌方单位会延长此技能，",
   "abilities.reignofnether.world_of_rot.tooltip3": "最多延长至 %d 秒。越强的单位延长时间越多。",
   "abilities.reignofnether.intense_heat": "极致高温（被动技能）",
   "abilities.reignofnether.intense_heat.tooltip1": "距离野火 %d 格范围内的敌方单位，",
