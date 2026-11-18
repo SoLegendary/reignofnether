@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.ItemStack;
@@ -207,6 +208,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
+
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()

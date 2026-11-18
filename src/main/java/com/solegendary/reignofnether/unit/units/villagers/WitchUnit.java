@@ -26,6 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -222,6 +223,9 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
         this.level().addFreshEntity(thrownPotion);
     }
+
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()

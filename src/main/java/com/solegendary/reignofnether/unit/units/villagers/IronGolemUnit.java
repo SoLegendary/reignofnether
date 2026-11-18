@@ -29,6 +29,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -182,6 +183,9 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
+
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()

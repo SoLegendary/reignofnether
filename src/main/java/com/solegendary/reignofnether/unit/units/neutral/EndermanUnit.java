@@ -23,6 +23,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -194,6 +195,9 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
+
+    @Override // prevent vanilla logic for picking up items
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()
