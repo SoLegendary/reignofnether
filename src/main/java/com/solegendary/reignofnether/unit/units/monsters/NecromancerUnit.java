@@ -662,7 +662,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(-0.125f, 0, -0.125f);
+        AABB aabb = this.getBoundingBox().inflate(-0.075f, 0, -0.075f);
         return aabb.setMaxY(aabb.maxY + 0.4875f);
     }
 }

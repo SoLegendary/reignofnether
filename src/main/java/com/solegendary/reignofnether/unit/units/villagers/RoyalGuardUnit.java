@@ -801,7 +801,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(-0.05f, 0, -0.05f);
+        AABB aabb = this.getBoundingBox().inflate(0f, 0, 0f);
         return aabb.setMaxY(aabb.maxY + 0.5f);
     }
 

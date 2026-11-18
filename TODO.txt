@@ -55,6 +55,8 @@ Quality of Life
 
 [❌] Thin highlight on targetable mobs when cursor action is a buff (like enchanter abilities)
 [✅] Added spawn eggs for the Enchanter, Wretched Wraith and Wildfire
+[✅] Updated the link to the map pack ingame to 2.2a to a new curseforge project:
+    - https://www.curseforge.com/minecraft/worlds/reign-of-nether-official-map-pack
 
 Bugfixes
 --------
@@ -66,10 +68,11 @@ Bugfixes
 [✅] Fixed issues with shift-clicking to deselect units with the bottom menu
 [✅] Fixed ghasts fireballs dealing too little damage
     - they dealt about 6-7 on direct impact, and now deal 8-9, matching the tooltip damage
+[✅] Fixed ranged heroes not being affected by lifesteal
 [🟡] Relogging no longer causes upgraded buildings to show as unupgraded when fog of war is on
 [❌] Dying in RTS mode no longer bugs out your screen
 [❌] Basic pathfinding for flying units to avoid tall structures
-
+[🟡] You can now pick up items that are overlapping a building
 [❌] WW can't attack enemies in garrisons?
 
 Languages

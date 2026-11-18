@@ -1093,7 +1093,7 @@ public class UnitServerEvents {
                 RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            if (evt.getSource().is(DamageTypes.MOB_ATTACK)) {
+            if (evt.getSource().is(DamageTypes.MOB_ATTACK) || evt.getSource().is(DamageTypes.MOB_PROJECTILE)) {
                 float lifeDmgPerc = aUnit.getLifeStealPercent();
                 if (lifeDmgPerc > 0) {
                     ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);

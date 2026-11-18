@@ -629,7 +629,7 @@ public class WitherbornUnit extends WitherSkeleton implements Unit, AttackerUnit
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.15f, 0, 0.15f);
+        AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
         return aabb.setMaxY(aabb.maxY + 0.9f);
     }
 }

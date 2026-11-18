@@ -26,7 +26,7 @@ public class EntityRegistrar {
 
     private static final int UNIT_CLIENT_TRACKING_RANGE = 100;
     // all hero units share the same hitbox; their visual selection boxes are set in getInflatedSelectionBox()
-    private static final float HERO_WIDTH = 1.0f;
+    private static final float HERO_WIDTH = 0.9f;
     private static final float HERO_HEIGHT = 2.0f;
 
     public static final RegistryObject<EntityType<ZombieVillagerUnit>> ZOMBIE_VILLAGER_UNIT = ENTITIES.register("zombie_villager_unit",

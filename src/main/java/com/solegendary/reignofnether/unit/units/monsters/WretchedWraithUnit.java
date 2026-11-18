@@ -807,7 +807,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
+        AABB aabb = this.getBoundingBox().inflate(0.25f, 0, 0.25f);
         return aabb.setMaxY(aabb.maxY + 1.5f);
     }
 

@@ -705,7 +705,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.4f, 0, 0.4f);
+        AABB aabb = this.getBoundingBox().inflate(0.45f, 0, 0.45f);
         return aabb.setMaxY(aabb.maxY + 1.0f);
     }
 

@@ -105,6 +105,8 @@ public class BuildingClientEvents {
     // can only be one preselected building as you can't box-select them like units
     // non-bridge buildings are prioritised over bridges at the same location
     public static BuildingPlacement getPreselectedBuilding() {
+        if (!ItemClientEvents.getPreselectedItems().isEmpty())
+            return null;
         BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
         BuildingPlacement preSelBridge = null;
         for (BuildingPlacement building : buildings) {
