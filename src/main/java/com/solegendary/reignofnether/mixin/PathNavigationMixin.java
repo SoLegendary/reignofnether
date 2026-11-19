@@ -34,6 +34,9 @@ public class PathNavigationMixin {
     @Unique
     private boolean reignofnether$isWideUnit() {
         if (mob instanceof SpiderUnit spider && spider.isWallClimbing()) return false;
+        // The wide-unit relaxations below are for ground ledges and drops. A flyer's path is cleared in 3D, so
+        // advancing a node early only cuts a corner (eg. turning toward the far side of a wall from 3 blocks below it).
+        if (mob instanceof Unit unit && unit.isFlyingUnit()) return false;
         return mob instanceof Unit && mob.getBbWidth() > 1.0f;
     }
 

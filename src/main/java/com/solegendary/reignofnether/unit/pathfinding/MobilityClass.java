@@ -12,7 +12,9 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.monster.Drowned;
 
 public enum MobilityClass {
-    HUMANOID, AQUATIC, LARGE, FIRE_IMMUNE;
+    // FLYING is never returned by of(): the flying move goal requests it explicitly (see FlyingPathfinder), and
+    // it's searched by FlyingAStar, which ignores terrain kinds, so costFor is never consulted for it
+    HUMANOID, AQUATIC, LARGE, FIRE_IMMUNE, FLYING;
 
     public static MobilityClass of(Unit unit) {
         boolean hasMagmaBoots = unit instanceof UnitInventory inv && inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS);

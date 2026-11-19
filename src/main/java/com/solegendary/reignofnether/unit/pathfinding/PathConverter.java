@@ -31,6 +31,9 @@ public final class PathConverter {
     private static final double DROP_CLEAR_MARGIN = 0.5;
 
     public static Path toMcPath(List<BlockPos> waypoints, BlockPos target, boolean reached, WalkabilityView view) {
+        if (view != null && view.mobility() == MobilityClass.FLYING)
+            return FlyingPathfinder.toMcPath(waypoints, target, reached);
+
         ArrayList<Node> nodes = new ArrayList<>(waypoints.size());
         for (BlockPos bp : waypoints) {
             Node n = new Node(bp.getX(), bp.getY(), bp.getZ());

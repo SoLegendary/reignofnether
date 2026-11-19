@@ -74,7 +74,10 @@ Bugfixes
 [✅] You can now pick up items that are overlapping a building
 [✅] Iron golems and wardens no longer pick up hero items automatically
 [🟡] Relogging no longer causes upgraded buildings to show as unupgraded when fog of war is on
-[❌] Basic pathfinding for flying units to avoid tall structures
+[🟡] Basic pathfinding for flying units to avoid tall structures
+    [❌] Test with flyingMaxYLevel
+    [❌] Fix ghasts
+    [❌] Retest all regular pathfinding
 [❌] Dying in survival mode no longer bugs out your screen
 
 

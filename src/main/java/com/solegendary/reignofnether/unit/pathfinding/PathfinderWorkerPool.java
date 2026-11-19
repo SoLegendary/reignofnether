@@ -165,6 +165,12 @@ public final class PathfinderWorkerPool {
     }
 
     public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, BooleanSupplier valid, PathCallback onReady) {
+        submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, maxNodes, Integer.MAX_VALUE, valid, onReady);
+    }
+
+    // flyingMaxY: the highest cell a MobilityClass.FLYING search may put the unit's feet in (the flyingMaxYLevel
+    // gamerule). Ignored for every other mobility.
+    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, int flyingMaxY, BooleanSupplier valid, PathCallback onReady) {
         if (POOL == null) {
             onReady.onPath(null, false);
             return;
@@ -178,7 +184,7 @@ public final class PathfinderWorkerPool {
         int dilation = PathfinderConfig.dilationFor(start, target);
         ChunkSnapshot.CaptureRegion region = ChunkSnapshot.regionFor(level, start, target, dilation);
         BUILD_QUEUE.add(new PendingBuild(level, start, target, reach, mobility, clearanceCells,
-                footprintRadius, fireCost, canClimb, maxNodes, region, valid, onReady, System.nanoTime()));
+                footprintRadius, fireCost, canClimb, maxNodes, flyingMaxY, region, valid, onReady, System.nanoTime()));
     }
 
     // Classify up to maxChunkBuildsPerTick cold chunks across parked requests this tick. Cache hits are free
@@ -254,6 +260,8 @@ public final class PathfinderWorkerPool {
         final BlockPos target = pb.target;
         final int reach = pb.reach;
         final int maxNodes = pb.maxNodes;
+        final boolean flying = pb.mobility == MobilityClass.FLYING;
+        final int flyingMaxY = pb.flyingMaxY;
         final PathCallback onReady = pb.onReady;
         final long submitNanos = pb.submitNanos;
         INFLIGHT.incrementAndGet();
@@ -270,8 +278,9 @@ public final class PathfinderWorkerPool {
                 BlockPos cur = start;
                 boolean reached = false;
                 for (int seg = 0; seg < segLimit; seg++) {
-                    GridAStar.Result r = GridAStar.search(snapshot, cur, target, reach,
-                            PathfinderConfig.MAX_RADIUS, maxNodes);
+                    GridAStar.Result r = flying
+                            ? FlyingAStar.search(snapshot, cur, target, reach, PathfinderConfig.MAX_RADIUS, maxNodes, flyingMaxY)
+                            : GridAStar.search(snapshot, cur, target, reach, PathfinderConfig.MAX_RADIUS, maxNodes);
                     if (seg == 0) {
                         combined.addAll(r.waypoints);
                     } else {
@@ -315,6 +324,7 @@ public final class PathfinderWorkerPool {
         final float fireCost;
         final boolean canClimb;
         final int maxNodes;
+        final int flyingMaxY;
         final ChunkSnapshot.CaptureRegion region;
         final BooleanSupplier valid;
         final PathCallback onReady;
@@ -322,7 +332,7 @@ public final class PathfinderWorkerPool {
         int cursor = 0;
 
         PendingBuild(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility,
-                     int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes,
+                     int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, int flyingMaxY,
                      ChunkSnapshot.CaptureRegion region, BooleanSupplier valid, PathCallback onReady, long submitNanos) {
             this.level = level;
             this.start = start;
@@ -334,6 +344,7 @@ public final class PathfinderWorkerPool {
             this.fireCost = fireCost;
             this.canClimb = canClimb;
             this.maxNodes = maxNodes;
+            this.flyingMaxY = flyingMaxY;
             this.region = region;
             this.valid = valid;
             this.onReady = onReady;
