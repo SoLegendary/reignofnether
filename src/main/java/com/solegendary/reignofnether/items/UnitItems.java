@@ -679,6 +679,7 @@ public class UnitItems {
             .range(ENDER_PEARL_RANGE)
             .pointDesc("item.reignofnether.ender_pearl.point1")
             .nonHeroUseable()
+            .noRandomDrop()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide())
@@ -702,6 +703,7 @@ public class UnitItems {
             .cooldownTicks(TNT_COOLDOWN_TICKS)
             .pointDesc("item.reignofnether.throwable_tnt.point1")
             .nonHeroUseable()
+            .noRandomDrop()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide())

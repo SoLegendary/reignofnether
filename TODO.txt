@@ -34,10 +34,12 @@ World of Rot
 
 Balance
 -------
-[✅] Ghost cloak duration reduced from 15s to 10s, but now grants 50% evasion chance
+[🟡] Ghost cloak duration reduced from 15s to 10s, but now grants 50% evasion chance
 [✅] Ice wand duration on heroes reduced from 7.5s to 5s
 [✅] The hitbox size of all hero units have been set to 1x1x2 to avoid issues with garrisons and terrain
-    - visual size is unchanged
+    - Visual sizes are unchanged
+[✅] TNT and enderpearls no longer drop from neutral enemies
+    - TNT was too difficult to balance, and enderpearls allowed heroes to get soft-locked
 
 Quality of Life
 ---------------
@@ -67,15 +69,14 @@ Bugfixes
 [✅] Fixed Wildfires being unable to get item drop
 [✅] Fixed issues with shift-clicking to deselect units with the bottom menu
 [✅] Fixed ghasts fireballs dealing too little damage
-    - they dealt about 6-7 on direct impact, and now deal 8-9, matching the tooltip damage
-[✅] Fixed ranged heroes not being affected by lifesteal
+    - They dealt about 6-7 on direct impact, and now deal 8-9, matching the tooltip damage
+[✅] Ranged heroes are now properly affected by lifesteal
 [✅] You can now pick up items that are overlapping a building
-[✅] Iron golems and wardens no longer hide the first resource they pick up
+[✅] Iron golems and wardens no longer pick up hero items automatically
 [🟡] Relogging no longer causes upgraded buildings to show as unupgraded when fog of war is on
-[❌] Dying in RTS mode no longer bugs out your screen
 [❌] Basic pathfinding for flying units to avoid tall structures
+[❌] Dying in survival mode no longer bugs out your screen
 
-[❌] Iron golems can pick up hero items automatically without backpacks?
 
 Languages
 ---------

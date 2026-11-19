@@ -1,4 +1,9 @@
 
+Misc
+----
+[❌] Static defense
+[❌] More cheese options?
+
 Fog of war
 ----------
 [❌] Add commands for revealing in fog, temporarily or permanently
