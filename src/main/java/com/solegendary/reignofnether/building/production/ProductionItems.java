@@ -20,6 +20,7 @@ public class ProductionItems {
     public static final CreeperProd CREEPER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper"), new CreeperProd());
     public static final WraithProd WRAITH = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith"), new WraithProd());
     public static final SkeletonProd SKELETON = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton"), new SkeletonProd());
+    public static final SkeletonVanguardProd SKELETON_VANGUARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton_vanguard"), new SkeletonVanguardProd());
     public static final BoggedProd BOGGED = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bogged"), new BoggedProd());
     public static final ZombieProd ZOMBIE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie"), new ZombieProd());
     public static final StrayProd STRAY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stray"), new StrayProd());
@@ -52,6 +53,7 @@ public class ProductionItems {
     public static final HoglinProd HOGLIN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "hoglin"), new HoglinProd());
     public static final BlazeProd BLAZE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blaze"), new BlazeProd());
     public static final WitherSkeletonProd WITHER_SKELETON = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wither_skeleton"), new WitherSkeletonProd());
+    public static final WitherbornProd WITHERBORN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn"), new WitherbornProd());
     public static final MagmaCubeProd MAGMA_CUBE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "magma_cube"), new MagmaCubeProd());
     public static final GhastProd GHAST = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ghast"), new GhastProd());
     public static final RoyalGuardProd ROYAL_GUARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard"), new RoyalGuardProd());
@@ -140,6 +142,7 @@ public class ProductionItems {
         CREEPER,
         WRAITH,
         SKELETON,
+        SKELETON_VANGUARD,
         BOGGED,
         ZOMBIE,
         STRAY,
@@ -171,6 +174,7 @@ public class ProductionItems {
         HOGLIN,
         BLAZE,
         WITHER_SKELETON,
+        WITHERBORN,
         MAGMA_CUBE,
         GHAST,
         ROYAL_GUARD,

@@ -24,6 +24,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.SKELETON.define(BUILDER);
         UnitCosts.STRAY.define(BUILDER);
         UnitCosts.BOGGED.define(BUILDER);
+        UnitCosts.SKELETON_VANGUARD.define(BUILDER);
         UnitCosts.HUSK.define(BUILDER);
         UnitCosts.DROWNED.define(BUILDER);
         UnitCosts.SPIDER.define(BUILDER);
@@ -61,6 +62,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.HOGLIN.define(BUILDER);
         UnitCosts.BLAZE.define(BUILDER);
         UnitCosts.WITHER_SKELETON.define(BUILDER);
+        UnitCosts.WITHERBORN.define(BUILDER);
         UnitCosts.GHAST.define(BUILDER);
         UnitCosts.MAGMA_CUBE.define(BUILDER);
         UnitCosts.PIGLIN_MERCHANT.define(BUILDER);
@@ -207,6 +209,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry SKELETON = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.SKELETON, "Skeleton Config");
         public static final ResourceCostConfigEntry STRAY = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.STRAY, "Stray Config");
         public static final ResourceCostConfigEntry BOGGED = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.BOGGED, "Bogged Config");
+        public static final ResourceCostConfigEntry SKELETON_VANGUARD = ResourceCostConfigEntry.Unit(100,75,0,35,3, ResourceCosts.SKELETON_VANGUARD, "Skeleton Vanguard Config");
         public static final ResourceCostConfigEntry HUSK = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.HUSK, "Husk Config");
         public static final ResourceCostConfigEntry DROWNED = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.DROWNED, "Drowned Config");
         public static final ResourceCostConfigEntry SPIDER = ResourceCostConfigEntry.Unit(80,20,20,25,2, ResourceCosts.SPIDER, "Spider Config");
@@ -219,7 +222,7 @@ public class ReignOfNetherCommonConfigs {
 
         public static final ResourceCostConfigEntry ZOMBIE_PIGLIN = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.ZOMBIE_PIGLIN, "Zombie Piglin Config");
         public static final ResourceCostConfigEntry ZOGLIN = ResourceCostConfigEntry.Unit(100,0,40,25,2, ResourceCosts.ZOGLIN, "Zoglin Config");
-
+        
         // VillagersFaction
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
         public static final ResourceCostConfigEntry SCOUT_DOG = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_DOG, "Scout Dog Config");
@@ -249,6 +252,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry MAGMA_CUBE = ResourceCostConfigEntry.Unit(40,40,40,25,2, ResourceCosts.MAGMA_CUBE, "Magma Cube Config");
         public static final ResourceCostConfigEntry PIGLIN_MERCHANT = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.PIGLIN_MERCHANT, "Piglin Merchant Config");
         public static final ResourceCostConfigEntry WILDFIRE = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.WILDFIRE, "Wildfire Config");
+        public static final ResourceCostConfigEntry WITHERBORN = ResourceCostConfigEntry.Unit(0,0,0,30,5, ResourceCosts.WITHERBORN, "Witherborn Config");
 
         public static final ResourceCostConfigEntry ENDERMAN = ResourceCostConfigEntry.Unit(75,75,75,35,3, ResourceCosts.ENDERMAN, "Enderman Config");
         public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.POLAR_BEAR, "Polar Bear Config");

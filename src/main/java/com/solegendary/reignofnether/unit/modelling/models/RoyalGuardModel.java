@@ -122,14 +122,10 @@ public class RoyalGuardModel<T extends Entity> extends KeyframeHierarchicalModel
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		RoyalGuardUnit royalGuard = ((RoyalGuardUnit) entity);
 
-		if (royalGuard.animateScale > 0 && royalGuard.animateScaleReducing) {
-			royalGuard.animateScale -= 0.02f;
-		}
-		if (royalGuard.animateScale <= 0) {
-			royalGuard.animateScale = 1.0f;
+		if (royalGuard.stopActiveAnimation) {
+			royalGuard.stopActiveAnimation = false;
 			royalGuard.activeAnimDef = null;
 			royalGuard.activeAnimState = null;
-			royalGuard.animateScaleReducing = false;
 			royalGuard.stopAllAnimations();
 		}
 
@@ -140,10 +136,10 @@ public class RoyalGuardModel<T extends Entity> extends KeyframeHierarchicalModel
 
 		// any once-off animation like attack or cast spell
 		if (royalGuard.activeAnimDef != null && royalGuard.activeAnimState != null && royalGuard.animateTicks > 0) {
-			restartThenAnimate(royalGuard, royalGuard.activeAnimState, royalGuard.activeAnimDef, ageInTicks, royalGuard.animateScale, royalGuard.animateSpeed);
+			restartThenAnimate(royalGuard, royalGuard.activeAnimState, royalGuard.activeAnimDef, ageInTicks, royalGuard.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(royalGuard, royalGuard.walkAnimState, ageInTicks);
 			animateWalk(RoyalGuardAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

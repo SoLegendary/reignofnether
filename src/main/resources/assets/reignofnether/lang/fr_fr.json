@@ -150,7 +150,7 @@
     "item.reignofnether.ice_wand": "Baguette de glace",
     "item.reignofnether.ice_wand.desc": "Domptez la puissance d'un blizzard glacial",
     "item.reignofnether.ice_wand.point1": "Gèle un ennemi dans un bloc de glace et le blesse pendant %ss",
-    "item.reignofnether.ice_wand.point2": "(Durée réduite de moitié sur les héros)",
+    "item.reignofnether.ice_wand.point2": "(Durée 1/3 pour les héros)",
     "item.reignofnether.updraft_tome": "Tome d'ascension",
     "item.reignofnether.updraft_tome.desc": "Domptez la puissance d'un ouragan effroyable",
     "item.reignofnether.updraft_tome.point1": "Fait léviter jusqu'à 5 ennemis dans la zone ciblée pendant %ss",

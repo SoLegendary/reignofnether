@@ -53,12 +53,19 @@ public final class GridNeighbors {
         return false;
     }
 
-    // Cells [fy+2 .. fy+clearance-1] must be clear for units taller than 2 cells (a 2-tall unit's head at fy+1
-    // is already covered by the feet cell being occupiable).
+    // Cells [fy+headCheckStart .. fy+clearance-1] must be clear for units taller than 2 cells (a 2-tall unit's head
+    // at fy+1 is already covered by the feet cell being occupiable).
     private static boolean headClear(WalkabilityView view, int cx, int fy, int cz, int clearance) {
-        for (int k = 2; k < clearance; k++)
+        for (int k = headCheckStart(clearance); k < clearance; k++)
             if (view.solidAt(cx, fy + k, cz)) return false;
         return true;
+    }
+
+    // First cell above the feet that a headroom check must cover. The classifier lets a half-height ceiling (top
+    // slab) into the head cell (fy+1) when the floor is half-height too, which only a 2-tall body fits under, so
+    // anything taller must also check the head cell itself.
+    public static int headCheckStart(int clearance) {
+        return clearance > 2 ? 1 : 2;
     }
 
     // Small A* cost nudging units toward open space (vanilla's "avoid box" malus). wideFits already guarantees

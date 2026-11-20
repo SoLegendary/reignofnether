@@ -53,6 +53,7 @@ import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
+import com.solegendary.reignofnether.unit.modelling.renderers.WitheringMarkRenderer;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.ArrayUtil;
@@ -1036,6 +1037,13 @@ public class UnitClientEvents {
         }
     }
 
+
+    @SubscribeEvent
+    public static void onRenderWitheringMarks(RenderLevelStageEvent evt) {
+        if (MC.level == null || evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
+            return;
+        WitheringMarkRenderer.render(evt.getPartialTick(), evt.getPoseStack(), MC.gameRenderer.getMainCamera());
+    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {

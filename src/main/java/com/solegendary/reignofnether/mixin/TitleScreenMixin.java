@@ -113,7 +113,7 @@ public class TitleScreenMixin extends Screen {
         this.mapsButton = new AbstractWidget(mapsButtonX, mapsButtonY, mapsButtonSize, mapsButtonSize, Component.empty()) {
             @Override
             public void onClick(double pMouseX, double pMouseY) {
-                openLink("https://www.curseforge.com/minecraft/mc-mods/reign-of-nether-rts-in-minecraft/files/8714818");
+                openLink("https://www.curseforge.com/minecraft/worlds/reign-of-nether-official-map-pack");
             }
             @Override
             protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {

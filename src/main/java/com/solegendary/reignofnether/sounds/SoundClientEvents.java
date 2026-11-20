@@ -45,6 +45,9 @@ public class SoundClientEvents {
     private static final int SOUND_MAX_STACKS = 10; // volume floors at diminish^maxStacks
 
     public static final float SOUND_RANGE = 96; // all sounds have this max range
+    private static final float SOUND_FULL_VOLUME_FRACTION = 0.25f; // sounds play at full volume within this fraction of the range
+    private static final float SOUND_FULL_VOLUME_RANGE = SOUND_RANGE * SOUND_FULL_VOLUME_FRACTION;
+    private static final float SOUND_FADE_RANGE = SOUND_RANGE - SOUND_FULL_VOLUME_RANGE; // volume fades linearly to 0 over this
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
@@ -129,7 +132,7 @@ public class SoundClientEvents {
 
         float dist = (float) Math.sqrt(listenerPos.distanceToSqr(bp.getCenter()));
         if (dist > SOUND_RANGE) return;
-        float attenuatedVolume = dist <= (SOUND_RANGE / 4) ? diminishedVolume : diminishedVolume * (1.0f - (dist - (SOUND_RANGE / 4)) / (((SOUND_RANGE * 3) / 4)));
+        float attenuatedVolume = dist <= SOUND_FULL_VOLUME_RANGE ? diminishedVolume : diminishedVolume * (1.0f - (dist - SOUND_FULL_VOLUME_RANGE) / SOUND_FADE_RANGE);
 
         level.playLocalSound(bp.getX(), bp.getY(), bp.getZ(), soundEvent, SoundSource.NEUTRAL, attenuatedVolume, 1.0F, false);
     }
@@ -258,6 +261,12 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.WINDCALLER_LIFT, SoundRegistrar.WINDCALLER_LIFT.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_YELL, SoundRegistrar.WINDCALLER_YELL.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_WIND_ATTACK, SoundRegistrar.WINDCALLER_WIND_ATTACK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_IDLE, SoundRegistrar.WITHERBORN_IDLE.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ATTACK, SoundRegistrar.WITHERBORN_ATTACK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_WITHERING_MARK, SoundRegistrar.WITHERBORN_WITHERING_MARK.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_SINGING, SoundRegistrar.WITHERBORN_SINGING.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ESSENCE_DRAIN_START, SoundRegistrar.WITHERBORN_ESSENCE_DRAIN_START.get());
+        SOUND_MAP.put(SoundAction.WITHERBORN_ESSENCE_DRAIN_LOOP, SoundRegistrar.WITHERBORN_ESSENCE_DRAIN_LOOP.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_COMMON, SoundRegistrar.ITEM_DROP_COMMON.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_RARE, SoundRegistrar.ITEM_DROP_RARE.get());
         SOUND_MAP.put(SoundAction.ITEM_DROP_LEGENDARY, SoundRegistrar.ITEM_DROP_LEGENDARY.get());

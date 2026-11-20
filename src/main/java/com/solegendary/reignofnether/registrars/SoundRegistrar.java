@@ -72,6 +72,10 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("blood_moon", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blood_moon")));
 
+    public static final RegistryObject<SoundEvent> WORLD_OF_ROT_SONG =
+            SOUND_EVENTS.register("world_of_rot", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "world_of_rot")));
+
     public static final RegistryObject<SoundEvent> VILLAGER_CALM_THEME_SONG =
             SOUND_EVENTS.register("sharpened_grassblades_calm", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sharpened_grassblades_calm")));
@@ -199,6 +203,30 @@ public class SoundRegistrar {
     public static final RegistryObject<SoundEvent> WINDCALLER_YELL =
             SOUND_EVENTS.register("windcaller_yell", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "windcaller_yell")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_IDLE =
+            SOUND_EVENTS.register("witherborn_idle", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_idle")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_ATTACK =
+            SOUND_EVENTS.register("witherborn_attack", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_attack")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_WITHERING_MARK =
+            SOUND_EVENTS.register("witherborn_withering_mark", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_withering_mark")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_SINGING =
+            SOUND_EVENTS.register("witherborn_singing", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_singing")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_ESSENCE_DRAIN_START =
+            SOUND_EVENTS.register("witherborn_essence_drain_start", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_essence_drain_start")));
+
+    public static final RegistryObject<SoundEvent> WITHERBORN_ESSENCE_DRAIN_LOOP =
+            SOUND_EVENTS.register("witherborn_essence_drain_loop", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witherborn_essence_drain_loop")));
 
     public static final RegistryObject<SoundEvent> ITEM_DROP_COMMON =
             SOUND_EVENTS.register("item_drop_common", () ->

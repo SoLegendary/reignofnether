@@ -122,14 +122,10 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 		this.rArm.visible = false;
 		this.lArm.visible = false;
 
-		if (enchanter.animateScale > 0 && enchanter.animateScaleReducing) {
-			enchanter.animateScale -= 0.02f;
-		}
-		if (enchanter.animateScale <= 0) {
-			enchanter.animateScale = 1.0f;
+		if (enchanter.stopActiveAnimation) {
+			enchanter.stopActiveAnimation = false;
 			enchanter.activeAnimDef = null;
 			enchanter.activeAnimState = null;
-			enchanter.animateScaleReducing = false;
 			enchanter.stopAllAnimations();
 		}
 
@@ -140,12 +136,12 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 
 		// any once-off animation like attack or cast spell
 		if (enchanter.activeAnimDef != null && enchanter.activeAnimState != null && enchanter.animateTicks > 0) {
-			restartThenAnimate(enchanter, enchanter.activeAnimState, enchanter.activeAnimDef, ageInTicks, enchanter.animateScale, enchanter.animateSpeed);
+			restartThenAnimate(enchanter, enchanter.activeAnimState, enchanter.activeAnimDef, ageInTicks, enchanter.animateSpeed);
 			this.rArm.visible = true;
 			this.lArm.visible = true;
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(enchanter, enchanter.walkAnimState, ageInTicks);
 			animateWalk(EnchanterAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

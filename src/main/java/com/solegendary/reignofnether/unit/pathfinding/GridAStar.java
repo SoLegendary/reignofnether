@@ -112,7 +112,7 @@ public final class GridAStar {
 
                 // stepping up also needs height clear above the origin so the body can rise into it
                 // (else a tall mob can't climb a ledge under an overhang).
-                if (DY[d] == 1 && riseBlocked(view, cur.x, cur.y, cur.z, clearance)) continue;
+                if (DY[d] == 1 && riseBlocked(view, cur.x, cur.y, cur.z, clearance, nx, nz)) continue;
 
                 if (GridNeighbors.diagonalBlocked(view, mob, cur.x, ny, cur.z, DX[d], DZ[d])) continue;
 
@@ -220,17 +220,27 @@ public final class GridAStar {
                                    : !headBlocked(view, x, y, z, clearance);
     }
 
-    // Cells [y+2 .. y+clearance-1] above the destination feet must be clear for a mob taller than 2 cells.
+    // Cells above the destination feet must be clear for a mob taller than 2 cells (see GridNeighbors.headCheckStart).
     private static boolean headBlocked(WalkabilityView view, int x, int y, int z, int clearance) {
-        for (int k = 2; k < clearance; k++)
+        for (int k = GridNeighbors.headCheckStart(clearance); k < clearance; k++)
             if (view.solidAt(x, y + k, z)) return true;
         return false;
     }
 
-    // Cells [y+2 .. y+clearance] above the origin feet must be clear for the body to rise on a step-up.
-    private static boolean riseBlocked(WalkabilityView view, int x, int y, int z, int clearance) {
-        for (int k = 2; k <= clearance; k++)
-            if (view.solidAt(x, y + k, z)) return true;
+    // Cells [y+2 .. y+clearance] above the origin feet must be clear for the body to rise on a step-up. A 2-tall
+    // body rising onto a half-height floor (eg. a bottom slab) only climbs to that floor's top, so it still fits
+    // under a ceiling in y+2 that starts at or above it (eg. a top slab).
+    // The destination is one cell up, so its floor block is the origin's feet cell in the destination column.
+    private static boolean riseBlocked(WalkabilityView view, int x, int y, int z, int clearance, int destX, int destZ) {
+        for (int k = 2; k <= clearance; k++) {
+            if (!view.solidAt(x, y + k, z)) continue;
+            if (clearance == 2) {
+                int floorTop8 = view.solidTop8At(destX, y, destZ);
+                if (floorTop8 == 0) floorTop8 = WalkabilityBuilder.SHAPE_STEPS; // non-solid floor (eg. water surface): treat as full
+                if (view.solidBottom8At(x, y + k, z) >= floorTop8) continue;
+            }
+            return true;
+        }
         return false;
     }
 

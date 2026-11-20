@@ -12,6 +12,7 @@ public enum UnitAnimationAction {
     CHARGE_SPELL,
     CAST_SPELL_ALT,
     CHARGE_SPELL_ALT,
+    END_SPELL,
     TELEPORT,
     ULTIMATE,
     ATTACK_UNIT,

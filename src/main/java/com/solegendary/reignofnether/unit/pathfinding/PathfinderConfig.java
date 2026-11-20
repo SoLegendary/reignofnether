@@ -15,6 +15,14 @@ public final class PathfinderConfig {
     // search would flood the full MAX_NODES (~250ms) just to prove it's unreachable. cap it low: the unit still
     // best-effort approaches and returns in a few ms. chaining is skipped here too (nothing to chain toward).
     public static final int MAX_NODES_UNREACHABLE_GOAL = 8000;
+    // flying search budget. open sky is cheap for A*, so this is only spent flooding around a big obstacle or an
+    // enclosed goal. kept low (and the pool runs a single segment for it, see PathfinderWorkerPool) because a
+    // partial best-effort path is fine for a flyer: it just repaths from where it ends up
+    public static final int MAX_NODES_FLYING = 20000;
+    // flying searches stay within this many blocks below / above the start-goal altitude range, so the 3D
+    // search volume is a thin slab instead of the whole world column
+    public static final int FLYING_Y_BELOW = 6;
+    public static final int FLYING_Y_ABOVE = 16;
     public static final int MAX_CHAIN_SEGMENTS = 10;
     public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;

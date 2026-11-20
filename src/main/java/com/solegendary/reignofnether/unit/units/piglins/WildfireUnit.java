@@ -304,42 +304,37 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = WildfireAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = WildfireAnimations.SPELL_SLAM;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL_ALT -> {
                 activeAnimDef = WildfireAnimations.SPELL_STARE;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 0.75f;
                 startAnimation(activeAnimDef);
             }
             case ULTIMATE -> {
                 activeAnimDef = WildfireAnimations.ULTIMATE;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             default -> {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
                 animateSpeed = 1.0f;
             }
         }
@@ -368,7 +363,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castMoltenBombGoal.stop();
         this.castScorchingGazeGoal.stop();
         this.castSoulsAflameGoal.stop();
@@ -654,6 +648,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
             targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
         }
         targetEntity.setSecondsOnFire(getScorchingGaze().durationSeconds);
+        targetEntity.setLastHurtByMob(this);
         if (targetEntity instanceof Unit unit)
             unit.aggroToEnemyIfIdle(this);
     }
@@ -710,9 +705,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.6f, 0, 0.6f);
-        aabb.setMaxY(aabb.maxY + 1.2f);
-        return aabb;
+        AABB aabb = this.getBoundingBox().inflate(0.45f, 0, 0.45f);
+        return aabb.setMaxY(aabb.maxY + 1.0f);
     }
 
     @Override

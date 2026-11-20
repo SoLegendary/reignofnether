@@ -313,7 +313,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "setLastHurtByMob", at = @At("TAIL"))
     private void extendHurtByMobTimer(@Nullable LivingEntity le, CallbackInfo ci) {
-        if (le instanceof Unit unit && unit.getOwnerName().isBlank()) {
+        if (le instanceof Unit unit && !unit.getOwnerName().isBlank()) {
             this.getPersistentData().putString("lastHurtByRTSPlayer", unit.getOwnerName());
         }
     }

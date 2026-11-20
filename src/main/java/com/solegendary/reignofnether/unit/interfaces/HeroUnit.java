@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.ability.heroAbilities.witherborn.WitheringMark;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -294,6 +295,13 @@ public interface HeroUnit extends Unit {
 
     default int getHeroAbilityRank(HeroAbility ability) {
         return getHeroAbilityRanks().getOrDefault(ability, 0);
+    }
+
+    default HeroAbility getHeroAbility(Class<? extends HeroAbility> abilityClass) {
+        for (Ability ability : this.getAbilities().get())
+            if (ability.getClass() == abilityClass && ability instanceof HeroAbility heroAbility)
+                return heroAbility;
+        return null;
     }
 
     public default void syncToClients() {

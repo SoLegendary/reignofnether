@@ -154,14 +154,10 @@ public class MarauderModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		MarauderUnit marauder = ((MarauderUnit) entity);
 
-		if (marauder.animateScale > 0 && marauder.animateScaleReducing) {
-			marauder.animateScale -= 0.02f;
-		}
-		if (marauder.animateScale <= 0) {
-			marauder.animateScale = 1.0f;
+		if (marauder.stopActiveAnimation) {
+			marauder.stopActiveAnimation = false;
 			marauder.activeAnimDef = null;
 			marauder.activeAnimState = null;
-			marauder.animateScaleReducing = false;
 			marauder.stopAllAnimations();
 		}
 
@@ -172,10 +168,10 @@ public class MarauderModel<T extends Entity> extends KeyframeHierarchicalModel<T
 
 		// any once-off animation like attack or cast spell
 		if (marauder.activeAnimDef != null && marauder.activeAnimState != null && marauder.animateTicks > 0) {
-			restartThenAnimate(marauder, marauder.activeAnimState, marauder.activeAnimDef, ageInTicks, marauder.animateScale, marauder.getAnimationSpeed());
+			restartThenAnimate(marauder, marauder.activeAnimState, marauder.activeAnimDef, ageInTicks, marauder.getAnimationSpeed());
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(marauder, marauder.walkAnimState, ageInTicks);
 			if (marauder.hasEffectWithDuration(MobEffectRegistrar.BLOODLUST.get()))
 				animateWalk(MarauderAnimations.RUN, limbSwing, limbSwingAmount, speed * 0.4f, speed * 0.4f);

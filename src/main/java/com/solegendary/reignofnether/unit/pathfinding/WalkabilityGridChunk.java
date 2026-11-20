@@ -123,16 +123,21 @@ public final class WalkabilityGridChunk {
         // still treats them as no floor support, so units don't walk on them.)
         mp.set(wx, y, wz);
         BlockState bs = level.getBlockState(mp);
-        boolean cellSolid = MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(bs)
-                || WalkabilityBuilder.isFenceLike(bs);
-        // a fence/wall directly below is 1.5 tall and reaches into this cell. mark this cell solid too so
-        // wallBeside (which probes above the feet, skipping the feet cell as a climbable step) detects a
-        // ground-level fence/wall - otherwise a 1-tall fence at a neighbour's feet is invisible to the malus.
-        if (!cellSolid) {
+        // solid[] also carries the block's collision extent (see WalkabilityBuilder.packSolid) so half-height
+        // blocks (slab, lantern) aren't treated as full ones by the step-up headroom check.
+        byte packed;
+        if (MiscUtil.isSolidBlocking(level, mp)) {
+            packed = WalkabilityBuilder.packSolid(bs.getCollisionShape(level, mp));
+        } else if (BlockUtils.isLeafBlock(bs) || WalkabilityBuilder.isFenceLike(bs) || WalkabilityBuilder.isThinWall(bs)) {
+            packed = WalkabilityBuilder.FULL_BLOCK;
+        } else {
+            // a fence/wall directly below is 1.5 tall and reaches into this cell. mark this cell solid too so
+            // wallBeside (which probes above the feet, skipping the feet cell as a climbable step) detects a
+            // ground-level fence/wall - otherwise a 1-tall fence at a neighbour's feet is invisible to the malus.
             mpBelow.set(wx, y - 1, wz);
-            if (WalkabilityBuilder.isFenceLike(level.getBlockState(mpBelow))) cellSolid = true;
+            packed = WalkabilityBuilder.isFenceLike(level.getBlockState(mpBelow)) ? WalkabilityBuilder.FULL_BLOCK : 0;
         }
-        solid[i] = cellSolid ? (byte) 1 : 0;
+        solid[i] = packed;
     }
 
     private static int idx(int localX, int yIdx, int localZ) {
@@ -172,6 +177,20 @@ public final class WalkabilityGridChunk {
         int yIdx = y - minY;
         if (yIdx < 0 || yIdx >= height) return false;
         return solid[idx(wx & 15, yIdx, wz & 15)] != 0;
+    }
+
+    // collision extent of this cell's block in eighths of a block (see WalkabilityBuilder.packSolid). out-of-band and
+    // non-solid cells read as open: bottom = SHAPE_STEPS (nothing in the way), top = 0.
+    public int solidBottom8At(int wx, int y, int wz) {
+        int yIdx = y - minY;
+        if (yIdx < 0 || yIdx >= height) return WalkabilityBuilder.SHAPE_STEPS;
+        return WalkabilityBuilder.bottom8Of(solid[idx(wx & 15, yIdx, wz & 15)]);
+    }
+
+    public int solidTop8At(int wx, int y, int wz) {
+        int yIdx = y - minY;
+        if (yIdx < 0 || yIdx >= height) return 0;
+        return WalkabilityBuilder.top8Of(solid[idx(wx & 15, yIdx, wz & 15)]);
     }
 
     // precomputed crowding malus for this cell (dequantised). out-of-band reads as 0 (open, no steering cost).

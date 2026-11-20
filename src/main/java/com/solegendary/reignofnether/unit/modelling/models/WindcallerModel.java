@@ -110,14 +110,10 @@ public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel
 		currentTilt = Mth.lerp(0.025f, currentTilt, targetTilt);
 		this.bone.xRot += currentTilt;
 
-		if (windcaller.animateScale > 0 && windcaller.animateScaleReducing) {
-			windcaller.animateScale -= 0.02f;
-		}
-		if (windcaller.animateScale <= 0) {
-			windcaller.animateScale = 1.0f;
+		if (windcaller.stopActiveAnimation) {
+			windcaller.stopActiveAnimation = false;
 			windcaller.activeAnimDef = null;
 			windcaller.activeAnimState = null;
-			windcaller.animateScaleReducing = false;
 			windcaller.stopAllAnimations();
 		}
 
@@ -128,10 +124,10 @@ public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel
 
 		// any once-off animation like attack or cast spell
 		if (windcaller.activeAnimDef != null && windcaller.activeAnimState != null && windcaller.animateTicks > 0) {
-			restartThenAnimate(windcaller, windcaller.activeAnimState, windcaller.activeAnimDef, ageInTicks, windcaller.animateScale, windcaller.animateSpeed);
+			restartThenAnimate(windcaller, windcaller.activeAnimState, windcaller.activeAnimDef, ageInTicks, windcaller.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(windcaller, windcaller.walkAnimState, ageInTicks);
 			if (windcaller.isFlying())
 				animateWalk(WindcallerAnimations.WALK_FLY, limbSwing, limbSwingAmount, speed * 1.5f, speed * 1.5f);

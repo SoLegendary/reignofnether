@@ -40,6 +40,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -215,6 +216,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public GhastUnit(EntityType<? extends Ghast> entityType, Level level) {
         super(entityType, level);
         this.moveControl = new FlyingUnitMoveControl(this);
+        this.navigation = new FlyingPathNavigation(this, level());
 
         updateAbilityButtons();
     }

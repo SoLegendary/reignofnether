@@ -45,6 +45,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.DROWNED_UNIT.get(), DrownedUnit.createAttributes().build());
         evt.put(EntityRegistrar.STRAY_UNIT.get(), StrayUnit.createAttributes().build());
         evt.put(EntityRegistrar.BOGGED_UNIT.get(), BoggedUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SKELETON_VANGUARD_UNIT.get(), SkeletonVanguardUnit.createAttributes().build());
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
@@ -85,6 +86,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.WRETCHED_WRAITH_UNIT.get(), WretchedWraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), PiglinMerchantUnit.createAttributes().build());
         evt.put(EntityRegistrar.WILDFIRE_UNIT.get(), WildfireUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WITHERBORN_UNIT.get(), WitherbornUnit.createAttributes().build());
         evt.put(EntityRegistrar.KILLER_RABBIT_UNIT.get(), KillerRabbitUnit.createAttributes().build());
         evt.put(EntityRegistrar.TOTEM_OF_REGENERATION.get(), AbstractTotem.createAttributes().build());
         evt.put(EntityRegistrar.TOTEM_OF_CASTING.get(), AbstractTotem.createAttributes().build());
@@ -113,10 +115,12 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.SKELETON_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.STRAY_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BOGGED_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SKELETON_VANGUARD_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.CREEPER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SPIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POISON_SPIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WRAITH_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WRETCHED_WRAITH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.VILLAGER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.MILITIA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.ZOMBIE_VILLAGER_UNIT_SPAWN_EGG);
@@ -126,6 +130,7 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.IRON_GOLEM_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WITCH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.EVOKER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.ENCHANTER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.ENDERMAN_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WARDEN_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.RAVAGER_UNIT_SPAWN_EGG);
@@ -136,7 +141,9 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.MARAUDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.HOGLIN_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BLAZE_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WILDFIRE_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WITHER_SKELETON_UNIT_SPAWN_EGG);
+            //event.accept(ItemRegistrar.WITHERBORN_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.GHAST_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.MAGMA_CUBE_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SLIME_UNIT_SPAWN_EGG);

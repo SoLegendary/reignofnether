@@ -993,13 +993,9 @@ public class UnitServerEvents {
             return;
         }
 
-        // halve direct ghast damage since they get bonus damage from launching units into the air
+        // support ghast bonus strength and normalise it to tooltip damage (actual direct hit does about 10-11 damage, tooltip is 8)
         if (evt.getSource().getEntity() instanceof GhastUnit ghastUnit) {
-            // (unless its to a garrisoned unit)
-            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuildingAddon.getGarrison(unit) != null)) {
-                evt.setAmount(evt.getAmount() / 2);
-            }
-            evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
+            evt.setAmount(evt.getAmount() * 0.75f * ghastUnit.getEffectiveDamageMultiplier());
         }
 
         // checked via tag rather than the pillager's current state, as it may have dismounted or died since firing
@@ -1097,7 +1093,7 @@ public class UnitServerEvents {
                 RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            if (evt.getSource().is(DamageTypes.MOB_ATTACK)) {
+            if (evt.getSource().is(DamageTypes.MOB_ATTACK) || evt.getSource().is(DamageTypes.MOB_PROJECTILE)) {
                 float lifeDmgPerc = aUnit.getLifeStealPercent();
                 if (lifeDmgPerc > 0) {
                     ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);

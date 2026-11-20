@@ -48,6 +48,10 @@ public class ItemRegistrar {
             ITEMS.register("bogged_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BOGGED_UNIT,
                     0xa1a387, 0x3e4d12, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> SKELETON_VANGUARD_UNIT_SPAWN_EGG =
+            ITEMS.register("skeleton_vanguard_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SKELETON_VANGUARD_UNIT,
+                    0xa7a7a7, 0xc99a2e, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> CREEPER_UNIT_SPAWN_EGG =
             ITEMS.register("creeper_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.CREEPER_UNIT,
                     0x0c990a, 0x000000, new Item.Properties()));
@@ -144,6 +148,10 @@ public class ItemRegistrar {
             ITEMS.register("wither_skeleton_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITHER_SKELETON_UNIT,
                     1315860, 4672845, new Item.Properties()));
 
+    //public static final RegistryObject<ForgeSpawnEggItem> WITHERBORN_UNIT_SPAWN_EGG =
+    //        ITEMS.register("witherborn_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WITHERBORN_UNIT,
+    //                1315860, 4672845, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> GHAST_UNIT_SPAWN_EGG =
             ITEMS.register("ghast_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.GHAST_UNIT,
                     16382457, 12369084, new Item.Properties()));
@@ -211,6 +219,18 @@ public class ItemRegistrar {
     public static final RegistryObject<ForgeSpawnEggItem> BEE_UNIT_SPAWN_EGG =
             ITEMS.register("bee_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BEE_UNIT,
                     0xdbb544, 0x2a1711, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> ENCHANTER_UNIT_SPAWN_EGG =
+            ITEMS.register("enchanter_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.ENCHANTER_UNIT,
+                    0x717676, 0x101010, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> WRETCHED_WRAITH_UNIT_SPAWN_EGG =
+            ITEMS.register("wretched_wraith_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WRETCHED_WRAITH_UNIT,
+                    0x9ca4a1, 0x15134e, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> WILDFIRE_UNIT_SPAWN_EGG =
+            ITEMS.register("wildfire_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WILDFIRE_UNIT,
+                    0xc58e01, 0xccc665, new Item.Properties()));
 
     public static final RegistryObject<Item> THROWABLE_TNT =
             ITEMS.register("throwable_tnt", () -> new ThrowableTnt(new Item.Properties()));

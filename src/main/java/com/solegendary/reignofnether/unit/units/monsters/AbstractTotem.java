@@ -247,7 +247,6 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     @Override
     public AABB getInflatedSelectionBox() {
         AABB aabb = this.getBoundingBox().inflate(0.05f, 0, 0.05f);
-        aabb.setMaxY(aabb.maxY + 0.4f);
         return aabb;
     }
 }

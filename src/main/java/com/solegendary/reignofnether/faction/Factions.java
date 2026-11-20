@@ -112,6 +112,7 @@ public class Factions {
 		registerEntity(MONSTERS, EntityRegistrar.SKELETON_UNIT.get(), ProductionItems.SKELETON);
 		registerEntity(MONSTERS, EntityRegistrar.BOGGED_UNIT.get(), ProductionItems.BOGGED);
 		registerEntity(MONSTERS, EntityRegistrar.STRAY_UNIT.get(), ProductionItems.STRAY);
+		registerEntity(MONSTERS, EntityRegistrar.SKELETON_VANGUARD_UNIT.get(), ProductionItems.SKELETON_VANGUARD);
 		registerEntity(MONSTERS, EntityRegistrar.SPIDER_UNIT.get(), ProductionItems.SPIDER);
 		registerEntity(MONSTERS, EntityRegistrar.POISON_SPIDER_UNIT.get(), ProductionItems.POISON_SPIDER);
 		registerEntity(MONSTERS, EntityRegistrar.CREEPER_UNIT.get(), ProductionItems.CREEPER);
@@ -138,6 +139,7 @@ public class Factions {
 		registerEntity(PIGLINS, EntityRegistrar.GHAST_UNIT.get(), ProductionItems.GHAST);
 		registerEntity(PIGLINS, EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), ProductionItems.PIGLIN_MERCHANT);
 		registerEntity(PIGLINS, EntityRegistrar.WILDFIRE_UNIT.get(), ProductionItems.WILDFIRE);
+		//registerEntity(PIGLINS, EntityRegistrar.WITHERBORN_UNIT.get(), ProductionItems.WITHERBORN);
 		registerEntity(PIGLINS, EntityRegistrar.ARMOURED_HOGLIN_UNIT.get());
 		
 		// Neutral

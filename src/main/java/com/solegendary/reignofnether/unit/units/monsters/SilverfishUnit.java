@@ -254,7 +254,6 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     @Override
     public AABB getInflatedSelectionBox() {
         AABB aabb = this.getBoundingBox().inflate(0.1f, 0, 0.1f);
-        aabb.setMaxY(aabb.maxY + 0.2f);
         return aabb;
     }
 }

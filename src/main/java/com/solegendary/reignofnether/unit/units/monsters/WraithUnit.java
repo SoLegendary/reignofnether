@@ -235,14 +235,13 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 if (getFearAbility() != null && getFearAbility().isAutocasting(this) && getFearAbility().isOffCooldown(this))
@@ -250,24 +249,21 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                 else
                     activeAnimDef = WraithAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = WraithAnimations.FEAR;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL_ALT -> {
                 activeAnimDef = WraithAnimations.POSSESS;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 animateSpeed = 0.15f;
                 startAnimation(activeAnimDef);
             }
             default -> {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
                 animateSpeed = 1.0f;
             }
         }

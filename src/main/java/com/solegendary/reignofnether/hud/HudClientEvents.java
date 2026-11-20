@@ -797,7 +797,7 @@ public class HudClientEvents {
                     .onLeftClick(() -> {
                         // select this one specific unit
                         if (Keybindings.shiftMod.isDown()) {
-                            UnitClientEvents.getSelectedUnits().remove(hudSelectedEntity);
+                            UnitClientEvents.getSelectedUnits().remove(unit);
                         } else if (getModifiedEntityName(hudSelectedEntity).equals(getModifiedEntityName(unit))) {
                             UnitClientEvents.clearSelectedUnits();
                             UnitClientEvents.addSelectedUnit(unit);

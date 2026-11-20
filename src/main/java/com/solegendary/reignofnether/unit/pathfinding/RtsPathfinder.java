@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.function.BooleanSupplier;
@@ -45,7 +46,12 @@ public final class RtsPathfinder {
         // Snap the start too: a unit standing on a slab/dais edge or still falling (eg. a hero just spawned on
         // its altar) is a block off its node 0, and narrow units can't advance to a node 1 block above/below,
         // so they spun in place until moved by hand.
-        start = snapToWalkable(level, surfaceOf(level, start), mobility, footprintRadius, clearanceCells, fireCost, 1);
+        // Rank candidates from the unit's real position, not its cell centre: a unit pressed against one side of a
+        // thin wall that shares its cell (eg. a glass pane) must snap to the cell on ITS side, or the path's first
+        // node is across the pane and it walks into it.
+        BlockPos surfaceStart = surfaceOf(level, start);
+        start = snapToWalkable(level, surfaceStart, mobility, footprintRadius, clearanceCells, fireCost, 1,
+                new Vec3(mob.getX(), surfaceStart.getY(), mob.getZ()));
         // Snap the goal onto a standable cell. If none exists nearby (eg. an airborne canopy leaf) the goal is
         // unreachable as an exact cell: path best-effort with a capped budget so A* can't flood MAX_RADIUS
         // proving the obvious (the 250ms freeze on leaf orders).
@@ -99,13 +105,23 @@ public final class RtsPathfinder {
     @Nullable
     public static BlockPos findStandable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
                                          int clearanceCells, float fireCost, int radius) {
+        return findStandable(level, bp, mobility, footprintRadius, clearanceCells, fireCost, radius, null);
+    }
+
+    // `from` (if given) is where the unit actually is: candidates are ranked by distance to it rather than to bp's
+    // cell centre, so which of several equally-near cells wins depends on the side the unit is really on.
+    @Nullable
+    public static BlockPos findStandable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
+                                         int clearanceCells, float fireCost, int radius, @Nullable Vec3 from) {
+        double fromX = from != null ? from.x : bp.getX() + 0.5;
+        double fromZ = from != null ? from.z : bp.getZ() + 0.5;
         // snap over a small snapshot so the goal reuses the exact walkability + footprint logic A* uses (so the
         // snapped goal is never a cell A* would reject). +footprintRadius+1 dilation keeps wideFits off an
         // uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to ground, never a wall-cling cell.
         ChunkSnapshot view = ChunkSnapshot.capture(level, bp, bp, radius + footprintRadius + 1,
                 mobility, clearanceCells, footprintRadius, fireCost, false);
         if (standable(mobility, view, bp.getX(), bp.getY(), bp.getZ())) return bp;
-        int bestDistSq = Integer.MAX_VALUE;
+        double bestDistSq = Double.MAX_VALUE;
         BlockPos best = null;
         for (int dz = -radius; dz <= radius; dz++) {
             for (int dx = -radius; dx <= radius; dx++) {
@@ -114,7 +130,8 @@ public final class RtsPathfinder {
                     int ny = bp.getY() + dy;
                     int nz = bp.getZ() + dz;
                     if (!standable(mobility, view, nx, ny, nz)) continue;
-                    int distSq = dx * dx + dy * dy + dz * dz;
+                    double ex = nx + 0.5 - fromX, ez = nz + 0.5 - fromZ;
+                    double distSq = ex * ex + dy * dy + ez * ez;
                     if (distSq < bestDistSq) { bestDistSq = distSq; best = new BlockPos(nx, ny, nz); }
                 }
             }
@@ -124,8 +141,8 @@ public final class RtsPathfinder {
 
     // Nearest standable cell to bp, or bp itself if none found. Kept for callers that always want a position.
     public static BlockPos snapToWalkable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
-                                          int clearanceCells, float fireCost, int radius) {
-        BlockPos s = findStandable(level, bp, mobility, footprintRadius, clearanceCells, fireCost, radius);
+                                          int clearanceCells, float fireCost, int radius, @Nullable Vec3 from) {
+        BlockPos s = findStandable(level, bp, mobility, footprintRadius, clearanceCells, fireCost, radius, from);
         return s != null ? s : bp;
     }
 

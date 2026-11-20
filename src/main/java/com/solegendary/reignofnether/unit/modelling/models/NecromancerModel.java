@@ -102,14 +102,10 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		NecromancerUnit necromancer = ((NecromancerUnit) entity);
 
-		if (necromancer.animateScale > 0 && necromancer.animateScaleReducing) {
-			necromancer.animateScale -= 0.02f;
-		}
-		if (necromancer.animateScale <= 0) {
-			necromancer.animateScale = 1.0f;
+		if (necromancer.stopActiveAnimation) {
+			necromancer.stopActiveAnimation = false;
 			necromancer.activeAnimDef = null;
 			necromancer.activeAnimState = null;
-			necromancer.animateScaleReducing = false;
 			necromancer.stopAllAnimations();
 		}
 
@@ -120,10 +116,10 @@ public class NecromancerModel<T extends Entity> extends KeyframeHierarchicalMode
 
 		// any once-off animation like attack or cast spell
 		if (necromancer.activeAnimDef != null && necromancer.activeAnimState != null && necromancer.animateTicks > 0) {
-			restartThenAnimate(necromancer, necromancer.activeAnimState, necromancer.activeAnimDef, ageInTicks, necromancer.animateScale, necromancer.animateSpeed);
+			restartThenAnimate(necromancer, necromancer.activeAnimState, necromancer.activeAnimDef, ageInTicks, necromancer.animateSpeed);
 		}
 		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+		else if (isWalking(entity, limbSwingAmount)) {
 			restart(necromancer, necromancer.walkAnimState, ageInTicks);
 			animateWalk(NecromancerAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

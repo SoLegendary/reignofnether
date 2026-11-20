@@ -19,6 +19,7 @@ public class ResourceCosts {
     public static final ResourceCost SKELETON = new ResourceCost(ID, "SKELETON");
     public static final ResourceCost STRAY = new ResourceCost(ID, "STRAY");
     public static final ResourceCost BOGGED = new ResourceCost(ID, "BOGGED");
+    public static final ResourceCost SKELETON_VANGUARD = new ResourceCost(ID, "SKELETON_VANGUARD");
     public static final ResourceCost HUSK = new ResourceCost(ID, "HUSK");
     public static final ResourceCost DROWNED = new ResourceCost(ID, "DROWNED");
     public static final ResourceCost SPIDER = new ResourceCost(ID, "SPIDER");
@@ -48,6 +49,7 @@ public class ResourceCosts {
     public static final ResourceCost HOGLIN = new ResourceCost(ID, "HOGLIN");
     public static final ResourceCost BLAZE = new ResourceCost(ID, "BLAZE");
     public static final ResourceCost WITHER_SKELETON = new ResourceCost(ID, "WITHER_SKELETON");
+    public static final ResourceCost WITHERBORN = new ResourceCost(ID, "WITHERBORN");
     public static final ResourceCost GHAST = new ResourceCost(ID, "GHAST");
     public static final ResourceCost MAGMA_CUBE = new ResourceCost(ID, "MAGMA_CUBE");
 
@@ -230,6 +232,7 @@ public class ResourceCosts {
         SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON);
         STRAY.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRAY);
         BOGGED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BOGGED);
+        SKELETON_VANGUARD.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON_VANGUARD);
         HUSK.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HUSK);
         DROWNED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.DROWNED);
         SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SPIDER);
@@ -265,6 +268,7 @@ public class ResourceCosts {
         HOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HOGLIN);
         BLAZE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BLAZE);
         WITHER_SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITHER_SKELETON);
+        WITHERBORN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITHERBORN);
         GHAST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GHAST);
         MAGMA_CUBE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MAGMA_CUBE);
         PIGLIN_MERCHANT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PIGLIN_MERCHANT);

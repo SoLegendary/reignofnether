@@ -306,34 +306,30 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         attackAnimState.stop();
     }
     public int animateTicks = 0;
-    public float animateScale = 1.0f;
     public float animateSpeed = 1.0f;
-    public boolean animateScaleReducing = false;
+    public boolean stopActiveAnimation = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
 
     public void playSingleAnimation(UnitAnimationAction animAction) {
-        animateScaleReducing = false;
+        stopActiveAnimation = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
                 activeAnimDef = RoyalGuardAnimations.ATTACK;
                 activeAnimState = attackAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CHARGE_SPELL -> {
                 activeAnimDef = RoyalGuardAnimations.SPELL_CHARGE;
                 activeAnimState = spellChargeAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = RoyalGuardAnimations.SPELL_ACTIVATE;
                 activeAnimState = spellActivateAnimState;
-                animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default -> stopActiveAnimation = true;
         }
     }
 
@@ -616,7 +612,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public void resetBehaviours() {
-        animateScaleReducing = true;
         this.castMaceSlamGoal.stop();
         this.castTauntingCryGoal.stop();
         /*
@@ -743,7 +738,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         if (getAvatarScalingStarted() && getAvatarScaleTicks() < AVATAR_SCALE_TICKS_MAX) {
             setAvatarScaleTicks(getAvatarScaleTicks() + 1);
             if (getAvatarScaleTicks() == AVATAR_SCALE_TICKS_MAX * 0.75f) {
-                animateScaleReducing = true;
+                stopActiveAnimation = true;
             }
             this.reapplyPosition();
             this.refreshDimensions();
@@ -806,9 +801,8 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.15f, 0, 0.15f);
-        aabb.setMaxY(aabb.maxY + 0.4875f);
-        return aabb;
+        AABB aabb = this.getBoundingBox().inflate(0f, 0, 0f);
+        return aabb.setMaxY(aabb.maxY + 0.5f);
     }
 
     @Override

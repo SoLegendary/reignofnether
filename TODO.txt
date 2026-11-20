@@ -1,15 +1,45 @@
 
-1.20.1-1.5.1d
+1.20.1-1.5.1e
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
+Witherborn
+----------
+Essence drain
+    [❌] Change target automatically to withering mark target
+    [❌] Channel animation
+    [❌] Damage and healing, including magic damage type
+    [❌] Break on max range or target death/removal
+    [❌] Auto rotation
+
+Withering mark
+    [❌] Buff on attackers
+    [❌] Move on target death/removal to nearest ally
+    [❌] Sync sound and animation
+
+Castigation
+    [❌] Green particle effect on usage
+    [❌] Damage and cooldown reduction
+    [❌] Error if can't afford health
+
+World of Rot
+    [❌] Global effect like blood moon
+    [❌] Green overlay and sky
+    [❌] Extend on enemy death
+    [❌] Mob effect
+    [❌] Music
+
 
 Balance
 -------
-
-
+[✅] Ghost cloak duration reduced from 15s to 10s, but now grants 50% evasion chance
+[✅] Ice wand duration on heroes reduced from 7.5s to 5s
+[✅] The hitbox size of all hero units have been set to 1x1x2 to avoid issues with garrisons and terrain
+    - Visual sizes are unchanged
+[✅] TNT and enderpearls no longer drop from neutral enemies
+    - TNT was too difficult to balance, and enderpearls allowed heroes to get soft-locked
 
 Quality of Life
 ---------------
@@ -25,33 +55,29 @@ Quality of Life
     [❌] Commands to modify it in memory
     [❌] Save as .dat file separately so we can retain modifications
 
-Map Pack 2.2a
+[❌] Thin highlight on targetable mobs when cursor action is a buff (like enchanter abilities)
 
-Download: https://drive.google.com/file/d/1nST78mPb42F8TWFcDB_pcBLeeOM9Uyn6/view
-
-- Summoner's Rift is now credited to Shrinkiroo
-- Fixed sandbox mode being set for some maps
-- Fixed the rtsmap.json version numbers and incorrect labels
-- Throne's Path:
-	- Neutral armies no longer spawn until 10mins after match start
-	- Player units no longer get removed at the corners of the map
-
-[✅] You can now set a rally point on iron golem buildings
-[✅] Farms now have a button to assign the nearest idle worker to them
-    - Wheat farms prioritise farmers and non-profession villagers
-[✅] Spectators can now toggle fog of war for themselves
-[✅] Dead coral blocks now convert to basalt
+[✅] Flying units can now pathfind instead of always flying in a straight line
+[✅] Added spawn eggs for the Enchanter, Wretched Wraith and Wildfire
+[✅] Updated the link to the map pack ingame to 2.2a to a new curseforge project:
+    - https://www.curseforge.com/minecraft/worlds/reign-of-nether-official-map-pack
 
 
 Bugfixes
 --------
-[✅] The Wretched Wraith's snow no longer breaks portal blocks
-[✅] Spiders no longer get stuck on overhangs like on the spider cave structure
-[✅] Reduced the occurrence of missing chunks in fog of war when render distance is low
-[✅] Bees can now be produced in custom buildings
-[✅] Food can now be sold at custom item shops
-[✅] Chickens now render at much further distances while in RTS camera
-[✅] Animals no longer path into water, swim much faster and will try to go back to land if they are in water
+[✅] Fixed units getting stuck on half-slab gaps
+[✅] Fixed units getting stuck on the grand library glass panes
+[✅] Fixed Wildfires being unable to get item drops
+[✅] Fixed issues with shift-clicking to deselect units with the bottom menu
+[✅] Fixed ghasts fireballs dealing too little damage
+    - They dealt about 6-7 on direct impact, and now deal 8-9, matching the tooltip damage
+[✅] Ranged heroes are now properly affected by lifesteal
+[✅] You can now pick up items that are overlapping a building
+[✅] Iron golems and wardens no longer pick up hero items automatically
+[✅] Dying in survival mode then switching back to creative/spectator no longer locks you out of the RTS camera
+[✅] Relogging no longer causes upgraded buildings to show as unupgraded when fog of war is on
+[✅] Fixed a crash when you shift-queued a building with a worker that was also attacking
+
 
 
 Languages

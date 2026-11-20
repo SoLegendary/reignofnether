@@ -84,6 +84,18 @@ public final class ChunkSnapshot implements WalkabilityView {
     }
 
     @Override
+    public int solidBottom8At(int wx, int y, int wz) {
+        WalkabilityGridChunk c = chunkAt(wx, wz);
+        return c == null ? WalkabilityBuilder.SHAPE_STEPS : c.solidBottom8At(wx, y, wz);
+    }
+
+    @Override
+    public int solidTop8At(int wx, int y, int wz) {
+        WalkabilityGridChunk c = chunkAt(wx, wz);
+        return c == null ? 0 : c.solidTop8At(wx, y, wz);
+    }
+
+    @Override
     public float crowdAt(int wx, int y, int wz) {
         WalkabilityGridChunk c = chunkAt(wx, wz);
         return c == null ? 0f : c.crowdAt(wx, y, wz);
