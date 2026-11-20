@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -65,6 +67,14 @@ import java.util.List;
 import java.util.Set;
 
 public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.HERO, UnitRole.RANGED, UnitRole.ANTI_AIR, UnitRole.CASTER, UnitRole.UNDEAD);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public final Abilities ABILITIES = new Abilities(
         List.of(
             new Pair<>(new RaiseDead(), Keybindings.abilitySlot1),
@@ -180,11 +190,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.STRING);
 
-    // which scenario role does this unit use?
-    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
-    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.INT);
     
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
@@ -195,7 +200,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
     }
 

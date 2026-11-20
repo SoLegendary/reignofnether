@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.gamemode;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,8 +39,7 @@ public class GameModeServerboundPacket {
             if (player == null)
                 return;
             // sent by each player right after they start RTS, so they must be an RTS player by now
-            if ((this.gameMode != GameMode.CLASSIC && player.level().getGameRules().getRule(GameRuleRegistrar.PVP_MODES_ONLY).get()) ||
-                (!PlayerServerEvents.isOpOrHost(player) && !PlayerServerEvents.isRTSPlayer(player.getName().getString()))) {
+            if (!PlayerServerEvents.isOpOrHost(player) && !PlayerServerEvents.isRTSPlayer(player.getName().getString())) {
                 ReignOfNether.LOGGER.warn("GameModeServerboundPacket: {} is not allowed to set game mode {}", player.getName().getString(), this.gameMode);
                 return;
             }

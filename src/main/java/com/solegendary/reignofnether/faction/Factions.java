@@ -4,15 +4,13 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
-import com.solegendary.reignofnether.survival.spawners.IllagerWaveSpawner;
-import com.solegendary.reignofnether.survival.spawners.MonsterWaveSpawner;
-import com.solegendary.reignofnether.survival.spawners.PiglinWaveSpawner;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerProd;
 
@@ -24,14 +22,17 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 
 public class Factions {
 	
 	public static final ArrayList<ResourceLocation> CLASSIC_FACTIONS = new ArrayList<>();
-	public static final ArrayList<ResourceLocation> SURVIVAL_FACTIONS = new ArrayList<>();
 	public static final ArrayList<ResourceLocation> PLAYABLE_FACTIONS = new ArrayList<>();
 	
 	public static final HashMap<ResourceLocation, ResourceLocation> ENTITY_FACTION = new HashMap<>();
+	// what each unit production item trains; the first registration wins (VILLAGER also places militia)
+	private static final Map<ProductionItem, EntityType<? extends Unit>> UNIT_TYPES = new HashMap<>();
 	
 	public static Faction VILLAGERS;
 	public static Faction MONSTERS;
@@ -45,7 +46,6 @@ public class Factions {
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setSound(SoundRegistrar.VILLAGER_CALM_THEME_SONG.get())
-			.setSpawnWave(IllagerWaveSpawner::spawnIllagerWave)
 			.setCustomBuildingCondition((cb) -> cb.buildableByVillagers)
 		);
 		
@@ -53,17 +53,14 @@ public class Factions {
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"))
 			.setSound(SoundRegistrar.MONSTER_CALM_THEME_SONG.get())
-			.setSpawnWave(MonsterWaveSpawner::spawnMonsterWave)
 			.setCustomBuildingCondition((cb) -> cb.buildableByMonsters)
 		);
 		
 		PIGLINS = register("piglins", new Faction()
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
-			.setSpawnWave(IllagerWaveSpawner::spawnIllagerWave)
 			.setSound(SoundRegistrar.PIGLIN_CALM_THEME_SONG.get())
 			.setCustomBuildingCondition((cb) -> cb.buildableByPiglins)
-			.setSpawnWave(PiglinWaveSpawner::spawnPiglinWave)
 		);
 		
 		NEUTRAL = register("neutral", new Faction()
@@ -73,7 +70,7 @@ public class Factions {
 		
 		RANDOM = register("random", new Faction()
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/unknown.png"))
-			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark_bg.png"))
+			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/gui/icons/shuffle.png"))
 			.setUnplayable()
 			.noCubeMap()
 		);
@@ -228,8 +225,6 @@ public class Factions {
 			CLASSIC_FACTIONS.add(key);
 		if (faction.playable)
 			PLAYABLE_FACTIONS.add(key);
-		if (faction.spawnWave != null)
-			SURVIVAL_FACTIONS.add(key);
 		faction = register(key, faction).setKey(key);
 		return faction;
 	}
@@ -270,6 +265,13 @@ public class Factions {
 			else
 				faction.addEntityButton(productionItem.getPlaceButton());
 		ENTITY_FACTION.put(EntityType.getKey(unit), faction.key);
+		if (productionItem instanceof ProductionItem item)
+			UNIT_TYPES.putIfAbsent(item, unit);
+	}
+
+	@Nullable
+	public static EntityType<? extends Unit> unitTypeOf(ProductionItem item) {
+		return UNIT_TYPES.get(item);
 	}
 	
 	public static void registerEntity(Faction faction, EntityType<? extends Unit> unit) {

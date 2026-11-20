@@ -26,26 +26,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.server.command.EnumArgument;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class UnitCommands {
 	
-	public static final List<String> UNIT_ACTIONS = List.of(
-		UnitAction.NONE.name(), UnitAction.ATTACK.name(),
-		UnitAction.ATTACK_BUILDING.name(), UnitAction.STOP.name(),
-		UnitAction.HOLD.name(), UnitAction.MOVE.name(),
-		UnitAction.GARRISON.name(), UnitAction.UNGARRISON.name(),
-		UnitAction.ATTACK_MOVE.name(), UnitAction.FOLLOW.name(),
-		UnitAction.BUILD_REPAIR.name(), UnitAction.FARM.name(),
-		UnitAction.RETURN_RESOURCES.name(),
-		UnitAction.RETURN_RESOURCES_TO_CLOSEST.name(),
-		UnitAction.DELETE.name()
-	);
+	// every order, abilities too (cast with a targetPos or target when they need one)
+	public static final List<String> UNIT_ACTIONS = Arrays.stream(UnitAction.values()).map(UnitAction::name).toList();
 	
 	public static void register(final LiteralArgumentBuilder<CommandSourceStack> commandBuilder) {
 		commandBuilder
@@ -56,34 +47,38 @@ public class UnitCommands {
 							(ctx, builder) -> SharedSuggestionProvider.suggestResource(
 								net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getEntries().stream()
 									.filter(e -> e.getKey().location().getNamespace().equals(com.solegendary.reignofnether.ReignOfNether.MOD_ID))
-									.map(e -> e.getKey().location()),
+									.map(e -> RonIds.prodId(e.getKey().location())),
 								builder))
-						.executes(ctx -> {
-							Entity source = ctx.getSource().getEntity();
-							String ownerName = "";
-							if (source instanceof Player player)
-								ownerName = player.getName().getString();
-							else if (source instanceof Unit unit)
-								ownerName = unit.getOwnerName();
-							return CommandsServerEvents.summonEntity(ctx, ownerName,
-								ResourceLocationArgument.getId(ctx, "entity"),
-								BlockPos.containing(ctx.getSource().getPosition()), null);
-						})
+						.executes(ctx -> CommandsServerEvents.summonEntity(ctx, PlayerNameArgument.sourceOwner(ctx.getSource()),
+							RonIds.entityId(RonIds.arg(ctx, "entity")),
+							BlockPos.containing(ctx.getSource().getPosition()), null))
 						.then(Commands.argument("ownerName", PlayerNameArgument.player())
 							.executes(ctx -> CommandsServerEvents.summonEntity(ctx,
 								PlayerNameArgument.getPlayerName(ctx, "ownerName"),
-								ResourceLocationArgument.getId(ctx, "entity"),
+								RonIds.entityId(RonIds.arg(ctx, "entity")),
 								BlockPos.containing(ctx.getSource().getPosition()), null))
 							.then(Commands.argument("pos", BlockPosArgument.blockPos())
 								.executes(ctx -> CommandsServerEvents.summonEntity(ctx,
 									PlayerNameArgument.getPlayerName(ctx, "ownerName"),
-									ResourceLocationArgument.getId(ctx, "entity"),
-									BlockPosArgument.getLoadedBlockPos(ctx, "pos"), null))
+									RonIds.entityId(RonIds.arg(ctx, "entity")),
+									BlockPosArgument.getSpawnablePos(ctx, "pos"), null))
+								// on the ground at pos's x and z, whatever its y
+								.then(Commands.literal("ground")
+									.executes(ctx -> CommandsServerEvents.summonEntity(ctx,
+										PlayerNameArgument.getPlayerName(ctx, "ownerName"),
+										RonIds.entityId(RonIds.arg(ctx, "entity")),
+										BlockPosArgument.getSpawnablePos(ctx, "pos"), null, true))
+									.then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+										.executes(ctx -> CommandsServerEvents.summonEntity(ctx,
+											PlayerNameArgument.getPlayerName(ctx, "ownerName"),
+											RonIds.entityId(RonIds.arg(ctx, "entity")),
+											BlockPosArgument.getSpawnablePos(ctx, "pos"),
+											CompoundTagArgument.getCompoundTag(ctx, "nbt"), true))))
 								.then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
 									.executes(ctx -> CommandsServerEvents.summonEntity(ctx,
 										PlayerNameArgument.getPlayerName(ctx, "ownerName"),
-										ResourceLocationArgument.getId(ctx, "entity"),
-										BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+										RonIds.entityId(RonIds.arg(ctx, "entity")),
+										BlockPosArgument.getSpawnablePos(ctx, "pos"),
 										CompoundTagArgument.getCompoundTag(ctx, "nbt")))
 								)
 							)

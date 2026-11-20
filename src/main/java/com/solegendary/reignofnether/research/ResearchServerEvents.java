@@ -4,7 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -79,10 +81,17 @@ public class ResearchServerEvents {
         researchItems.add(new Pair<>(playerName, researchItemName));
         ResearchClientboundPacket.addResearch(playerName, researchItemName.toString());
         saveResearch();
+        // events/research_done for any research, events/research_done/<id> (e.g. research_bloodlust) for one
+        if (serverLevel != null) {
+            MinecraftServer server = serverLevel.getServer();
+            RonFiles.fire(server, "research_done", RonFiles.ownerSource(server, playerName), playerName);
+            RonFiles.fire(server, "research_done/" + researchItemName.getPath(), RonFiles.ownerSource(server, playerName), playerName);
+        }
     }
 
     public static void removeResearch(String playerName, ResourceLocation researchItemName) {
         researchItems.removeIf(p -> p.getFirst().equals(playerName) && p.getSecond().equals(researchItemName));
+        ResearchClientboundPacket.removeResearch(playerName, researchItemName.toString());
         saveResearch();
     }
 

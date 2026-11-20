@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -46,8 +45,7 @@ public class ResearchMilitiaBows extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> ProductionItems.RESEARCH_MILITIA_BOWS.itemIsBeingProduced(prodBuilding.ownerName)
-                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS)
-                || TutorialClientEvents.isEnabled(),
+                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS),
             List.of(fcs(I18n.get("research.reignofnether.militia_bows"), true),
                 ResourceCosts.getFormattedCost(cost),

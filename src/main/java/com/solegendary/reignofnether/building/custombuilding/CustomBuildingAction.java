@@ -29,5 +29,6 @@ public enum CustomBuildingAction {
     DELETE_COMMAND,
     SET_COMMAND_TEXT,
     SET_COMMAND_COOLDOWN,
-    SET_COMMAND_TRIGGER
+    SET_COMMAND_TRIGGER,
+    SET_TRIGGER_COOLDOWN // by trigger, not index, so a client whose list is out of step can't change the wrong one
 }

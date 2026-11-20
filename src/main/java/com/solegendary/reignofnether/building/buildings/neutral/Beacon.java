@@ -23,7 +23,6 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -105,7 +104,7 @@ public class Beacon extends ProductionBuilding {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
-                () -> TutorialClientEvents.isEnabled() || !GameruleClient.allowBeacons,
+                () -> !GameruleClient.allowBeacons,
                 () -> {
                     List<BuildingPlacement> list = new ArrayList<>();
                     for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {

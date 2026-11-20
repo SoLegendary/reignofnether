@@ -1,12 +1,15 @@
 package com.solegendary.reignofnether.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -16,7 +19,9 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.rtsapi.RTSApiCommands;
+import com.solegendary.reignofnether.commands.rtsapi.RonIds;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -35,12 +40,14 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
@@ -49,6 +56,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -57,9 +66,9 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class CommandsServerEvents {
@@ -81,10 +90,10 @@ public class CommandsServerEvents {
 			.then(Commands.argument("buildingName", StringArgumentType.string())
 				.then(placeBuildingTail(ctx -> ""))
 				.then(Commands.argument("ownerName", StringArgumentType.string())
-					.then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+					.then(placeBuildingTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 				)
 				.then(Commands.argument("ownerSelector", EntityArgument.player())
-					.then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+					.then(placeBuildingTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 				)
 			)
 		);
@@ -100,32 +109,32 @@ public class CommandsServerEvents {
 			.requires(source -> source.hasPermission(2))
 			.then(setUnitOwnerTail(ctx -> ""))
 			.then(Commands.argument("ownerName", StringArgumentType.string())
-				.then(setUnitOwnerTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				.then(setUnitOwnerTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 				.then(Commands.argument("newOwnerName", StringArgumentType.string())
 					.then(setUnitOwnerTail(
-						ctx -> StringArgumentType.getString(ctx, "ownerName"),
-						ctx -> StringArgumentType.getString(ctx, "newOwnerName")
+						ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
+						ctx -> resolveOwner(StringArgumentType.getString(ctx, "newOwnerName"))
 					))
 				)
 				.then(Commands.argument("newOwnerSelector", EntityArgument.player())
 					.then(setUnitOwnerTail(
-						ctx -> StringArgumentType.getString(ctx, "ownerName"),
-						ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector"))
+						ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
+						ctx -> resolveOwner(selectorName(ctx, "newOwnerSelector"))
 					))
 				)
 			)
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
-				.then(setUnitOwnerTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				.then(setUnitOwnerTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 				.then(Commands.argument("newOwnerName", StringArgumentType.string())
 					.then(setUnitOwnerTail(
-						ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
-						ctx -> StringArgumentType.getString(ctx, "newOwnerName")
+						ctx -> resolveOwner(selectorName(ctx, "ownerSelector")),
+						ctx -> resolveOwner(StringArgumentType.getString(ctx, "newOwnerName"))
 					))
 				)
 				.then(Commands.argument("newOwnerSelector", EntityArgument.player())
 					.then(setUnitOwnerTail(
-						ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
-						ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector"))
+						ctx -> resolveOwner(selectorName(ctx, "ownerSelector")),
+						ctx -> resolveOwner(selectorName(ctx, "newOwnerSelector"))
 					))
 				)
 			)
@@ -135,10 +144,10 @@ public class CommandsServerEvents {
 			.requires(source -> source.hasPermission(2))
 			.then(buildingSelectionTail(ctx -> ""))
 			.then(Commands.argument("ownerName", StringArgumentType.string())
-				.then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				.then(buildingSelectionTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 			)
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
-				.then(buildingSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				.then(buildingSelectionTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 			)
 		);
 		
@@ -180,7 +189,7 @@ public class CommandsServerEvents {
 							ctx,
 							StringArgumentType.getString(ctx, "resource"),
 							IntegerArgumentType.getInteger(ctx, "points"),
-							StringArgumentType.getString(ctx, "playerName")
+							resolveOwner(StringArgumentType.getString(ctx, "playerName"))
 						))
 					)
 					.then(Commands.argument("playerSelector", EntityArgument.player())
@@ -188,7 +197,7 @@ public class CommandsServerEvents {
 							ctx,
 							StringArgumentType.getString(ctx, "resource"),
 							IntegerArgumentType.getInteger(ctx, "points"),
-							getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+							resolveOwner(selectorName(ctx, "playerSelector"))
 						))
 					)
 				)
@@ -198,20 +207,20 @@ public class CommandsServerEvents {
 		dispatcher.register(Commands.literal("rtsapi-unit-action")
 			.requires(source -> source.hasPermission(2))
 			.then(Commands.argument("ownerName", StringArgumentType.string())
-				.then(unitActionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				.then(unitActionTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 			)
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
-				.then(unitActionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				.then(unitActionTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 			)
 		);
 		
 		dispatcher.register(Commands.literal("rtsapi-unit-action")
 			.requires(source -> source.hasPermission(2))
 			.then(Commands.argument("ownerName", StringArgumentType.string())
-				.then(unitActionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				.then(unitActionTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 			)
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
-				.then(unitActionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				.then(unitActionTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 			)
 		);
 		
@@ -220,13 +229,13 @@ public class CommandsServerEvents {
 			.then(Commands.argument("ownerName", StringArgumentType.string())
 				.then(Commands.argument("reason", StringArgumentType.string())
 					.executes(ctx -> victoryPlayer(
-						StringArgumentType.getString(ctx, "ownerName"),
+						resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
 						StringArgumentType.getString(ctx, "reason")
 					))))
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
 				.then(Commands.argument("reason", StringArgumentType.string())
 					.executes(ctx -> victoryPlayer(
-						getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+						resolveOwner(selectorName(ctx, "ownerSelector")),
 						StringArgumentType.getString(ctx, "reason")
 					))))
 		);
@@ -236,13 +245,13 @@ public class CommandsServerEvents {
 			.then(Commands.argument("ownerName", StringArgumentType.string())
 				.then(Commands.argument("reason", StringArgumentType.string())
 					.executes(ctx -> defeatPlayer(
-						StringArgumentType.getString(ctx, "ownerName"),
+						resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
 						StringArgumentType.getString(ctx, "reason")
 					))))
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
 				.then(Commands.argument("reason", StringArgumentType.string())
 					.executes(ctx -> defeatPlayer(
-						getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+						resolveOwner(selectorName(ctx, "ownerSelector")),
 						StringArgumentType.getString(ctx, "reason")
 					))))
 		);
@@ -255,7 +264,7 @@ public class CommandsServerEvents {
 						ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder))
 					.executes(ctx -> summonEntity(
 						ctx,
-						StringArgumentType.getString(ctx, "ownerName"),
+						resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
 						ResourceLocationArgument.getId(ctx, "entity"),
 						BlockPos.containing(ctx.getSource().getPosition()),
 						null
@@ -263,17 +272,17 @@ public class CommandsServerEvents {
 					.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.executes(ctx -> summonEntity(
 							ctx,
-							StringArgumentType.getString(ctx, "ownerName"),
+							resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
 							ResourceLocationArgument.getId(ctx, "entity"),
-							BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+							BlockPosArgument.getSpawnablePos(ctx, "pos"),
 							null
 						))
 						.then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
 							.executes(ctx -> summonEntity(
 								ctx,
-								StringArgumentType.getString(ctx, "ownerName"),
+								resolveOwner(StringArgumentType.getString(ctx, "ownerName")),
 								ResourceLocationArgument.getId(ctx, "entity"),
-								BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+								BlockPosArgument.getSpawnablePos(ctx, "pos"),
 								CompoundTagArgument.getCompoundTag(ctx, "nbt")
 							))
 						)
@@ -290,15 +299,15 @@ public class CommandsServerEvents {
 				.then(Commands.argument("playerName", StringArgumentType.string())
 					.executes(ctx -> addResearch(
 						ctx,
-						ResourceLocationArgument.getId(ctx, "researchItem"),
-						StringArgumentType.getString(ctx, "playerName")
+						RonIds.arg(ctx, "researchItem"),
+						resolveOwner(StringArgumentType.getString(ctx, "playerName"))
 					))
 				)
 				.then(Commands.argument("playerSelector", EntityArgument.player())
 					.executes(ctx -> addResearch(
 						ctx,
-						ResourceLocationArgument.getId(ctx, "researchItem"),
-						getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+						RonIds.arg(ctx, "researchItem"),
+						resolveOwner(selectorName(ctx, "playerSelector"))
 					))
 				)
 			)
@@ -312,15 +321,15 @@ public class CommandsServerEvents {
 				.then(Commands.argument("playerName", StringArgumentType.string())
 					.executes(ctx -> removeResearch(
 						ctx,
-						ResourceLocationArgument.getId(ctx, "researchItem"),
-						StringArgumentType.getString(ctx, "playerName")
+						RonIds.arg(ctx, "researchItem"),
+						resolveOwner(StringArgumentType.getString(ctx, "playerName"))
 					))
 				)
 				.then(Commands.argument("playerSelector", EntityArgument.player())
 					.executes(ctx -> removeResearch(
 						ctx,
-						ResourceLocationArgument.getId(ctx, "researchItem"),
-						getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+						RonIds.arg(ctx, "researchItem"),
+						resolveOwner(selectorName(ctx, "playerSelector"))
 					))
 				)
 			)
@@ -329,10 +338,10 @@ public class CommandsServerEvents {
 		dispatcher.register(Commands.literal("rtsapi-set-unit-enemy-search")
 			.requires(source -> source.hasPermission(2))
 			.then(Commands.argument("ownerName", StringArgumentType.string())
-				.then(searchBehaviourTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				.then(searchBehaviourTail(ctx -> resolveOwner(StringArgumentType.getString(ctx, "ownerName"))))
 			)
 			.then(Commands.argument("ownerSelector", EntityArgument.player())
-				.then(searchBehaviourTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				.then(searchBehaviourTail(ctx -> resolveOwner(selectorName(ctx, "ownerSelector"))))
 			)
 		);
 		
@@ -342,14 +351,14 @@ public class CommandsServerEvents {
 				.then(Commands.argument("value", BoolArgumentType.bool())
 					.executes(ctx -> setRTSCamera(
 						ctx,
-						StringArgumentType.getString(ctx, "playerName"),
+						seatName(StringArgumentType.getString(ctx, "playerName")),
 						BoolArgumentType.getBool(ctx, "value")
 					))))
 			.then(Commands.argument("playerSelector", EntityArgument.player())
 				.then(Commands.argument("value", BoolArgumentType.bool())
 					.executes(ctx -> setRTSCamera(
 						ctx,
-						StringArgumentType.getString(ctx, "playerSelector"),
+						selectorName(ctx, "playerSelector"),
 						BoolArgumentType.getBool(ctx, "value")
 					))))
 		);
@@ -380,18 +389,9 @@ public class CommandsServerEvents {
 										.executes(ctx -> setAlliance(
 												ctx,
 												BoolArgumentType.getBool(ctx, "value"),
-												StringArgumentType.getString(ctx, "playerName1"),
-												StringArgumentType.getString(ctx, "playerName2")
+												resolveOwner(StringArgumentType.getString(ctx, "playerName1")),
+												resolveOwner(StringArgumentType.getString(ctx, "playerName2"))
 										)))))
-		);
-
-		dispatcher.register(Commands.literal("rts-reset")
-				.requires(source -> source.hasPermission(2))
-				.executes(ctx -> PlayerServerEvents.resetRTS(false))
-		);
-		dispatcher.register(Commands.literal("rts-hard-reset")
-				.requires(source -> source.hasPermission(2))
-				.executes(ctx -> PlayerServerEvents.resetRTS(true))
 		);
 
 		dispatcher.register(Commands.literal("rtsapi-export-custom-buildings")
@@ -405,8 +405,50 @@ public class CommandsServerEvents {
 					return 1;
 				})
 		);
+
+		// vanilla only registers these on dedicated servers, which leaves LAN and P2P hosts unable to grant op
+		if (event.getCommandSelection() == Commands.CommandSelection.INTEGRATED) {
+			dispatcher.register(opCommand("op", true));
+			dispatcher.register(opCommand("deop", false));
+		}
 	}
-	
+
+	private static LiteralArgumentBuilder<CommandSourceStack> opCommand(String name, boolean op) {
+		return Commands.literal(name)
+			.requires(source -> source.isPlayer() && PlayerServerEvents.isOpOrHost(source.getPlayer()))
+			.then(Commands.argument("targets", GameProfileArgument.gameProfile())
+				.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+					ctx.getSource().getOnlinePlayerNames(), builder))
+				.executes(ctx -> setOp(ctx.getSource(), GameProfileArgument.getGameProfiles(ctx, "targets"), op))
+			);
+	}
+
+	private static int setOp(CommandSourceStack source, Collection<GameProfile> profiles, boolean op) {
+		PlayerList playerList = source.getServer().getPlayerList();
+		int changed = 0;
+		for (GameProfile profile : profiles) {
+			if (playerList.isOp(profile) == op)
+				continue;
+			if (op) {
+				// PlayerList.op() only grants level 2 on integrated servers, our op checks need 4
+				playerList.getOps().add(new ServerOpListEntry(profile, 4, false));
+				ServerPlayer player = playerList.getPlayer(profile.getId());
+				if (player != null)
+					playerList.sendPlayerPermissionLevel(player);
+			} else {
+				playerList.deop(profile);
+			}
+			source.sendSuccess(
+				() -> Component.translatable(op ? "commands.op.success" : "commands.deop.success", profile.getName()),
+				true
+			);
+			changed++;
+		}
+		if (changed == 0)
+			source.sendFailure(Component.translatable(op ? "commands.op.failed" : "commands.deop.failed"));
+		return changed;
+	}
+
 	private static ArgumentBuilder<CommandSourceStack, ?> placeBuildingTail(NameResolver ownerResolver) {
 		return Commands.argument("autoBuild", BoolArgumentType.bool())
 			.then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -415,7 +457,7 @@ public class CommandsServerEvents {
 					StringArgumentType.getString(ctx, "buildingName"),
 					ownerResolver.resolve(ctx),
 					BoolArgumentType.getBool(ctx, "autoBuild"),
-					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+					BlockPosArgument.getSpawnablePos(ctx, "pos"),
 					Rotation.NONE
 				))
 				// with rotation
@@ -429,7 +471,7 @@ public class CommandsServerEvents {
 						StringArgumentType.getString(ctx, "buildingName"),
 						ownerResolver.resolve(ctx),
 						BoolArgumentType.getBool(ctx, "autoBuild"),
-						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+						BlockPosArgument.getSpawnablePos(ctx, "pos"),
 						parseRotation(StringArgumentType.getString(ctx, "rotation"))
 					))
 				)
@@ -627,13 +669,29 @@ public class CommandsServerEvents {
 		BlockPos pos,
 		CompoundTag nbt
 	) {
+		return summonEntity(ctx, ownerName, entityId, pos, nbt, false);
+	}
+
+	// ground: on the surface at pos's x and z (dry ground, or on water), whatever its y
+	public static int summonEntity(
+		CommandContext<CommandSourceStack> ctx,
+		String ownerName,
+		ResourceLocation entityId,
+		BlockPos pos,
+		CompoundTag nbt,
+		boolean ground
+	) {
 		ServerLevel level = ctx.getSource().getLevel();
+		loadChunks(level, pos, 0);
+		if (ground)
+			pos = MiscUtil.getHighestGroundBlock(level, pos).above(2); // it returns the block under the surface
+		BlockPos fPos = pos;
 		
 		CompoundTag tag = nbt != null ? nbt.copy() : new CompoundTag();
 		tag.putString("id", entityId.toString());
 		
 		Entity entity = EntityType.loadEntityRecursive(tag, level, e -> {
-			e.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5,
+			e.moveTo(fPos.getX() + 0.5, fPos.getY(), fPos.getZ() + 0.5,
 				e.getYRot(), e.getXRot());
 			return e;
 		});
@@ -650,7 +708,7 @@ public class CommandsServerEvents {
 		}
 		
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.entity.summon.success", entityId, ownerName, formatPos(pos)), true
+			() -> Component.translatable("commands.reignofnether.entity.summon.success", entityId, ownerName, formatPos(fPos)), true
 		);
 		return 1;
 	}
@@ -699,6 +757,30 @@ public class CommandsServerEvents {
 	public static String getPlayerName(ServerPlayer player) {
 		return player.getName().getString();
 	}
+
+	// a map seat name means whoever plays that seat, or the seat itself when nobody does
+	// a player selector's name; @s from a seat with no entity (a bot's or an offline player's building trigger)
+	// is that seat's owner, so "rtsapi-change-resources wood 10 @s" works for every owner
+	private static String selectorName(CommandContext<CommandSourceStack> ctx, String arg) throws CommandSyntaxException {
+		try {
+			return getPlayerName(EntityArgument.getPlayer(ctx, arg));
+		} catch (CommandSyntaxException e) {
+			String owner = ctx.getSource().getEntity() == null ? PlayerNameArgument.sourceOwner(ctx.getSource()) : "";
+			if (owner.isEmpty())
+				throw e;
+			return owner;
+		}
+	}
+
+	private static String seatName(String name) {
+		String occupant = StartPosServerEvents.seatOccupant(name);
+		return occupant != null ? occupant : name;
+	}
+
+	// seatName, and a co-commander acts as the owner they command with
+	private static String resolveOwner(String name) {
+		return PlayerRoles.ownerOf(seatName(name));
+	}
 	
 	public static int placeBuilding(
 		CommandContext<CommandSourceStack> ctx,
@@ -708,13 +790,14 @@ public class CommandsServerEvents {
 		BlockPos pos,
 		Rotation rotation
 	) throws CommandSyntaxException {
-		Building building = resolveBuilding(buildingName);
+		Building building = RonIds.building(buildingName);
 		if (building == null) {
 			throw UNKNOWN_BUILDING.create();
 		}
 		if (BuildingServerEvents.getServerLevel() == null) {
 			throw NO_SERVER_LEVEL.create();
 		}
+		loadChunks(BuildingServerEvents.getServerLevel(), pos, 48);
 		
 		BuildingPlacement placement = BuildingServerEvents.placeBuilding(
 			building,
@@ -739,6 +822,14 @@ public class CommandsServerEvents {
 		return 1;
 	}
 	
+	// a map script may place or summon where nobody is: the chunks within radius blocks are loaded (from disk, or
+	// generated) so it works; they unload again on their own, and a building's later blocks load theirs as they go up
+	private static void loadChunks(ServerLevel level, BlockPos pos, int radius) {
+		for (int cx = (pos.getX() - radius) >> 4; cx <= (pos.getX() + radius) >> 4; cx++)
+			for (int cz = (pos.getZ() - radius) >> 4; cz <= (pos.getZ() + radius) >> 4; cz++)
+				level.getChunk(cx, cz);
+	}
+
 	public static int destroyBuildingsAt(BlockPos pos, CommandSourceStack source) {
 		int removed = 0;
 		for (BuildingPlacement placement : BuildingServerEvents.getBuildings()) {
@@ -853,6 +944,10 @@ public class CommandsServerEvents {
 		String playerName
 	) throws CommandSyntaxException {
 		ResourceName resource = resolveResource(resourceName);
+		if (ResourcesServerEvents.resourcesList.stream().noneMatch(r -> r.ownerName.equals(playerName))) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.unknown", playerName));
+			return 0;
+		}
 		int food = resource == ResourceName.FOOD ? amount : 0;
 		int wood = resource == ResourceName.WOOD ? amount : 0;
 		int ore = resource == ResourceName.ORE ? amount : 0;
@@ -872,7 +967,6 @@ public class CommandsServerEvents {
 		String playerName
 	) {
 		ResearchServerEvents.addResearch(playerName, researchItemName);
-		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
 			() -> Component.translatable("commands.reignofnether.research.add.success", researchItemName, playerName),
 			true
@@ -886,7 +980,6 @@ public class CommandsServerEvents {
 		String playerName
 	) {
 		ResearchServerEvents.removeResearch(playerName, researchItemName);
-		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
 			() -> Component.translatable("commands.reignofnether.research.remove.success", researchItemName, playerName),
 			true
@@ -958,25 +1051,6 @@ public class CommandsServerEvents {
 		return idArray;
 	}
 	
-	private static Building resolveBuilding(String input) {
-		ResourceLocation location;
-		if (input.contains(":")) {
-			location = ResourceLocation.tryParse(input);
-		} else {
-			location = ResourceLocation.tryParse(ReignOfNether.MOD_ID + ":" + input);
-		}
-		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
-		if (building == null) {
-			building = CustomBuildingServerEvents.getCustomBuilding(
-				WordUtils.capitalize(
-					input
-						.replace("custom:", "")
-						.replace("_", " ")
-				)
-			);
-		}
-		return building;
-	}
 	
 	public static int setStartingTeamsMode(
 		CommandContext<CommandSourceStack> ctx,
@@ -993,8 +1067,8 @@ public class CommandsServerEvents {
 			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.rtsmap.unknown_mode", mode));
 			return 0;
 		}
-		RTSMapInfoServerEvents.rtsMapInfo.setDefaultMode(mode);
-		RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, RTSMapInfoServerEvents.rtsMapInfo.getDefaultMode());
+		RTSMapInfoServerEvents.rtsMapInfo.setSelectedMode(mode);
+		RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, RTSMapInfoServerEvents.rtsMapInfo.getSelectedMode());
 		ctx.getSource().sendSuccess(
 			() -> Component.translatable("commands.reignofnether.rtsmap.starting_team_mode.set", mode),
 			true

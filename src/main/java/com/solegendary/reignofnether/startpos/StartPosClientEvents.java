@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.startpos;
 
-import com.solegendary.reignofnether.ReignOfNether;
+import javax.annotation.Nullable;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
@@ -11,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -20,9 +20,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class StartPosClientEvents {
 
@@ -32,6 +32,8 @@ public class StartPosClientEvents {
     public static boolean isStarting = false; // game is counting down to start
     // players on other teams whose seats the server hides (hideEnemyPicks): name -> ready
     public static final Map<String, Boolean> hiddenPlayers = new LinkedHashMap<>();
+    public static final List<SeatJoin> joins = new ArrayList<>(); // soldiers and co-commanders this player may see
+    public static final List<Faction> botFactions = new ArrayList<>(); // what the host can give an AI seat (BotPlans)
 
     public static boolean isEnabled() {
         return ClientGameModeHelper.gameMode == GameMode.CLASSIC && !startPoses.isEmpty();
@@ -45,6 +47,12 @@ public class StartPosClientEvents {
                 changed = true;
             }
         }
+        for (SeatJoin join : joins) {
+            if (join.playerName.equals(playerName) && join.ready != ready) {
+                join.ready = ready;
+                changed = true;
+            }
+        }
         Boolean hiddenReady = hiddenPlayers.get(playerName);
         if (hiddenReady != null && hiddenReady != ready) {
             hiddenPlayers.put(playerName, ready);
@@ -52,10 +60,10 @@ public class StartPosClientEvents {
         }
         if (changed && MC.player != null) {
             if (ready) {
-                MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_ready",
-                        playerName, getNumPlayersReady(), getNumEnabledPoses()));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("startpos.reignofnether.player_ready",
+                        playerName, getNumPlayersReady(), getNumEnabledPoses())));
             } else {
-                MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_not_ready", playerName));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("startpos.reignofnether.player_not_ready", playerName)));
             }
         }
     }
@@ -73,23 +81,40 @@ public class StartPosClientEvents {
         }
     }
 
+    // the singleplayer/P2P host or an op; the server checks this too
+    public static boolean isHost() {
+        return MC.hasSingleplayerServer() || (MC.player != null && MC.player.hasPermissions(2));
+    }
+
     public static boolean hasReservedPos() {
         return getPos() != null;
     }
 
-    private static int getNumPlayersReady() {
+    // the local player's soldier/co-commander join, if any
+    @Nullable
+    public static SeatJoin getJoin() {
+        for (SeatJoin join : joins)
+            if (MC.player != null && MC.player.getName().getString().equals(join.playerName))
+                return join;
+        return null;
+    }
+
+    public static int getNumPlayersReady() {
         int readyPlayers = 0;
         for (StartPos startPose : startPoses)
             if (startPose.faction != Factions.NONE && startPose.ready && !startPose.playerName.isBlank())
+                readyPlayers++;
+        for (SeatJoin join : joins)
+            if (join.ready)
                 readyPlayers++;
         for (boolean ready : hiddenPlayers.values())
             if (ready)
                 readyPlayers++;
         return readyPlayers;
     }
-    private static int getNumEnabledPoses() {
-        // hidden seats are sent without their player, who is counted in hiddenPlayers instead
-        int enabledPoses = hiddenPlayers.size();
+    public static int getNumEnabledPoses() {
+        // hidden seats are counted with the seats, so hidden players beyond them are hidden joins
+        int enabledPoses = (int) joins.stream().filter(j -> !j.pending).count() + hiddenPlayers.size();
         for (StartPos startPose : startPoses) {
             if (startPose.enabled)
                 enabledPoses++;
@@ -99,19 +124,11 @@ public class StartPosClientEvents {
         return enabledPoses;
     }
 
-
     public static StartPos getPos() {
         for (StartPos startPos : startPoses)
             if (MC.player != null && MC.player.getName().getString().equals(startPos.playerName))
                 return startPos;
         return null;
-    }
-
-    private static ResourceLocation getIcon() {
-        if (getPos() == null)
-            return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/block/rts_start_block_white.png");
-        else
-            return getPos().getIcon();
     }
 
     @SubscribeEvent
@@ -152,6 +169,7 @@ public class StartPosClientEvents {
         selectedFaction = Factions.NONE;
         isStarting = false;
         hiddenPlayers.clear();
+        joins.clear();
         for (StartPos startPos : startPoses)
             startPos.reset();
     }

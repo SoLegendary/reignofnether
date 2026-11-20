@@ -76,7 +76,30 @@ public final class ResourceIndex {
     public Optional<BlockPos> findClosest(Level level, BlockPos origin, int range,
                                           ResourceName type, Predicate<BlockPos> condition) {
         if (type == null || type == ResourceName.NONE) return Optional.empty();
+        LongArrayList cand = collect(level, origin, range, type);
+        if (cand.isEmpty()) return Optional.empty();
+        final int ox = origin.getX(), oy = origin.getY(), oz = origin.getZ();
 
+        // Sort nearest-first so condition runs in increasing-distance order (preserving findClosestMatch's
+        // "first passing wins", and the altSearchPos side-effect in BLOCK_CONDITION firing on the NEAREST
+        // contested block). Candidate count is small (resources in a handful of chunks).
+        long[] arr = cand.toLongArray();
+        LongArrays.quickSort(arr, (a, b) -> Long.compare(distSq(a, ox, oy, oz), distSq(b, ox, oy, oz)));
+        for (long p : arr) {
+            BlockPos bp = new BlockPos(BlockPos.getX(p), BlockPos.getY(p), BlockPos.getZ(p));
+            if (condition.test(bp)) return Optional.of(bp);
+        }
+        return Optional.empty();
+    }
+
+    // How many indexed resource blocks of `type` lie in the [-range,range] box around centre: how rich a spot is.
+    public int count(Level level, BlockPos centre, int range, ResourceName type) {
+        if (type == null || type == ResourceName.NONE) return 0;
+        return collect(level, centre, range, type).size();
+    }
+
+    // Indexed positions of `type` in the [-range,range] box around origin; queues un-indexed chunks for a scan.
+    private LongArrayList collect(Level level, BlockPos origin, int range, ResourceName type) {
         final int ox = origin.getX(), oy = origin.getY(), oz = origin.getZ();
         final int cx0 = (ox - range) >> 4, cx1 = (ox + range) >> 4;
         final int cz0 = (oz - range) >> 4, cz1 = (oz + range) >> 4;
@@ -98,18 +121,7 @@ public final class ResourceIndex {
                 }
             }
         }
-        if (cand.isEmpty()) return Optional.empty();
-
-        // Sort nearest-first so condition runs in increasing-distance order (preserving findClosestMatch's
-        // "first passing wins", and the altSearchPos side-effect in BLOCK_CONDITION firing on the NEAREST
-        // contested block). Candidate count is small (resources in a handful of chunks).
-        long[] arr = cand.toLongArray();
-        LongArrays.quickSort(arr, (a, b) -> Long.compare(distSq(a, ox, oy, oz), distSq(b, ox, oy, oz)));
-        for (long p : arr) {
-            BlockPos bp = new BlockPos(BlockPos.getX(p), BlockPos.getY(p), BlockPos.getZ(p));
-            if (condition.test(bp)) return Optional.of(bp);
-        }
-        return Optional.empty();
+        return cand;
     }
 
     private void enqueueIfNeeded(Level level, long chunkKey) {

@@ -51,6 +51,12 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
         this.productions.add(ProductionItems.GRUNT, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.BABY_HOGLIN, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.STRIDER, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_ARMOR_1, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_ARMOR_2, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_ARMOR_3, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_WEAPONS_1, Keybindings.abilitySlot5);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_WEAPONS_2, Keybindings.abilitySlot5);
+        this.productions.add(ProductionItems.RESEARCH_SOLDIER_WEAPONS_3, Keybindings.abilitySlot5);
 
         setActiveAddon(NetherConvertingAddon.class, this, true);
     }

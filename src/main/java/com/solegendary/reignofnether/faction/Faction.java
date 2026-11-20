@@ -9,17 +9,14 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.survival.Wave;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public class Faction {
@@ -34,7 +31,6 @@ public class Faction {
 	public ResourceLocation capitolBuilding;
 	public Predicate<CustomBuilding> isBuildableCustomBuilding = null;
 	public SoundEvent sound;
-	public BiConsumer<ServerLevel, Wave> spawnWave;
 	ArrayList<BuildingPlaceButton> buildingButtons = new ArrayList<>();
 	ArrayList<UnitSpawnButton> entityButtons = new ArrayList<>();
 	
@@ -55,14 +51,7 @@ public class Faction {
 		return this;
 	}
 	
-	public Faction setSpawnWave(BiConsumer<ServerLevel, Wave> spawnWave) {
-		this.spawnWave = spawnWave;
-		return this;
-	}
 	
-	public void spawnWave(ServerLevel level, Wave wave) {
-		this.spawnWave.accept(level, wave);
-	}
 	
 	public Faction setUnplayable() {
 		this.playable = false;
@@ -102,7 +91,9 @@ public class Faction {
 	}
 	
 	public void addBuilding(Building building, Keybinding keybinding) {
-		BuildingPlaceButton buildButton = getBuilding(ReignOfNetherRegistries.BUILDING.getKey(building)).getBuildButton(keybinding);
+		Building registered = getBuilding(ReignOfNetherRegistries.BUILDING.getKey(building));
+		BuildingPlaceButton buildButton = registered.getBuildButton(keybinding);
+		buildButton.cost = () -> registered.cost;
 		buildingButtons.add(buildButton);
 	}
 	

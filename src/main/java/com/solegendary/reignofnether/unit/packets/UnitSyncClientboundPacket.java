@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.replay.ReplayServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -54,39 +55,30 @@ public class UnitSyncClientboundPacket {
         );
     }
 
-    public static void sendSyncScenarioRoleIndexPacket(Unit unit) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncClientboundPacket(UnitSyncAction.SYNC_SCENARIO_ROLE_INDEX,
-                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0,0,0, "")
-        );
-    }
-
     public static void sendSyncStatsPacket(List<ServerPlayer> players, LivingEntity entity) {
         String owner = "";
         if (entity instanceof Unit unit)
             owner = unit.getOwnerName();
 
-        for (ServerPlayer player : players) {
-            if (FogOfWarServerEvents.isBlockVisibleFor(player, entity.getOnPos().getX(), entity.getOnPos().getZ())) {
-                int pop = 0;
-                if (entity instanceof Unit unit) {
-                    CompoundTag tag = entity.getPersistentData();
-                    if (tag.contains("popCost", Tag.TAG_INT)) {
-                        pop = tag.getInt("popCost");
-                    } else {
-                        pop = unit.getCost().population;
-                    }
-                }
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                        new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
-                                entity.getId(), 0,
-                                entity.getHealth(),
-                                entity.getAbsorptionAmount(),
-                                entity.getX(), entity.getY(), entity.getZ(),
-                                0,0,0,0, pop, owner)
-                );
+        int pop = 0;
+        if (entity instanceof Unit unit) {
+            CompoundTag tag = entity.getPersistentData();
+            if (tag.contains("popCost", Tag.TAG_INT)) {
+                pop = tag.getInt("popCost");
+            } else {
+                pop = unit.getCost().population;
             }
         }
+        UnitSyncClientboundPacket packet = new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
+                entity.getId(), 0,
+                entity.getHealth(),
+                entity.getAbsorptionAmount(),
+                entity.getX(), entity.getY(), entity.getZ(),
+                0,0,0,0, pop, owner);
+        for (ServerPlayer player : players)
+            if (FogOfWarServerEvents.isBlockVisibleFor(player, entity.getOnPos().getX(), entity.getOnPos().getZ()))
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+        ReplayServerEvents.recordOmniMessage(packet); // a replay has every unit's stats, fog or not
     }
 
     public static void sendSyncResourcesPacket(Unit unit) {
@@ -203,7 +195,6 @@ public class UnitSyncClientboundPacket {
                     switch (this.syncAction) {
                         case LEAVE_LEVEL -> UnitClientEvents.onEntityLeave(this.entityId);
                         case SYNC_OWNERNAME -> UnitClientEvents.syncOwnerName(this.entityId, ownerName);
-                        case SYNC_SCENARIO_ROLE_INDEX -> UnitClientEvents.syncScenarioRoleIndex(this.entityId, this.targetId);
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,

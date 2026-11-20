@@ -16,12 +16,9 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> FLYING_MAX_Y_LEVEL;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_BEACONS;
     public static GameRules.Key<GameRules.IntegerValue> BEACON_WIN_MINUTES;
-    public static GameRules.Key<GameRules.BooleanValue> PVP_MODES_ONLY;
     public static GameRules.Key<GameRules.BooleanValue> SLANTED_BUILDING;
     public static GameRules.Key<GameRules.IntegerValue> ALLOWED_HEROES;
     public static GameRules.Key<GameRules.BooleanValue> LOCK_ALLIANCES;
-    public static GameRules.Key<GameRules.BooleanValue> SCENARIO_MODE;
-    public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
     public static GameRules.Key<GameRules.BooleanValue> FORCE_FOG;
@@ -31,6 +28,13 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
     public static GameRules.Key<GameRules.IntegerValue> RANDOM_ITEM_DROPS;
     public static GameRules.Key<GameRules.BooleanValue> HIDE_ENEMY_PICKS;
+    public static GameRules.Key<GameRules.BooleanValue> BOT_TAKEOVER;
+    public static GameRules.Key<GameRules.IntegerValue> SOLDIERS_PER_TEAM;
+    public static final int MAX_SOLDIERS_PER_TEAM = 4;
+    public static final int MAX_SOLDIER_RESPAWN_SECONDS = 300;
+    public static GameRules.Key<GameRules.BooleanValue> CO_COMMANDERS;
+    public static GameRules.Key<GameRules.IntegerValue> SOLDIER_RESPAWN_SECONDS;
+    public static GameRules.Key<GameRules.BooleanValue> ALL_CHAT;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -65,10 +69,6 @@ public class GameRuleRegistrar {
         ALLOW_BEACONS = GameRules.register("allowBeacons", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(true)
         );
-        // allow only classic/king of the beacon gamemodes
-        PVP_MODES_ONLY = GameRules.register("pvpModesOnly", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(false)
-        );
         // ticks to win with a beacon
         BEACON_WIN_MINUTES = GameRules.register("beaconWinMinutes", GameRules.Category.PLAYER,
                 GameRules.IntegerValue.create(10)
@@ -85,16 +85,12 @@ public class GameRuleRegistrar {
         LOCK_ALLIANCES = GameRules.register("lockAlliances", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
         );
-        // map is set to be played as a scenario by the player that opens it
-        SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
-                GameRules.BooleanValue.create(false)
-        );
         // in the match lobby, other teams' factions and chosen start positions are hidden
         HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(true)
         );
-        // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
-        COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,
+        // a bot plays a disconnected player's base until they reconnect
+        BOT_TAKEOVER = GameRules.register("botTakeover", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
         );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
@@ -133,6 +129,21 @@ public class GameRuleRegistrar {
         // Difference in level that animals can spawn around capitols at
         RANDOM_ITEM_DROPS = GameRules.register("randomItemDrops", GameRules.Category.DROPS,
                 boundedInt(2, 0, 3)
+        );
+        // first-person soldier seats each team gets in the match lobby (0 = no soldiers)
+        SOLDIERS_PER_TEAM = GameRules.register("soldiersPerTeam", GameRules.Category.PLAYER,
+                boundedInt(0, 0, MAX_SOLDIERS_PER_TEAM)
+        );
+        // players can join an occupied seat to share that player's faction
+        CO_COMMANDERS = GameRules.register("coCommanders", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
+        );
+        SOLDIER_RESPAWN_SECONDS = GameRules.register("soldierRespawnSeconds", GameRules.Category.PLAYER,
+                boundedInt(30, 0, MAX_SOLDIER_RESPAWN_SECONDS)
+        );
+        // '!' chat (and the voice ALL channel) reaches every player during a match
+        ALL_CHAT = GameRules.register("allChat", GameRules.Category.CHAT,
+                GameRules.BooleanValue.create(true)
         );
     }
 

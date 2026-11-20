@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+import java.util.Set;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
@@ -54,6 +57,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.WORKER, UnitRole.UNDEAD);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public static final Abilities ABILITIES = new Abilities();
 
     //region
@@ -136,11 +147,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(ZombieVillagerUnit.class, EntityDataSerializers.STRING);
 
-    // which scenario role does this unit use?
-    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
-    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(ZombieVillagerUnit.class, EntityDataSerializers.INT);
     
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
@@ -151,7 +157,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
     }
 

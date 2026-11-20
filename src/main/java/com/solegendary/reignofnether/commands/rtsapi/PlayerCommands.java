@@ -16,16 +16,13 @@ import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
 import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -236,9 +233,8 @@ public class PlayerCommands {
 							.then(Commands.argument("player", PlayerNameArgument.player())
 								.executes(ctx -> {
 									String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
-									ResourceLocation researchItem = ResourceLocationArgument.getId(ctx, "researchItem");
+									ResourceLocation researchItem = RonIds.arg(ctx, "researchItem");
 									ResearchServerEvents.addResearch(playerName, researchItem);
-									ResearchServerEvents.syncResearch(playerName);
 									ctx.getSource().sendSuccess(
 										() -> Component.translatable("commands.reignofnether.research.add.success",researchItem, playerName),
 										true
@@ -255,9 +251,8 @@ public class PlayerCommands {
 							.then(Commands.argument("player", PlayerNameArgument.player())
 								.executes(ctx -> {
 									String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
-									ResourceLocation researchItem = ResourceLocationArgument.getId(ctx, "researchItem");
+									ResourceLocation researchItem = RonIds.arg(ctx, "researchItem");
 									ResearchServerEvents.removeResearch(playerName, researchItem);
-									ResearchServerEvents.syncResearch(playerName);
 									ctx.getSource().sendSuccess(
 										() -> Component.translatable("commands.reignofnether.research.remove.success", researchItem, playerName),
 										true
@@ -301,7 +296,7 @@ public class PlayerCommands {
 								.executes(ctx -> forceMoveCam(
 									ctx,
 									BlockPosArgument.getBlockPos(ctx, "pos"),
-									PlayerNameArgument.getPlayerName(ctx, "player"),
+									PlayerNameArgument.getPersonName(ctx, "player"),
 									0,
 									20,
 									0
@@ -310,7 +305,7 @@ public class PlayerCommands {
 									.executes(ctx -> forceMoveCam(
 										ctx,
 										BlockPosArgument.getBlockPos(ctx, "pos"),
-										PlayerNameArgument.getPlayerName(ctx, "player"),
+										PlayerNameArgument.getPersonName(ctx, "player"),
 										IntegerArgumentType.getInteger(ctx, "lockTicks"),
 										20,
 										0
@@ -319,7 +314,7 @@ public class PlayerCommands {
 										.executes(ctx -> forceMoveCam(
 											ctx,
 											BlockPosArgument.getBlockPos(ctx, "pos"),
-											PlayerNameArgument.getPlayerName(ctx, "player"),
+											PlayerNameArgument.getPersonName(ctx, "player"),
 											IntegerArgumentType.getInteger(ctx, "lockTicks"),
 											IntegerArgumentType.getInteger(ctx, "forcePanTicks"),
 											0
@@ -328,7 +323,7 @@ public class PlayerCommands {
 											.executes(ctx -> forceMoveCam(
 												ctx,
 												BlockPosArgument.getBlockPos(ctx, "pos"),
-												PlayerNameArgument.getPlayerName(ctx, "player"),
+												PlayerNameArgument.getPersonName(ctx, "player"),
 												IntegerArgumentType.getInteger(ctx, "lockTicks"),
 												IntegerArgumentType.getInteger(ctx, "forcePanTicks"),
 												IntegerArgumentType.getInteger(ctx, "zoom")
@@ -345,7 +340,7 @@ public class PlayerCommands {
 								.executes(ctx -> fadeMoveCam(
 									ctx,
 									BlockPosArgument.getBlockPos(ctx, "pos"),
-									PlayerNameArgument.getPlayerName(ctx, "player"),
+									PlayerNameArgument.getPersonName(ctx, "player"),
 									CameraFadeClientEvents.DEFAULT_FADE_TICKS,
 									CameraFadeClientEvents.DEFAULT_BLACKOUT_TICKS
 								))
@@ -353,7 +348,7 @@ public class PlayerCommands {
 									.executes(ctx -> fadeMoveCam(
 										ctx,
 										BlockPosArgument.getBlockPos(ctx, "pos"),
-										PlayerNameArgument.getPlayerName(ctx, "player"),
+										PlayerNameArgument.getPersonName(ctx, "player"),
 										IntegerArgumentType.getInteger(ctx, "fadeTicks"),
 										CameraFadeClientEvents.DEFAULT_BLACKOUT_TICKS
 									))
@@ -361,7 +356,7 @@ public class PlayerCommands {
 										.executes(ctx -> fadeMoveCam(
 											ctx,
 											BlockPosArgument.getBlockPos(ctx, "pos"),
-											PlayerNameArgument.getPlayerName(ctx, "player"),
+											PlayerNameArgument.getPersonName(ctx, "player"),
 											IntegerArgumentType.getInteger(ctx, "fadeTicks"),
 											IntegerArgumentType.getInteger(ctx, "blackoutTicks")
 										))
@@ -375,7 +370,7 @@ public class PlayerCommands {
 					.then(Commands.argument("value", BoolArgumentType.bool())
 					.then(Commands.argument("player", PlayerNameArgument.player())
 						.executes(ctx -> {
-							String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
+							String playerName = PlayerNameArgument.getPersonName(ctx, "player");
 							boolean value = BoolArgumentType.getBool(ctx, "value");
 							PlayerClientboundPacket.setRTSCamera(playerName, value);
 							ctx.getSource().sendSuccess(
@@ -397,17 +392,6 @@ public class PlayerCommands {
 						.executes(ctx -> CommandsServerEvents.setStartingTeamsMode(ctx, StringArgumentType.getString(ctx, "mode")))
 					)
 				)
-				.then(Commands.literal("start-scenario-role")
-					.then(Commands.argument("player", PlayerNameArgument.player())
-						.then(Commands.argument("scenarioId", IntegerArgumentType.integer(0))
-							.executes(ctx -> startScenarioRole(
-								ctx,
-								PlayerNameArgument.getPlayerName(ctx, "player"),
-								IntegerArgumentType.getInteger(ctx, "scenarioId")
-							))
-						)
-					)
-				)
 			);
 	}
 
@@ -419,12 +403,12 @@ public class PlayerCommands {
 			int forcePanTicks,
 			int zoomLevel
 	) {
-		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
-		if (player == null) {
+		List<ServerPlayer> players = seatPlayersOnline(ctx, playerName);
+		if (players.isEmpty()) {
 			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.offline", playerName));
 			return 0;
 		}
-		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel);
+		players.forEach(player -> CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel));
         Component forcePanTicksText = forcePanTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.force_pan_ticks", forcePanTicks) : Component.empty();
 		Component lockTicksText = lockTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.lock_ticks", lockTicks) : Component.empty();
 		Component zoomLevelText = zoomLevel > 0 ? Component.translatable("commands.reignofnether.player.move_camera.zoom_level", zoomLevel) : Component.empty();
@@ -435,6 +419,20 @@ public class PlayerCommands {
 		return 1;
 	}
 
+	// the player plus everyone else on their seat (co-commanders, soldiers) who is online
+	private static List<ServerPlayer> seatPlayersOnline(CommandContext<CommandSourceStack> ctx, String playerName) {
+		List<String> names = new ArrayList<>(List.of(playerName));
+		names.addAll(PlayerRoles.coCommandersOf(playerName));
+		names.addAll(PlayerRoles.soldiersOf(playerName));
+		List<ServerPlayer> players = new ArrayList<>();
+		for (String name : names) {
+			ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(name);
+			if (player != null)
+				players.add(player);
+		}
+		return players;
+	}
+
 	private static int fadeMoveCam(
 			CommandContext<CommandSourceStack> ctx,
 			BlockPos pos,
@@ -442,12 +440,12 @@ public class PlayerCommands {
 			int fadeTicks,
 			int blackoutTicks
 	) {
-		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
-		if (player == null) {
+		List<ServerPlayer> players = seatPlayersOnline(ctx, playerName);
+		if (players.isEmpty()) {
 			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.offline", playerName));
 			return 0;
 		}
-		CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, blackoutTicks, fadeTicks);
+		players.forEach(player -> CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, blackoutTicks, fadeTicks));
 		ctx.getSource().sendSuccess(
 				() -> Component.translatable("commands.reignofnether.player.fade_camera", playerName, pos.getX(), pos.getZ()),
 				true
@@ -455,53 +453,6 @@ public class PlayerCommands {
 		return 1;
 	}
 
-
-	private static int startScenarioRole(
-		CommandContext<CommandSourceStack> ctx,
-		String playerName,
-		int roleIndex
-	) {
-		if (!ctx.getSource().getServer().getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.not_scenario_mode"));
-			return 0;
-		}
-		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
-		if (player == null) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.offline", playerName));
-			return 0;
-		}
-		if (PlayerServerEvents.isRTSPlayer(playerName)) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.already_rts_player", playerName));
-			return 0;
-		}
-		ScenarioRole role = ScenarioUtils.getScenarioRole(false, roleIndex);
-		if (role == null) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.unknown_role", roleIndex));
-			return 0;
-		}
-		if (role.isNpc) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_npc", roleIndex));
-			return 0;
-		}
-		synchronized (PlayerServerEvents.rtsPlayers) {
-			for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
-				if (rtsPlayer.scenarioRoleIndex == roleIndex) {
-					ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_taken", roleIndex, rtsPlayer.name));
-					return 0;
-				}
-			}
-		}
-		if (PlayerServerEvents.rtsLocked) {
-			ctx.getSource().sendFailure(Component.translatable("server.reignofnether.locked"));
-			return 0;
-		}
-		PlayerServerEvents.startRTSScenario(player.getId(), roleIndex);
-		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.scenario.start_role.success", playerName, role.name, roleIndex),
-			true
-		);
-		return 1;
-	}
 
 	private static int changeResources(
 		CommandContext<CommandSourceStack> ctx,

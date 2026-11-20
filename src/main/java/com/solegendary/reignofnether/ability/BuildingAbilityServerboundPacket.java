@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability;
 
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -7,6 +8,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.Minecraft;
@@ -65,9 +67,11 @@ public class BuildingAbilityServerboundPacket {
                 success.set(false);
                 return;
             }
+            if (GuideServer.isLocked(player))
+                return; // a cutscene took their control
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
             if (building != null) {
-                if (!player.getName().getString().equals(building.ownerName)) {
+                if (!PlayerRoles.ownerOf(player.getName().getString()).equals(building.ownerName)) {
                     ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;

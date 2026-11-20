@@ -4,14 +4,12 @@ import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalPocket;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -68,8 +66,6 @@ public class BuildingValidators {
             return "building.reignofnether.unexplored";
         } else if (!isBuildingPlacementWithinWorldBorder(level, building, absoluteBlocks)) {
             return "building.reignofnether.outside_map";
-        } else if (!isNotTutorialOrNearValidCapitolPosition(level, building, originPos)) {
-            return "building.reignofnether.build_centre_here";
         }
         return null;
     }
@@ -269,16 +265,6 @@ public class BuildingValidators {
         }
         float percentWater = (float) waterBlocksClipping / (float) bridgeBlocks;
         return percentWater > MIN_BRIDGE_LIQUID_BLOCKS_PERCENT && percentWater < MAX_BRIDGE_LIQUID_BLOCKS_PERCENT;
-    }
-
-    private static boolean isNotTutorialOrNearValidCapitolPosition(Level level, Building building, BlockPos originPos) {
-        if (!level.isClientSide())
-            return true;
-        if (!TutorialClientEvents.isEnabled())
-            return true;
-        if (!(building instanceof TownCentre))
-            return true;
-        return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
     }
 
     public static boolean isInBrightChunk(Level level, List<BuildingBlock> blocks, String ownerName) {

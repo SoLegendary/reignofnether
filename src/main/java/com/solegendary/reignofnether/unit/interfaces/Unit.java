@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.rtsmap.MapConverter;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
@@ -34,7 +38,6 @@ import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.time.NightUtils;
@@ -218,6 +221,10 @@ public interface Unit {
 
     public ResourceCost getCost();
 
+    // hand-written per unit class so the AI knows a new unit as soon as it exists (see UnitRole). An instance
+    // method so a unit can change roles at runtime (a mounted pillager, a flying windcaller)
+    Set<UnitRole> getUnitRoles();
+
     LivingEntity getFollowTarget();
     boolean getHoldPosition();
     void setHoldPosition(boolean holdPosition);
@@ -225,9 +232,6 @@ public interface Unit {
     String getOwnerName();
     void setOwnerName(String name);
 
-    int getScenarioRoleIndex(); // if -1, no role
-    void setScenarioRoleIndex(int index);
-    
     String getOnDeathCommand();
     void setOnDeathCommand(String command);
 
@@ -242,7 +246,7 @@ public interface Unit {
                     .withPosition(entity.position())
                     .withLevel(serverLevel)
                     .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, RonFiles.withOwner(command, getOwnerName()));
             }
         }
     }
@@ -531,7 +535,8 @@ public interface Unit {
 
     private static void checkAndPickupResources(Unit unit, List<ItemEntity> nearbyItems) {
         Mob unitMob = (Mob) unit;
-        if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
+        // resources and unit items are carried side by side; the HUD shows both
+        if (unitMob.canPickUpLoot()) {
             for (ItemEntity itementity : nearbyItems) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {
@@ -651,7 +656,6 @@ public interface Unit {
     // call from addAdditionalSaveData
     public default void addUnitSaveData(@NotNull CompoundTag pCompound) {
         pCompound.putString("ownerName", getOwnerName());
-        pCompound.putInt("scenarioRoleIndex", getScenarioRoleIndex());
         if (getAnchor() != null) {
             pCompound.putInt("anchorPosX", getAnchor().getX());
             pCompound.putInt("anchorPosY", getAnchor().getY());
@@ -671,7 +675,6 @@ public interface Unit {
     // call from readAdditionalSaveData
     public default void readUnitSaveData(@NotNull CompoundTag pCompound) {
         setOwnerName(pCompound.getString("ownerName"));
-        setScenarioRoleIndex(pCompound.getInt("scenarioRoleIndex"));
         BlockPos anchorPos = new BlockPos(
             pCompound.getInt("anchorPosX"),
             pCompound.getInt("anchorPosY"),
@@ -693,6 +696,10 @@ public interface Unit {
             }
         }
         setOnDeathCommand(pCompound.getString("onDeathCommand"));
+        // a v1 scenario unit: kept until a converted map's seat for that role claims it (MapConverter.claimLegacyUnit)
+        if (pCompound.contains("scenarioRoleIndex") && pCompound.getInt("scenarioRoleIndex") >= 0)
+            ((Entity) this).getPersistentData().putInt(MapConverter.LEGACY_ROLE,
+                    pCompound.getInt("scenarioRoleIndex"));
     }
 
     public enum SunlightEffect {
@@ -1048,10 +1055,6 @@ public interface Unit {
                 PlayerClientEvents.getRTSPlayer(getOwnerName()) :
                 PlayerServerEvents.getRTSPlayer(getOwnerName());
         return rtsPlayer != null;
-    }
-
-    public default boolean hasScenarioNpcOwner() {
-        return ScenarioUtils.isScenarioNpc(((Entity) this).level().isClientSide(), this.getOwnerName());
     }
 
     public default boolean isScout() {

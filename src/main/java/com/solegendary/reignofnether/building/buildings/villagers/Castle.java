@@ -19,7 +19,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -94,7 +93,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobblestone.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.CASTLE,
-            TutorialClientEvents::isEnabled,
+            () -> false,
             () -> (
                 BuildingClientEvents.hasFinishedBuilding(Buildings.WITCH_HUT)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.BLACKSMITH)

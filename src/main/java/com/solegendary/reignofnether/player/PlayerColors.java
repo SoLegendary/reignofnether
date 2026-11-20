@@ -4,9 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.MapColor;
@@ -18,6 +17,10 @@ import static com.solegendary.reignofnether.unit.UnitClientEvents.getPlayerToPla
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class PlayerColors {
+
+    static {
+        WorldState.onClientReset(PlayerColors::reset);
+    }
     /**
      * Indicates which color mode is used. This affects unit/buildings outlines, as well as some UI elements.
      * @return true if using player colors, false if using relation colors
@@ -162,7 +165,7 @@ public class PlayerColors {
 
     public static int getPlayerColorHex(String playerName) {
         if (playerName == null || playerName.isBlank()) {
-            return COLOR_WHITE.hexCode;
+            return COLOR_NEUTRAL.hexCode;
         }
 
         int colorId = getPlayerColorId(playerName);
@@ -228,7 +231,7 @@ public class PlayerColors {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
                 null,
                 () -> false,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !MinimapClientEvents.isLargeMap(),
+                () -> !MinimapClientEvents.isLargeMap(),
                 PlayerClientEvents::isRTSPlayer,
                 PlayerColors::toggleColorMode,
                 null,

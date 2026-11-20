@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalCivilian;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
@@ -9,7 +10,9 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.placements.StockpilePlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.guide.GuideServer;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.rtsmap.RonFiles;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -171,16 +174,19 @@ public class BuildingServerboundPacket {
                 return;
             }
             else if (((newBuildingAuthActions.contains(this.action) &&
-                    !player.getName().getString().equals(ownerName)) ||
+                            !Sharing.shares(ownerName, player.getName().getString(), Share.CONTROL)) ||
                     (existingBuildingAuthActions.contains(this.action) && building != null &&
-                            !player.getName().getString().equals(building.ownerName))) &&
-                    !SandboxServer.isSandboxOp(player) &&
-                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), building != null ? building.ownerName : ownerName)) {
+                            !Sharing.shares(building.ownerName, player.getName().getString(), Share.CONTROL))) &&
+                    !SandboxServer.isSandboxOp(player)) {
 
                 ReignOfNether.LOGGER.warn("BuildingServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);
                 return;
             }
+            // a cutscene took their control (rtsapi player control <player> false)
+            if ((newBuildingAuthActions.contains(this.action) || existingBuildingAuthActions.contains(this.action))
+                    && GuideServer.isLocked(player))
+                return;
             ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
             // only the owner's own workers can be assigned to build it
             if (newBuildingAuthActions.contains(this.action) && !SandboxServer.isSandboxOp(player)) {
@@ -205,6 +211,9 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.cancelBuilding(building, player.getName().getString());
                 }
                 case SET_RALLY_POINT -> {
+                    // ron/events/rally_set: @s is the player who set it
+                    if (RonFiles.matchRunning())
+                        RonFiles.fire(player.server, "rally_set", player.createCommandSourceStack(), player.getName().getString());
                     if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.setRallyPoint(rallyPos);
                         productionBuilding.attackRally = false;

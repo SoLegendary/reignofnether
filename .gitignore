@@ -37,6 +37,7 @@ bin/
 .vscode/
 
 ### Mac OS ###
-.DS_Store*.launch
+.DS_Store
+*.launch
 
 .claude

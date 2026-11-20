@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -94,7 +93,7 @@ public class VillagerMarket extends AbstractMarket {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/emerald_block.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
-                TutorialClientEvents::isEnabled,
+                () -> false,
                 () -> true,
                 List.of(
                         Component.translatable("buildings.reignofnether.villager_market").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),

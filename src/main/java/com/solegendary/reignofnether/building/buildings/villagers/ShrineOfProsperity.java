@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -64,7 +63,7 @@ public class ShrineOfProsperity extends ProductionBuilding {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/acacia_log_top.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SHRINE_OF_PROSPERITY,
-                () -> (!SandboxClientEvents.isSandboxPlayer() && GameruleClient.allowedHeroes <= 0) || TutorialClientEvents.isEnabled(),
+                () -> (!SandboxClientEvents.isSandboxPlayer() && GameruleClient.allowedHeroes <= 0),
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(

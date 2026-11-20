@@ -9,6 +9,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.solegendary.reignofnether.mixin.EntitySelectorAccessor;
+import com.solegendary.reignofnether.player.PlayerRoles;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,6 +24,8 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,17 +56,64 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 		return new PlayerNameArgument(false);
 	}
 	
+	// the name as typed, a seat name staying a seat name (for things resolved later, like restrictions); null for "*"
+	public static String getTypedName(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
+		Result result = pContext.getArgument(pName, Result.class);
+		String typed = result.selector != null ? ((EntitySelectorAccessor) result.selector).getPlayerName() : result.rawInput;
+		return typed != null ? typed : result.resolve(pContext.getSource());
+	}
+	
+	// the owner a player argument means: a co-commander or soldier means the commander they play for.
+	// For the person themselves (camera, teleport) use getPersonName
 	public static String getPlayerName(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
-		try {
-			pContext.getArgument("rotation1", Integer.class);
-			EntitySelectorAccessor selector = ((EntitySelectorAccessor) pContext.getArgument(pName, Result.class).selector);
-			if (selector.getPlayerName() != null)
-				return selector.getPlayerName();
-			else
-				return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
-		} catch (Exception e) {
-			return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
+		String name = getPersonName(pContext, pName);
+		return name != null ? PlayerRoles.commanderOf(name) : null;
+	}
+	
+	// an online player as they are; a name nobody online has (a bot, an offline player, a map seat or role name meaning
+	// whoever plays it, or the seat itself) as typed; @s from a source with no player is the owner it acts for
+	// (sourceOwner). Real selectors (@a, @p...) select online players as usual. null for "*"
+	public static String getPersonName(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
+		Result result = pContext.getArgument(pName, Result.class);
+		CommandSourceStack source = pContext.getSource();
+		String typed = result.selector != null ? ((EntitySelectorAccessor) result.selector).getPlayerName() : result.rawInput;
+		// a seat name first, so a player can't take over a seat's commands by picking its name as their username
+		String occupant = typed != null ? StartPosServerEvents.seatOccupant(typed) : null;
+		if (occupant != null)
+			return occupant;
+		if (typed != null && source.getServer().getPlayerList().getPlayerByName(typed) == null) {
+			synchronized (PlayerServerEvents.rtsPlayers) {
+				for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
+					if (rtsPlayer.name.equalsIgnoreCase(typed))
+						return rtsPlayer.name;
+			}
+			return typed;
 		}
+		if (result.selector != null && result.selector.isSelfSelector() && !(source.getEntity() instanceof Player)) {
+			String owner = sourceOwner(source);
+			if (!owner.isEmpty())
+				return owner;
+		}
+		return result.resolve(source);
+	}
+	
+	// the owner a command source acts for: a player's commander, a unit's owner, or the name of a source with no
+	// entity named after an RTS player or seat (RonFiles.asOwner); "" for the server and anything else
+	public static String sourceOwner(CommandSourceStack source) {
+		Entity entity = source.getEntity();
+		if (entity instanceof Player player)
+			return PlayerRoles.commanderOf(player.getName().getString());
+		if (entity instanceof Unit unit)
+			return unit.getOwnerName();
+		if (entity == null) {
+			String name = source.getTextName();
+			if (PlayerServerEvents.isRTSPlayer(name))
+				return name;
+			String occupant = StartPosServerEvents.seatOccupant(name);
+			if (occupant != null)
+				return occupant;
+		}
+		return "";
 	}
 	
 	

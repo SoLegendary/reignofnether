@@ -1,23 +1,24 @@
 package com.solegendary.reignofnether.gamerules;
 
-import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.items.RandomItemDropRule;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.ui.SettingRow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class GameruleClient {
 
@@ -31,272 +32,140 @@ public class GameruleClient {
     public static double groundYLevel = -320;
     public static double flyingMaxYLevel = 320;
     public static boolean allowBeacons = true;
-    public static boolean pvpModesOnly = false;
     public static double beaconWinMinutes = 10;
     public static boolean slantedBuilding = true;
     public static int allowedHeroes = 2;
     public static boolean lockAlliances = false;
     public static boolean hideEnemyPicks = true;
-    public static boolean scenarioMode = false;
-    public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
     public static boolean rtsPathfinding = false; // only for GUI
     public static int animalSpawnYDiff = 5;
     public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_SAME_RARITY;
+    public static final int MAX_SOLDIERS_PER_TEAM = GameRuleRegistrar.MAX_SOLDIERS_PER_TEAM;
+    public static int soldiersPerTeam = 0;
+    public static boolean coCommanders = false;
+    public static int soldierRespawnSeconds = 30;
+    public static boolean allChat = true;
 
     public static boolean gamerulesMenuOpen = false;
 
-    public static final String BOOLEAN_BUTTON_NAME = "Boolean Game Rule";
-    public static final String INTEGER_BUTTON_NAME = "Integer Game Rule";
+    /**
+     * One match rule as the UI shows it, its value as a number (booleans 0/1). Toggles flip; number rules step with
+     * − and + (shift for bigger steps). The match host can change them in the lobby, unless the map locks them.
+     * advanced: in the "Advanced" group, folded away in the match menus until shown, else "Basic".
+     */
+    public record Rule(String id, boolean advanced, int min, int max, int small, int big,
+                       Supplier<Integer> get, Consumer<Integer> set) {
 
-    public static Button getGamerulesButton() {
-        return new Button(
-                "Game Rules Menu",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_back.png"),
-                (Keybinding) null,
-                () -> gamerulesMenuOpen,
-                () -> scenarioMode,
-                () -> !StartPosClientEvents.isStarting,
-                () -> gamerulesMenuOpen = !gamerulesMenuOpen,
-                null,
-                MC.player != null && MC.player.hasPermissions(4) ?
-                        List.of(fcs(I18n.get("hud.gamerule.reignofnether.menu"))) :
-                        List.of(
-                                fcs(I18n.get("hud.gamerule.reignofnether.menu")),
-                                fcs(I18n.get("hud.gamerule.reignofnether.warn_not_opped"))
-                        )
-        );
-    }
+        public boolean isToggle() {
+            return max == 1;
+        }
 
-    private static class GameruleBooleanButton extends Button {
-        private static final Minecraft MC = Minecraft.getInstance();
-        private final String label;
-        public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
-            super(
-                    BOOLEAN_BUTTON_NAME,
-                    8,
-                    enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
-                            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                    (Keybinding) null,
-                    () -> false,
-                    () -> false,
-                    () -> MC.player != null && MC.player.hasPermissions(4) && !StartPosClientEvents.isStarting,
-                    onLeftClick,
-                    null,
-                    List.of(fcs(tooltip))
-            );
-            this.imageSize = 12;
-            this.label = label;
-            this.frameResource = null;
+        public String name() {
+            return I18n.get("gamerule.reignofnether.name." + id);
         }
-        @Override
-        public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-            super.render(guiGraphics, x, y, mouseX, mouseY);
-            guiGraphics.drawString(MC.font, label,x + 22, y + 6, 0xFFFFFF);
-        }
-        @Override
-        public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-            MyRenderer.renderTooltip(guiGraphics, tooltipLines, mouseX, mouseY + tooltipOffsetY - 10);
-        }
-    }
 
-    private static class GameruleIntegerButton extends Button {
-        private static final Minecraft MC = Minecraft.getInstance();
-        private final String label;
-        public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
-            super(
-                INTEGER_BUTTON_NAME,
-                8,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> MC.player != null && MC.player.hasPermissions(4) && !StartPosClientEvents.isStarting,
-                onLeftClick,
-                onRightClick,
-                tooltipLines
-            );
-            this.imageSize = 12;
-            this.label = label;
+        public String description() {
+            return I18n.get("commands.reignofnether.gamerule." + id);
         }
-        @Override
-        public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-            super.render(guiGraphics, x, y, mouseX, mouseY);
-            guiGraphics.drawString(MC.font, label,
-                    x + 23, y + 6, 0xFFFFFF);
+
+        /** Its id in map.json rules and lockedRules: the gamerule's (fog_of_war, which isn't one, is fogOfWar). */
+        public String mapId() {
+            return GameruleClient.mapId(id);
         }
-        @Override
-        public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-            MyRenderer.renderTooltip(guiGraphics, tooltipLines, mouseX, mouseY + tooltipOffsetY - 10);
+
+        /** The same rule, read from and written to somewhere else (the Editor's map defaults). */
+        public Rule withValue(Supplier<Integer> get, Consumer<Integer> set) {
+            return new Rule(id, advanced, min, max, small, big, get, set);
+        }
+
+        public boolean canEdit() {
+            if (MC.player == null || StartPosClientEvents.isStarting || teamLocked() || picksLocked() || isMapLocked(id))
+                return false;
+            return MC.player.hasPermissions(4) || StartPosClientEvents.isHost();
+        }
+
+        public SettingRow toRow() {
+            return toRow(this::canEdit, I18n.get(teamLocked() ? "hud.gamerule.reignofnether.team_locked"
+                    : picksLocked() ? "hud.gamerule.reignofnether.picks_locked"
+                    : isMapLocked(id) ? "hud.gamerule.reignofnether.map_locked" : "hud.gamerule.reignofnether.host_only"));
+        }
+
+        public SettingRow toRow(Supplier<Boolean> editable, String lockedHint) {
+            boolean drops = id.equals("random_item_drops"); // cycles through its 4 settings
+            return new SettingRow(name(), description(), null,
+                    () -> isToggle() ? I18n.get(get.get() == 1 ? "options.on" : "options.off")
+                            : drops ? I18n.get("gamerule.reignofnether.random_item_drops." + get.get()) : String.valueOf(get.get()),
+                    () -> !isToggle() && !drops || get.get() != 0,
+                    () -> set.accept(isToggle() ? 1 - get.get() : drops ? (get.get() + 1) % 4 : Math.min(max, get.get() + step(small, big))),
+                    isToggle() ? null : () -> set.accept(drops ? (get.get() + 3) % 4 : Math.max(min, get.get() - step(small, big))),
+                    editable, lockedHint);
+        }
+
+        private boolean teamLocked() {
+            return id.equals("lock_alliances") && RTSMapInfoClientEvents.teamMode;
+        }
+
+        private boolean picksLocked() {
+            return id.equals("hide_enemy_picks") && seatJoinsOn();
         }
     }
 
-    // returns list of rendered buttons
-    public static List<Button> renderGamerulesGUI(GuiGraphics guiGraphics, int xTR, int yTR, int mouseX, int mouseY) {
-        ArrayList<Button> buttons = new ArrayList<>();
-        int width = 145;
-        int x = xTR - width - 8;
-        int y = yTR - 36;
+    // soldiers and co-commanders pick a seat by name, so picks can't be hidden (StartPosServerEvents.syncTo)
+    private static boolean seatJoinsOn() {
+        return coCommanders || soldiersPerTeam > 0;
+    }
 
-        buttons.add(new GameruleBooleanButton("doLogFalling", doLogFalling,
-            () -> GameruleServerboundPacket.setLogFalling(!doLogFalling),
-            I18n.get("commands.reignofnether.gamerule.do_log_falling")
-        ));
-        buttons.add(new GameruleBooleanButton("neutralAggro", neutralAggro,
-            () -> GameruleServerboundPacket.setNeutralAggro(!neutralAggro),
-            I18n.get("commands.reignofnether.gamerule.neutral_aggro")
-        ));
-        buttons.add(new GameruleBooleanButton("doUnitGriefing", doUnitGriefing,
-            () -> GameruleServerboundPacket.setUnitGriefing(!doUnitGriefing),
-            I18n.get("commands.reignofnether.gamerule.unit_griefing")
-        ));
-        buttons.add(new GameruleBooleanButton("doPlayerGriefing", doPlayerGriefing,
-            () -> GameruleServerboundPacket.setPlayerGriefing(!doPlayerGriefing),
-            I18n.get("commands.reignofnether.gamerule.player_griefing")
-        ));
-        buttons.add(new GameruleBooleanButton("allowBeacons", allowBeacons,
-            () -> GameruleServerboundPacket.setAllowBeacons(!allowBeacons),
-            I18n.get("commands.reignofnether.gamerule.allow_beacons")
-        ));
-        buttons.add(new GameruleBooleanButton("pvpModesOnly", pvpModesOnly,
-            () -> GameruleServerboundPacket.setPvpModesOnly(!pvpModesOnly),
-            I18n.get("commands.reignofnether.gamerule.pvp_modes_only")
-        ));
-        buttons.add(new GameruleBooleanButton("slantedBuilding", slantedBuilding,
-                () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
-                I18n.get("commands.reignofnether.gamerule.slanted_buildings")
-        ));
-        buttons.add(new GameruleBooleanButton("lockAlliances", lockAlliances,
-                () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
-                I18n.get("commands.reignofnether.gamerule.lock_alliances")
-        ));
-        buttons.add(new GameruleBooleanButton("hideEnemyPicks", hideEnemyPicks,
-                () -> GameruleServerboundPacket.setHideEnemyPicks(!hideEnemyPicks),
-                I18n.get("commands.reignofnether.gamerule.hide_enemy_picks")
-        ));
-        buttons.add(new GameruleBooleanButton("coopMode", coopMode,
-                () -> GameruleServerboundPacket.setCoopMode(!coopMode),
-                I18n.get("commands.reignofnether.gamerule.coop_mode")
-        ));
-        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
-                () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
-                I18n.get("commands.reignofnether.gamerule.rts_pathfinding")
-        ));
-        buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
-            () -> {
-                int value = Math.min(2, allowedHeroes + 1);
-                GameruleServerboundPacket.setAllowedHeroes(value);
-            },
-            () -> {
-                int value = Math.max(0, allowedHeroes - 1);
-                GameruleServerboundPacket.setAllowedHeroes(value);
-            },
-            List.of(
-                    fcs(I18n.get("commands.reignofnether.gamerule.allowed_heroes")),
-                    fcs(I18n.get("hud.gamerule.reignofnether.click"))
-            )
-        ));
-        buttons.add(new GameruleIntegerButton("maxPopulation: " + Math.round(maxPopulation),
-            () -> {
-                int value = Math.min(10000, maxPopulation + (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setMaxPopulation(value);
-            },
-            () -> {
-                int value = Math.max(0, maxPopulation - (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setMaxPopulation(value);
-            },
-            List.of(
-                fcs(I18n.get("commands.reignofnether.gamerule.max_population")),
-                fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-            )
-        ));
-        buttons.add(new GameruleIntegerButton("groundYLevel: " + Math.round(groundYLevel),
-            () -> {
-                int value = (int) Math.min(320, groundYLevel + (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setGroundYLevel(value);
-            },
-            () -> {
-                int value = (int) Math.max(-320, groundYLevel - (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setGroundYLevel(value);
-            },
-            List.of(
-                fcs(I18n.get("commands.reignofnether.gamerule.ground_y_level")),
-                fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-            )
-        ));
-        buttons.add(new GameruleIntegerButton("flyingMaxYLevel: " + Math.round(flyingMaxYLevel),
-            () -> {
-                int value = (int) Math.min(320, flyingMaxYLevel + (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setFlyingMaxYLevel(value);
-            },
-            () -> {
-                int value = (int) Math.max(-320, flyingMaxYLevel - (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setFlyingMaxYLevel(value);
-            },
-            List.of(
-                fcs(I18n.get("commands.reignofnether.gamerule.flying_max_y_level")),
-                fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-            )
-        ));
-        buttons.add(new GameruleIntegerButton("beaconWinMinutes: " + Math.round(beaconWinMinutes),
-            () -> {
-                int value = (int) Math.min(1000, beaconWinMinutes + (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setBeaconWinMinutes(value);
-            },
-            () -> {
-                int value = (int) Math.max(1, beaconWinMinutes - (Keybindings.shiftMod.isDown() ? 10 : 1));
-                GameruleServerboundPacket.setBeaconWinMinutes(value);
-            },
-            List.of(
-                fcs(I18n.get("commands.reignofnether.gamerule.beacon_win_minutes")),
-                fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
-            )
-        ));
-        buttons.add(new GameruleIntegerButton("randomItemDrops: " + Math.round(randomItemDrops.getValue()),
-                () -> {
-                    int value = randomItemDrops.getValue() + 1;
-                    if (value > 3) value = 0;
-                    GameruleServerboundPacket.setRandomItemDrops(value);
-                },
-                () -> {
-                    int value = randomItemDrops.getValue() - 1;
-                    if (value < 0) value = 3;
-                    GameruleServerboundPacket.setRandomItemDrops(value);
-                },
-                List.of(
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point1")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point2")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point3")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point4")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point5"))
-                )
-        ));
+    /** The map locks this rule (map.json lockedRules), so the lobby can't change it. Takes the snake case id. */
+    public static boolean isMapLocked(String id) {
+        return RTSMapInfoClientEvents.lockedRules.contains(mapId(id));
+    }
 
-        int height = (buttons.size() * 18) - 12;
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xC8000000);
+    private static String mapId(String id) {
+        return Pattern.compile("_([a-z])").matcher(id).replaceAll(m -> m.group(1).toUpperCase(Locale.ROOT));
+    }
 
-        for (Button button : buttons) {
-            button.render(guiGraphics, x + 5, y + 5, mouseX, mouseY);
-            y += 16;
-        }
-        return buttons;
+    /** The match rules for the match setup and Esc menu: the Game group, then Teams and players, each with its header. */
+    // the lobby's More options: every rule but its quick toggles (skip), in one list
+    public static List<SettingRow> ruleRows(Set<String> skip) {
+        return rules().stream().filter(r -> !skip.contains(r.id())).map(Rule::toRow).toList();
+    }
+
+    public static String groupName(boolean advanced) {
+        return I18n.get(advanced ? "sandbox.reignofnether.rules.group.advanced" : "sandbox.reignofnether.rules.group.basic");
+    }
+
+    private static int step(int small, int big) {
+        return Keybindings.shiftMod.isDown() ? big : small;
+    }
+
+    private static Rule toggle(String id, boolean teams, Supplier<Boolean> value, Consumer<Boolean> set) {
+        return new Rule(id, teams, 0, 1, 1, 1, () -> value.get() ? 1 : 0, v -> set.accept(v == 1));
+    }
+
+    private static Rule number(String id, boolean teams, Supplier<Integer> value, int min, int max, int small, int big,
+                               Consumer<Long> set) {
+        return new Rule(id, teams, min, max, small, big, value, v -> set.accept((long) v));
+    }
+
+    /**
+     * The match rules, Basic ones first. Map rules (ground level, griefing, beacons...) are set in the Editor's Map tab
+     * and technical ones (rtsPathfinding, doLogFalling) only by /gamerule.
+     */
+    public static List<Rule> rules() {
+        List<Rule> rules = new ArrayList<>();
+        rules.add(toggle("fog_of_war", false, FogOfWarClientEvents::isMatchFogOn, GameruleServerboundPacket::setFogOfWar));
+        rules.add(toggle("lock_alliances", false, () -> lockAlliances, GameruleServerboundPacket::setLockAlliances));
+        rules.add(toggle("co_commanders", false, () -> coCommanders, GameruleServerboundPacket::setCoCommanders));
+        rules.add(number("soldiers_per_team", false, () -> soldiersPerTeam, 0, MAX_SOLDIERS_PER_TEAM, 1, 1, GameruleServerboundPacket::setSoldiersPerTeam));
+        rules.add(toggle("hide_enemy_picks", false, () -> hideEnemyPicks && !seatJoinsOn(), GameruleServerboundPacket::setHideEnemyPicks));
+        rules.add(toggle("all_chat", false, () -> allChat, GameruleServerboundPacket::setAllChat));
+        rules.add(number("max_population", true, () -> maxPopulation, 0, 10000, 5, 25, GameruleServerboundPacket::setMaxPopulation));
+        rules.add(number("allowed_heroes", true, () -> allowedHeroes, 0, 2, 1, 1, GameruleServerboundPacket::setAllowedHeroes));
+        rules.add(number("random_item_drops", true, () -> randomItemDrops.getValue(), 0, 3, 1, 1, GameruleServerboundPacket::setRandomItemDrops));
+        rules.add(toggle("neutral_aggro", true, () -> neutralAggro, GameruleServerboundPacket::setNeutralAggro));
+        rules.add(number("beacon_win_minutes", true, () -> (int) beaconWinMinutes, 1, 1000, 1, 10, GameruleServerboundPacket::setBeaconWinMinutes));
+        rules.add(number("soldier_respawn_seconds", true, () -> soldierRespawnSeconds, 0, GameRuleRegistrar.MAX_SOLDIER_RESPAWN_SECONDS, 5, 30, GameruleServerboundPacket::setSoldierRespawnSeconds));
+        return rules;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

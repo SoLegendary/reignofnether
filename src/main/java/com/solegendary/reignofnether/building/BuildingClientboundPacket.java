@@ -37,7 +37,6 @@ public class BuildingClientboundPacket {
     public String itemName;
     public Rotation rotation;
     public String ownerName;
-    public int scenarioRoleIndex;
     public int blocksPlaced; // for syncing out-of-view clientside buildings
     public int numQueuedBlocks; // used for delaying destroy checks clientside
     public boolean isDiagonalBridge;
@@ -75,7 +74,6 @@ public class BuildingClientboundPacket {
             Building building,
             Rotation rotation,
             String ownerName,
-            int scenarioRoleIndex,
             int numQueuedBlocks,
             boolean isDiagonalBridge,
             int upgradeLevel,
@@ -90,7 +88,6 @@ public class BuildingClientboundPacket {
                 buildingPos,
                 rotation,
                 ownerName,
-                scenarioRoleIndex,
                 0,
                 numQueuedBlocks,
                 isDiagonalBridge,
@@ -101,14 +98,13 @@ public class BuildingClientboundPacket {
         ));
     }
 
-    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced, double partialBlocksDestroyed, String ownerName, int scenarioRoleIndex) {
+    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced, double partialBlocksDestroyed, String ownerName) {
         BuildingClientboundPacket packet = new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS_AND_OWNER,
                 EMPTY,
                 "",
                 buildingPos,
                 Rotation.NONE,
                 ownerName,
-                scenarioRoleIndex,
                 blocksPlaced,
                 0,
                 false,
@@ -131,7 +127,6 @@ public class BuildingClientboundPacket {
                         "",
                         0,
                         0,
-                        0,
                         false,
                         0,
                         false,
@@ -151,7 +146,6 @@ public class BuildingClientboundPacket {
                         "",
                         0,
                         0,
-                        0,
                         false,
                         upgradeLevel,
                         false,
@@ -169,7 +163,6 @@ public class BuildingClientboundPacket {
                         buildingPos,
                         Rotation.NONE,
                         "",
-                        0,
                         0,
                         0,
                         false,
@@ -199,7 +192,6 @@ public class BuildingClientboundPacket {
         this.buildingPos = buildingPos;
         this.rotation = Rotation.NONE;
         this.ownerName = "";
-        this.scenarioRoleIndex = 0;
         this.blocksPlaced = 0;
         this.numQueuedBlocks = 0;
         this.isDiagonalBridge = false;
@@ -216,7 +208,6 @@ public class BuildingClientboundPacket {
             BlockPos buildingPos,
             Rotation rotation,
             String ownerName,
-            int scenarioRoleIndex,
             int blocksPlaced,
             int numQueuedBlocks,
             boolean isDiagonalBridge,
@@ -231,7 +222,6 @@ public class BuildingClientboundPacket {
         this.buildingPos = buildingPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
-        this.scenarioRoleIndex = scenarioRoleIndex;
         this.blocksPlaced = blocksPlaced;
         this.numQueuedBlocks = numQueuedBlocks;
         this.isDiagonalBridge = isDiagonalBridge;
@@ -248,7 +238,6 @@ public class BuildingClientboundPacket {
         this.buildingPos = buffer.readBlockPos();
         this.rotation = buffer.readEnum(Rotation.class);
         this.ownerName = buffer.readUtf();
-        this.scenarioRoleIndex = buffer.readInt();
         this.blocksPlaced = buffer.readInt();
         this.numQueuedBlocks = buffer.readInt();
         this.isDiagonalBridge = buffer.readBoolean();
@@ -266,7 +255,6 @@ public class BuildingClientboundPacket {
         buffer.writeBlockPos(this.buildingPos);
         buffer.writeEnum(this.rotation);
         buffer.writeUtf(this.ownerName);
-        buffer.writeInt(this.scenarioRoleIndex);
         buffer.writeInt(this.blocksPlaced);
         buffer.writeInt(this.numQueuedBlocks);
         buffer.writeBoolean(this.isDiagonalBridge);
@@ -323,7 +311,7 @@ public class BuildingClientboundPacket {
                             this.portalDestination
                     );
                     case SYNC_BLOCKS_AND_OWNER -> {
-                        BuildingClientEvents.syncBuilding(building, this.blocksPlaced, this.partialBlocksDestroyed, this.ownerName, this.scenarioRoleIndex);
+                        BuildingClientEvents.syncBuilding(building, this.blocksPlaced, this.partialBlocksDestroyed, this.ownerName);
                     }
                     case CHANGE_PORTAL -> {
                         if (building instanceof PortalPlacement portal) {

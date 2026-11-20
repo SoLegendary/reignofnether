@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class ActionButtons {
                 },
                 List.of(
                         fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.build_repair")),
+                        fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.build_repair.tooltip1")),
                         fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.build_repair_autocast"))
                 )
         );
@@ -82,7 +84,7 @@ public class ActionButtons {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK),
                 null,
-                List.of(fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.attack")))
+                tooltip("hud.actionbuttons.reignofnether.attack")
         );
         stop = new Button(
                 "Stop",
@@ -94,7 +96,7 @@ public class ActionButtons {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.STOP),
                 null,
-                List.of(fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.stop")))
+                tooltip("hud.actionbuttons.reignofnether.stop")
         );
         hold = new Button(
                 "Hold Position",
@@ -109,7 +111,7 @@ public class ActionButtons {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.HOLD),
                 null,
-                List.of(fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.hold_position")))
+                tooltip("hud.actionbuttons.reignofnether.hold_position")
         );
         garrison = new Button(
                 "Garrison",
@@ -121,7 +123,7 @@ public class ActionButtons {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.GARRISON),
                 null,
-                List.of(fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.garrison")))
+                tooltip("hud.actionbuttons.reignofnether.garrison")
         );
         ungarrison = new Button(
                 "Ungarrison",
@@ -133,7 +135,15 @@ public class ActionButtons {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.UNGARRISON),
                 null,
-                List.of(fcs(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.ungarrison")))
+                tooltip("hud.actionbuttons.reignofnether.ungarrison")
+        );
+    }
+
+    // title, then a one-line description under <key>.tooltip1
+    private static List<FormattedCharSequence> tooltip(String key) {
+        return List.of(
+                fcs(LanguageUtil.getTranslation(key)),
+                fcs(LanguageUtil.getTranslation(key + ".tooltip1"))
         );
     }
 

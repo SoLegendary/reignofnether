@@ -28,6 +28,9 @@ import java.util.ArrayList;
 public class BuildingSaveData extends SavedData {
 
     public final ArrayList<BuildingSave> buildings = new ArrayList<>();
+    // custom buildings placed on the map whose building isn't loaded (an old format map not converted yet, a file gone):
+    // kept as they were, so they come back once it is
+    private final ListTag unloadedCustom = new ListTag();
 
     private static BuildingSaveData create() {
         return new BuildingSaveData();
@@ -56,8 +59,15 @@ public class BuildingSaveData extends SavedData {
                 BlockPos pos = new BlockPos(btag.getInt("x"), btag.getInt("y"), btag.getInt("z"));
                 Level level = ServerLifecycleHooks.getCurrentServer().getLevel(Level.OVERWORLD);
                 Building building;
-                if (btag.contains("customStructureName")) {
-                    building = CustomBuildingServerEvents.getCustomBuilding(btag.getString("customStructureName"));
+                if (btag.contains("customId") || btag.contains("customStructureName")) {
+                    // by name too: the id is the file name, which a mapmaker can rename by hand
+                    building = CustomBuildingServerEvents.getCustomBuildingById(btag.getString("customId"));
+                    if (building == null)
+                        building = CustomBuildingServerEvents.getCustomBuilding(btag.getString("customStructureName"));
+                    if (building == null) {
+                        data.unloadedCustom.add(btag);
+                        continue;
+                    }
                 }
                 else if (btag.contains("buildingKey")) {
                     building = ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(btag.getString("buildingKey")));
@@ -72,7 +82,6 @@ public class BuildingSaveData extends SavedData {
                 int upgradeLevel = btag.getInt("upgradeLevel");
                 PortalPlacement.PortalType portalType = PortalPlacement.PortalType.valueOf(btag.getString("portalType"));
                 BlockPos portalDestination = new BlockPos(btag.getInt("xp"), btag.getInt("yp"), btag.getInt("zp"));
-                int scenarioRoleIndex = btag.getInt("scenarioRoleIndex");
                 DataStorage dataStorage;
                 if (btag.contains("dataStorage", Tag.TAG_LIST)) {
                     dataStorage = DataStorage.read(btag.getList("dataStorage", Tag.TAG_COMPOUND), server);
@@ -94,7 +103,6 @@ public class BuildingSaveData extends SavedData {
                             upgradeLevel,
                             portalType,
                             portalDestination,
-                            scenarioRoleIndex,
                             dataStorage,
                             partialBlocksDestroyed,
                             commandsNbt
@@ -113,7 +121,8 @@ public class BuildingSaveData extends SavedData {
         ListTag list = new ListTag();
         this.buildings.forEach(b -> {
             CompoundTag cTag = new CompoundTag();
-            if (b.building instanceof CustomBuilding) {
+            if (b.building instanceof CustomBuilding customBuilding) {
+                cTag.putString("customId", customBuilding.id);
                 cTag.putString("customStructureName", b.building.name);
             }
             if (!(b.building instanceof CustomBuilding)) {
@@ -134,7 +143,6 @@ public class BuildingSaveData extends SavedData {
             cTag.putInt("xp", b.portalDestination != null ? b.portalDestination.getX() : 0);
             cTag.putInt("yp", b.portalDestination != null ? b.portalDestination.getY() : 0);
             cTag.putInt("zp", b.portalDestination != null ? b.portalDestination.getZ() : 0);
-            cTag.putInt("scenarioRoleIndex", b.scenarioRoleIndex);
             cTag.put("dataStorage", b.dataStorage.write());
             cTag.putDouble("partialBlocksDestroyed", b.partialBlocksDestroyed);
             cTag.put("commandsNbt", b.commandsNbt);
@@ -142,6 +150,7 @@ public class BuildingSaveData extends SavedData {
 
             //ReignOfNether.LOGGER.info("BuildingSaveData.save: " + b.ownerName + "|" + buildingName);
         });
+        list.addAll(unloadedCustom);
         tag.put("buildings", list);
         return tag;
     }

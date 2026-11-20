@@ -7,21 +7,15 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.ArrayUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -29,8 +23,6 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 // action buttons but only for neutral units in sandbox
 
 public class SandboxActionButtons {
-
-    private static final Minecraft MC = Minecraft.getInstance();
 
     public static Button setAnchor;
     public static Button resetToAnchor;
@@ -115,146 +107,26 @@ public class SandboxActionButtons {
         );
     }
 
-    public static Button getSetRelationshipButton() {
-        Relationship relationship = Relationship.OWNED;
+    public static Relationship getSelectionRelationship() {
         if (HudClientEvents.hudSelectedEntity != null)
-            relationship = UnitClientEvents.getPlayerToEntityRelationship(HudClientEvents.hudSelectedEntity);
-        else if (HudClientEvents.hudSelectedPlacement != null)
-            relationship = BuildingClientEvents.getPlayerToBuildingRelationship(HudClientEvents.hudSelectedPlacement);
-        final Relationship finalRelationship = relationship;
-
-        return new Button(
-                "Toggle Relationship",
-                Button.itemIconSize,
-                switch (finalRelationship) {
-                    case OWNED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/lime_wool.png");
-                    case FRIENDLY -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_wool.png");
-                    case NEUTRAL ->
-                            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/yellow_wool.png");
-                    case HOSTILE -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_wool.png");
-                },
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> {
-                    if (MC.player != null) {
-                        for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
-                            if (entity instanceof Unit unit) {
-                                switch (finalRelationship) {
-                                    case NEUTRAL -> unit.setOwnerName("Enemy");
-                                    case HOSTILE -> unit.setOwnerName(MC.player.getName().getString());
-                                    default -> unit.setOwnerName("");
-                                }
-                            }
-                        }
-                        if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                            SandboxServerboundPacket.setUnitOwner(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()), unit.getOwnerName());
-                            updateButtons();
-                        }
-                        for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
-                            switch (finalRelationship) {
-                                case NEUTRAL -> bpl.ownerName = "Enemy";
-                                case HOSTILE -> bpl.ownerName = MC.player.getName().getString();
-                                default -> bpl.ownerName = "";
-                            }
-                            SandboxServerboundPacket.setBuildingOwner(bpl.originPos, bpl.ownerName);
-                            updateButtons();
-                        }
-                    }
-                },
-                () -> {
-                    if (MC.player != null) {
-                        for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
-                            if (entity instanceof Unit unit) {
-                                switch (finalRelationship) {
-                                    case NEUTRAL -> unit.setOwnerName(MC.player.getName().getString());
-                                    case HOSTILE -> unit.setOwnerName("");
-                                    default -> unit.setOwnerName("Enemy");
-                                }
-                            }
-                        }
-                        if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                            SandboxServerboundPacket.setUnitOwner(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()), unit.getOwnerName());
-                            updateButtons();
-                        }
-                        for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
-                            switch (finalRelationship) {
-                                case NEUTRAL -> bpl.ownerName = MC.player.getName().getString();
-                                case HOSTILE -> bpl.ownerName = "";
-                                default -> bpl.ownerName = "Enemy";
-                            }
-                            SandboxServerboundPacket.setBuildingOwner(bpl.originPos, bpl.ownerName);
-                            updateButtons();
-                        }
-                    }
-                },
-                List.of(
-                        fcs(I18n.get("hud.relationship.reignofnether.owned"), relationship == Relationship.OWNED),
-                        fcs(I18n.get("hud.relationship.reignofnether.neutral"), relationship == Relationship.NEUTRAL),
-                        fcs(I18n.get("hud.relationship.reignofnether.enemy"), relationship == Relationship.HOSTILE)
-                )
-        );
+            return UnitClientEvents.getPlayerToEntityRelationship(HudClientEvents.hudSelectedEntity);
+        if (HudClientEvents.hudSelectedPlacement != null)
+            return BuildingClientEvents.getPlayerToBuildingRelationship(HudClientEvents.hudSelectedPlacement);
+        return Relationship.OWNED;
     }
 
-    public static Button getCycleScenarioRoleButton() {
-        ScenarioRole role = getHudSelectedScenarioRole();
-        String roleName = I18n.get("sandbox.reignofnether.scenario_role_none");
-        if (role != null) {
-            roleName = role.name;
-        }
-        return new Button(
-                "Switch Building Scenario Role",
-                Button.itemIconSize,
-                role != null ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional.png") :
-                                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional_dark.png"),
-                (Keybinding) null,
-                () -> false,
-                () -> false,
-                () -> true,
-                () -> cycleUnitOrBuildingRoleIndex(false),
-                () -> cycleUnitOrBuildingRoleIndex(true),
-                List.of(
-                        fcs(I18n.get("sandbox.reignofnether.cycle_scenario_role", roleName))
-                )
-        );
-    }
-
-    private static void cycleUnitOrBuildingRoleIndex(boolean reverse) {
-        int currentRoleIndex = 0;
-        if (HudClientEvents.hudSelectedPlacement != null) {
-            currentRoleIndex = HudClientEvents.hudSelectedPlacement.scenarioRoleIndex;
-        } else if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-            currentRoleIndex = unit.getScenarioRoleIndex();
-        }
-        currentRoleIndex += reverse ? -1 : 1;
-        if (currentRoleIndex > ScenarioClientEvents.scenarioRoles.size() - 1)
-            currentRoleIndex = -1;
-        if (currentRoleIndex < -1)
-            currentRoleIndex = ScenarioClientEvents.scenarioRoles.size() - 1;
-
-        for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
-            if (le instanceof Unit unit) {
-                ScenarioServerboundPacket.setUnitRole(currentRoleIndex, le.getId());
-                unit.setScenarioRoleIndex(currentRoleIndex);
-            }
-        }
+    public static void setSelectionOwner(Relationship relationship) {
+        String ownerName = SandboxClientEvents.ownerName(relationship);
+        for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
+            if (entity instanceof Unit unit)
+                unit.setOwnerName(ownerName);
+        if (HudClientEvents.hudSelectedEntity instanceof Unit)
+            SandboxServerboundPacket.setUnitOwner(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()), ownerName);
         for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
-            ScenarioServerboundPacket.setBuildingRole(currentRoleIndex, bpl.originPos);
-            bpl.scenarioRoleIndex = currentRoleIndex;
+            bpl.ownerName = ownerName;
+            SandboxServerboundPacket.setBuildingOwner(bpl.originPos, ownerName);
         }
-    }
-
-    @Nullable
-    private static ScenarioRole getHudSelectedScenarioRole() {
-        ScenarioRole role = null;
-        if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-            role = ScenarioUtils.getScenarioRole(true, unit.getScenarioRoleIndex());
-        } else if (HudClientEvents.hudSelectedPlacement != null) {
-            int index = HudClientEvents.hudSelectedPlacement.scenarioRoleIndex;
-            role = ScenarioUtils.getScenarioRole(true, index);
-        }
-        return role;
+        updateButtons();
     }
 
     static {

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.unit.UnitRole;
+
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -66,6 +68,14 @@ import java.util.List;
 import java.util.Set;
 
 public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
+
+    // what the AI uses this unit for and how it counters it (UnitRole)
+    public static final Set<UnitRole> ROLES = Set.of(UnitRole.HERO, UnitRole.FRONTLINE, UnitRole.AOE);
+
+    @Override
+    public Set<UnitRole> getUnitRoles() {
+        return ROLES;
+    }
     public final Abilities ABILITIES = new Abilities(
             List.of(
                     new Pair<>(new MaceSlam(), Keybindings.abilitySlot1),
@@ -175,11 +185,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.STRING);
 
-    // which scenario role does this unit use?
-    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
-    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
     
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
@@ -205,7 +210,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
         this.entityData.define(avatarTicksLeftAccessor, 0);
         this.entityData.define(avatarScalingStartedAccessor, false);

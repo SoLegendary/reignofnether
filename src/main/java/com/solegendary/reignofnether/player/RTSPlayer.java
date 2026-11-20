@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 
 import java.util.*;
 
@@ -27,7 +26,7 @@ public class RTSPlayer {
     public int beaconOwnerTicks = 0; // ticks owning a beacon - will win upon reaching
     public int startPosColorId = 0;
     public RTSPlayerScores scores = new RTSPlayerScores();
-    public int scenarioRoleIndex = -1;
+    public List<Integer> armyTimeline = new ArrayList<>(); // army size every MatchStatsClientboundPacket.ARMY_SAMPLE_TICKS, for the end screen
     public Map<TradeAction, Integer> tradeRates = new HashMap<>();
     public boolean isDogPerson = true;
     public int itemsDropped = 0;
@@ -35,19 +34,6 @@ public class RTSPlayer {
     public Long itemSeed = 0L;
     public Long raritySeed = 0L;
     public ArrayDeque<UnitItem> itemDropQueue = new ArrayDeque<>();
-
-    public static RTSPlayer getNewScenarioPlayer(String playerName, Faction faction, int id, int scenarioRoleIndex) {
-        RTSPlayer rtsPlayer = new RTSPlayer(playerName, faction, id);
-        rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
-        return rtsPlayer;
-    }
-
-    private RTSPlayer(String playerName, Faction faction, int id) {
-        this.name = playerName;
-        this.id = id;
-        this.faction = faction;
-        initTradeRates();
-    }
 
     public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson, Long itemSeed, Long raritySeed) {
         return new RTSPlayer(playerName, faction, id, startPosColorId, isDogPerson, itemSeed, raritySeed);
@@ -92,16 +78,16 @@ public class RTSPlayer {
     }
 
     public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
-                                        int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates,
+                                        int[] scores, Map<TradeAction, Integer> tradeRates,
                                         int creepScore, int itemsDropped, Long itemSeed, Long raritySeed) {
         return new RTSPlayer(
                 name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores,
-                scenarioRoleIndex, tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
+                tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
         );
     }
 
     private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
-                      int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates,
+                      int[] scores, Map<TradeAction, Integer> tradeRates,
                       int creepScore, int itemsDropped, Long itemSeed, Long raritySeed) {
         this.name = name;
         this.id = id;
@@ -109,7 +95,6 @@ public class RTSPlayer {
         this.faction = faction;
         this.beaconOwnerTicks = beaconOwnerTicks;
         this.scores.setScoreListFromArray(scores);
-        this.scenarioRoleIndex = scenarioRoleIndex;
         this.tradeRates = tradeRates;
         this.creepScore = creepScore;
         this.itemsDropped = itemsDropped;
@@ -154,8 +139,7 @@ public class RTSPlayer {
                     if (FogOfWarServerEvents.isEnabled()) {
                         PlayerServerEvents.sendMessageToAllPlayers("server.reignofnether.revealed", false, this.name);
                     }
-                    if (!ScenarioUtils.isScenarioNpc(false, scenarioRoleIndex))
-                        FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
+                    FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
                 }
             }
         } else {

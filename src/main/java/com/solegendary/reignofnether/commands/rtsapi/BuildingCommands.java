@@ -18,26 +18,23 @@ import com.solegendary.reignofnether.commands.CommandsServerEvents;
 import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.server.command.EnumArgument;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -49,12 +46,7 @@ public class BuildingCommands {
 		List<ResourceLocation> locations = Stream.concat(
 			ReignOfNetherRegistries.BUILDING.stream(),
 			CustomBuildingServerEvents.customBuildings.stream()
-		).map(building -> {
-			ResourceLocation id = ReignOfNetherRegistries.BUILDING.getKey(building);
-			return id != null ? id : ResourceLocation.fromNamespaceAndPath(
-				"custom",
-				building.name.toLowerCase().replace(' ', '_'));
-		}).collect(Collectors.toList());
+		).map(RonIds::of).collect(Collectors.toList());
 		
 		SharedSuggestionProvider.suggestResource(locations, builder,
 			id -> id,
@@ -77,22 +69,14 @@ public class BuildingCommands {
 						.suggests(BUILDINGS)
 						.then(placeBuildingTail(ctx -> ""))
 						.then(placeBuildingTail(PlayerNameArgument.player(), ctx -> PlayerNameArgument.getPlayerName(ctx, "ownerName")))
-						.executes(ctx -> {
-								Entity source = ctx.getSource().getEntity();
-								String ownerName = "";
-								if (source instanceof Player player)
-									ownerName = player.getName().getString();
-								else if (source instanceof Unit unit)
-									ownerName = unit.getOwnerName();
-								return CommandsServerEvents.placeBuilding(
-									ctx,
-									ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-									ownerName,
-									true,
-									Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
-									Rotation.NONE
-								);
-							}
+						.executes(ctx -> CommandsServerEvents.placeBuilding(
+								ctx,
+								RonIds.arg(ctx, "buildingName").toString(),
+								PlayerNameArgument.sourceOwner(ctx.getSource()),
+								true,
+								BlockPos.containing(ctx.getSource().getPosition()),
+								Rotation.NONE
+							)
 						)
 					)
 				)
@@ -475,10 +459,10 @@ public class BuildingCommands {
 		return Commands.argument("ownerName", argumentType)
 			.executes(ctx -> CommandsServerEvents.placeBuilding(
 				ctx,
-				ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+				RonIds.arg(ctx, "buildingName").toString(),
 				ownerResolver.resolve(ctx),
 				true,
-				Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
+				BlockPos.containing(ctx.getSource().getPosition()),
 				Rotation.NONE))
 			.then(placeBuildingTail(ownerResolver));
 	}
@@ -487,27 +471,27 @@ public class BuildingCommands {
 		return Commands.argument("pos", BlockPosArgument.blockPos())
 			.executes(ctx -> CommandsServerEvents.placeBuilding(
 				ctx,
-				ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+				RonIds.arg(ctx, "buildingName").toString(),
 				ownerResolver.resolve(ctx),
 				true,
-				BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+				BlockPosArgument.getSpawnablePos(ctx, "pos"),
 				Rotation.NONE))
 			.then(Commands.argument("autoBuild", BoolArgumentType.bool())
 				.executes(ctx -> CommandsServerEvents.placeBuilding(
 					ctx,
-					ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+					RonIds.arg(ctx, "buildingName").toString(),
 					ownerResolver.resolve(ctx),
 					BoolArgumentType.getBool(ctx, "autoBuild"),
-					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+					BlockPosArgument.getSpawnablePos(ctx, "pos"),
 					Rotation.NONE
 				))
 				.then(Commands.argument("rotation", EnumArgument.enumArgument(Rotation.class))
 					.executes(ctx -> CommandsServerEvents.placeBuilding(
 						ctx,
-						ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+						RonIds.arg(ctx, "buildingName").toString(),
 						ownerResolver.resolve(ctx),
 						BoolArgumentType.getBool(ctx, "autoBuild"),
-						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+						BlockPosArgument.getSpawnablePos(ctx, "pos"),
 						ctx.getArgument("rotation", Rotation.class)
 					))
 				)
@@ -515,10 +499,10 @@ public class BuildingCommands {
 					.executes(ctx -> {
 						CommandsServerEvents.placeBuilding(
 							ctx,
-							ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+							RonIds.arg(ctx, "buildingName").toString(),
 							ownerResolver.resolve(ctx),
 							BoolArgumentType.getBool(ctx, "autoBuild"),
-							BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+							BlockPosArgument.getSpawnablePos(ctx, "pos"),
 							CommandsServerEvents.parseRotation(String.valueOf(IntegerArgumentType.getInteger(ctx, "rotation1")))
 						);
 						ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.deprecated_argument"));

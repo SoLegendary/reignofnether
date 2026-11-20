@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.blocks.BlockUtils;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -54,9 +55,10 @@ public abstract class MobMixin extends LivingEntity {
                         (AlliancesClient.isAllied(player.getName().getString(), eu.getOwnerName()) ||
                             player.getName().getString().equals(eu.getOwnerName()));
             } else {
-                targetIsAlliedPlayer = pTarget instanceof Player player &&
-                        (AlliancesServerEvents.isAllied(player.getName().getString(), eu.getOwnerName()) ||
-                            player.getName().getString().equals(eu.getOwnerName()));
+                // a soldier counts as the side they fight for
+                targetIsAlliedPlayer = pTarget instanceof Player player && (AlliancesServerEvents.isAllied(
+                        PlayerRoles.commanderOf(player.getName().getString()), eu.getOwnerName()) ||
+                        PlayerRoles.commanderOf(player.getName().getString()).equals(eu.getOwnerName()));
             }
             boolean outOfRange = eu.distanceTo(pTarget) > eu.getVexTargetRange();
             if (outOfRange || targetIsAlliedPlayer)

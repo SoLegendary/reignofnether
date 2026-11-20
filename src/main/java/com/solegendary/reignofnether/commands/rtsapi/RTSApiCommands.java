@@ -15,6 +15,9 @@ public class RTSApiCommands {
 		BuildingCommands.register(RTSApiBuilder);
 		UnitCommands.register(RTSApiBuilder);
 		PlayerCommands.register(RTSApiBuilder);
+		RestrictCommands.register(RTSApiBuilder);
+		RonCommands.register(RTSApiBuilder);
+		GuideCommands.register(RTSApiBuilder);
 		
 		dispatcher.register(RTSApiBuilder);
 	}

@@ -68,6 +68,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()
     );
 
+    public String id; // stable file name in ron/buildings and command id custom:<id>, kept when the name changes
     public Vec3i structureSize;
     public final CompoundTag structureNbt;
     public Set<Block> portraitBlockOptions = new HashSet<>();
@@ -100,6 +101,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                 .replace("minecraft:", "")
                 .replace("reignofnether:", "")
                 .replace("_", " "));
+        this.id = idFromName(this.name);
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
         this.portraitBlock = portraitBlock;
@@ -167,6 +169,11 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         if (!stockedItems.isEmpty()) {
             setActiveAddon(ItemShopAddon.class, this, true);
         }
+    }
+
+    public static String idFromName(String name) {
+        String id = name.toLowerCase().replaceAll("[^a-z0-9_-]+", "_").replaceAll("^_+|_+$", "");
+        return id.isEmpty() ? "building" : id;
     }
 
     private static final List<Keybinding> HOTKEYS = List.of(
@@ -374,7 +381,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         attributesNbt.putBoolean("drawAggro", this.drawAggro);
     }
 
-	private void unpackAttributesNbt() {
+	void unpackAttributesNbt() {
 		this.setIconAndPortrait(attributesNbt.getString("portraitBlockRegistryKey"));
 		this.capturable = attributesNbt.getBoolean("capturable");
 		this.invulnerable = attributesNbt.getBoolean("invulnerable");
@@ -567,6 +574,26 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         } catch (IndexOutOfBoundsException e) {
             ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandCooldown", e);
         }
+    }
+
+    // every command of this trigger gets the cooldown; one is added when there's none, or its file never runs
+    public void setTriggerCooldown(String triggerStr, int cooldownTicks) {
+        BuildingCommand.TriggerCondition trigger;
+        try {
+            trigger = BuildingCommand.TriggerCondition.valueOf(triggerStr);
+        } catch (IllegalArgumentException e) {
+            ReignOfNether.LOGGER.warn("IllegalArgumentException in setTriggerCooldown", e);
+            return;
+        }
+        if (this.commands.stream().noneMatch(c -> c.condition == trigger)) {
+            BuildingCommand command = new BuildingCommand();
+            command.condition = trigger;
+            this.commands.add(command);
+        }
+        int ticks = Math.max(0, Math.min(72000, cooldownTicks));
+        for (BuildingCommand c : this.commands)
+            if (c.condition == trigger)
+                c.tickCooldownMax = c.tickCooldown = ticks;
     }
 
     public void setCommandTrigger(int index, String triggerStr) {
