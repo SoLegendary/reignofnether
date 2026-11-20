@@ -415,6 +415,15 @@ public class PlayerServerEvents {
         orthoviewPlayers.removeIf(player -> player.getId() == id);
     }
 
+    // respawning creates a new ServerPlayer with the same id, so replace the stale instances (their gameMode is out of date)
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent evt) {
+        if (!(evt.getEntity() instanceof ServerPlayer newPlayer))
+            return;
+        players.replaceAll(p -> p.getId() == newPlayer.getId() ? newPlayer : p);
+        orthoviewPlayers.replaceAll(p -> p.getId() == newPlayer.getId() ? newPlayer : p);
+    }
+
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {
         startRTS(playerId, pos, faction, 0);
     }

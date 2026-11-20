@@ -2318,7 +2318,7 @@
     "effect.reignofnether.vigor": "Vigor",
     "effect.reignofnether.vigor.desc": "Faster mana regen and spell cooldowns",
     "effect.reignofnether.phasing": "Phasing",
-    "effect.reignofnether.phasing.desc": "Ignoring collision and knockback",
+    "effect.reignofnether.phasing.desc": "Increased evasion, collision and knockback immunity",
     "effect.reignofnether.night_warping": "Night Warping",
     "effect.reignofnether.night_warping.desc": "Day is warped to night nearby",
     "effect.reignofnether.cold": "Cold",
