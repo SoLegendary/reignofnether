@@ -575,8 +575,8 @@ public class BuildingClientEvents {
                     for (LivingEntity entity : getSelectedUnits()) {
                         if (entity instanceof Unit unit) {
                             unit.getCheckpoints().removeIf(c -> {
-                                if (!c.isForEntity() && c.bp == null)
-                                    return true;
+                                if (c.bp == null)
+                                    return !c.isForEntity();
                                 boolean notInBuilding = !BuildingUtils.isPosInsideAnyBuilding(true, c.bp);
                                 boolean hasFogQueue = false;
                                 if (unit instanceof WorkerUnit workerUnit) { // remove if the pos is a fog-queued position that is explored
